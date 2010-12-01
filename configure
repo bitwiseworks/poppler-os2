@@ -5495,6 +5495,9 @@ else
       lt_cv_sys_max_cmd_len=32768
     fi
     ;;
+  os2*)
+    lt_cv_sys_max_cmd_len=-1
+    ;;
   *)
     lt_cv_sys_max_cmd_len=`(getconf ARG_MAX) 2> /dev/null`
     if test -n "$lt_cv_sys_max_cmd_len"; then
@@ -5928,6 +5931,10 @@ sysv4 | sysv4.3*)
 tpf*)
   lt_cv_deplibs_check_method=pass_all
   ;;
+*os2*)
+  lt_cv_deplibs_check_method=pass_all
+  ;;
+
 esac
 
 fi
@@ -9479,7 +9486,7 @@ rm -f core conftest.err conftest.$ac_objext \
       hardcode_libdir_flag_spec='-L$libdir'
       hardcode_minus_L=yes
       allow_undefined_flag=unsupported
-      archive_cmds='$ECHO "LIBRARY $libname INITINSTANCE" > $output_objdir/$libname.def~$ECHO "DESCRIPTION \"$libname\"" >> $output_objdir/$libname.def~$ECHO DATA >> $output_objdir/$libname.def~$ECHO " SINGLE NONSHARED" >> $output_objdir/$libname.def~$ECHO EXPORTS >> $output_objdir/$libname.def~emxexp $libobjs >> $output_objdir/$libname.def~$CC -Zdll -Zcrtdll -o $lib $libobjs $deplibs $compiler_flags $output_objdir/$libname.def'
+      archive_cmds='$ECHO "LIBRARY $libname INITINSTANCE TERMINSTANCE" > $output_objdir/$libname.def~$ECHO "DESCRIPTION \"$libname\"" >> $output_objdir/$libname.def~$ECHO "DATA MULTIPLE" >> $output_objdir/$libname.def~$ECHO EXPORTS >> $output_objdir/$libname.def~emxexp $libobjs >> $output_objdir/$libname.def~$CC -Zdll -Zbin-files -Zhigh-mem -Zomf -o $lib $libobjs $deplibs $linker_flags $output_objdir/$libname.def'
       old_archive_from_new_cmds='emximp -o $output_objdir/$libname.a $output_objdir/$libname.def'
       ;;
 
@@ -16489,7 +16496,7 @@ fi
 
 
 if test "x$GXX" = "xyes"; then
-  CXXFLAGS="$CXXFLAGS -ansi"
+# no ansi on os2  CXXFLAGS="$CXXFLAGS -ansi"
 fi
 
 
@@ -24780,13 +24787,13 @@ whole_archive_flag_spec=$lt_whole_archive_flag_spec_CXX
 compiler_needs_object=$lt_compiler_needs_object_CXX
 
 # Create an old-style archive from a shared archive.
-old_archive_from_new_cmds=$lt_old_archive_from_new_cmds_CXX
+old_archive_from_new_cmds=$lt_old_archive_from_new_cmds
 
 # Create a temporary old-style archive to link instead of a shared archive.
 old_archive_from_expsyms_cmds=$lt_old_archive_from_expsyms_cmds_CXX
 
 # Commands used to build a shared archive.
-archive_cmds=$lt_archive_cmds_CXX
+archive_cmds=$lt_archive_cmds
 archive_expsym_cmds=$lt_archive_expsym_cmds_CXX
 
 # Commands used to build a loadable module if different from building

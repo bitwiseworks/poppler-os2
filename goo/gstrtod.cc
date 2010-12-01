@@ -22,10 +22,17 @@
 
 #include "gstrtod.h"
 
+#if !defined(OS2)
 #include <clocale>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#else
+#include <locale.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#endif
 
 #define ascii_isspace(c) \
   (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v')

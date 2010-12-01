@@ -61,6 +61,9 @@ extern "C" {
 #    if HAVE_NDIR_H
 #      include <ndir.h>
 #    endif
+#    if HAVE_DIRECT_H
+#      include <direct.h>
+#    endif
 #  endif
 #endif
 }

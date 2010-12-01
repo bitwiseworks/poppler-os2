@@ -47,6 +47,18 @@ typedef CRITICAL_SECTION GooMutex;
 #define gLockMutex(m) EnterCriticalSection(m)
 #define gUnlockMutex(m) LeaveCriticalSection(m)
 
+#elif defined(OS2)
+
+#define INCL_DOS
+#include <os2.h>
+
+typedef HMTX GooMutex;
+
+#define gInitMutex(m) DosCreateMutexSem(NULL,m,0,FALSE)
+#define gDestroyMutex(m) DosCloseMutexSem(*m)
+#define gLockMutex(m) DosRequestMutexSem(*m,SEM_INDEFINITE_WAIT)
+#define gUnlockMutex(m) DosReleaseMutexSem(*m)
+
 #else // assume pthreads
 
 #include <pthread.h>

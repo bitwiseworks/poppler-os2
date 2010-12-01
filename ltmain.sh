@@ -2066,8 +2066,17 @@ func_mode_install ()
 	    # so we also need to try rm && ln -s.
 	    for linkname
 	    do
-	      test "$linkname" != "$realname" \
-		&& func_show_eval "(cd $destdir && { $LN_S -f $realname $linkname || { $RM $linkname && $LN_S $realname $linkname; }; })"
+	      if test "$linkname" != "$realname"; then
+		case $host_os in
+		os2*)
+		  # Create import libraries instead of links on OS/2
+		  func_show_eval "(emximp -o $destdir/$linkname $dir/${linkname%%_dll.$libext}.def)"
+		  ;;
+		*)
+		  func_show_eval "(cd $destdir && { $LN_S -f $realname $linkname || { $RM $linkname && $LN_S $realname $linkname; }; })"
+		  ;;
+		esac
+	      fi
 	    done
 	  fi
 
@@ -5559,7 +5568,7 @@ func_mode_link ()
 	if test -n "$library_names" &&
 	   { test "$use_static_libs" = no || test -z "$old_library"; }; then
 	  case $host in
-	  *cygwin* | *mingw* | *cegcc*)
+	  *cygwin* | *mingw* | *cegcc* | *os2*)
 	      # No point in relinking DLLs because paths are not encoded
 	      notinst_deplibs="$notinst_deplibs $lib"
 	      need_relink=no
@@ -5933,6 +5942,28 @@ func_mode_link ()
 		      path=
 		    fi
 		  fi
+		  ;;
+		*-*-os2*)
+		  depdepl=
+		  deplibrary_names=
+		  if test "$build_old_libs" != yes && test "$link_static" != yes ; then
+		    eval deplibrary_names=`${SED} -n -e 's/^library_names=\(.*\)$/\1/p' $deplib`
+		  fi
+		  if test -z "$deplibrary_names" ; then
+		    # fall back to static library
+		    eval deplibrary_names=`${SED} -n -e 's/^old_library=\(.*\)$/\1/p' $deplib`
+		  fi
+		  if test -n "$deplibrary_names" ; then
+		    for tmp in $deplibrary_names ; do
+		      depdepl=$tmp
+		    done
+		    if test -f "$absdir/$objdir/$depdepl" ; then
+		      depdepl="$absdir/$objdir/$depdepl"
+		      compiler_flags="$compiler_flags $depdepl"
+		      linker_flags="$linker_flags $depdepl"
+		    fi
+		  fi
+		  path=
 		  ;;
 		*)
 		  path="-L$absdir/$objdir"
@@ -7375,7 +7406,16 @@ EOF
 	# Create links to the real library.
 	for linkname in $linknames; do
 	  if test "$realname" != "$linkname"; then
+	    case $host_os in
+	    os2*)
+	      # Create import libraries instead of links on OS/2
+	      func_show_eval '(emximp -o $output_objdir/$libname.a $output_objdir/$libname.def)' 'exit $?'
+	      func_show_eval '(emximp -o $output_objdir/$libname.lib $output_objdir/$libname.def)' 'exit $?'
+	      ;;
+	    *)
 	    func_show_eval '(cd "$output_objdir" && $RM "$linkname" && $LN_S "$realname" "$linkname")' 'exit $?'
+	      ;;
+	    esac
 	  fi
 	done
 

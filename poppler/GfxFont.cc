@@ -541,6 +541,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
   int code;
   char *charName;
   GBool missing, hex;
+  char alpha;
   Unicode toUnicode[256];
   CharCodeToUnicode *utu, *ctu2;
   Unicode uBuf[8];
@@ -826,28 +827,43 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
   //----- build the mapping to Unicode -----
 
   // pass 1: use the name-to-Unicode mapping table
-  missing = hex = gFalse;
+  missing = gFalse;
+  hex = gTrue;
+  alpha = -1;
   for (code = 0; code < 256; ++code) {
     if ((charName = enc[code])) {
       if (!(toUnicode[code] = globalParams->mapNameToUnicode(charName)) &&
 	  strcmp(charName, ".notdef")) {
 	// if it wasn't in the name-to-Unicode table, check for a
 	// name that looks like 'Axx' or 'xx', where 'A' is any letter
-	// and 'xx' is two hex digits
-	if ((strlen(charName) == 3 &&
+	// and 'xx' is two hex digits. Be strict and assume that names are
+        // consistent (i.e. either all are 'Axx' or 'xx')
+    if (hex) {
+	if (strlen(charName) == 3 &&
 	     isalpha(charName[0]) &&
 	     isxdigit(charName[1]) && isxdigit(charName[2]) &&
 	     ((charName[1] >= 'a' && charName[1] <= 'f') ||
 	      (charName[1] >= 'A' && charName[1] <= 'F') ||
 	      (charName[2] >= 'a' && charName[2] <= 'f') ||
-	      (charName[2] >= 'A' && charName[2] <= 'F'))) ||
-	    (strlen(charName) == 2 &&
+	      (charName[2] >= 'A' && charName[2] <= 'F'))) {
+          if (alpha == -1)
+            alpha = charName[0];
+          else if (alpha != charName[0])
+            hex = gFalse;
+        } else
+	if (strlen(charName) == 2 &&
 	     isxdigit(charName[0]) && isxdigit(charName[1]) &&
 	     ((charName[0] >= 'a' && charName[0] <= 'f') ||
 	      (charName[0] >= 'A' && charName[0] <= 'F') ||
 	      (charName[1] >= 'a' && charName[1] <= 'f') ||
-	      (charName[1] >= 'A' && charName[1] <= 'F')))) {
-	  hex = gTrue;
+	      (charName[1] >= 'A' && charName[1] <= 'F'))) {
+          if (alpha == -1)
+            alpha = 0;
+          else if (alpha != 0)
+            hex = gFalse;
+        } else {
+            hex = gFalse;
+      }
 	}
 	missing = gTrue;
       }

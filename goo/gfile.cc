@@ -41,7 +41,7 @@
 #  endif
 #  include <limits.h>
 #  include <string.h>
-#  if !defined(VMS) && !defined(ACORN) && !defined(MACOS)
+#  if !defined(VMS) && !defined(ACORN) && !defined(MACOS) && !defined(OS2)
 #    include <pwd.h>
 #  endif
 #  if defined(VMS) && (__DECCXX_VER < 50200000)
@@ -64,7 +64,7 @@ GooString *getHomeDir() {
   //---------- VMS ----------
   return new GooString("SYS$LOGIN:");
 
-#elif defined(__EMX__) || defined(_WIN32)
+#elif defined(__EMX__) || defined(_WIN32) || defined(OS2)
   //---------- OS/2+EMX and Win32 ----------
   char *s;
   GooString *ret;
@@ -213,7 +213,7 @@ GooString *appendToPath(GooString *path, char *fileName) {
   }
   return path;
 
-#elif defined(__EMX__)
+#elif defined(__EMX__) || defined(OS2)
   //---------- OS/2+EMX ----------
   int i;
 
@@ -300,7 +300,7 @@ GooString *grabPath(char *fileName) {
     return new GooString(fileName, p + 1 - fileName);
   return new GooString();
 
-#elif defined(__EMX__) || defined(_WIN32)
+#elif defined(__EMX__) || defined(_WIN32) || defined(OS2)
   //---------- OS/2+EMX and Win32 ----------
   char *p;
 
@@ -344,7 +344,7 @@ GBool isAbsolutePath(char *path) {
   return strchr(path, ':') ||
 	 (path[0] == '[' && path[1] != '.' && path[1] != '-');
 
-#elif defined(__EMX__) || defined(_WIN32)
+#elif defined(__EMX__) || defined(_WIN32) || defined(OS2)
   //---------- OS/2+EMX and Win32 ----------
   return path[0] == '/' || path[0] == '\\' || path[1] == ':';
 
@@ -396,6 +396,18 @@ GooString *makePathAbsolute(GooString *path) {
 #elif defined(MACOS)
   //---------- MacOS ----------
   path->del(0, 1);
+  return path;
+
+#elif defined(OS2)
+  //---------- OS/2 -----------
+  char buf[_MAX_PATH];
+  buf[0] = '\0';
+  if (!_fullpath( buf, path->getCString(), _MAX_PATH ) ) {
+    path->clear();
+    return path;
+  }
+  path->clear();
+  path->append(buf);
   return path;
 
 #else
@@ -497,7 +509,8 @@ GBool openTempFile(GooString **name, FILE **f, char *mode) {
   }
   delete s;
   return gFalse;
-#elif defined(VMS) || defined(__EMX__) || defined(ACORN) || defined(MACOS)
+
+#elif defined(VMS) || defined(__EMX__) || defined(ACORN) || defined(MACOS) || defined(OS2)
   //---------- non-Unix ----------
   char *s;
 
