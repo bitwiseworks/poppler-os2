@@ -16500,7 +16500,13 @@ fi
 
 
 if test "x$GXX" = "xyes"; then
-# no ansi on os2  CXXFLAGS="$CXXFLAGS -ansi"
+ case $host_os in
+  *os2*)
+   ;;
+  *)
+  CXXFLAGS="$CXXFLAGS -ansi"
+   ;;
+  esac
 fi
 
 
