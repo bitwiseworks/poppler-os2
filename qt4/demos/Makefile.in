@@ -62,7 +62,7 @@ am_poppler_qt4viewer_OBJECTS = abstractinfodock.$(OBJEXT) \
 poppler_qt4viewer_OBJECTS = $(am_poppler_qt4viewer_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/poppler/libpoppler.la \
-	$(top_builddir)/qt4/src/libpoppler-qt4.la \
+	$(top_builddir)/qt4/src/libpopplerqt4.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 poppler_qt4viewer_DEPENDENCIES = $(am__DEPENDENCIES_2)
 AM_V_lt = $(am__v_lt_$(V))
@@ -314,7 +314,7 @@ INCLUDES = \
 
 LDADDS = \
 	$(top_builddir)/poppler/libpoppler.la	\
-	$(top_builddir)/qt4/src/libpoppler-qt4.la	\
+	$(top_builddir)/qt4/src/libpopplerqt4.la	\
 	$(FONTCONFIG_LIBS)				\
 	$(POPPLER_QT4_LIBS)
 

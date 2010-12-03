@@ -361,7 +361,7 @@ poppler_include_HEADERS = \
 	poppler-export.h			\
 	poppler-page-transition.h
 
-lib_LTLIBRARIES = libpoppler-qt4.la
+lib_LTLIBRARIES = libpopplerqt4.la
 libpoppler_qt4_la_SOURCES = \
 	poppler-document.cc			\
 	poppler-page.cc				\
@@ -470,7 +470,7 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libpoppler-qt4.la: $(libpoppler_qt4_la_OBJECTS) $(libpoppler_qt4_la_DEPENDENCIES) 
+libpopplerqt4.la: $(libpoppler_qt4_la_OBJECTS) $(libpoppler_qt4_la_DEPENDENCIES) 
 	$(AM_V_CXXLD)$(libpoppler_qt4_la_LINK) -rpath $(libdir) $(libpoppler_qt4_la_OBJECTS) $(libpoppler_qt4_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:

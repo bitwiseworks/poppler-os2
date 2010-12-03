@@ -9486,7 +9486,7 @@ rm -f core conftest.err conftest.$ac_objext \
       hardcode_libdir_flag_spec='-L$libdir'
       hardcode_minus_L=yes
       allow_undefined_flag=unsupported
-      archive_cmds='$ECHO "LIBRARY $libname INITINSTANCE TERMINSTANCE" > $output_objdir/$libname.def~$ECHO "DESCRIPTION \"$libname\"" >> $output_objdir/$libname.def~$ECHO "DATA MULTIPLE" >> $output_objdir/$libname.def~$ECHO EXPORTS >> $output_objdir/$libname.def~emxexp $libobjs >> $output_objdir/$libname.def~$CC -Zdll -Zbin-files -Zhigh-mem -Zomf -o $lib $libobjs $deplibs $linker_flags $output_objdir/$libname.def'
+      archive_cmds='$ECHO "LIBRARY `eval $shortname_cmds` INITINSTANCE TERMINSTANCE" > $output_objdir/$libname.def~$ECHO "DESCRIPTION \"$libname\"" >> $output_objdir/$libname.def~$ECHO "DATA MULTIPLE" >> $output_objdir/$libname.def~$ECHO EXPORTS >> $output_objdir/$libname.def~emxexp $libobjs >> $output_objdir/$libname.def~$CC -Zdll -Zbin-files -Zhigh-mem -Zomf -o $lib $libobjs $deplibs $linker_flags $output_objdir/$libname.def'
       old_archive_from_new_cmds='emximp -o $output_objdir/$libname.a $output_objdir/$libname.def'
       ;;
 
@@ -9969,6 +9969,7 @@ BEGIN {RS=" "; FS="/|\n";} {
 else
   sys_lib_search_path_spec="/lib /usr/lib /usr/local/lib"
 fi
+shortname_cmds=
 library_names_spec=
 libname_spec='lib$name'
 soname_spec=
@@ -10457,7 +10458,8 @@ os2*)
   libname_spec='$name'
   shrext_cmds=".dll"
   need_lib_prefix=no
-  library_names_spec='$libname${shared_ext} $libname.a'
+  shortname_cmds='$ECHO $libname | cut -b -8'
+  library_names_spec='`eval $shortname_cmds`${shared_ext} $libname.a'
   dynamic_linker='OS/2 ld.exe'
   shlibpath_var=LIBPATH
   ;;
@@ -15036,6 +15038,7 @@ esac
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking dynamic linker characteristics" >&5
 $as_echo_n "checking dynamic linker characteristics... " >&6; }
 
+shortname_cmds=
 library_names_spec=
 libname_spec='lib$name'
 soname_spec=
@@ -15523,7 +15526,8 @@ os2*)
   libname_spec='$name'
   shrext_cmds=".dll"
   need_lib_prefix=no
-  library_names_spec='$libname${shared_ext} $libname.a'
+  shortname_cmds='$ECHO $libname | cut -b -8'
+  library_names_spec='`eval $shortname_cmds`${shared_ext} $libname.a'
   dynamic_linker='OS/2 ld.exe'
   shlibpath_var=LIBPATH
   ;;
@@ -20478,6 +20482,16 @@ fi
 
 if test x$enable_poppler_qt4 = xyes; then
 
+# for os2 we add the libs here, as we know what we do. and if qt is not found, it fails later in te moc test
+case $host in
+*os2*)
+	POPPLER_QT4_CFLAGS='-D__OS2__'
+	POPPLER_QT4_LIBS='-lQtCore4 -lQtGui4 -lQtNet4 -lQtXml4'
+	POPPLER_QT4_TEST_CFLAGS=$POPPLER_QT4_CFLAGS
+	POPPLER_QT4_TEST_LIBS=$POPPLER_QT4_LIBS
+;;
+esac
+
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for POPPLER_QT4" >&5
 $as_echo_n "checking for POPPLER_QT4... " >&6; }
@@ -23123,6 +23137,7 @@ shlibpath_var='`$ECHO "X$shlibpath_var" | $Xsed -e "$delay_single_quote_subst"`'
 shlibpath_overrides_runpath='`$ECHO "X$shlibpath_overrides_runpath" | $Xsed -e "$delay_single_quote_subst"`'
 libname_spec='`$ECHO "X$libname_spec" | $Xsed -e "$delay_single_quote_subst"`'
 library_names_spec='`$ECHO "X$library_names_spec" | $Xsed -e "$delay_single_quote_subst"`'
+shortname_cmds='`$ECHO "X$shortname_cmds" | $Xsed -e "$delay_single_quote_subst"`'
 soname_spec='`$ECHO "X$soname_spec" | $Xsed -e "$delay_single_quote_subst"`'
 postinstall_cmds='`$ECHO "X$postinstall_cmds" | $Xsed -e "$delay_single_quote_subst"`'
 postuninstall_cmds='`$ECHO "X$postuninstall_cmds" | $Xsed -e "$delay_single_quote_subst"`'
@@ -23249,6 +23264,7 @@ file_list_spec \
 variables_saved_for_relink \
 libname_spec \
 library_names_spec \
+shortname_cmds \
 soname_spec \
 finish_eval \
 old_striplib \
@@ -24319,6 +24335,9 @@ libname_spec=$lt_libname_spec
 # List of archive names.  First name is the real one, the rest are links.
 # The last name is the one that the linker finds with -lNAME
 library_names_spec=$lt_library_names_spec
+
+# Command to make a short name
+shortname_cmds=$lt_shortname_cmds
 
 # The coded name of the library, if different from the real name.
 soname_spec=$lt_soname_spec

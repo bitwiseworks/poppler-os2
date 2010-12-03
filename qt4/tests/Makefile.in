@@ -444,7 +444,7 @@ INCLUDES = \
 
 LDADDS = \
 	$(top_builddir)/poppler/libpoppler.la	\
-	$(top_builddir)/qt4/src/libpoppler-qt4.la	\
+	$(top_builddir)/qt4/src/libpopplerqt4.la	\
 	$(FONTCONFIG_LIBS)				\
 	$(POPPLER_QT4_LIBS)
 
