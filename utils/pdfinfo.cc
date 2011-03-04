@@ -123,6 +123,8 @@ int main(int argc, char *argv[]) {
     if (!printVersion) {
       printUsage("pdfinfo", "<PDF-file>", argDesc);
     }
+    if (printVersion || printHelp)
+      exitCode = 0;
     goto err0;
   }
 
@@ -132,6 +134,7 @@ int main(int argc, char *argv[]) {
   if (printEnc) {
     printEncodings();
     delete globalParams;
+    exitCode = 0;
     goto err0;
   }
 
@@ -257,7 +260,11 @@ int main(int argc, char *argv[]) {
   if (printBoxes) {
     if (multiPage) {
       for (pg = firstPage; pg <= lastPage; ++pg) {
-	page = doc->getCatalog()->getPage(pg);
+	page = doc->getPage(pg);
+	if (!page) {
+          error(-1, "Failed to print boxes for page %d", pg);
+	  continue;
+	}
 	sprintf(buf, "Page %4d MediaBox: ", pg);
 	printBox(buf, page->getMediaBox());
 	sprintf(buf, "Page %4d CropBox:  ", pg);
@@ -270,12 +277,16 @@ int main(int argc, char *argv[]) {
 	printBox(buf, page->getArtBox());
       }
     } else {
-      page = doc->getCatalog()->getPage(firstPage);
-      printBox("MediaBox:       ", page->getMediaBox());
-      printBox("CropBox:        ", page->getCropBox());
-      printBox("BleedBox:       ", page->getBleedBox());
-      printBox("TrimBox:        ", page->getTrimBox());
-      printBox("ArtBox:         ", page->getArtBox());
+      page = doc->getPage(firstPage);
+      if (!page) {
+        error(-1, "Failed to print boxes for page %d", firstPage);
+      } else {
+        printBox("MediaBox:       ", page->getMediaBox());
+        printBox("CropBox:        ", page->getCropBox());
+        printBox("BleedBox:       ", page->getBleedBox());
+        printBox("TrimBox:        ", page->getTrimBox());
+        printBox("ArtBox:         ", page->getArtBox());
+      }
     }
   }
 

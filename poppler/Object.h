@@ -30,20 +30,14 @@
 #pragma interface
 #endif
 
+#include <set>
 #include <stdio.h>
 #include <string.h>
 #include "goo/gtypes.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
+#include "goo/GooLikely.h"
 #include "Error.h"
-
-#if defined(__GNUC__) && (__GNUC__ > 2) && defined(__OPTIMIZE__)
-# define likely(x)      __builtin_expect((x), 1)
-# define unlikely(x)    __builtin_expect((x), 0)
-#else
-# define likely(x)      (x)
-# define unlikely(x)    (x)
-#endif
 
 #define OBJECT_TYPE_CHECK(wanted_type) \
     if (unlikely(type != wanted_type)) { \
@@ -160,7 +154,7 @@ public:
 
   // If object is a Ref, fetch and return the referenced object.
   // Otherwise, return a copy of the object.
-  Object *fetch(XRef *xref, Object *obj);
+  Object *fetch(XRef *xref, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
 
   // Free object contents.
   void free();
@@ -219,7 +213,7 @@ public:
   void dictAdd(char *key, Object *val);
   void dictSet(char *key, Object *val);
   GBool dictIs(char *dictType);
-  Object *dictLookup(char *key, Object *obj);
+  Object *dictLookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
   Object *dictLookupNF(char *key, Object *obj);
   char *dictGetKey(int i);
   Object *dictGetVal(int i, Object *obj);
@@ -230,6 +224,7 @@ public:
   void streamReset();
   void streamClose();
   int streamGetChar();
+  int streamGetChars(int nChars, Guchar *buffer);
   int streamLookChar();
   char *streamGetLine(char *buf, int size);
   Guint streamGetPos();
@@ -305,8 +300,8 @@ inline GBool Object::dictIs(char *dictType)
 inline GBool Object::isDict(char *dictType)
   { return type == objDict && dictIs(dictType); }
 
-inline Object *Object::dictLookup(char *key, Object *obj)
-  { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, obj); }
+inline Object *Object::dictLookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums)
+  { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, obj, fetchOriginatorNums); }
 
 inline Object *Object::dictLookupNF(char *key, Object *obj)
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key, obj); }
@@ -340,6 +335,9 @@ inline void Object::streamClose()
 
 inline int Object::streamGetChar()
   { OBJECT_TYPE_CHECK(objStream); return stream->getChar(); }
+
+inline int Object::streamGetChars(int nChars, Guchar *buffer)
+  { OBJECT_TYPE_CHECK(objStream); return stream->doGetChars(nChars, buffer); }
 
 inline int Object::streamLookChar()
   { OBJECT_TYPE_CHECK(objStream); return stream->lookChar(); }

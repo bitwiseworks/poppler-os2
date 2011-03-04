@@ -20,6 +20,12 @@
 #include "poppler-layer.h"
 #include "poppler-private.h"
 
+/**
+ * SECTION:poppler-layer
+ * @short_description: Layers
+ * @title: PopplerLayer
+ */
+
 typedef struct _PopplerLayerClass PopplerLayerClass;
 struct _PopplerLayerClass
 {
@@ -93,6 +99,8 @@ _poppler_layer_new (PopplerDocument *document,
  * presentation as a title in a viewer's GUI
  *
  * Return value: a string containing the title of the layer
+ *
+ * Since: 0.12
  **/
 const gchar *
 poppler_layer_get_title (PopplerLayer *poppler_layer)
@@ -109,6 +117,8 @@ poppler_layer_get_title (PopplerLayer *poppler_layer)
  * Returns whether @layer is visible
  *
  * Return value: %TRUE if @layer is visible
+ *
+ * Since: 0.12
  **/
 gboolean
 poppler_layer_is_visible (PopplerLayer *poppler_layer)
@@ -123,6 +133,8 @@ poppler_layer_is_visible (PopplerLayer *poppler_layer)
  * @layer: a #PopplerLayer
  *
  * Shows @layer
+ *
+ * Since: 0.12
  **/
 void
 poppler_layer_show (PopplerLayer *poppler_layer)
@@ -154,6 +166,8 @@ poppler_layer_show (PopplerLayer *poppler_layer)
  * Hides @layer. If @layer is the parent of other nested layers,
  * such layers will be also hidden and will be blocked until @layer
  * is shown again
+ *
+ * Since: 0.12
  **/
 void
 poppler_layer_hide (PopplerLayer *poppler_layer)
@@ -178,6 +192,8 @@ poppler_layer_hide (PopplerLayer *poppler_layer)
  * Returns whether @layer is parent of other nested layers.
  *
  * Return value: %TRUE if @layer is a parent layer
+ *
+ * Since: 0.12
  **/
 gboolean
 poppler_layer_is_parent (PopplerLayer *poppler_layer)
@@ -195,6 +211,8 @@ poppler_layer_is_parent (PopplerLayer *poppler_layer)
  *
  * Return value: the ID of the radio button group associated with @layer,
  * or 0 if the layer is not associated to any radio button group
+ *
+ * Since: 0.12
  **/
 gint 
 poppler_layer_get_radio_button_group_id (PopplerLayer *poppler_layer)

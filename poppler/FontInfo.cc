@@ -3,10 +3,13 @@
 // FontInfo.cc
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2006 Kouhei Sutou <kou@cozmixng.org>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,15 +42,9 @@
 FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage) {
   doc = docA;
   currentPage = firstPage + 1;
-  fonts = NULL;
-  fontsLen = fontsSize = 0;
-  visitedXObjects = NULL;
-  visitedXObjectsLen = visitedXObjectsSize = 0;
 }
 
 FontInfoScanner::~FontInfoScanner() {
-  gfree(fonts);
-  gfree(visitedXObjects);
 }
 
 GooList *FontInfoScanner::scan(int nPages) {
@@ -70,7 +67,9 @@ GooList *FontInfoScanner::scan(int nPages) {
   }
 
   for (int pg = currentPage; pg < lastPage; ++pg) {
-    page = doc->getCatalog()->getPage(pg);
+    page = doc->getPage(pg);
+    if (!page) continue;
+
     if ((resDict = page->getResourceDict())) {
       scanFonts(resDict, result);
     }
@@ -95,7 +94,7 @@ GooList *FontInfoScanner::scan(int nPages) {
 }
 
 void FontInfoScanner::scanFonts(Dict *resDict, GooList *fontsList) {
-  Object obj1, obj2, xObjDict, xObj, xObj2, resObj;
+  Object obj1, obj2, objDict, resObj;
   Ref r;
   GfxFontDict *gfxFontDict;
   GfxFont *font;
@@ -116,26 +115,13 @@ void FontInfoScanner::scanFonts(Dict *resDict, GooList *fontsList) {
   }
   if (gfxFontDict) {
     for (i = 0; i < gfxFontDict->getNumFonts(); ++i) {
-      int k;
       if ((font = gfxFontDict->getFont(i))) {
         Ref fontRef = *font->getID();
-	GBool alreadySeen = gFalse;
 
-        // check for an already-seen font
-        for (k = 0; k < fontsLen; ++k) {
-          if (fontRef.num == fonts[k].num && fontRef.gen == fonts[k].gen) {
-            alreadySeen = gTrue;
-          }
-        }
-
-	// add this font to the list
-        if (!alreadySeen) {
+        // add this font to the list if not already found
+        if (fonts.find(fontRef.num) == fonts.end()) {
           fontsList->append(new FontInfo(font, doc));
-          if (fontsLen == fontsSize) {
-            fontsSize += 32;
-            fonts = (Ref *)grealloc(fonts, fontsSize * sizeof(Ref));
-          }
-          fonts[fontsLen++] = *font->getID();
+          fonts.insert(fontRef.num);
         }
       }
     }
@@ -145,46 +131,38 @@ void FontInfoScanner::scanFonts(Dict *resDict, GooList *fontsList) {
 
   // recursively scan any resource dictionaries in objects in this
   // resource dictionary
-  resDict->lookup("XObject", &xObjDict);
-  if (xObjDict.isDict()) {
-    for (i = 0; i < xObjDict.dictGetLength(); ++i) {
-      xObjDict.dictGetValNF(i, &xObj);
-      if (xObj.isRef()) {
-        GBool alreadySeen = gFalse;
-        // check for an already-seen XObject
-        for (int k = 0; k < visitedXObjectsLen; ++k) {
-          if (xObj.getRef().num == visitedXObjects[k].num &&
-              xObj.getRef().gen == visitedXObjects[k].gen) {
-            alreadySeen = gTrue;
+  char *resTypes[] = { "XObject", "Pattern" };
+  for (Guint resType = 0; resType < sizeof(resTypes) / sizeof(resTypes[0]); ++resType) {
+    resDict->lookup(resTypes[resType], &objDict);
+    if (objDict.isDict()) {
+      for (i = 0; i < objDict.dictGetLength(); ++i) {
+        objDict.dictGetValNF(i, &obj1);
+        if (obj1.isRef()) {
+          // check for an already-seen object
+          const Ref r = obj1.getRef();
+          if (visitedObjects.find(r.num) != visitedObjects.end()) {
+            obj1.free();
+            continue;
           }
+
+          visitedObjects.insert(r.num);
         }
 
-        if (alreadySeen) {
-          xObj.free();
-          continue;
-        }
+        obj1.fetch(doc->getXRef(), &obj2);
 
-        if (visitedXObjectsLen == visitedXObjectsSize) {
-          visitedXObjectsSize += 32;
-          visitedXObjects = (Ref *)grealloc(visitedXObjects, visitedXObjectsSize * sizeof(Ref));
+        if (obj2.isStream()) {
+          obj2.streamGetDict()->lookup("Resources", &resObj);
+          if (resObj.isDict() && resObj.getDict() != resDict) {
+            scanFonts(resObj.getDict(), fontsList);
+          }
+          resObj.free();
         }
-        visitedXObjects[visitedXObjectsLen++] = xObj.getRef();
+        obj1.free();
+        obj2.free();
       }
-
-      xObj.fetch(doc->getXRef(), &xObj2);
-
-      if (xObj2.isStream()) {
-        xObj2.streamGetDict()->lookup("Resources", &resObj);
-        if (resObj.isDict() && resObj.getDict() != resDict) {
-          scanFonts(resObj.getDict(), fontsList);
-        }
-        resObj.free();
-      }
-      xObj.free();
-      xObj2.free();
     }
+    objDict.free();
   }
-  xObjDict.free();
 }
 
 FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {

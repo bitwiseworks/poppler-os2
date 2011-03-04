@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2006, 2008-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
+// Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,6 +56,11 @@ Function::~Function() {
 }
 
 Function *Function::parse(Object *funcObj) {
+  std::set<int> usedParents;
+  return parse(funcObj, &usedParents);
+}
+
+Function *Function::parse(Object *funcObj, std::set<int> *usedParents) {
   Function *func;
   Dict *dict;
   int funcType;
@@ -84,7 +90,7 @@ Function *Function::parse(Object *funcObj) {
   } else if (funcType == 2) {
     func = new ExponentialFunction(funcObj, dict);
   } else if (funcType == 3) {
-    func = new StitchingFunction(funcObj, dict);
+    func = new StitchingFunction(funcObj, dict, usedParents);
   } else if (funcType == 4) {
     func = new PostScriptFunction(funcObj, dict);
   } else {
@@ -422,7 +428,11 @@ void SampledFunction::transform(double *in, double *out) {
       for (k = 0, t = j; k < m; ++k, t >>= 1) {
 	idx += idxMul[k] * (e[k][t & 1]);
       }
-      sBuf[j] = samples[idx];
+      if (likely(idx >= 0 && idx < nSamples)) {
+        sBuf[j] = samples[idx];
+      } else {
+        sBuf[j] = 0; // TODO Investigate if this is what Adobe does
+      }
     }
 
     // do m sets of interpolations
@@ -519,6 +529,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
   e = obj1.getNum();
   obj1.free();
 
+  isLinear = fabs(e-1.) < 1e-10;
   ok = gTrue;
   return;
 
@@ -549,7 +560,7 @@ void ExponentialFunction::transform(double *in, double *out) {
     x = in[0];
   }
   for (i = 0; i < n; ++i) {
-    out[i] = c0[i] + pow(x, e) * (c1[i] - c0[i]);
+    out[i] = c0[i] + (isLinear ? x : pow(x, e)) * (c1[i] - c0[i]);
     if (hasRange) {
       if (out[i] < range[i][0]) {
 	out[i] = range[i][0];
@@ -565,7 +576,7 @@ void ExponentialFunction::transform(double *in, double *out) {
 // StitchingFunction
 //------------------------------------------------------------------------
 
-StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict) {
+StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents) {
   Object obj1, obj2;
   int i;
 
@@ -598,7 +609,19 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict) {
     funcs[i] = NULL;
   }
   for (i = 0; i < k; ++i) {
-    if (!(funcs[i] = Function::parse(obj1.arrayGet(i, &obj2)))) {
+    std::set<int> usedParentsAux = *usedParents;
+    obj1.arrayGetNF(i, &obj2);
+    if (obj2.isRef()) {
+      const Ref ref = obj2.getRef();
+      if (usedParentsAux.find(ref.num) == usedParentsAux.end()) {
+        usedParentsAux.insert(ref.num);
+        obj2.free();
+        obj1.arrayGet(i, &obj2);
+      } else {
+        goto err2;
+      }
+    }
+    if (!(funcs[i] = Function::parse(&obj2, &usedParentsAux))) {
       goto err2;
     }
     if (i > 0 && (funcs[i]->getInputSize() != 1 ||
@@ -991,6 +1014,9 @@ void PSStack::roll(int n, int j) {
   PSObject obj;
   int i, k;
 
+  if (unlikely(n == 0)) {
+    return;
+  }
   if (j >= 0) {
     j %= n;
   } else {
@@ -1108,6 +1134,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   code = NULL;
   codeString = NULL;
   codeSize = 0;
+  stack = NULL;
   ok = gFalse;
   cache = new PopplerCache(5);
 

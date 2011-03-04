@@ -1,6 +1,6 @@
 m4_define([poppler_version_major],[0])
-m4_define([poppler_version_minor],[14])
-m4_define([poppler_version_micro],[2])
+m4_define([poppler_version_minor],[16])
+m4_define([poppler_version_micro],[3])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
 AC_PREREQ(2.59)
@@ -10,6 +10,7 @@ AM_INIT_AUTOMAKE([foreign])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AM_CONFIG_HEADER(config.h)
 AM_CONFIG_HEADER(poppler/poppler-config.h)
+AC_C_BIGENDIAN
 
 dnl ##### Initialize libtool.
 AC_LIBTOOL_WIN32_DLL
@@ -26,7 +27,13 @@ AC_PROG_CC_STDC
 #fi
 AC_PROG_CXX
 if test "x$GXX" = "xyes"; then
-  CXXFLAGS="$CXXFLAGS -ansi"
+  case "$host_os" in
+    cygwin* | mingw*)
+    ;;
+    *)
+      CXXFLAGS="$CXXFLAGS -ansi"
+    ;;
+  esac
 fi
 AC_PROG_INSTALL
 
@@ -107,10 +114,6 @@ AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])
 dnl ##### Checks for header files.
 AC_PATH_XTRA
 AC_HEADER_DIRENT
-
-AC_ARG_ENABLE(exceptions,
-	      [  --enable-exceptions     use C++ exceptions],
-	      AC_DEFINE([USE_EXCEPTIONS], [1], [Throw exceptions to deal with not enough memory and similar problems]))
 
 dnl ##### Switch over to C++.  This will make the checks below a little
 dnl ##### bit stricter (requiring function prototypes in include files).
@@ -336,7 +339,7 @@ if test x$enable_splash_output = xyes; then
   AC_DEFINE(HAVE_SPLASH)
 fi
 
-CAIRO_VERSION="1.8.4"
+CAIRO_VERSION="1.10.0"
 AC_SUBST(CAIRO_VERSION)
 AC_ARG_ENABLE(cairo-output,
               AC_HELP_STRING([--disable-cairo-output],
@@ -368,6 +371,7 @@ fi
 AC_SUBST(CAIRO_FEATURE)
 AC_SUBST(CAIRO_REQ)
 
+found_introspection=no
 if test x$enable_cairo_output = xyes; then
   POPPLER_GLIB_DISABLE_DEPRECATED=""
   POPPLER_GLIB_DISABLE_SINGLE_INCLUDES=""
@@ -386,6 +390,9 @@ if test x$enable_cairo_output = xyes; then
                       [enable_poppler_glib="no"])
   fi
   if test x$enable_poppler_glib = xyes; then
+    # Check for introspection
+    GOBJECT_INTROSPECTION_CHECK([0.6.7])
+
     GLIB_REQ="glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION"
     AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
     POPPLER_GLIB_DISABLE_DEPRECATED="$POPPLER_GLIB_DISABLE_DEPRECATED -DG_DISABLE_DEPRECATED"
@@ -399,9 +406,10 @@ else
   GLIB_REQ=""
 fi
 AM_CONDITIONAL(BUILD_POPPLER_GLIB, test x$enable_poppler_glib = xyes)
+AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")
 AC_SUBST(GLIB_REQ)
 
-GTK_DOC_CHECK([1.0])
+GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
 dnl
 dnl GDK
@@ -600,10 +608,10 @@ if test "x$GCC" != xyes; then
 fi
 case "$enable_compile_warnings" in
   no)	;;
-  yes)	CXXFLAGS="-Wall -Wno-write-strings -Woverloaded-virtual -Wnon-virtual-dtor $CXXFLAGS" ;;
+  yes)	CXXFLAGS="-Wall -Wno-write-strings -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common $CXXFLAGS" ;;
   kde)	CXXFLAGS="-Wnon-virtual-dtor -Wno-long-long -Wundef \
 		-D_XOPEN_SOURCE=600 -D_BSD_SOURCE -Wcast-align \
-		-Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith \
+		-Wconversion -Wall -W -Wpointer-arith \
 		-Wwrite-strings -O2 -Wformat-security \
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
 		-fno-common $CXXFLAGS" ;;
@@ -636,6 +644,7 @@ utils/Makefile
 glib/Makefile
 glib/poppler-features.h
 glib/reference/Makefile
+glib/reference/version.xml
 glib/demo/Makefile
 test/Makefile
 qt/Makefile
@@ -672,6 +681,7 @@ echo "  qt wrapper:         $enable_poppler_qt"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
 echo "  glib wrapper:       $enable_poppler_glib"
 echo "    use GDK:          $enable_gdk"
+echo "    introspection:    $found_introspection"
 echo "  cpp wrapper:        $enable_poppler_cpp"
 echo "  use gtk-doc:        $enable_gtk_doc"
 echo "  use libjpeg:        $enable_libjpeg"

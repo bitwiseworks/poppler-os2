@@ -29,20 +29,39 @@ G_BEGIN_DECLS
 #define POPPLER_MEDIA(obj)                   (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_MEDIA, PopplerMedia))
 #define POPPLER_IS_MEDIA(obj)                (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_MEDIA))
 
-// FIXME: this should be generic (PopplerSaveFunc)
+// FIXME: this should be generic (PopplerSaveToCallbackFunc)
+
+/**
+ * PopplerMediaSaveFunc:
+ * @buf: buffer containing bytes to be written.
+ * @count: number of bytes in @buf.
+ * @data: user data passed to poppler_media_save_to_callback()
+ * @error: GError to set on error, or NULL
+ *
+ * Specifies the type of the function passed to
+ * poppler_media_save_to_callback().  It is called once for each block of
+ * bytes that is "written" by poppler_media_save_to_callback().  If
+ * successful it should return %TRUE.  If an error occurs it should set
+ * @error and return %FALSE, in which case poppler_media_save_to_callback()
+ * will fail with the same error.
+ *
+ * Returns: %TRUE if successful, %FALSE (with @error set) if failed.
+ *
+ * Since: 0.14
+ */
 typedef gboolean (*PopplerMediaSaveFunc) (const gchar  *buf,
 					  gsize         count,
 					  gpointer      data,
 					  GError      **error);
 
 GType        poppler_media_get_type         (void) G_GNUC_CONST;
-gboolean     poppler_media_is_embedded      (PopplerMedia        *media);
-const gchar *poppler_media_get_filename     (PopplerMedia        *media);
-const gchar *poppler_media_get_mime_type    (PopplerMedia        *media);
-gboolean     poppler_media_save             (PopplerMedia        *media,
+gboolean     poppler_media_is_embedded      (PopplerMedia        *poppler_media);
+const gchar *poppler_media_get_filename     (PopplerMedia        *poppler_media);
+const gchar *poppler_media_get_mime_type    (PopplerMedia        *poppler_media);
+gboolean     poppler_media_save             (PopplerMedia        *poppler_media,
 					     const char          *filename,
 					     GError             **error);
-gboolean     poppler_media_save_to_callback (PopplerMedia        *media,
+gboolean     poppler_media_save_to_callback (PopplerMedia        *poppler_media,
 					     PopplerMediaSaveFunc save_func,
 					     gpointer             user_data,
 					     GError             **error);

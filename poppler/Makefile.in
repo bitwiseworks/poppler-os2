@@ -42,11 +42,11 @@ DIST_COMMON = $(am__poppler_include_HEADERS_DIST) \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/define-dir.m4 $(top_srcdir)/m4/gtk-doc.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjpeg.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/qt.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/introspection.m4 \
+	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -123,12 +123,13 @@ am__libpoppler_la_SOURCES_DIST = SplashOutputDev.cc DCTStream.h \
 	CachedFile.cc Catalog.cc CharCodeToUnicode.cc CMap.cc \
 	DateInfo.cc Decrypt.cc Dict.cc Error.cc FileSpec.cc \
 	FontEncodingTables.cc Form.cc FontInfo.cc Function.cc Gfx.cc \
-	GfxFont.cc GfxState.cc GlobalParams.cc JArithmeticDecoder.cc \
-	JBIG2Stream.cc Lexer.cc Link.cc LocalPDFDocBuilder.cc Movie.cc \
-	NameToCharCode.cc Object.cc OptionalContent.cc Outline.cc \
-	OutputDev.cc Page.cc PageTransition.cc Parser.cc PDFDoc.cc \
-	PDFDocEncoding.cc PDFDocFactory.cc PopplerCache.cc \
-	ProfileData.cc PreScanOutputDev.cc PSTokenizer.cc Rendition.cc \
+	GfxFont.cc GfxState.cc GlobalParams.cc Hints.cc \
+	JArithmeticDecoder.cc JBIG2Stream.cc Lexer.cc Linearization.cc \
+	Link.cc LocalPDFDocBuilder.cc Movie.cc NameToCharCode.cc \
+	Object.cc OptionalContent.cc Outline.cc OutputDev.cc Page.cc \
+	PageTransition.cc Parser.cc PDFDoc.cc PDFDocEncoding.cc \
+	PDFDocFactory.cc PopplerCache.cc ProfileData.cc \
+	PreScanOutputDev.cc PSTokenizer.cc Rendition.cc \
 	StdinCachedFile.cc StdinPDFDocBuilder.cc Stream.cc \
 	strtok_r.cpp UnicodeMap.cc UnicodeTypeTable.cc XRef.cc \
 	PSOutputDev.cc TextOutputDev.cc PageLabelInfo.h \
@@ -148,12 +149,12 @@ am_libpoppler_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	CharCodeToUnicode.lo CMap.lo DateInfo.lo Decrypt.lo Dict.lo \
 	Error.lo FileSpec.lo FontEncodingTables.lo Form.lo FontInfo.lo \
 	Function.lo Gfx.lo GfxFont.lo GfxState.lo GlobalParams.lo \
-	JArithmeticDecoder.lo JBIG2Stream.lo Lexer.lo Link.lo \
-	LocalPDFDocBuilder.lo Movie.lo NameToCharCode.lo Object.lo \
-	OptionalContent.lo Outline.lo OutputDev.lo Page.lo \
-	PageTransition.lo Parser.lo PDFDoc.lo PDFDocEncoding.lo \
-	PDFDocFactory.lo PopplerCache.lo ProfileData.lo \
-	PreScanOutputDev.lo PSTokenizer.lo Rendition.lo \
+	Hints.lo JArithmeticDecoder.lo JBIG2Stream.lo Lexer.lo \
+	Linearization.lo Link.lo LocalPDFDocBuilder.lo Movie.lo \
+	NameToCharCode.lo Object.lo OptionalContent.lo Outline.lo \
+	OutputDev.lo Page.lo PageTransition.lo Parser.lo PDFDoc.lo \
+	PDFDocEncoding.lo PDFDocFactory.lo PopplerCache.lo \
+	ProfileData.lo PreScanOutputDev.lo PSTokenizer.lo Rendition.lo \
 	StdinCachedFile.lo StdinPDFDocBuilder.lo Stream.lo strtok_r.lo \
 	UnicodeMap.lo UnicodeTypeTable.lo XRef.lo PSOutputDev.lo \
 	TextOutputDev.lo PageLabelInfo.lo SecurityHandler.lo Sound.lo \
@@ -215,9 +216,9 @@ am__poppler_include_HEADERS_DIST = SplashOutputDev.h CurlCachedFile.h \
 	BuiltinFontTables.h CachedFile.h Catalog.h CharCodeToUnicode.h \
 	CMap.h DateInfo.h Decrypt.h Dict.h Error.h FileSpec.h \
 	FontEncodingTables.h FontInfo.h Form.h Function.h Gfx.h \
-	GfxFont.h GfxState.h GfxState_helpers.h GlobalParams.h \
-	JArithmeticDecoder.h JBIG2Stream.h Lexer.h Link.h \
-	LocalPDFDocBuilder.h Movie.h NameToCharCode.h Object.h \
+	GfxFont.h GfxState.h GfxState_helpers.h GlobalParams.h Hints.h \
+	JArithmeticDecoder.h JBIG2Stream.h Lexer.h Linearization.h \
+	Link.h LocalPDFDocBuilder.h Movie.h NameToCharCode.h Object.h \
 	OptionalContent.h Outline.h OutputDev.h Page.h \
 	PageTransition.h Parser.h PDFDoc.h PDFDocBuilder.h \
 	PDFDocEncoding.h PDFDocFactory.h PopplerCache.h ProfileData.h \
@@ -292,6 +293,14 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
+INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
+INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
+INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
+INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
+INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LCMS_CFLAGS = @LCMS_CFLAGS@
 LCMS_LIBS = @LCMS_LIBS@
 LD = @LD@
@@ -311,6 +320,7 @@ LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MOCQT4 = @MOCQT4@
 NM = @NM@
@@ -330,6 +340,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PC_REQUIRES = @PC_REQUIRES@
 PC_REQUIRES_PRIVATE = @PC_REQUIRES_PRIVATE@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POPPLER_DATADIR = @POPPLER_DATADIR@
 POPPLER_GLIB_CFLAGS = @POPPLER_GLIB_CFLAGS@
 POPPLER_GLIB_DISABLE_DEPRECATED = @POPPLER_GLIB_DISABLE_DEPRECATED@
@@ -365,6 +377,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -403,7 +416,6 @@ libqt3_CFLAGS = @libqt3_CFLAGS@
 libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -549,7 +561,7 @@ libpoppler_la_LIBADD = \
 	$(PTHREAD_LIBS)				\
 	$(win32_libs)
 
-libpoppler_la_LDFLAGS = -version-info 7:0:0 @create_shared_lib@ @auto_import_flags@
+libpoppler_la_LDFLAGS = -version-info 13:0:0 @create_shared_lib@ @auto_import_flags@
 @ENABLE_XPDF_HEADERS_TRUE@poppler_includedir = $(includedir)/poppler
 @ENABLE_XPDF_HEADERS_TRUE@poppler_include_HEADERS = \
 @ENABLE_XPDF_HEADERS_TRUE@	$(splash_headers)	\
@@ -576,9 +588,11 @@ libpoppler_la_LDFLAGS = -version-info 7:0:0 @create_shared_lib@ @auto_import_fla
 @ENABLE_XPDF_HEADERS_TRUE@	GfxState.h		\
 @ENABLE_XPDF_HEADERS_TRUE@	GfxState_helpers.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	GlobalParams.h		\
+@ENABLE_XPDF_HEADERS_TRUE@	Hints.h			\
 @ENABLE_XPDF_HEADERS_TRUE@	JArithmeticDecoder.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	JBIG2Stream.h		\
 @ENABLE_XPDF_HEADERS_TRUE@	Lexer.h			\
+@ENABLE_XPDF_HEADERS_TRUE@	Linearization.h 	\
 @ENABLE_XPDF_HEADERS_TRUE@	Link.h			\
 @ENABLE_XPDF_HEADERS_TRUE@	LocalPDFDocBuilder.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	Movie.h                 \
@@ -652,9 +666,11 @@ libpoppler_la_SOURCES = \
 	GfxFont.cc 		\
 	GfxState.cc		\
 	GlobalParams.cc		\
+	Hints.cc		\
 	JArithmeticDecoder.cc	\
 	JBIG2Stream.cc		\
 	Lexer.cc 		\
+	Linearization.cc 	\
 	Link.cc 		\
 	LocalPDFDocBuilder.cc	\
 	Movie.cc                \
@@ -827,11 +843,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GfxFont.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GfxState.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GlobalParams.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hints.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/JArithmeticDecoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/JBIG2Stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/JPEG2000Stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/JPXStream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Lexer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Linearization.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Link.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LocalPDFDocBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Movie.Plo@am__quote@

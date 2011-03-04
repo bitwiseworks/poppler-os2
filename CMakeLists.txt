@@ -11,10 +11,12 @@ find_package(PkgConfig)
 include(MacroEnsureVersion)
 include(MacroBoolTo01)
 find_package(Threads)
+include(TestBigEndian)
+test_big_endian(WORDS_BIGENDIAN)
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "14")
-set(POPPLER_MICRO_VERSION "2")
+set(POPPLER_MINOR_VERSION "16")
+set(POPPLER_MICRO_VERSION "3")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 # command line switches
@@ -31,7 +33,6 @@ option(ENABLE_LIBOPENJPEG "Use libopenjpeg for JPX streams." ON)
 option(ENABLE_LCMS "Use liblcms for color management." ON)
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." OFF)
 option(ENABLE_ZLIB "Build with zlib (not totally safe)." OFF)
-option(USE_EXCEPTIONS "Throw exceptions to deal with not enough memory and similar problems." OFF)
 option(USE_FIXEDPOINT "Use fixed point arithmetic in the Splash backend" OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 if(WIN32)
@@ -67,7 +68,7 @@ set(TEXTOUT_WORD_LIST ON)
 # setting the minimum required versions for some components
 set(QT3_MIN_VERSION "3.3.0")
 set(QT4_MIN_VERSION "4.4.0")
-set(CAIRO_VERSION "1.8.4")
+set(CAIRO_VERSION "1.10.0")
 set(GLIB_REQUIRED "2.18")
 
 macro_bool_to_01(ENABLE_SPLASH HAVE_SPLASH)
@@ -92,6 +93,9 @@ if(CAIRO_FOUND)
   macro_optional_find_package(GLIB)
   if(GLIB_FOUND)
     set(ENABLE_GLIB ON)
+    # Check for introspection
+    macro_optional_find_package(GObjectIntrospection 0.9.12)
+    set(HAVE_INTROSPECTION ${INTROSPECTION_FOUND})
     set(GLIB_REQ "glib-2.0 >= ${GLIB_REQUIRED} gobject-2.0 >= ${GLIB_REQUIRED} cairo >= ${CAIRO_VERSION}")
     set(POPPLER_GLIB_DISABLE_DEPRECATED "${POPPLER_GLIB_DISABLE_DEPRECATED} -DG_DISABLE_DEPRECATED")
     set(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES "${POPPLER_GLIB_DISABLE_SINGLE_INCLUDES} -DG_DISABLE_SINGLE_INCLUDES")
@@ -245,10 +249,12 @@ set(poppler_SRCS
   poppler/GfxFont.cc
   poppler/GfxState.cc
   poppler/GlobalParams.cc
+  poppler/Hints.cc
   poppler/JArithmeticDecoder.cc
   poppler/JBIG2Stream.cc
   poppler/Lexer.cc
   poppler/Link.cc
+  poppler/Linearization.cc
   poppler/LocalPDFDocBuilder.cc
   poppler/NameToCharCode.cc
   poppler/Object.cc
@@ -361,7 +367,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else(MSVC)
 add_library(poppler SHARED ${poppler_SRCS})
 endif(MSVC)
-set_target_properties(poppler PROPERTIES VERSION 7.0.0 SOVERSION 7)
+set_target_properties(poppler PROPERTIES VERSION 13.0.0 SOVERSION 13)
 target_link_libraries(poppler ${poppler_LIBS})
 target_link_libraries(poppler LINK_INTERFACE_LIBRARIES "")
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
@@ -391,10 +397,12 @@ if(ENABLE_XPDF_HEADERS)
     poppler/GfxState.h
     poppler/GfxState_helpers.h
     poppler/GlobalParams.h
+    poppler/Hints.h
     poppler/JArithmeticDecoder.h
     poppler/JBIG2Stream.h
     poppler/Lexer.h
     poppler/Link.h
+    poppler/Linearization.h
     poppler/LocalPDFDocBuilder.h
     poppler/Movie.h
     poppler/NameToCharCode.h
@@ -443,12 +451,12 @@ if(ENABLE_XPDF_HEADERS)
     goo/GooTimer.h
     goo/GooMutex.h
     goo/GooString.h
-    goo/GooVector.h
     goo/gtypes.h
     goo/gmem.h
     goo/gfile.h
     goo/FixedPoint.h
     goo/ImgWriter.h
+    goo/GooLikely.h
     goo/gstrtod.h
     DESTINATION include/poppler/goo)
   if(PNG_FOUND)
@@ -574,6 +582,7 @@ show_end_message_yesno("qt wrapper" QT3_FOUND)
 show_end_message_yesno("qt4 wrapper" QT4_FOUND)
 show_end_message_yesno("glib wrapper" ENABLE_GLIB)
 show_end_message_yesno("  use GDK" POPPLER_WITH_GDK)
+show_end_message_yesno("  introspection" INTROSPECTION_FOUND)
 show_end_message_yesno("cpp wrapper" ENABLE_CPP)
 show_end_message("use gtk-doc" "not supported with this CMake build system")
 show_end_message_yesno("use libjpeg" ENABLE_LIBJPEG)

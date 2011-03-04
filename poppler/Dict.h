@@ -16,6 +16,8 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
+// Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -70,7 +72,7 @@ public:
 
   // Look up an entry and return the value.  Returns a null object
   // if <key> is not in the dictionary.
-  Object *lookup(char *key, Object *obj);
+  Object *lookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
   Object *lookupNF(char *key, Object *obj);
   GBool lookupInt(const char *key, const char *alt_key, int *value);
 
@@ -83,9 +85,14 @@ public:
   // trailer dictionary, which is read before the xref table is
   // parsed.
   void setXRef(XRef *xrefA) { xref = xrefA; }
+  
+  XRef *getXRef() { return xref; }
+  
+  GBool hasKey(char *key);
 
 private:
 
+  GBool sorted;
   XRef *xref;			// the xref table for this PDF file
   DictEntry *entries;		// array of entries
   int size;			// size of <entries> array

@@ -15,11 +15,13 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2006-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
+// Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
+// Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -567,26 +569,32 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr) {
   if (obj1.dictLookup("WhitePoint", &obj2)->isArray() &&
       obj2.arrayGetLength() == 3) {
     obj2.arrayGet(0, &obj3);
-    cs->whiteX = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->whiteX = obj3.getNum();
     obj3.free();
     obj2.arrayGet(1, &obj3);
-    cs->whiteY = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->whiteY = obj3.getNum();
     obj3.free();
     obj2.arrayGet(2, &obj3);
-    cs->whiteZ = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->whiteZ = obj3.getNum();
     obj3.free();
   }
   obj2.free();
   if (obj1.dictLookup("BlackPoint", &obj2)->isArray() &&
       obj2.arrayGetLength() == 3) {
     obj2.arrayGet(0, &obj3);
-    cs->blackX = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->blackX = obj3.getNum();
     obj3.free();
     obj2.arrayGet(1, &obj3);
-    cs->blackY = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->blackY = obj3.getNum();
     obj3.free();
     obj2.arrayGet(2, &obj3);
-    cs->blackZ = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->blackZ = obj3.getNum();
     obj3.free();
   }
   obj2.free();
@@ -613,12 +621,11 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr) {
 // (not multiply by the white point)
 void GfxCalGrayColorSpace::getXYZ(GfxColor *color, 
   double *pX, double *pY, double *pZ) {
-  double A;
-
-  A = colToDbl(color->c[0]);
-  *pX = pow(A,gamma);
-  *pY = pow(A,gamma);
-  *pZ = pow(A,gamma);
+  const double A = colToDbl(color->c[0]);
+  const double xyzColor = pow(A,gamma);
+  *pX = xyzColor;
+  *pY = xyzColor;
+  *pZ = xyzColor;
 }
 
 void GfxCalGrayColorSpace::getGray(GfxColor *color, GfxGray *gray) {
@@ -843,39 +850,48 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr) {
   if (obj1.dictLookup("WhitePoint", &obj2)->isArray() &&
       obj2.arrayGetLength() == 3) {
     obj2.arrayGet(0, &obj3);
-    cs->whiteX = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->whiteX = obj3.getNum();
     obj3.free();
     obj2.arrayGet(1, &obj3);
-    cs->whiteY = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->whiteY = obj3.getNum();
     obj3.free();
     obj2.arrayGet(2, &obj3);
-    cs->whiteZ = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->whiteZ = obj3.getNum();
     obj3.free();
   }
   obj2.free();
   if (obj1.dictLookup("BlackPoint", &obj2)->isArray() &&
       obj2.arrayGetLength() == 3) {
     obj2.arrayGet(0, &obj3);
-    cs->blackX = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->blackX = obj3.getNum();
     obj3.free();
     obj2.arrayGet(1, &obj3);
-    cs->blackY = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->blackY = obj3.getNum();
     obj3.free();
     obj2.arrayGet(2, &obj3);
-    cs->blackZ = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->blackZ = obj3.getNum();
     obj3.free();
   }
   obj2.free();
   if (obj1.dictLookup("Gamma", &obj2)->isArray() &&
       obj2.arrayGetLength() == 3) {
     obj2.arrayGet(0, &obj3);
-    cs->gammaR = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->gammaR = obj3.getNum();
     obj3.free();
     obj2.arrayGet(1, &obj3);
-    cs->gammaG = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->gammaG = obj3.getNum();
     obj3.free();
     obj2.arrayGet(2, &obj3);
-    cs->gammaB = obj3.getNum();
+    if (likely(obj3.isNum()))
+      cs->gammaB = obj3.getNum();
     obj3.free();
   }
   obj2.free();
@@ -883,7 +899,8 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr) {
       obj2.arrayGetLength() == 9) {
     for (i = 0; i < 9; ++i) {
       obj2.arrayGet(i, &obj3);
-      cs->mat[i] = obj3.getNum();
+      if (likely(obj3.isNum()))
+        cs->mat[i] = obj3.getNum();
       obj3.free();
     }
   }
@@ -1483,22 +1500,11 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx) {
   arr->get(1, &obj1);
   dict = obj1.streamGetDict();
   Guchar *profBuf;
-  unsigned int bufSize;
   Stream *iccStream = obj1.getStream();
-  int c;
-  unsigned int size = 0;
+  int length = 0;
 
-  bufSize = 65536;
-  profBuf = (Guchar *)gmallocn(bufSize,1);
-  iccStream->reset();
-  while ((c = iccStream->getChar()) != EOF) {
-    if (bufSize <= size) {
-      bufSize += 65536;
-      profBuf = (Guchar *)greallocn(profBuf,bufSize,1);
-    }
-    profBuf[size++] = c;
-  }
-  cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,size);
+  profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
+  cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,length);
   gfree(profBuf);
   if (hp == 0) {
     error(-1, "read ICCBased color space profile error");
@@ -1593,13 +1599,13 @@ void GfxICCBasedColorSpace::getRGBLine(Guchar *in, unsigned int *out,
 				       int length) {
 #ifdef USE_CMS
   if (lineTransform != 0) {
-    for (int i = 0;i < length;i++) {
-	Guchar tmp[gfxColorMaxComps];
-
-	lineTransform->doTransform(in,tmp,1);
-	in += nComps;
-	out[i] = (tmp[0] << 16) | (tmp[1] << 8) | tmp[2];
+    Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
+    lineTransform->doTransform(in, tmp, length);
+    for (int i = 0; i < length; ++i) {
+        Guchar *current = tmp + (i * 3);
+        out[i] = (current[0] << 16) | (current[1] << 8) | current[2];
     }
+    gfree(tmp);
   } else {
     alt->getRGBLine(in, out, length);
   }
@@ -1717,7 +1723,6 @@ GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, Gfx *gfx) {
   GfxColorSpace *baseA;
   int indexHighA;
   Object obj1;
-  int x;
   char *s;
   int n, i, j;
 
@@ -1754,12 +1759,10 @@ GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, Gfx *gfx) {
   if (obj1.isStream()) {
     obj1.streamReset();
     for (i = 0; i <= indexHighA; ++i) {
-      for (j = 0; j < n; ++j) {
-	if ((x = obj1.streamGetChar()) == EOF) {
-	  error(-1, "Bad Indexed color space (lookup table stream too short) padding with zeroes");
-	  x = 0;
-	}
-	cs->lookup[i*n + j] = (Guchar)x;
+      const int readChars = obj1.streamGetChars(n, &cs->lookup[i*n]);
+      for (j = readChars; j < n; ++j) {
+        error(-1, "Bad Indexed color space (lookup table stream too short) padding with zeroes");
+        cs->lookup[i*n + j] = 0;
       }
     }
     obj1.streamClose();
@@ -2521,15 +2524,25 @@ GBool GfxShading::init(Dict *dict, Gfx *gfx) {
   hasBBox = gFalse;
   if (dict->lookup("BBox", &obj1)->isArray()) {
     if (obj1.arrayGetLength() == 4) {
-      hasBBox = gTrue;
-      xMin = obj1.arrayGet(0, &obj2)->getNum();
+      Object obj3, obj4, obj5;
+      obj1.arrayGet(0, &obj2);
+      obj1.arrayGet(1, &obj3);
+      obj1.arrayGet(2, &obj4);
+      obj1.arrayGet(3, &obj5);
+      if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum())
+      {
+        hasBBox = gTrue;
+        xMin = obj2.getNum();
+        yMin = obj3.getNum();
+        xMax = obj4.getNum();
+        yMax = obj5.getNum();
+      } else {
+        error(-1, "Bad BBox in shading dictionary (Values not numbers)");
+      }
       obj2.free();
-      yMin = obj1.arrayGet(1, &obj2)->getNum();
-      obj2.free();
-      xMax = obj1.arrayGet(2, &obj2)->getNum();
-      obj2.free();
-      yMax = obj1.arrayGet(3, &obj2)->getNum();
-      obj2.free();
+      obj3.free();
+      obj4.free();
+      obj5.free();
     } else {
       error(-1, "Bad BBox in shading dictionary");
     }
@@ -2761,14 +2774,21 @@ GfxAxialShading *GfxAxialShading::parse(Dict *dict, Gfx *gfx) {
   x0A = y0A = x1A = y1A = 0;
   if (dict->lookup("Coords", &obj1)->isArray() &&
       obj1.arrayGetLength() == 4) {
-    x0A = obj1.arrayGet(0, &obj2)->getNum();
+    Object obj3, obj4, obj5;
+    obj1.arrayGet(0, &obj2);
+    obj1.arrayGet(1, &obj3);
+    obj1.arrayGet(2, &obj4);
+    obj1.arrayGet(3, &obj5);
+    if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum()) {
+      x0A = obj2.getNum();
+      y0A = obj3.getNum();
+      x1A = obj4.getNum();
+      y1A = obj5.getNum();
+    }
     obj2.free();
-    y0A = obj1.arrayGet(1, &obj2)->getNum();
-    obj2.free();
-    x1A = obj1.arrayGet(2, &obj2)->getNum();
-    obj2.free();
-    y1A = obj1.arrayGet(3, &obj2)->getNum();
-    obj2.free();
+    obj3.free();
+    obj4.free();
+    obj5.free();
   } else {
     error(-1, "Missing or invalid Coords in shading dictionary");
     goto err1;
@@ -2779,10 +2799,15 @@ GfxAxialShading *GfxAxialShading::parse(Dict *dict, Gfx *gfx) {
   t1A = 1;
   if (dict->lookup("Domain", &obj1)->isArray() &&
       obj1.arrayGetLength() == 2) {
-    t0A = obj1.arrayGet(0, &obj2)->getNum();
+    Object obj3;
+    obj1.arrayGet(0, &obj2);
+    obj1.arrayGet(1, &obj3);
+    if (obj2.isNum() && obj3.isNum()) {
+      t0A = obj2.getNum();
+      t1A = obj3.getNum();
+    }
     obj2.free();
-    t1A = obj1.arrayGet(1, &obj2)->getNum();
-    obj2.free();
+    obj3.free();
   }
   obj1.free();
 
@@ -3364,6 +3389,8 @@ void GfxGouraudTriangleShading::getTriangle(
   double out[gfxColorMaxComps];
   int v, j;
 
+  assert(!isParameterized()); 
+
   v = triangles[i][0];
   *x0 = vertices[v].x;
   *y0 = vertices[v].y;
@@ -3406,6 +3433,39 @@ void GfxGouraudTriangleShading::getTriangle(
   } else {
     *color2 = vertices[v].color;
   }
+}
+
+void GfxGouraudTriangleShading::getParameterizedColor(double t, GfxColor *color) {
+  double out[gfxColorMaxComps];
+
+  for (int j = 0; j < nFuncs; ++j) {
+    funcs[j]->transform(&t, &out[j]);
+  }
+  for (int j = 0; j < gfxColorMaxComps; ++j) {
+    color->c[j] = dblToCol(out[j]);
+  }
+}
+
+void GfxGouraudTriangleShading::getTriangle(int i,
+                                            double *x0, double *y0, double *color0,
+                                            double *x1, double *y1, double *color1,
+                                            double *x2, double *y2, double *color2) {
+  int v;
+
+  assert(isParameterized()); 
+
+  v = triangles[i][0];
+  *x0 = vertices[v].x;
+  *y0 = vertices[v].y;
+  *color0 = colToDbl(vertices[v].color.c[0]);
+  v = triangles[i][1];
+  *x1 = vertices[v].x;
+  *y1 = vertices[v].y;
+  *color1 = colToDbl(vertices[v].color.c[0]);
+  v = triangles[i][2];
+  *x2 = vertices[v].x;
+  *y2 = vertices[v].y;
+  *color2 = colToDbl(vertices[v].color.c[0]);
 }
 
 //------------------------------------------------------------------------
@@ -3465,7 +3525,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
   Guint flag;
   double x[16], y[16];
   Guint xi, yi;
-  GfxColorComp c[4][gfxColorMaxComps];
+  double c[4][gfxColorMaxComps];
   Guint ci[4];
   GfxShadingBitBuf *bitBuf;
   Object obj1, obj2;
@@ -3587,7 +3647,12 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	if (!bitBuf->getBits(compBits, &ci[j])) {
 	  break;
 	}
-	c[i][j] = dblToCol(cMin[j] + cMul[j] * (double)ci[j]);
+	c[i][j] = cMin[j] + cMul[j] * (double)ci[j];
+	if( nFuncsA == 0 ) {
+	  // ... and colorspace values can also be stored into doubles.
+	  // They will be casted later.
+	  c[i][j] = dblToCol(c[i][j]);
+	}
       }
       if (j < nComps) {
 	break;
@@ -3964,6 +4029,17 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
   return NULL;
 }
 
+void GfxPatchMeshShading::getParameterizedColor(double t, GfxColor *color) {
+  double out[gfxColorMaxComps];
+
+  for (int j = 0; j < nFuncs; ++j) {
+    funcs[j]->transform(&t, &out[j]);
+  }
+  for (int j = 0; j < gfxColorMaxComps; ++j) {
+    color->c[j] = dblToCol(out[j]);
+  }
+}
+
 GfxShading *GfxPatchMeshShading::copy() {
   return new GfxPatchMeshShading(this);
 }
@@ -4263,8 +4339,7 @@ void GfxImageColorMap::getRGBLine(Guchar *in, unsigned int *out, int length) {
   int i, j;
   Guchar *inp, *tmp_line;
 
-  if ((colorSpace2 && !colorSpace2->useGetRGBLine ()) ||
-      (!colorSpace2 && !colorSpace->useGetRGBLine ())) {
+  if (!useRGBLine()) {
     GfxRGB rgb;
 
     inp = in;
@@ -4521,6 +4596,46 @@ void GfxPath::offset(double dx, double dy) {
 //------------------------------------------------------------------------
 // GfxState
 //------------------------------------------------------------------------
+GfxState::ReusablePathIterator::ReusablePathIterator(GfxPath *path)
+ : path(path),
+   subPathOff(0),
+   coordOff(0),
+   numCoords(0),
+   curSubPath(NULL)
+{
+  if( path->getNumSubpaths() ) {
+    curSubPath = path->getSubpath(subPathOff);
+    numCoords = curSubPath->getNumPoints();
+  }
+}
+
+bool GfxState::ReusablePathIterator::isEnd() const {
+   return coordOff >= numCoords;
+}
+
+void GfxState::ReusablePathIterator::next() {
+  ++coordOff;
+  if (coordOff == numCoords) {
+    ++subPathOff;
+    if (subPathOff < path->getNumSubpaths()) {
+      coordOff = 0;
+      curSubPath = path->getSubpath(subPathOff);
+      numCoords = curSubPath->getNumPoints();
+    }
+  }
+}
+
+void GfxState::ReusablePathIterator::setCoord(double x, double y) {
+  curSubPath->setX(coordOff, x);
+  curSubPath->setY(coordOff, y);
+}
+
+void GfxState::ReusablePathIterator::reset() {
+  coordOff = 0;
+  subPathOff = 0;
+  curSubPath = path->getSubpath(0);
+  numCoords = curSubPath->getNumPoints();
+}
 
 GfxState::GfxState(double hDPIA, double vDPIA, PDFRectangle *pageBox,
 		   int rotateA, GBool upsideDown) {

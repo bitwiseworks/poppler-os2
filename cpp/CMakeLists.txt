@@ -12,7 +12,9 @@ set(poppler_cpp_SRCS
   poppler-embedded-file.cpp
   poppler-font.cpp
   poppler-global.cpp
+  poppler-image.cpp
   poppler-page.cpp
+  poppler-page-renderer.cpp
   poppler-page-transition.cpp
   poppler-private.cpp
   poppler-rectangle.cpp
@@ -21,7 +23,7 @@ set(poppler_cpp_SRCS
 )
 
 add_library(poppler-cpp SHARED ${poppler_cpp_SRCS})
-set_target_properties(poppler-cpp PROPERTIES VERSION 0.1.0 SOVERSION 0)
+set_target_properties(poppler-cpp PROPERTIES VERSION 0.2.0 SOVERSION 0)
 target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
 if(MSVC)
 target_link_libraries(poppler-cpp ${poppler_LIBS})
@@ -34,7 +36,9 @@ install(FILES
   poppler-embedded-file.h
   poppler-font.h
   poppler-global.h
+  poppler-image.h
   poppler-page.h
+  poppler-page-renderer.h
   poppler-page-transition.h
   poppler-rectangle.h
   poppler-toc.h

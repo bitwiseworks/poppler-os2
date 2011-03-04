@@ -68,6 +68,8 @@ GType poppler_page_transition_direction_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_PAGE_TRANSITION_DIRECTION (poppler_page_transition_direction_get_type ())
 GType poppler_selection_style_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_SELECTION_STYLE (poppler_selection_style_get_type ())
+GType poppler_print_flags_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_PRINT_FLAGS (poppler_print_flags_get_type ())
 GType poppler_backend_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_BACKEND (poppler_backend_get_type ())
 G_END_DECLS

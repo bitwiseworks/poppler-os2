@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Matthias Franz <matthias@ktug.or.kr>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 //
@@ -229,6 +229,8 @@ DecryptStream::DecryptStream(Stream *strA, Guchar *fileKey,
   if ((objKeyLength = keyLength + 5) > 16) {
     objKeyLength = 16;
   }
+
+  charactersRead = 0;
 }
 
 DecryptStream::~DecryptStream() {
@@ -350,6 +352,10 @@ static void rc4InitKey(Guchar *key, int keyLen, Guchar *state) {
 
   for (i = 0; i < 256; ++i)
     state[i] = i;
+
+  if (unlikely(keyLen == 0))
+    return;
+
   index1 = index2 = 0;
   for (i = 0; i < 256; ++i) {
     index2 = (key[index1] + state[i] + index2) % 256;

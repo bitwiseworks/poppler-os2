@@ -8,6 +8,7 @@
 // Copyright 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright 2005-2007, 2009, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 //
 //========================================================================
 
@@ -50,9 +51,12 @@ struct str_src_mgr {
     JOCTET buffer;
     Stream *str;
     int index;
-    jmp_buf setjmp_buffer;
 };
 
+struct str_error_mgr {
+  struct jpeg_error_mgr pub;
+  jmp_buf setjmp_buffer;
+};
 
 class DCTStream: public FilterStream {
 public:
@@ -70,11 +74,14 @@ public:
 private:
   void init();
 
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
+
   int colorXform;
   JSAMPLE *current;
   JSAMPLE *limit;
   struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr jerr;
+  struct str_error_mgr err;
   struct str_src_mgr src;
   JSAMPARRAY row_buffer;
 };

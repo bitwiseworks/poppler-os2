@@ -16,13 +16,16 @@
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2005, 2007-2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008 Pino Toscano <pino@kde.org>
+// Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Eric Toombs <ewtoombs@uwaterloo.ca>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Axel Struebing <axel.struebing@freenet.de>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
+// Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
+// Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
+// Copyright (C) 2010 Philip Lorenz <lorenzph+freedesktop@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,6 +38,7 @@
 #pragma implementation
 #endif
 
+#include <ctype.h>
 #include <locale.h>
 #include <stdio.h>
 #include <errno.h>
@@ -45,6 +49,7 @@
 #ifdef _WIN32
 #  include <windows.h>
 #endif
+#include <sys/stat.h>
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"
 #include "poppler-config.h"
@@ -53,6 +58,7 @@
 #include "Catalog.h"
 #include "Stream.h"
 #include "XRef.h"
+#include "Linearization.h"
 #include "Link.h"
 #include "OutputDev.h"
 #include "Error.h"
@@ -65,11 +71,20 @@
 #include "Outline.h"
 #endif
 #include "PDFDoc.h"
+#include "Hints.h"
 
 //------------------------------------------------------------------------
 
 #define headerSearchSize 1024	// read this many bytes at beginning of
 				//   file to look for '%PDF'
+#define pdfIdLength 32   // PDF Document IDs (PermanentId, UpdateId) length
+
+#define linearizationSearchSize 1024	// read this many bytes at beginning of
+					// file to look for linearization
+					// dictionary
+
+#define xrefSearchSize 1024	// read this many bytes at end of file
+				//   to look for 'startxref'
 
 //------------------------------------------------------------------------
 // PDFDoc
@@ -83,10 +98,15 @@ void PDFDoc::init()
   file = NULL;
   str = NULL;
   xref = NULL;
+  linearization = NULL;
   catalog = NULL;
+  hints = NULL;
 #ifndef DISABLE_OUTLINE
   outline = NULL;
 #endif
+  startXRefPos = ~(Guint)0;
+  secHdlr = NULL;
+  pageCache = NULL;
 }
 
 PDFDoc::PDFDoc()
@@ -97,11 +117,17 @@ PDFDoc::PDFDoc()
 PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   Object obj;
+  int size = 0;
 
   init();
 
   fileName = fileNameA;
   guiData = guiDataA;
+
+  struct stat buf;
+  if (stat(fileName->getCString(), &buf) == 0) {
+     size = buf.st_size;
+  }
 
   // try to open file
 #ifdef VMS
@@ -122,7 +148,7 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 
   // create stream
   obj.initNull();
-  str = new FileStream(file, 0, gFalse, 0, &obj);
+  str = new FileStream(file, 0, gFalse, size, &obj);
 
   ok = setup(ownerPassword, userPassword);
 }
@@ -153,11 +179,19 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
   // try to open file
   // NB: _wfopen is only available in NT
+  struct _stat buf;
+  int size;
   version.dwOSVersionInfoSize = sizeof(version);
   GetVersionEx(&version);
   if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+    if (_wstat(fileName2, &buf) == 0) {
+      size = buf.st_size;
+    }
     file = _wfopen(fileName2, L"rb");
   } else {
+    if (_stat(fileName->getCString(), &buf) == 0) {
+      size = buf.st_size;
+    }
     file = fopen(fileName->getCString(), "rb");
   }
   if (!file) {
@@ -168,7 +202,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
   // create stream
   obj.initNull();
-  str = new FileStream(file, 0, gFalse, 0, &obj);
+  str = new FileStream(file, 0, gFalse, size, &obj);
 
   ok = setup(ownerPassword, userPassword);
 }
@@ -205,8 +239,10 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   // check header
   checkHeader();
 
+  GBool wasReconstructed = false;
+
   // read xref table
-  xref = new XRef(str);
+  xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed);
   if (!xref->isOk()) {
     error(-1, "Couldn't read xref table");
     errCode = xref->getErrorCode();
@@ -221,10 +257,21 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
 
   // read catalog
   catalog = new Catalog(xref);
-  if (!catalog->isOk()) {
-    error(-1, "Couldn't read page catalog");
-    errCode = errBadCatalog;
-    return gFalse;
+  if (catalog && !catalog->isOk()) {
+    if (!wasReconstructed)
+    {
+      // try one more time to contruct the Catalog, maybe the problem is damaged XRef 
+      delete catalog;
+      delete xref;
+      xref = new XRef(str, 0, 0, NULL, true);
+      catalog = new Catalog(xref);
+    }
+
+    if (catalog && !catalog->isOk()) {
+      error(-1, "Couldn't read page catalog");
+      errCode = errBadCatalog;
+      return gFalse;
+    }
   }
 
   // done
@@ -232,6 +279,15 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
 }
 
 PDFDoc::~PDFDoc() {
+  if (pageCache) {
+    for (int i = 0; i < getNumPages(); i++) {
+      if (pageCache[i]) {
+        delete pageCache[i];
+      }
+    }
+    gfree(pageCache);
+  }
+  delete secHdlr;
 #ifndef DISABLE_OUTLINE
   if (outline) {
     delete outline;
@@ -242,6 +298,12 @@ PDFDoc::~PDFDoc() {
   }
   if (xref) {
     delete xref;
+  }
+  if (hints) {
+    delete hints;
+  }
+  if (linearization) {
+    delete linearization;
   }
   if (str) {
     delete str;
@@ -325,7 +387,6 @@ void PDFDoc::checkHeader() {
 GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword) {
   Object encrypt;
   GBool encrypted;
-  SecurityHandler *secHdlr;
   GBool ret;
 
   xref->getTrailerDict()->dictLookup("Encrypt", &encrypt);
@@ -345,7 +406,6 @@ GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword)
 	// authorization failed
 	ret = gFalse;
       }
-      delete secHdlr;
     } else {
       // couldn't find the matching security handler
       ret = gFalse;
@@ -368,11 +428,13 @@ void PDFDoc::displayPage(OutputDev *out, int page,
   if (globalParams->getPrintCommands()) {
     printf("***** page %d *****\n", page);
   }
-  if (catalog->getPage(page))
-    catalog->getPage(page)->display(out, hDPI, vDPI,
+
+  if (getPage(page))
+    getPage(page)->display(out, hDPI, vDPI,
 				    rotate, useMediaBox, crop, printing, catalog,
 				    abortCheckCbk, abortCheckCbkData,
 				    annotDisplayDecideCbk, annotDisplayDecideCbkData);
+
 }
 
 void PDFDoc::displayPages(OutputDev *out, int firstPage, int lastPage,
@@ -399,8 +461,8 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
 			      void *abortCheckCbkData,
                               GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
                               void *annotDisplayDecideCbkData) {
-  if (catalog->getPage(page))
-    catalog->getPage(page)->displaySlice(out, hDPI, vDPI,
+  if (getPage(page))
+    getPage(page)->displaySlice(out, hDPI, vDPI,
 					 rotate, useMediaBox, crop,
 					 sliceX, sliceY, sliceW, sliceH,
 					 printing, catalog,
@@ -409,43 +471,108 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
 }
 
 Links *PDFDoc::getLinks(int page) {
-  return catalog->getPage(page) ? catalog->getPage(page)->getLinks(catalog) : NULL;
+  Page *p = getPage(page);
+  if (!p) {
+    Object obj;
+    obj.initNull();
+    return new Links (&obj, NULL);
+  }
+  return p->getLinks(catalog);
 }
-  
+
 void PDFDoc::processLinks(OutputDev *out, int page) {
-  if (catalog->getPage(page))
-    catalog->getPage(page)->processLinks(out, catalog);
+  if (getPage(page))
+    getPage(page)->processLinks(out, catalog);
+}
+
+Linearization *PDFDoc::getLinearization()
+{
+  if (!linearization) {
+    linearization = new Linearization(str);
+  }
+  return linearization;
 }
 
 GBool PDFDoc::isLinearized() {
-  Parser *parser;
-  Object obj1, obj2, obj3, obj4, obj5;
-  GBool lin;
+  if ((str->getLength()) &&
+      (getLinearization()->getLength() == str->getLength()))
+    return gTrue;
+  else
+    return gFalse;
+}
 
-  lin = gFalse;
-  obj1.initNull();
-  parser = new Parser(xref,
-	     new Lexer(xref,
-	       str->makeSubStream(str->getStart(), gFalse, 0, &obj1)),
-	     gTrue);
-  parser->getObj(&obj1);
-  parser->getObj(&obj2);
-  parser->getObj(&obj3);
-  parser->getObj(&obj4);
-  if (obj1.isInt() && obj2.isInt() && obj3.isCmd("obj") &&
-      obj4.isDict()) {
-    obj4.dictLookup("Linearized", &obj5);
-    if (obj5.isNum() && obj5.getNum() > 0) {
-      lin = gTrue;
+static GBool
+get_id (GooString *encodedidstring, GooString *id) {
+  const char *encodedid = encodedidstring->getCString();
+  char pdfid[pdfIdLength + 1];
+  int n;
+
+  if (encodedidstring->getLength() != pdfIdLength / 2)
+    return gFalse;
+
+  n = sprintf(pdfid, "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+	      encodedid[0] & 0xff, encodedid[1] & 0xff, encodedid[2] & 0xff, encodedid[3] & 0xff,
+	      encodedid[4] & 0xff, encodedid[5] & 0xff, encodedid[6] & 0xff, encodedid[7] & 0xff,
+	      encodedid[8] & 0xff, encodedid[9] & 0xff, encodedid[10] & 0xff, encodedid[11] & 0xff,
+	      encodedid[12] & 0xff, encodedid[13] & 0xff, encodedid[14] & 0xff, encodedid[15] & 0xff);
+  if (n != pdfIdLength)
+    return gFalse;
+
+  id->Set(pdfid, pdfIdLength);
+  return gTrue;
+}
+
+GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
+  Object obj;
+  xref->getTrailerDict()->dictLookup ("ID", &obj);
+
+  if (obj.isArray() && obj.arrayGetLength() == 2) {
+    Object obj2;
+
+    if (permanent_id) {
+      if (obj.arrayGet(0, &obj2)->isString()) {
+        if (!get_id (obj2.getString(), permanent_id)) {
+	  obj2.free();
+	  return gFalse;
+	}
+      } else {
+        error(-1, "Invalid permanent ID");
+	obj2.free();
+	return gFalse;
+      }
+      obj2.free();
     }
-    obj5.free();
+
+    if (update_id) {
+      if (obj.arrayGet(1, &obj2)->isString()) {
+        if (!get_id (obj2.getString(), update_id)) {
+	  obj2.free();
+	  return gFalse;
+	}
+      } else {
+        error(-1, "Invalid update ID");
+	obj2.free();
+	return gFalse;
+      }
+      obj2.free();
+    }
+
+    obj.free();
+
+    return gTrue;
   }
-  obj4.free();
-  obj3.free();
-  obj2.free();
-  obj1.free();
-  delete parser;
-  return lin;
+  obj.free();
+
+  return gFalse;
+}
+
+Hints *PDFDoc::getHints()
+{
+  if (!hints && isLinearized()) {
+    hints = new Hints(str, getLinearization(), getXRef(), secHdlr);
+  }
+
+  return hints;
 }
 
 int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
@@ -889,7 +1016,7 @@ void PDFDoc::writeTrailer (Guint uxrefOffset, int uxrefSize, OutStream* outStr, 
   trailerDict->set("Root", &obj1);
 
   if (incrUpdate) { 
-    obj1.initInt(xref->getLastXRefPos());
+    obj1.initInt(getStartXRef());
     trailerDict->set("Prev", &obj1);
   }
   
@@ -926,4 +1053,157 @@ PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, GooString *fileNameA)
   doc->fileName = fileNameA;
 
   return doc;
+}
+
+Guint PDFDoc::strToUnsigned(char *s) {
+  Guint x;
+  char *p;
+  int i;
+
+  x = 0;
+  for (p = s, i = 0; *p && isdigit(*p) && i < 10; ++p, ++i) {
+    x = 10 * x + (*p - '0');
+  }
+  return x;
+}
+
+// Read the 'startxref' position.
+Guint PDFDoc::getStartXRef()
+{
+  if (startXRefPos == ~(Guint)0) {
+
+    if (isLinearized()) {
+      char buf[linearizationSearchSize+1];
+      int c, n, i;
+
+      str->setPos(0);
+      for (n = 0; n < linearizationSearchSize; ++n) {
+        if ((c = str->getChar()) == EOF) {
+          break;
+        }
+        buf[n] = c;
+      }
+      buf[n] = '\0';
+
+      // find end of first obj
+      startXRefPos = 0;
+      for (i = 0; i < n; i++) {
+        if (!strncmp("endobj", &buf[i], 6)) {
+           startXRefPos = i+6;
+           break;
+        }
+      }
+    } else {
+      char buf[xrefSearchSize+1];
+      char *p;
+      int c, n, i;
+
+      // read last xrefSearchSize bytes
+      str->setPos(xrefSearchSize, -1);
+      for (n = 0; n < xrefSearchSize; ++n) {
+        if ((c = str->getChar()) == EOF) {
+          break;
+        }
+        buf[n] = c;
+      }
+      buf[n] = '\0';
+
+      // find startxref
+      for (i = n - 9; i >= 0; --i) {
+        if (!strncmp(&buf[i], "startxref", 9)) {
+          break;
+        }
+      }
+      if (i < 0) {
+        startXRefPos = 0;
+      }
+      for (p = &buf[i+9]; isspace(*p); ++p) ;
+      startXRefPos =  strToUnsigned(p);
+    }
+
+  }
+
+  return startXRefPos;
+}
+
+Guint PDFDoc::getMainXRefEntriesOffset()
+{
+  Guint mainXRefEntriesOffset = 0;
+
+  if (isLinearized()) {
+    mainXRefEntriesOffset = getLinearization()->getMainXRefEntriesOffset();
+  }
+
+  return mainXRefEntriesOffset;
+}
+
+int PDFDoc::getNumPages()
+{
+  if (isLinearized()) {
+    int n;
+    if ((n = getLinearization()->getNumPages())) {
+      return n;
+    }
+  }
+
+  return catalog->getNumPages();
+}
+
+Page *PDFDoc::parsePage(int page)
+{
+  Page *p = NULL;
+  Object obj;
+  Ref pageRef;
+  Dict *pageDict;
+
+  pageRef.num = getHints()->getPageObjectNum(page);
+  if (!pageRef.num) {
+    error(-1, "Failed to get object num from hint tables for page %d", page);
+    return NULL;
+  }
+
+  // check for bogus ref - this can happen in corrupted PDF files
+  if (pageRef.num < 0 || pageRef.num >= xref->getNumObjects()) {
+    error(-1, "Invalid object num (%d) for page %d", pageRef.num, page);
+    return NULL;
+  }
+
+  pageRef.gen = xref->getEntry(pageRef.num)->gen;
+  xref->fetch(pageRef.num, pageRef.gen, &obj);
+  if (!obj.isDict()) {
+    obj.free();
+    error(-1, "Object (%d %d) is not a pageDict", pageRef.num, pageRef.gen);
+    return NULL;
+  }
+  pageDict = obj.getDict();
+
+  p = new Page(xref, page, pageDict, pageRef,
+               new PageAttrs(NULL, pageDict), catalog->getForm());
+  obj.free();
+
+  return p;
+}
+
+Page *PDFDoc::getPage(int page)
+{
+  if ((page < 1) || page > getNumPages()) return NULL;
+
+  if (isLinearized()) {
+    if (!pageCache) {
+      pageCache = (Page **) gmallocn(getNumPages(), sizeof(Page *));
+      for (int i = 0; i < getNumPages(); i++) {
+        pageCache[i] = NULL;
+      }
+    }
+    if (!pageCache[page-1]) {
+      pageCache[page-1] = parsePage(page);
+    }
+    if (pageCache[page-1]) {
+       return pageCache[page-1];
+    } else {
+       error(-1, "Failed parsing page %d using hint tables", page);
+    }
+  }
+
+  return catalog->getPage(page);
 }

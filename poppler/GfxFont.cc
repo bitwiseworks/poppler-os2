@@ -10,7 +10,7 @@
 //
 // Modified under the Poppler project - http://poppler.freedesktop.org
 //
-// Copyright (C) 2005, 2006, 2008, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -19,9 +19,11 @@
 // Copyright (C) 2007 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2008 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2008 Ed Avis <eda@waniasset.com>
-// Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Peter Kerzum <kerzum@yandex-team.ru>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
+// Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
+// Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -38,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <algorithm>
 #include "goo/gmem.h"
 #include "Error.h"
 #include "Object.h"
@@ -175,6 +178,7 @@ GfxFont::GfxFont(char *tagA, Ref idA, GooString *nameA) {
   weight = WeightNotDefined;
   refCnt = 1;
   dfp = NULL;
+  hasToUnicode = gFalse;
 }
 
 GfxFont::~GfxFont() {
@@ -421,17 +425,13 @@ CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits,
 					      CharCodeToUnicode *ctu) {
   GooString *buf;
   Object obj1;
-  int c;
 
   if (!fontDict->lookup("ToUnicode", &obj1)->isStream()) {
     obj1.free();
     return NULL;
   }
   buf = new GooString();
-  obj1.streamReset();
-  while ((c = obj1.streamGetChar()) != EOF) {
-    buf->append(c);
-  }
+  obj1.getStream()->fillGooString(buf);
   obj1.streamClose();
   obj1.free();
   if (ctu) {
@@ -439,6 +439,7 @@ CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits,
   } else {
     ctu = CharCodeToUnicode::parseCMap(buf, nBits);
   }
+  hasToUnicode = gTrue;
   delete buf;
   return ctu;
 }
@@ -488,8 +489,6 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len) {
   char *buf;
   Object obj1, obj2;
   Stream *str;
-  int c;
-  int size, i;
 
   obj1.initRef(embFontID.num, embFontID.gen);
   obj1.fetch(xref, &obj2);
@@ -503,17 +502,7 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len) {
   }
   str = obj2.getStream();
 
-  buf = NULL;
-  i = size = 0;
-  str->reset();
-  while ((c = str->getChar()) != EOF) {
-    if (i == size) {
-      size += 4096;
-      buf = (char *)grealloc(buf, size);
-    }
-    buf[i++] = c;
-  }
-  *len = i;
+  buf = (char*)str->toUnsignedChars(len);
   str->close();
 
   obj2.free();
@@ -1243,7 +1232,7 @@ Gushort *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   cmap = 0;
   useMacRoman = gFalse;
   useUnicode = gFalse;
-  if (hasEncoding) {
+  if (hasEncoding || type == fontType1) {
     if (usesMacRomanEnc && macRomanCmap >= 0) {
       cmap = macRomanCmap;
       useMacRoman = gTrue;
@@ -1331,14 +1320,12 @@ Dict *Gfx8BitFont::getResources() {
 // GfxCIDFont
 //------------------------------------------------------------------------
 
-static int CDECL cmpWidthExcep(const void *w1, const void *w2) {
-  return ((GfxFontCIDWidthExcep *)w1)->first -
-         ((GfxFontCIDWidthExcep *)w2)->first;
+static bool cmpWidthExcep(const GfxFontCIDWidthExcep &w1, const GfxFontCIDWidthExcep &w2) {
+  return w1.first < w2.first;
 }
 
-static int CDECL cmpWidthExcepV(const void *w1, const void *w2) {
-  return ((GfxFontCIDWidthExcepV *)w1)->first -
-         ((GfxFontCIDWidthExcepV *)w2)->first;
+static bool cmpWidthExcepV(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) {
+  return w1.first < w2.first;
 }
 
 GfxCIDFont::GfxCIDFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
@@ -1360,6 +1347,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
   descent = -0.35;
   fontBBox[0] = fontBBox[1] = fontBBox[2] = fontBBox[3] = 0;
   cMap = NULL;
+  cMapName = NULL;
   ctu = NULL;
   widths.defWidth = 1.0;
   widths.defHeight = -1.0;
@@ -1598,8 +1586,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
       obj3.free();
       obj2.free();
     }
-    qsort(widths.exceps, widths.nExceps, sizeof(GfxFontCIDWidthExcep),
-	  &cmpWidthExcep);
+    std::sort(widths.exceps, widths.exceps + widths.nExceps, &cmpWidthExcep);
   }
   obj1.free();
 
@@ -1682,8 +1669,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
       obj3.free();
       obj2.free();
     }
-    qsort(widths.excepsV, widths.nExcepsV, sizeof(GfxFontCIDWidthExcepV),
-	  &cmpWidthExcepV);
+    std::sort(widths.excepsV, widths.excepsV + widths.nExcepsV, &cmpWidthExcepV);
   }
   obj1.free();
 
@@ -1731,7 +1717,16 @@ int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
 
   *code = (CharCode)(cid = cMap->getCID(s, len, &n));
   if (ctu) {
-    *uLen = ctu->mapToUnicode(cid, u);
+    if (hasToUnicode) {
+      int i = 0, c = 0;
+      while (i < n) {
+	c = (c << 8 ) + (s[i] & 0xff);
+	++i;
+      }
+      *uLen = ctu->mapToUnicode(c, u);
+    } else {
+      *uLen = ctu->mapToUnicode(cid, u);
+    }
   } else {
     *uLen = 0;
   }
