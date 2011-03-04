@@ -15,8 +15,8 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2010 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2007-2010 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2007-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
@@ -1098,6 +1098,15 @@ void Annot::setColor(AnnotColor *new_color) {
   }
 }
 
+void Annot::setPage(Ref *pageRef, int pageIndex)
+{
+  Object obj1;
+
+  obj1.initRef(pageRef->num, pageRef->gen);
+  update("P", &obj1);
+  page = pageIndex;
+}
+
 double Annot::getXMin() {
   return rect->x1;
 }
@@ -1516,6 +1525,14 @@ void AnnotMarkup::setPopup(AnnotPopup *new_popup) {
   } else {
     popup = NULL;
   }
+}
+
+void AnnotMarkup::setOpacity(double opacityA) {
+  Object obj1;
+
+  opacity = opacityA;
+  obj1.initReal(opacity);
+  update ("CA", &obj1);
 }
 
 //------------------------------------------------------------------------
@@ -2620,7 +2637,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 	y3 = quadrilaterals->getY3(i);
 	x4 = quadrilaterals->getX4(i);
 	y4 = quadrilaterals->getY4(i);
-	h4 = (y1 - y3) / 4.0;
+	h4 = abs(y1 - y3) / 4.0;
 
 	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x3, y3);
 	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
@@ -3383,7 +3400,7 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
 // Draw the variable text or caption for a field.
 void AnnotWidget::drawListBox(GooString **text, GBool *selection,
 			      int nOptions, int topIdx,
-			      GooString *da, GfxFontDict *fontDict, GBool quadding) {
+			      GooString *da, GfxFontDict *fontDict, int quadding) {
   GooList *daToks;
   GooString *tok, *convertedText;
   GfxFont *font;
@@ -3777,7 +3794,7 @@ void AnnotWidget::generateFieldAppearance() {
                   obj3.arrayGetLength() > 0) {
                 dx = rect->x2 - rect->x1;
                 dy = rect->y2 - rect->y1;
-		aColor = AnnotColor (obj1.getArray());
+		aColor = AnnotColor (obj3.getArray());
                 setColor(&aColor, gTrue);
                 drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy),
                     gTrue);
@@ -4084,6 +4101,7 @@ void AnnotMovie::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
     obj2.free();
   } else {
     error(-1, "Bad Annot Movie");
+    movie = NULL;
     ok = gFalse;
   }
   movieDict.free();
@@ -4361,6 +4379,7 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
     if (border) {
       int i, dashLength;
       double *dash;
+      double borderWidth = border->getWidth();
 
       switch (border->getStyle()) {
       case AnnotBorder::borderDashed:
@@ -4375,70 +4394,70 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
         appearBuf->append("[] 0 d\n");
         break;
       }
-      appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+      appearBuf->appendf("{0:.2f} w\n", borderWidth);
+
+      if (interiorColor)
+        setColor(interiorColor, gTrue);
+
+      if (type == typeSquare) {
+        appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n",
+			    borderWidth / 2.0, borderWidth / 2.0,
+			    (rect->x2 - rect->x1) - borderWidth,
+			    (rect->y2 - rect->y1) - borderWidth);
+      } else {
+        double width, height;
+	double b;
+	double x1, y1, x2, y2, x3, y3;
+
+	width = rect->x2 - rect->x1;
+	height = rect->y2 - rect->y1;
+	b = borderWidth / 2.0;
+
+	x1 = b;
+	y1 = height / 2.0;
+	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y1);
+
+	y1 += height / 4.0;
+	x2 = width / 4.0;
+	y2 = height - b;
+	x3 = width / 2.0;
+	y3 = y2;
+	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+			    x1, y1, x2, y2, x3, y3);
+	x2 = width - b;
+	y2 = y1;
+	x1 = x3 + (width / 4.0);
+	y1 = y3;
+	x3 = x2;
+	y3 = height / 2.0;
+	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+			    x1, y1, x2, y2, x3, y3);
+
+	x2 = x1;
+	y2 = b;
+	x1 = x3;
+	y1 = height / 4.0;
+	x3 = width / 2.0;
+	y3 = b;
+	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+			    x1, y1, x2, y2, x3, y3);
+
+	x2 = b;
+	y2 = y1;
+	x1 = width / 4.0;
+	y1 = b;
+	x3 = b;
+	y3 = height / 2.0;
+	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+			    x1, y1, x2, y2, x3, y3);
+
+      }
+
+      if (interiorColor)
+        appearBuf->append ("b\n");
+      else
+        appearBuf->append ("S\n");
     }
-
-    if (interiorColor)
-      setColor(interiorColor, gTrue);
-
-    if (type == typeSquare) {
-      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n",
-			  border->getWidth() / 2.0, border->getWidth() / 2.0,
-			  (rect->x2 - rect->x1) - border->getWidth(),
-			  (rect->y2 - rect->y1) - border->getWidth());
-    } else {
-      double width, height;
-      double b;
-      double x1, y1, x2, y2, x3, y3;
-
-      width = rect->x2 - rect->x1;
-      height = rect->y2 - rect->y1;
-      b = border->getWidth() / 2.0;
-
-      x1 = b;
-      y1 = height / 2.0;
-      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y1);
-
-      y1 += height / 4.0;
-      x2 = width / 4.0;
-      y2 = height - b;
-      x3 = width / 2.0;
-      y3 = y2;
-      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			  x1, y1, x2, y2, x3, y3);
-      x2 = width - b;
-      y2 = y1;
-      x1 = x3 + (width / 4.0);
-      y1 = y3;
-      x3 = x2;
-      y3 = height / 2.0;
-      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			  x1, y1, x2, y2, x3, y3);
-
-      x2 = x1;
-      y2 = b;
-      x1 = x3;
-      y1 = height / 4.0;
-      x3 = width / 2.0;
-      y3 = b;
-      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			  x1, y1, x2, y2, x3, y3);
-
-      x2 = b;
-      y2 = y1;
-      x1 = width / 4.0;
-      y1 = b;
-      x3 = b;
-      y3 = height / 2.0;
-      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			  x1, y1, x2, y2, x3, y3);
-
-    }
-
-    if (interiorColor)
-      appearBuf->append ("b\n");
-    else
-      appearBuf->append ("S\n");
     appearBuf->append ("Q\n");
 
     double bbox[4];

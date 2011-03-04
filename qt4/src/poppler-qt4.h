@@ -3,8 +3,10 @@
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2005-2010, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
- * Copyright (C) 2006-2009, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
+ * Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +57,30 @@ namespace Poppler {
 
     class PDFConverter;
     class PSConverter;
+
+    /**
+	Debug/error function.
+
+	This function type is used for debugging & error output;
+	the first parameter is the actual message, the second is the unaltered
+	closure argument which was passed to the setDebugErrorFunction call.
+
+	\since 0.16
+    */
+    typedef void (*PopplerDebugFunc)(const QString & /*message*/, const QVariant & /*closure*/);
+
+    /**
+	Set a new debug/error output function.
+
+	If not set, by default error and debug messages will be sent to the
+	Qt \p qDebug() function.
+
+	\param debugFunction the new debug function
+	\param closure user data which will be passes as-is to the debug function
+
+	\since 0.16
+    */
+    POPPLER_QT4_EXPORT void setDebugErrorFunction(PopplerDebugFunc debugFunction, const QVariant &closure);
 
     /**
         Describes the physical location of text on a document page
@@ -387,6 +413,31 @@ delete it;
 	    Opening,   ///< The action when a page is "opened"
 	    Closing    ///< The action when a page is "closed"
 	};
+	
+	/**
+	   How the text is going to be returned
+	   \since 0.16
+	*/
+	enum TextLayout {
+	    PhysicalLayout,   ///< The text is layouted to resemble the real page layout
+	    RawOrderLayout          ///< The text is returned without any type of processing
+	};
+
+        /**
+           Additional flags for the renderToPainter method
+           \since 0.16
+        */
+        enum PainterFlag {
+            /**
+               Do not save/restore the caller-owned painter.
+
+               renderToPainter() by default preserves, using save() + restore(),
+               the state of the painter specified; if this is not needed, this
+               flag can avoid this job
+             */
+            DontSaveAndRestore = 0x00000001
+        };
+        Q_DECLARE_FLAGS( PainterFlags, PainterFlag )
 
 	/** 
 	   Render the page to a QImage using the current
@@ -428,6 +479,51 @@ delete it;
         */
 	QImage renderToImage(double xres=72.0, double yres=72.0, int x=-1, int y=-1, int w=-1, int h=-1, Rotation rotate = Rotate0) const;
 
+        /**
+           Render the page to the specified QPainter using the current
+           \link Document::renderBackend() Document renderer\endlink.
+
+           If \p x = \p y = \p w = \p h = -1, the method will automatically
+           compute the size of the page area from the horizontal and vertical
+           resolutions specified in \p xres and \p yres. Otherwise, the
+           method renders only a part of the page, specified by the
+           parameters (\p x, \p y, \p w, \p h) in pixel coordinates.
+
+           \param painter the painter to paint on
+
+           \param x specifies the left x-coordinate of the box, in
+           pixels.
+
+           \param y specifies the top y-coordinate of the box, in
+           pixels.
+
+           \param w specifies the width of the box, in pixels.
+
+           \param h specifies the height of the box, in pixels.
+
+           \param xres horizontal resolution of the graphics device,
+           in dots per inch
+
+           \param yres vertical resolution of the graphics device, in
+           dots per inch
+
+           \param rotate how to rotate the page
+
+           \param flags additional painter flags
+
+           \warning The parameter (\p x, \p y, \p w, \p h) are not
+           well-tested. Unusual or meaningless parameters may lead to
+           rather unexpected results.
+
+           \returns whether the painting succeeded
+
+           \note This method is only supported for Arthur
+
+           \since 0.16
+        */
+        bool renderToPainter(QPainter* painter, double xres=72.0, double yres=72.0, int x=-1, int y=-1, int w=-1, int h=-1,
+                             Rotation rotate = Rotate0, PainterFlags flags = 0) const;
+
 	/**
 	   Get the page thumbnail if it exists.
 
@@ -440,6 +536,18 @@ delete it;
 
 	/**
 	   Returns the text that is inside a specified rectangle
+
+	   \param rect the rectangle specifying the area of interest,
+	   with coordinates given in points, i.e., 1/72th of an inch.
+	   If rect is null, all text on the page is given
+	
+	   \since 0.16
+	**/
+	QString text(const QRectF &rect, TextLayout textLayout) const;
+
+	/**
+	   Returns the text that is inside a specified rectangle.
+	   The text is returned using the physical layout of the page
 
 	   \param rect the rectangle specifying the area of interest,
 	   with coordinates given in points, i.e., 1/72th of an inch.
@@ -780,6 +888,8 @@ delete it;
      
 	   Note that this follows the PDF standard of being zero based - if you
 	   want the first page, then you need an index of zero.
+	
+	   The caller gets the ownership of the returned object.
 
 	   \param index the page number index
 	*/
@@ -1192,6 +1302,20 @@ QString subject = m_doc->info("Subject");
 	QStringList scripts() const;
 
 	/**
+	   The PDF identifiers.
+
+	   \param permanentId an optional pointer to a variable where store the
+	   permanent ID of the document
+	   \param updateId an optional pointer to a variable where store the
+	   update ID of the document
+
+	   \return whether the document has the IDs
+
+	   \since 0.16
+	*/
+	bool getPdfId(QByteArray *permanentId, QByteArray *updateId) const;
+
+	/**
 	   Destructor.
 	*/
 	~Document();
@@ -1373,6 +1497,7 @@ height = dummy.height();
               \since 0.10
              */
             void setPSOptions(PSOptions options);
+
             /**
               The currently set options for the PS export.
 
@@ -1381,6 +1506,15 @@ height = dummy.height();
               \since 0.10
              */
             PSOptions psOptions() const;
+
+            /**
+              Sets a function that will be called each time a page is converted.
+
+              The payload belongs to the caller.
+
+              \since 0.16
+             */
+            void setPageConvertedCallback(void (* callback)(int page, void *payload), void *payload);
 
             bool convert();
 
@@ -1578,6 +1712,7 @@ height = dummy.height();
 
 }
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(Poppler::Page::PainterFlags)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Poppler::Document::RenderHints)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Poppler::PDFConverter::PDFOptions)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Poppler::PSConverter::PSOptions)

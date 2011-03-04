@@ -26,6 +26,8 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Reece Dunn <msclrhd@gmail.com>
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -62,8 +64,8 @@ int HtmlPage::pgNum=0;
 int HtmlOutputDev::imgNum=1;
 GooList *HtmlOutputDev::imgList=new GooList();
 
-extern double scale;
 extern GBool complexMode;
+extern GBool singleHtml;
 extern GBool ignore;
 extern GBool printCommands;
 extern GBool printHtml;
@@ -669,22 +671,33 @@ void HtmlPage::dumpComplex(FILE *file, int page){
   {
       GooString* pgNum=GooString::fromInt(page);
       tmp = new GooString(DocName);
-      tmp->append('-')->append(pgNum)->append(".html");
+      if (!singleHtml){
+            tmp->append('-')->append(pgNum)->append(".html");
+            pageFile = fopen(tmp->getCString(), "w");
+      } else {
+            tmp->append("-html")->append(".html");
+            pageFile = fopen(tmp->getCString(), "a");
+      }
       delete pgNum;
-  
-      if (!(pageFile = fopen(tmp->getCString(), "w"))) {
+      if (!pageFile) {
 	  error(-1, "Couldn't open html file '%s'", tmp->getCString());
 	  delete tmp;
 	  return;
       } 
-      delete tmp;
 
-      fprintf(pageFile,"%s\n<HTML>\n<HEAD>\n<TITLE>Page %d</TITLE>\n\n",
-	      DOCTYPE, page);
+      if (!singleHtml)
+          fprintf(pageFile,"%s\n<HTML>\n<HEAD>\n<TITLE>Page %d</TITLE>\n\n", DOCTYPE, page);
+      else
+          fprintf(pageFile,"%s\n<HTML>\n<HEAD>\n<TITLE>%s</TITLE>\n\n", DOCTYPE, tmp->getCString());
+
+      delete tmp;
 
       htmlEncoding = HtmlOutputDev::mapEncodingToHtml
 	  (globalParams->getTextEncodingName());
-      fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\">\n", htmlEncoding);
+      if (!singleHtml)
+          fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\">\n", htmlEncoding);
+      else
+          fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\">\n <br>\n", htmlEncoding);
   }
   else 
   {
@@ -700,7 +713,11 @@ void HtmlPage::dumpComplex(FILE *file, int page){
    
   fputs("<STYLE type=\"text/css\">\n<!--\n",pageFile);
   for(int i=fontsPageMarker;i!=fonts->size();i++) {
-    GooString *fontCSStyle = fonts->CSStyle(i);
+    GooString *fontCSStyle;
+    if (!singleHtml)
+         fontCSStyle = fonts->CSStyle(i);
+    else
+         fontCSStyle = fonts->CSStyle(i,page);
     fprintf(pageFile,"\t%s\n",fontCSStyle->getCString());
     delete fontCSStyle;
   }
@@ -731,7 +748,10 @@ void HtmlPage::dumpComplex(FILE *file, int page){
 	      xoutRound(tmp1->yMin),
 	      xoutRound(tmp1->xMin));
       fputs("<nobr>",pageFile); 
-      str1=fonts->getCSStyle(tmp1->fontpos, str);  
+      if (!singleHtml)
+          str1=fonts->getCSStyle(tmp1->fontpos, str);
+      else
+          str1=fonts->getCSStyle(tmp1->fontpos, str, page);
       fputs(str1->getCString(),pageFile);
       delete str;      
       delete str1;
@@ -751,7 +771,7 @@ void HtmlPage::dumpComplex(FILE *file, int page){
 
 void HtmlPage::dump(FILE *f, int pageNum) 
 {
-  if (complexMode)
+  if (complexMode || singleHtml)
   {
     if (xml) dumpAsXML(f, pageNum);
     if (!xml) dumpComplex(f, pageNum);  
@@ -942,28 +962,30 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
   // for non-xml output (complex or simple) with frames generate the left frame
   if(!xml && !noframes)
   {
-     GooString* left=new GooString(fileName);
-     left->append("_ind.html");
+     if (!singleHtml)
+     {
+         GooString* left=new GooString(fileName);
+         left->append("_ind.html");
 
-     doFrame(firstPage);
-   
-     if (!(fContentsFrame = fopen(left->getCString(), "w")))
-	 {
-        error(-1, "Couldn't open html file '%s'", left->getCString());
-		delete left;
-        return;
+         doFrame(firstPage);
+
+         if (!(fContentsFrame = fopen(left->getCString(), "w")))
+         {
+             error(-1, "Couldn't open html file '%s'", left->getCString());
+             delete left;
+             return;
+         }
+         delete left;
+         fputs(DOCTYPE, fContentsFrame);
+         fputs("<HTML>\n<HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>\n",fContentsFrame);
+
+         if (doOutline)
+         {
+             GooString *str = basename(Docname);
+             fprintf(fContentsFrame, "<A href=\"%s%s\" target=\"contents\">Outline</a><br>", str->getCString(), complexMode ? "-outline.html" : "s.html#outline");
+             delete str;
+         }
      }
-     delete left;
-     fputs(DOCTYPE, fContentsFrame);
-     fputs("<HTML>\n<HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>\n",fContentsFrame);
-     
-  	if (doOutline)
-	{
-		GooString *str = basename(Docname);
-		fprintf(fContentsFrame, "<A href=\"%s%s\" target=\"contents\">Outline</a><br>", str->getCString(), complexMode ? "-outline.html" : "s.html#outline");
-		delete str;
-	}
-  	
 	if (!complexMode)
 	{	/* not in complex mode */
 		
@@ -1018,14 +1040,6 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
 }
 
 HtmlOutputDev::~HtmlOutputDev() {
-  /*if (mode&&!xml){
-    int h=xoutRound(pages->pageHeight/scale);
-    int w=xoutRound(pages->pageWidth/scale);
-    fprintf(tin,"%s=%03d\n","PAPER_WIDTH",w);
-    fprintf(tin,"%s=%03d\n","PAPER_HEIGHT",h);
-    fclose(tin);
-    }*/
-
     HtmlFont::clear(); 
     
     delete Docname;
@@ -1093,7 +1107,7 @@ void HtmlOutputDev::startPage(int pageNum, GfxState *state) {
 
 
 void HtmlOutputDev::endPage() {
-  Links *linksList = catalog->getPage(pageNum)->getLinks(catalog);
+  Links *linksList = docPage->getLinks(catalog);
   for (int i = 0; i < linksList->getNumLinks(); ++i)
   {
       doProcessLink(linksList->getLink(i));
@@ -1529,7 +1543,7 @@ void HtmlOutputDev::dumpMetaVars(FILE *file)
 
 GBool HtmlOutputDev::dumpDocOutline(Catalog* catalog)
 { 
-	FILE * output;
+	FILE * output = NULL;
 	GBool bClose = gFalse;
 
 	if (!ok || xml)

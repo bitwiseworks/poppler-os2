@@ -40,22 +40,22 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/gtk-doc.make
+	$(srcdir)/version.xml.in $(top_srcdir)/gtk-doc.make
 subdir = glib/reference
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/define-dir.m4 $(top_srcdir)/m4/gtk-doc.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjpeg.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/qt.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/introspection.m4 \
+	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h \
 	$(top_builddir)/poppler/poppler-config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = version.xml
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
@@ -126,6 +126,14 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
+INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
+INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
+INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
+INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
+INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LCMS_CFLAGS = @LCMS_CFLAGS@
 LCMS_LIBS = @LCMS_LIBS@
 LD = @LD@
@@ -145,6 +153,7 @@ LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MOCQT4 = @MOCQT4@
 NM = @NM@
@@ -164,6 +173,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PC_REQUIRES = @PC_REQUIRES@
 PC_REQUIRES_PRIVATE = @PC_REQUIRES_PRIVATE@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POPPLER_DATADIR = @POPPLER_DATADIR@
 POPPLER_GLIB_CFLAGS = @POPPLER_GLIB_CFLAGS@
 POPPLER_GLIB_DISABLE_DEPRECATED = @POPPLER_GLIB_DISABLE_DEPRECATED@
@@ -199,6 +210,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -237,7 +249,6 @@ libqt3_CFLAGS = @libqt3_CFLAGS@
 libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -310,7 +321,7 @@ HTML_IMAGES =
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
-content_files = 
+content_files = version.xml
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
@@ -354,9 +365,11 @@ TARGET_DIR = $(HTML_DIR)/$(DOC_MODULE)
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
 EXTRA_DIST = $(content_files) $(HTML_IMAGES) $(DOC_MAIN_SGML_FILE) \
-	$(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt
-DOC_STAMPS = scan-build.stamp tmpl-build.stamp sgml-build.stamp html-build.stamp \
-	   $(srcdir)/tmpl.stamp $(srcdir)/sgml.stamp $(srcdir)/html.stamp
+	$(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt \
+	version.xml.in
+DOC_STAMPS = scan-build.stamp sgml-build.stamp html-build.stamp pdf-build.stamp \
+	$(srcdir)/sgml.stamp $(srcdir)/html.stamp  \
+	$(srcdir)/pdf.stamp
 
 SCANOBJ_FILES = \
 	$(DOC_MODULE).args 	 \
@@ -371,6 +384,10 @@ REPORT_FILES = \
 	$(DOC_MODULE)-unused.txt
 
 CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS)
+@ENABLE_GTK_DOC_TRUE@@GTK_DOC_BUILD_HTML_FALSE@HTML_BUILD_STAMP = 
+@ENABLE_GTK_DOC_TRUE@@GTK_DOC_BUILD_HTML_TRUE@HTML_BUILD_STAMP = html-build.stamp
+@ENABLE_GTK_DOC_TRUE@@GTK_DOC_BUILD_PDF_FALSE@PDF_BUILD_STAMP = 
+@ENABLE_GTK_DOC_TRUE@@GTK_DOC_BUILD_PDF_TRUE@PDF_BUILD_STAMP = pdf-build.stamp
 all: all-am
 
 .SUFFIXES:
@@ -404,6 +421,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+version.xml: $(top_builddir)/config.status $(srcdir)/version.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -564,10 +583,10 @@ uninstall-am: uninstall-local
 	uninstall-local
 
 
-@ENABLE_GTK_DOC_TRUE@all-local: html-build.stamp
+@ENABLE_GTK_DOC_TRUE@all-local: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
 @ENABLE_GTK_DOC_FALSE@all-local:
 
-docs: html-build.stamp
+docs: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
 
 $(REPORT_FILES): sgml-build.stamp
 
@@ -576,8 +595,11 @@ $(REPORT_FILES): sgml-build.stamp
 scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB)
 	@echo 'gtk-doc: Scanning header files'
 	@-chmod -R u+w $(srcdir)
-	@cd $(srcdir) && \
-	  gtkdoc-scan --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --ignore-headers="$(IGNORE_HFILES)" $(SCAN_OPTIONS) $(EXTRA_HFILES)
+	@_source_dir='' ; for i in $(DOC_SOURCE_DIR) ; do \
+	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
+	  done ; \
+	  cd $(srcdir) && \
+	  gtkdoc-scan --module=$(DOC_MODULE) --ignore-headers="$(IGNORE_HFILES)" $${_source_dir} $(SCAN_OPTIONS) $(EXTRA_HFILES)
 	@if grep -l '^..*$$' $(srcdir)/$(DOC_MODULE).types > /dev/null 2>&1 ; then \
 	    CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" RUN="$(GTKDOC_RUN)" CFLAGS="$(GTKDOC_CFLAGS) $(CFLAGS)" LDFLAGS="$(GTKDOC_LIBS) $(LDFLAGS)" gtkdoc-scangobj $(SCANGOBJ_OPTIONS) --module=$(DOC_MODULE) --output-dir=$(srcdir) ; \
 	else \
@@ -591,27 +613,16 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB)
 $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt: scan-build.stamp
 	@true
 
-#### templates ####
-
-tmpl-build.stamp: $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt
-	@echo 'gtk-doc: Rebuilding template files'
-	@-chmod -R u+w $(srcdir)
-	@cd $(srcdir) && gtkdoc-mktmpl --module=$(DOC_MODULE) $(MKTMPL_OPTIONS)
-	@touch tmpl-build.stamp
-
-tmpl.stamp: tmpl-build.stamp
-	@true
-
-$(srcdir)/tmpl/*.sgml:
-	@true
-
 #### xml ####
 
-sgml-build.stamp: tmpl.stamp $(DOC_MODULE)-sections.txt $(srcdir)/tmpl/*.sgml $(expand_content_files)
+sgml-build.stamp: $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files)
 	@echo 'gtk-doc: Building XML'
 	@-chmod -R u+w $(srcdir)
-	@cd $(srcdir) && \
-	gtkdoc-mkdb --module=$(DOC_MODULE) --source-dir=$(DOC_SOURCE_DIR) --output-format=xml --expand-content-files="$(expand_content_files)" --main-sgml-file=$(DOC_MAIN_SGML_FILE) $(MKDB_OPTIONS)
+	@_source_dir='' ; for i in $(DOC_SOURCE_DIR) ; do \
+	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
+	  done ; \
+	  cd $(srcdir) && \
+	  gtkdoc-mkdb --module=$(DOC_MODULE) --output-format=xml --expand-content-files="$(expand_content_files)" --main-sgml-file=$(DOC_MAIN_SGML_FILE) $${_source_dir} $(MKDB_OPTIONS)
 	@touch sgml-build.stamp
 
 sgml.stamp: sgml-build.stamp
@@ -629,11 +640,30 @@ html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
 	if test "$(?)" = "0"; then \
 	  mkhtml_options=--path="$(srcdir)"; \
 	fi; \
-	cd $(srcdir)/html && gtkdoc-mkhtml $(mkhtml_options) $(MKHTML_OPTIONS) $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
+	cd $(srcdir)/html && gtkdoc-mkhtml $$mkhtml_options $(MKHTML_OPTIONS) $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
 	@test "x$(HTML_IMAGES)" = "x" || ( cd $(srcdir) && cp $(HTML_IMAGES) html )
 	@echo 'gtk-doc: Fixing cross-references'
 	@cd $(srcdir) && gtkdoc-fixxref --module=$(DOC_MODULE) --module-dir=html --html-dir=$(HTML_DIR) $(FIXXREF_OPTIONS)
 	@touch html-build.stamp
+
+#### pdf ####
+
+pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
+	@echo 'gtk-doc: Building PDF'
+	@-chmod -R u+w $(srcdir)
+	@rm -rf $(srcdir)/$(DOC_MODULE).pdf
+	@mkpdf_imgdirs=""; \
+	if test "x$(HTML_IMAGES)" != "x"; then \
+	  for img in $(HTML_IMAGES); do \
+	    part=`dirname $$img`; \
+	    echo $$mkpdf_imgdirs | grep >/dev/null "\-\-imgdir=$$part "; \
+	    if test $$? != 0; then \
+	      mkpdf_imgdirs="$$mkpdf_imgdirs --imgdir=$$part"; \
+	    fi; \
+	  done; \
+	fi; \
+	cd $(srcdir) && gtkdoc-mkpdf --path="$(abs_srcdir)" $$mkpdf_imgdirs $(DOC_MODULE) $(DOC_MAIN_SGML_FILE) $(MKPDF_OPTIONS)
+	@touch pdf-build.stamp
 
 ##############
 
@@ -643,11 +673,11 @@ clean-local:
 
 distclean-local:
 	cd $(srcdir) && \
-	  rm -rf xml $(REPORT_FILES) \
+	  rm -rf xml $(REPORT_FILES) $(DOC_MODULE).pdf \
 	         $(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt
 
 maintainer-clean-local: clean
-	cd $(srcdir) && rm -rf xml html
+	cd $(srcdir) && rm -rf html
 
 install-data-local:
 	@installfiles=`echo $(srcdir)/html/*`; \
@@ -690,10 +720,9 @@ uninstall-local:
 @ENABLE_GTK_DOC_FALSE@	@false
 
 dist-hook: dist-check-gtkdoc dist-hook-local
-	mkdir $(distdir)/tmpl
 	mkdir $(distdir)/html
-	-cp $(srcdir)/tmpl/*.sgml $(distdir)/tmpl
 	cp $(srcdir)/html/* $(distdir)/html
+	-cp $(srcdir)/$(DOC_MODULE).pdf $(distdir)/
 	-cp $(srcdir)/$(DOC_MODULE).types $(distdir)/
 	-cp $(srcdir)/$(DOC_MODULE)-sections.txt $(distdir)/
 	cd $(distdir) && rm -f $(DISTCLEANFILES)

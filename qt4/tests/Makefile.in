@@ -37,7 +37,7 @@ host_triplet = @host@
 noinst_PROGRAMS = test-poppler-qt4$(EXEEXT) \
 	stress-poppler-qt4$(EXEEXT) poppler-fonts$(EXEEXT) \
 	test-password-qt4$(EXEEXT) stress-poppler-dir$(EXEEXT) \
-	poppler-attachments$(EXEEXT)
+	poppler-attachments$(EXEEXT) poppler-texts$(EXEEXT)
 @BUILD_POPPLER_QT4_TRUE@TESTS = check_attachments$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_actualtext$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_dateConversion$(EXEEXT) \
@@ -49,18 +49,19 @@ noinst_PROGRAMS = test-poppler-qt4$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_pagemode$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_password$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_pagelayout$(EXEEXT) \
-@BUILD_POPPLER_QT4_TRUE@	check_search$(EXEEXT)
+@BUILD_POPPLER_QT4_TRUE@	check_search$(EXEEXT) \
+@BUILD_POPPLER_QT4_TRUE@	check_strings$(EXEEXT)
 @BUILD_POPPLER_QT4_TRUE@check_PROGRAMS = $(am__EXEEXT_1)
 subdir = qt4/tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/define-dir.m4 $(top_srcdir)/m4/gtk-doc.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjpeg.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/qt.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/introspection.m4 \
+	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -79,7 +80,8 @@ CONFIG_CLEAN_VPATH_FILES =
 @BUILD_POPPLER_QT4_TRUE@	check_pagemode$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_password$(EXEEXT) \
 @BUILD_POPPLER_QT4_TRUE@	check_pagelayout$(EXEEXT) \
-@BUILD_POPPLER_QT4_TRUE@	check_search$(EXEEXT)
+@BUILD_POPPLER_QT4_TRUE@	check_search$(EXEEXT) \
+@BUILD_POPPLER_QT4_TRUE@	check_strings$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am__check_actualtext_SOURCES_DIST = check_actualtext.cpp
 @BUILD_POPPLER_QT4_TRUE@am_check_actualtext_OBJECTS =  \
@@ -172,12 +174,22 @@ check_search_OBJECTS = $(am_check_search_OBJECTS)
 @BUILD_POPPLER_QT4_TRUE@check_search_DEPENDENCIES =  \
 @BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_2) \
 @BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_1)
+am__check_strings_SOURCES_DIST = check_strings.cpp
+@BUILD_POPPLER_QT4_TRUE@am_check_strings_OBJECTS =  \
+@BUILD_POPPLER_QT4_TRUE@	check_strings.$(OBJEXT)
+check_strings_OBJECTS = $(am_check_strings_OBJECTS)
+@BUILD_POPPLER_QT4_TRUE@check_strings_DEPENDENCIES =  \
+@BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_2) \
+@BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_1)
 am_poppler_attachments_OBJECTS = poppler-attachments.$(OBJEXT)
 poppler_attachments_OBJECTS = $(am_poppler_attachments_OBJECTS)
 poppler_attachments_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_poppler_fonts_OBJECTS = poppler-fonts.$(OBJEXT)
 poppler_fonts_OBJECTS = $(am_poppler_fonts_OBJECTS)
 poppler_fonts_DEPENDENCIES = $(am__DEPENDENCIES_2)
+am_poppler_texts_OBJECTS = poppler-texts.$(OBJEXT)
+poppler_texts_OBJECTS = $(am_poppler_texts_OBJECTS)
+poppler_texts_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_stress_poppler_dir_OBJECTS = stress-poppler-dir.$(OBJEXT)
 stress_poppler_dir_OBJECTS = $(am_stress_poppler_dir_OBJECTS)
 stress_poppler_dir_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -222,7 +234,8 @@ SOURCES = $(check_actualtext_SOURCES) $(check_attachments_SOURCES) \
 	$(check_optcontent_SOURCES) $(check_pagelayout_SOURCES) \
 	$(check_pagemode_SOURCES) $(check_password_SOURCES) \
 	$(check_permissions_SOURCES) $(check_search_SOURCES) \
-	$(poppler_attachments_SOURCES) $(poppler_fonts_SOURCES) \
+	$(check_strings_SOURCES) $(poppler_attachments_SOURCES) \
+	$(poppler_fonts_SOURCES) $(poppler_texts_SOURCES) \
 	$(stress_poppler_dir_SOURCES) $(stress_poppler_qt4_SOURCES) \
 	$(test_password_qt4_SOURCES) $(test_poppler_qt4_SOURCES)
 DIST_SOURCES = $(am__check_actualtext_SOURCES_DIST) \
@@ -237,9 +250,11 @@ DIST_SOURCES = $(am__check_actualtext_SOURCES_DIST) \
 	$(am__check_password_SOURCES_DIST) \
 	$(am__check_permissions_SOURCES_DIST) \
 	$(am__check_search_SOURCES_DIST) \
+	$(am__check_strings_SOURCES_DIST) \
 	$(poppler_attachments_SOURCES) $(poppler_fonts_SOURCES) \
-	$(stress_poppler_dir_SOURCES) $(stress_poppler_qt4_SOURCES) \
-	$(test_password_qt4_SOURCES) $(test_poppler_qt4_SOURCES)
+	$(poppler_texts_SOURCES) $(stress_poppler_dir_SOURCES) \
+	$(stress_poppler_qt4_SOURCES) $(test_password_qt4_SOURCES) \
+	$(test_poppler_qt4_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -305,6 +320,14 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
+INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
+INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
+INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
+INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
+INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LCMS_CFLAGS = @LCMS_CFLAGS@
 LCMS_LIBS = @LCMS_LIBS@
 LD = @LD@
@@ -324,6 +347,7 @@ LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MOCQT4 = @MOCQT4@
 NM = @NM@
@@ -343,6 +367,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PC_REQUIRES = @PC_REQUIRES@
 PC_REQUIRES_PRIVATE = @PC_REQUIRES_PRIVATE@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POPPLER_DATADIR = @POPPLER_DATADIR@
 POPPLER_GLIB_CFLAGS = @POPPLER_GLIB_CFLAGS@
 POPPLER_GLIB_DISABLE_DEPRECATED = @POPPLER_GLIB_DISABLE_DEPRECATED@
@@ -378,6 +404,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -416,7 +443,6 @@ libqt3_CFLAGS = @libqt3_CFLAGS@
 libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -464,6 +490,10 @@ poppler_attachments_SOURCES = \
        poppler-attachments.cpp
 
 poppler_attachments_LDADD = $(LDADDS)
+poppler_texts_SOURCES = \
+       poppler-texts.cpp
+
+poppler_texts_LDADD = $(LDADDS)
 stress_poppler_qt4_SOURCES = \
        stress-poppler-qt4.cpp
 
@@ -496,6 +526,8 @@ stress_poppler_dir_LDADD = $(LDADDS)
 @BUILD_POPPLER_QT4_TRUE@check_password_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 @BUILD_POPPLER_QT4_TRUE@check_search_SOURCES = check_search.cpp
 @BUILD_POPPLER_QT4_TRUE@check_search_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
+@BUILD_POPPLER_QT4_TRUE@check_strings_SOURCES = check_strings.cpp
+@BUILD_POPPLER_QT4_TRUE@check_strings_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 all: all-am
 
 .SUFFIXES:
@@ -584,12 +616,18 @@ check_permissions$(EXEEXT): $(check_permissions_OBJECTS) $(check_permissions_DEP
 check_search$(EXEEXT): $(check_search_OBJECTS) $(check_search_DEPENDENCIES) 
 	@rm -f check_search$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(check_search_OBJECTS) $(check_search_LDADD) $(LIBS)
+check_strings$(EXEEXT): $(check_strings_OBJECTS) $(check_strings_DEPENDENCIES) 
+	@rm -f check_strings$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(check_strings_OBJECTS) $(check_strings_LDADD) $(LIBS)
 poppler-attachments$(EXEEXT): $(poppler_attachments_OBJECTS) $(poppler_attachments_DEPENDENCIES) 
 	@rm -f poppler-attachments$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(poppler_attachments_OBJECTS) $(poppler_attachments_LDADD) $(LIBS)
 poppler-fonts$(EXEEXT): $(poppler_fonts_OBJECTS) $(poppler_fonts_DEPENDENCIES) 
 	@rm -f poppler-fonts$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(poppler_fonts_OBJECTS) $(poppler_fonts_LDADD) $(LIBS)
+poppler-texts$(EXEEXT): $(poppler_texts_OBJECTS) $(poppler_texts_DEPENDENCIES) 
+	@rm -f poppler-texts$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(poppler_texts_OBJECTS) $(poppler_texts_LDADD) $(LIBS)
 stress-poppler-dir$(EXEEXT): $(stress_poppler_dir_OBJECTS) $(stress_poppler_dir_DEPENDENCIES) 
 	@rm -f stress-poppler-dir$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(stress_poppler_dir_OBJECTS) $(stress_poppler_dir_LDADD) $(LIBS)
@@ -621,8 +659,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_password.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_permissions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_search.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check_strings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/poppler-attachments.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/poppler-fonts.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/poppler-texts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stress-poppler-dir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stress-poppler-qt4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-password-qt4.Po@am__quote@
@@ -968,6 +1008,7 @@ clean-generic:
 @BUILD_POPPLER_QT4_TRUE@check_pagelayout.$(OBJEXT): check_pagelayout.moc
 @BUILD_POPPLER_QT4_TRUE@check_password.$(OBJEXT): check_password.moc
 @BUILD_POPPLER_QT4_TRUE@check_search.$(OBJEXT): check_search.moc
+@BUILD_POPPLER_QT4_TRUE@check_strings.$(OBJEXT): check_strings.moc
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

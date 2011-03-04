@@ -20,7 +20,7 @@
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
-// Copyright (C) 2008-2010 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008-2011 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
@@ -500,7 +500,6 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset) {
 }
 
 void CairoOutputDev::updateBlendMode(GfxState *state) {
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 9, 4)
   switch (state->getBlendMode()) {
   default:
   case gfxBlendNormal:
@@ -553,7 +552,6 @@ void CairoOutputDev::updateBlendMode(GfxState *state) {
     break;
   }
   LOG(printf ("blend mode: %d\n", (int)state->getBlendMode()));
-#endif /* CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 9, 4) */
 }
 
 void CairoOutputDev::updateFont(GfxState *state) {
@@ -604,15 +602,6 @@ void CairoOutputDev::updateFont(GfxState *state) {
   }
 
   cairo_set_font_matrix (cairo, &matrix);
-}
-
-void CairoOutputDev::updateRender(GfxState *state) {
-  int rm;
-  rm = state->getRender();
-  if (rm == 7 && haveCSPattern) {
-    haveCSPattern = gFalse;
-    restoreState(state);
-  }
 }
 
 void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
@@ -909,7 +898,7 @@ void CairoOutputDev::endString(GfxState *state)
     return;
   }
   
-  if (!(render & 1)) {
+  if (!(render & 1) && !haveCSPattern) {
     LOG (printf ("fill string\n"));
     cairo_set_source (cairo, fill_pattern);
     cairo_show_glyphs (cairo, glyphs, glyphCount);
@@ -930,7 +919,7 @@ void CairoOutputDev::endString(GfxState *state)
   }
 
   // clip
-  if (render & 4) {
+  if (haveCSPattern || (render & 4)) {
     LOG (printf ("clip string\n"));
     // append the glyph path to textClipPath.
 
@@ -1014,17 +1003,14 @@ void CairoOutputDev::type3D1(GfxState *state, double wx, double wy,
 }
 
 void CairoOutputDev::beginTextObject(GfxState *state) {
-  if (state->getFillColorSpace()->getMode() == csPattern) {
+  if (!(state->getRender() & 4) && state->getFillColorSpace()->getMode() == csPattern) {
     haveCSPattern = gTrue;
     saveState(state);
-    savedRender = state->getRender();
-    state->setRender(7); // Set clip to text path
   }
 }
 
 void CairoOutputDev::endTextObject(GfxState *state) {
   if (haveCSPattern) {
-    state->setRender(savedRender);
     haveCSPattern = gFalse;
     if (state->getFillColorSpace()->getMode() != csPattern) {
       if (textClipPath) {
@@ -1564,7 +1550,7 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
   unsigned char *dest;
   cairo_surface_t *image;
   cairo_pattern_t *pattern;
-  int x, y;
+  int x, y, i, bit;
   ImageStream *imgStr;
   Guchar *pix;
   cairo_matrix_t matrix;
@@ -1576,7 +1562,7 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
   imgStr = new ImageStream(str, width, 1, 1);
   imgStr->reset();
 
-  image = cairo_image_surface_create (CAIRO_FORMAT_A8, width, height);
+  image = cairo_image_surface_create (CAIRO_FORMAT_A1, width, height);
   if (cairo_surface_status (image))
     goto cleanup;
 
@@ -1588,12 +1574,23 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
   for (y = 0; y < height; y++) {
     pix = imgStr->getLine();
     dest = buffer + y * row_stride;
+    i = 0;
+    bit = 0;
     for (x = 0; x < width; x++) {
-
-      if (pix[x] ^ invert_bit)
-	*dest++ = 0;
-      else
-	*dest++ = 255;
+      if (bit == 0)
+	dest[i] = 0;
+      if (!(pix[x] ^ invert_bit)) {
+#ifdef WORDS_BIGENDIAN
+	dest[i] |= (1 << (7 - bit));
+#else
+	dest[i] |= (1 << bit);
+#endif
+      }
+      bit++;
+      if (bit > 7) {
+	bit = 0;
+	i++;
+      }
     }
   }
 
@@ -2286,6 +2283,36 @@ GBool CairoOutputDev::getStreamData (Stream *str, char **buffer, int *length)
   return gTrue;
 }
 
+void CairoOutputDev::setMimeData(Stream *str, cairo_surface_t *image)
+{
+  char *strBuffer;
+  int len;
+  Object obj;
+
+  if (!printing || !(str->getKind() == strDCT || str->getKind() == strJPX))
+    return;
+
+  // colorspace in stream dict may be different from colorspace in jpx
+  // data
+  if (str->getKind() == strJPX) {
+    GBool hasColorSpace = !str->getDict()->lookup("ColorSpace", &obj)->isNull();
+    obj.free();
+    if (hasColorSpace)
+      return;
+  }
+
+  if (getStreamData (str->getNextStream(), &strBuffer, &len)) {
+    cairo_status_t st;
+    st = cairo_surface_set_mime_data (image,
+				      str->getKind() == strDCT ?
+				      CAIRO_MIME_TYPE_JPEG : CAIRO_MIME_TYPE_JP2,
+				      (const unsigned char *)strBuffer, len,
+				      gfree, strBuffer);
+    if (st)
+      gfree (strBuffer);
+  }
+}
+
 void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
@@ -2399,23 +2426,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   cairo_surface_mark_dirty (image);
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 9, 6)
-  if (printing && (str->getKind() == strDCT || str->getKind() == strJPX)) {
-    char *strBuffer;
-    int len;
-
-    if (getStreamData (str->getNextStream(), &strBuffer, &len)) {
-      cairo_status_t st;
-      st = cairo_surface_set_mime_data (image,
-					str->getKind() == strDCT ?
-					CAIRO_MIME_TYPE_JPEG : CAIRO_MIME_TYPE_JP2,
-					(const unsigned char *)strBuffer, len,
-					gfree, strBuffer);
-      if (st)
-        gfree (strBuffer);
-    }
-  }
-#endif /* CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 9, 6) */
+  setMimeData(str, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);

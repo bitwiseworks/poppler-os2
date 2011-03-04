@@ -2,6 +2,8 @@
 #define __POPPLER_PRIVATE_H__
 
 #include <config.h>
+
+#ifndef __GI_SCANNER__
 #include <PDFDoc.h>
 #include <PSOutputDev.h>
 #include <Link.h>
@@ -14,9 +16,11 @@
 #include <Catalog.h>
 #include <OptionalContent.h>
 #include <CairoOutputDev.h>
+#endif
 
 struct _PopplerDocument
 {
+  /*< private >*/
   GObject parent_instance;
   PDFDoc *doc;
 
@@ -27,6 +31,7 @@ struct _PopplerDocument
 
 struct _PopplerPSFile
 {
+  /*< private >*/
   GObject parent_instance;
 
   PopplerDocument *document;
@@ -41,6 +46,7 @@ struct _PopplerPSFile
 
 struct _PopplerFontInfo
 {
+  /*< private >*/
   GObject parent_instance;
   PopplerDocument *document;
   FontInfoScanner *scanner;
@@ -48,6 +54,7 @@ struct _PopplerFontInfo
 
 struct _PopplerPage
 {
+  /*< private >*/
   GObject parent_instance;
   PopplerDocument *document;
   Page *page;
@@ -58,12 +65,20 @@ struct _PopplerPage
 
 struct _PopplerFormField
 {
+  /*< private >*/
   GObject parent_instance;
   PopplerDocument *document;
   FormWidget *widget;
 };
 
+struct _PopplerAnnot
+{
+  GObject  parent_instance;
+  Annot   *annot;
+};
+
 typedef struct _Layer {
+  /*< private >*/
   GList *kids;
   gchar *label;
   OptionalContentGroup *oc;
@@ -71,6 +86,7 @@ typedef struct _Layer {
 
 struct _PopplerLayer
 {
+  /*< private >*/
   GObject parent_instance;
   PopplerDocument *document;
   Layer *layer;

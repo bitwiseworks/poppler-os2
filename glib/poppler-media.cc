@@ -25,6 +25,12 @@
 #include "poppler-media.h"
 #include "poppler-private.h"
 
+/**
+ * SECTION: poppler-media
+ * @short_description: Media
+ * @title: PopplerMedia
+ */
+
 typedef struct _PopplerMediaClass PopplerMediaClass;
 
 struct _PopplerMedia
@@ -111,6 +117,8 @@ _poppler_media_new (MediaRendition *poppler_media)
 * a local relative or absolute path or a URI
 *
 * Return value: a filename, return value is owned by #PopplerMedia and should not be freed
+*
+* Since: 0.14
 */
 const gchar *
 poppler_media_get_filename (PopplerMedia *poppler_media)
@@ -131,6 +139,8 @@ poppler_media_get_filename (PopplerMedia *poppler_media)
  * poppler_media_get_file_name() function.
  *
  * Return value: %TRUE if media clip is embedded, %FALSE otherwise
+ *
+ * Since: 0.14
  */
 gboolean
 poppler_media_is_embedded (PopplerMedia *poppler_media)
@@ -147,6 +157,8 @@ poppler_media_is_embedded (PopplerMedia *poppler_media)
  * Returns the media clip mime-type
  *
  * Return value: the mime-type, return value is owned by #PopplerMedia and should not be freed
+ *
+ * Since: 0.14
  */
 const gchar *
 poppler_media_get_mime_type (PopplerMedia *poppler_media)
@@ -183,7 +195,7 @@ save_helper (const gchar  *buf,
  * poppler_media_save:
  * @poppler_media: a #PopplerMedia
  * @filename: name of file to save
- * @error: return location for error, or %NULL.
+ * @error: (allow-none): return location for error, or %NULL.
  *
  * Saves embedded stream of @poppler_media to a file indicated by @filename.
  * If @error is set, %FALSE will be returned.
@@ -191,7 +203,9 @@ save_helper (const gchar  *buf,
  * and whatever the save function generates.
  *
  * Return value: %TRUE, if the file successfully saved
- **/
+ *
+ * Since: 0.14
+ */
 gboolean
 poppler_media_save (PopplerMedia *poppler_media,
 		    const char   *filename,
@@ -241,9 +255,9 @@ poppler_media_save (PopplerMedia *poppler_media,
 /**
  * poppler_media_save_to_callback:
  * @poppler_media: a #PopplerMedia
- * @save_func: a function that is called to save each block of data that the save routine generates.
+ * @save_func: (scope call): a function that is called to save each block of data that the save routine generates.
  * @user_data: user data to pass to the save function.
- * @error: return location for error, or %NULL.
+ * @error: (allow-none): return location for error, or %NULL.
  *
  * Saves embedded stream of @poppler_media by feeding the produced data to @save_func. Can be used
  * when you want to store the media clip stream to something other than a file, such as
@@ -252,7 +266,9 @@ poppler_media_save (PopplerMedia *poppler_media,
  * whatever the save function generates.
  *
  * Return value: %TRUE, if the save successfully completed
- **/
+ *
+ * Since: 0.14
+ */
 gboolean
 poppler_media_save_to_callback (PopplerMedia        *poppler_media,
 				PopplerMediaSaveFunc save_func,

@@ -123,6 +123,9 @@
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine HAVE_ZLIB_H 1
 
+/* Define to 1 if you have a big endian machine */
+#cmakedefine WORDS_BIGENDIAN 1
+
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST ${ICONV_CONST}
 
@@ -170,9 +173,6 @@
 
 /* Defines if use cms */
 #cmakedefine USE_CMS 1
-
-/* Throw exceptions to deal with not enough memory and similar problems */
-#cmakedefine USE_EXCEPTIONS 1
 
 /* Use fixed point arithmetic in the Splash backend */
 #cmakedefine USE_FIXEDPOINT 1

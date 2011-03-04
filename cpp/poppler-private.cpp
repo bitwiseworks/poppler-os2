@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,11 +84,11 @@ ustring detail::unicode_GooString_to_ustring(GooString *str)
 
 ustring detail::unicode_to_ustring(const Unicode *u, int length)
 {
-    ustring str(length, 0);
-    ustring::iterator it = str.begin(), it_end = str.end();
+    ustring str(length * 2, 0);
+    ustring::iterator it = str.begin();
     const Unicode *uu = u;
-    for (; it != it_end; ++it) {
-        *it = ustring::value_type(*uu++);
+    for (int i = 0; i < length; ++i) {
+        *it++ = ustring::value_type(*uu++ & 0xffff);
     }
     return str;
 }

@@ -41,11 +41,11 @@ DIST_COMMON = $(poppler_include_HEADERS) $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/define-dir.m4 $(top_srcdir)/m4/gtk-doc.m4 \
-	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/libjpeg.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/qt.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/iconv.m4 $(top_srcdir)/m4/introspection.m4 \
+	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -84,7 +84,9 @@ am_libpoppler_cpp_la_OBJECTS = libpoppler_cpp_la-poppler-document.lo \
 	libpoppler_cpp_la-poppler-embedded-file.lo \
 	libpoppler_cpp_la-poppler-font.lo \
 	libpoppler_cpp_la-poppler-global.lo \
+	libpoppler_cpp_la-poppler-image.lo \
 	libpoppler_cpp_la-poppler-page.lo \
+	libpoppler_cpp_la-poppler-page-renderer.lo \
 	libpoppler_cpp_la-poppler-page-transition.lo \
 	libpoppler_cpp_la-poppler-private.lo \
 	libpoppler_cpp_la-poppler-rectangle.lo \
@@ -244,6 +246,14 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
+INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
+INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
+INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
+INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
+INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LCMS_CFLAGS = @LCMS_CFLAGS@
 LCMS_LIBS = @LCMS_LIBS@
 LD = @LD@
@@ -263,6 +273,7 @@ LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MOCQT4 = @MOCQT4@
 NM = @NM@
@@ -282,6 +293,8 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PC_REQUIRES = @PC_REQUIRES@
 PC_REQUIRES_PRIVATE = @PC_REQUIRES_PRIVATE@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POPPLER_DATADIR = @POPPLER_DATADIR@
 POPPLER_GLIB_CFLAGS = @POPPLER_GLIB_CFLAGS@
 POPPLER_GLIB_DISABLE_DEPRECATED = @POPPLER_GLIB_DISABLE_DEPRECATED@
@@ -317,6 +330,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -355,7 +369,6 @@ libqt3_CFLAGS = @libqt3_CFLAGS@
 libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -384,7 +397,9 @@ poppler_include_HEADERS = \
 	poppler-embedded-file.h			\
 	poppler-font.h				\
 	poppler-global.h			\
+	poppler-image.h			\
 	poppler-page.h				\
+	poppler-page-renderer.h			\
 	poppler-page-transition.h		\
 	poppler-rectangle.h			\
 	poppler-toc.h				\
@@ -398,8 +413,11 @@ libpoppler_cpp_la_SOURCES = \
 	poppler-embedded-file-private.h		\
 	poppler-font.cpp			\
 	poppler-global.cpp			\
+	poppler-image.cpp			\
+	poppler-image-private.h			\
 	poppler-page.cpp			\
 	poppler-page-private.h			\
+	poppler-page-renderer.cpp		\
 	poppler-page-transition.cpp		\
 	poppler-private.cpp			\
 	poppler-private.h			\
@@ -415,7 +433,7 @@ libpoppler_cpp_la_LIBADD = \
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(LIBICONV)
 
-libpoppler_cpp_la_LDFLAGS = -version-info 1:0:1 @create_shared_lib@ @auto_import_flags@
+libpoppler_cpp_la_LDFLAGS = -version-info 2:0:2 @create_shared_lib@ @auto_import_flags@
 all: all-recursive
 
 .SUFFIXES:
@@ -496,6 +514,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-embedded-file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-font.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-global.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-image.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-page-renderer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-page-transition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-page.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_cpp_la-poppler-private.Plo@am__quote@
@@ -559,6 +579,14 @@ libpoppler_cpp_la-poppler-global.lo: poppler-global.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_cpp_la-poppler-global.lo `test -f 'poppler-global.cpp' || echo '$(srcdir)/'`poppler-global.cpp
 
+libpoppler_cpp_la-poppler-image.lo: poppler-image.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_cpp_la-poppler-image.lo -MD -MP -MF $(DEPDIR)/libpoppler_cpp_la-poppler-image.Tpo -c -o libpoppler_cpp_la-poppler-image.lo `test -f 'poppler-image.cpp' || echo '$(srcdir)/'`poppler-image.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_cpp_la-poppler-image.Tpo $(DEPDIR)/libpoppler_cpp_la-poppler-image.Plo
+@am__fastdepCXX_FALSE@	$(AM_V_CXX) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='poppler-image.cpp' object='libpoppler_cpp_la-poppler-image.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_cpp_la-poppler-image.lo `test -f 'poppler-image.cpp' || echo '$(srcdir)/'`poppler-image.cpp
+
 libpoppler_cpp_la-poppler-page.lo: poppler-page.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_cpp_la-poppler-page.lo -MD -MP -MF $(DEPDIR)/libpoppler_cpp_la-poppler-page.Tpo -c -o libpoppler_cpp_la-poppler-page.lo `test -f 'poppler-page.cpp' || echo '$(srcdir)/'`poppler-page.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_cpp_la-poppler-page.Tpo $(DEPDIR)/libpoppler_cpp_la-poppler-page.Plo
@@ -566,6 +594,14 @@ libpoppler_cpp_la-poppler-page.lo: poppler-page.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='poppler-page.cpp' object='libpoppler_cpp_la-poppler-page.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_cpp_la-poppler-page.lo `test -f 'poppler-page.cpp' || echo '$(srcdir)/'`poppler-page.cpp
+
+libpoppler_cpp_la-poppler-page-renderer.lo: poppler-page-renderer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_cpp_la-poppler-page-renderer.lo -MD -MP -MF $(DEPDIR)/libpoppler_cpp_la-poppler-page-renderer.Tpo -c -o libpoppler_cpp_la-poppler-page-renderer.lo `test -f 'poppler-page-renderer.cpp' || echo '$(srcdir)/'`poppler-page-renderer.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_cpp_la-poppler-page-renderer.Tpo $(DEPDIR)/libpoppler_cpp_la-poppler-page-renderer.Plo
+@am__fastdepCXX_FALSE@	$(AM_V_CXX) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='poppler-page-renderer.cpp' object='libpoppler_cpp_la-poppler-page-renderer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_cpp_la-poppler-page-renderer.lo `test -f 'poppler-page-renderer.cpp' || echo '$(srcdir)/'`poppler-page-renderer.cpp
 
 libpoppler_cpp_la-poppler-page-transition.lo: poppler-page-transition.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libpoppler_cpp_la_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_cpp_la-poppler-page-transition.lo -MD -MP -MF $(DEPDIR)/libpoppler_cpp_la-poppler-page-transition.Tpo -c -o libpoppler_cpp_la-poppler-page-transition.lo `test -f 'poppler-page-transition.cpp' || echo '$(srcdir)/'`poppler-page-transition.cpp

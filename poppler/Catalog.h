@@ -33,6 +33,8 @@
 #pragma interface
 #endif
 
+#include <vector>
+
 class XRef;
 class Object;
 class Page;
@@ -148,13 +150,13 @@ public:
   GBool isOk() { return ok; }
 
   // Get number of pages.
-  int getNumPages() { return numPages; }
+  int getNumPages();
 
   // Get a page.
-  Page *getPage(int i) { return pages[i-1]; }
+  Page *getPage(int i);
 
   // Get the reference for a page object.
-  Ref *getPageRef(int i) { return &pageRefs[i-1]; }
+  Ref *getPageRef(int i);
 
   // Return base URI, or NULL if none.
   GooString *getBaseURI() { return baseURI; }
@@ -232,6 +234,11 @@ private:
   XRef *xref;			// the xref table for this PDF file
   Page **pages;			// array of pages
   Ref *pageRefs;		// object ID for each page
+  int lastCachedPage;
+  std::vector<Dict *> *pagesList;
+  std::vector<Ref> *pagesRefList;
+  std::vector<PageAttrs *> *attrsList;
+  std::vector<int> *kidsIdxList;
   Form *form;
   int numPages;			// number of pages
   int pagesSize;		// size of pages array
@@ -251,8 +258,7 @@ private:
   PageMode pageMode;		// page mode
   PageLayout pageLayout;	// page layout
 
-  int readPageTree(Dict *pages, PageAttrs *attrs, int start,
-		   char *alreadyRead);
+  GBool cachePageTree(int page); // Cache first <page> pages.
   Object *findDestInTree(Object *tree, GooString *name, Object *obj);
 
   Object *getNames();

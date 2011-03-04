@@ -18,8 +18,9 @@
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008, 2009, 2011 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
+// Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -106,7 +107,7 @@ public:
   // Does this device use functionShadedFill(), axialShadedFill(), and
   // radialShadedFill()?  If this returns false, these shaded fills
   // will be reduced to a series of other drawing operations.
-  virtual GBool useShadedFills() { return gTrue; }
+  virtual GBool useShadedFills(int type) { return type < 4; }
 
   // Does this device use FillColorStop()?
   virtual GBool useFillColorStop() { return gTrue; }
@@ -150,7 +151,6 @@ public:
 
   //----- update text state
   virtual void updateFont(GfxState *state);
-  virtual void updateRender(GfxState *state);
 
   //----- path painting
   virtual void stroke(GfxState *state);
@@ -275,6 +275,7 @@ protected:
   cairo_filter_t getFilterForSurface(cairo_surface_t *image,
 				     GBool interpolate);
   GBool getStreamData (Stream *str, char **buffer, int *length);
+  void setMimeData(Stream *str, cairo_surface_t *image);
   
   GfxRGB fill_color, stroke_color;
   cairo_pattern_t *fill_pattern, *stroke_pattern;
@@ -328,7 +329,6 @@ protected:
 
   GBool haveCSPattern;	// set if text has been drawn with a
                         //   clipping render mode because of pattern colorspace
-  int savedRender;	// use if pattern colorspace
 };
 
 //------------------------------------------------------------------------
@@ -362,7 +362,7 @@ public:
   // Does this device use functionShadedFill(), axialShadedFill(), and
   // radialShadedFill()?  If this returns false, these shaded fills
   // will be reduced to a series of other drawing operations.
-  virtual GBool useShadedFills() { return gTrue; }
+  virtual GBool useShadedFills(int type) { return type < 4; }
 
   // Does this device use FillColorStop()?
   virtual GBool useFillColorStop() { return gFalse; }

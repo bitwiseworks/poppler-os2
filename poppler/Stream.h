@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -34,7 +34,6 @@
 
 #include <stdio.h>
 #include "goo/gtypes.h"
-#include "goo/GooVector.h"
 #include "Object.h"
 
 class BaseStream;
@@ -106,6 +105,56 @@ public:
   // Close down the stream.
   virtual void close();
 
+  inline int doGetChars(int nChars, Guchar *buffer)
+  {
+    if (hasGetChars()) {
+      return getChars(nChars, buffer);
+    } else {
+      for (int i = 0; i < nChars; ++i) {
+        const int c = getChar();
+        if (likely(c != EOF)) buffer[i] = c;
+        else return i;
+      }
+      return nChars;
+    }
+  }
+
+  inline void fillGooString(GooString *s)
+  {
+    Guchar readBuf[4096];
+    int readChars;
+    reset();
+    while ((readChars = doGetChars(4096, readBuf)) != 0) {
+      s->append((const char *)readBuf, readChars);
+    }
+  }
+  
+  inline Guchar *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
+  {
+    int readChars;
+    Guchar *buf = (Guchar *)gmalloc(initialSize);
+    int size = initialSize;
+    *length = 0;
+    int charsToRead = initialSize;
+    bool continueReading = true;
+    reset();
+    while (continueReading && (readChars = doGetChars(charsToRead, &buf[*length])) != 0) {
+      *length += readChars;
+      if (readChars == charsToRead) {
+        if (lookChar() != EOF) {
+          size += sizeIncrement;
+          charsToRead = sizeIncrement;
+          buf = (Guchar *)grealloc(buf, size);
+        } else {
+          continueReading = false;
+        }
+      } else {
+        continueReading = false;
+      }
+    }
+    return buf;
+  }
+
   // Get next char from stream.
   virtual int getChar() = 0;
 
@@ -115,6 +164,7 @@ public:
   // Get next char from stream without using the predictor.
   // This is only used by StreamPredictor.
   virtual int getRawChar();
+  virtual void getRawChars(int nChars, int *buffer);
 
   // Get next char directly from stream source, without filtering it
   virtual int getUnfilteredChar () = 0;
@@ -166,6 +216,8 @@ public:
   Stream *addFilters(Object *dict);
 
 private:
+  virtual GBool hasGetChars() { return false; }
+  virtual int getChars(int nChars, Guchar *buffer);
 
   Stream *makeFilter(char *name, Stream *str, Object *params);
 
@@ -240,7 +292,7 @@ private:
 class BaseStream: public Stream {
 public:
 
-  BaseStream(Object *dictA);
+  BaseStream(Object *dictA, Guint lengthA);
   virtual ~BaseStream();
   virtual Stream *makeSubStream(Guint start, GBool limited,
 				Guint length, Object *dict) = 0;
@@ -250,10 +302,15 @@ public:
   virtual Stream *getUndecodedStream() { return this; }
   virtual Dict *getDict() { return dict.getDict(); }
   virtual GooString *getFileName() { return NULL; }
+  virtual Guint getLength() { return length; }
 
   // Get/set position of first byte of stream within the file.
   virtual Guint getStart() = 0;
   virtual void moveStart(int delta) = 0;
+
+protected:
+
+  Guint length;
 
 private:
 
@@ -347,10 +404,20 @@ public:
 
   int lookChar();
   int getChar();
+  int getChars(int nChars, Guchar *buffer);
 
 private:
 
   GBool getNextLine();
+
+  inline int doGetChar() {
+    if (predIdx >= rowBytes) {
+      if (!getNextLine()) {
+        return EOF;
+      }
+    }
+    return predLine[predIdx++];
+  }
 
   Stream *str;			// base stream
   int predictor;		// predictor
@@ -383,7 +450,7 @@ public:
   virtual void reset();
   virtual void close();
   virtual int getChar()
-    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
+    { return doGetChar(); }
   virtual int lookChar()
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
   virtual int getPos() { return bufPos + (bufPtr - buf); }
@@ -397,11 +464,24 @@ public:
 private:
 
   GBool fillBuf();
+  
+  inline int doGetChar()
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
+
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer)
+    {
+      for (int i = 0; i < nChars; ++i) {
+        const int c = doGetChar();
+        if (likely(c != EOF)) buffer[i] = c;
+        else return i;
+      }
+      return nChars;
+    }
 
   FILE *f;
   Guint start;
   GBool limited;
-  Guint length;
   char buf[fileStreamBufSize];
   char *bufPtr;
   char *bufEnd;
@@ -446,7 +526,6 @@ private:
   CachedFile *cc;
   Guint start;
   GBool limited;
-  Guint length;
   char buf[cachedStreamBufSize];
   char *bufPtr;
   char *bufEnd;
@@ -490,7 +569,6 @@ private:
 
   char *buf;
   Guint start;
-  Guint length;
   char *bufEnd;
   char *bufPtr;
   GBool needFree;
@@ -530,7 +608,6 @@ private:
 
   Stream *str;
   GBool limited;
-  Guint length;
 };
 
 //------------------------------------------------------------------------
@@ -596,10 +673,23 @@ public:
   virtual int getChar();
   virtual int lookChar();
   virtual int getRawChar();
+  virtual void getRawChars(int nChars, int *buffer);
   virtual GooString *getPSFilter(int psLevel, char *indent);
   virtual GBool isBinary(GBool last = gTrue);
 
 private:
+
+  inline int doGetRawChar() {
+    if (eof) {
+      return EOF;
+    }
+    if (seqIndex >= seqLength) {
+      if (!processNextCode()) {
+        return EOF;
+      }
+    }
+    return seqBuf[seqIndex++];
+  }
 
   StreamPredictor *pred;	// predictor
   int early;			// early parameter
@@ -855,11 +945,35 @@ public:
   virtual int getChar();
   virtual int lookChar();
   virtual int getRawChar();
+  virtual void getRawChars(int nChars, int *buffer);
   virtual GooString *getPSFilter(int psLevel, char *indent);
   virtual GBool isBinary(GBool last = gTrue);
   virtual void unfilteredReset ();
 
 private:
+  inline int doGetRawChar() {
+    int c;
+
+    while (remain == 0) {
+      if (endOfBlock && eof)
+        return EOF;
+      readSome();
+    }
+    c = buf[index];
+    index = (index + 1) & flateMask;
+    --remain;
+    return c;
+  }
+
+  inline int doGetChar() {
+    if (pred) {
+      return pred->getChar();
+    }
+    return doGetRawChar();
+  }
+
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
 
   StreamPredictor *pred;	// predictor
   Guchar buf[flateWindow];	// output data buffer
