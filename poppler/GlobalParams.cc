@@ -1152,20 +1152,14 @@ static FcPattern *buildFcPattern(GfxFont *font)
   
   p = FcPatternBuild(NULL,
                     FC_FAMILY, FcTypeString, family,
-#ifdef OS2
-                    FC_SLANT, FcTypeInteger, slant, 
-                    FC_WEIGHT, FcTypeInteger, weight,
-                    FC_WIDTH, FcTypeInteger, width, 
-                    FC_SPACING, FcTypeInteger, spacing,
-#endif
                     FC_LANG, FcTypeString, lang,
                     NULL);
-#ifndef OS2
+
   if (slant != -1) FcPatternAddInteger(p, FC_SLANT, slant);
   if (weight != -1) FcPatternAddInteger(p, FC_WEIGHT, weight);
   if (width != -1) FcPatternAddInteger(p, FC_WIDTH, width);
   if (spacing != -1) FcPatternAddInteger(p, FC_SPACING, spacing);
-#endif
+
 
   if (deleteFamily)
     delete[] family;
