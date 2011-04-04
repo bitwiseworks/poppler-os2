@@ -31,6 +31,12 @@
 //
 //========================================================================
 
+#ifdef __OS2__
+#define INCL_DOSPROCESS
+#define INCL_DOSMODULEMGR
+#define INCL_DOSERRORS
+#endif
+
 #include <config.h>
 
 #ifdef USE_GCC_PRAGMAS
@@ -191,6 +197,69 @@ get_poppler_datadir (void)
       *p = '\0';
   }
   strcat (retval, "\\share\\poppler");
+
+  beenhere = 1;
+
+  return retval;
+}
+
+#undef POPPLER_DATADIR
+#define POPPLER_DATADIR get_poppler_datadir ()
+
+#endif
+
+#ifdef __OS2__
+
+// we search within the exe first of the data-dir
+static char *
+get_poppler_datadir(void)
+{
+   char sExeName[_MAX_PATH];
+   char sDrive[_MAX_PATH], sDir[_MAX_DIR];
+   static char retval[_MAX_PATH];
+   static int beenhere = 0; 
+   APIRET rc = NO_ERROR;
+   PPIB ppib = NULL;
+   DIR *dir = NULL; 
+
+  if (beenhere)
+    return retval;
+
+  // we search for the infoblock to get the module name
+  rc = DosGetInfoBlocks(NULL, &ppib);
+  if (rc != NO_ERROR)
+  {
+	return POPPLER_DATADIR;
+  }
+
+  // with the module name we get the path (including the exe name)
+  rc = DosQueryModuleName(ppib->pib_hmte, sizeof(sExeName), sExeName);
+  if (rc != NO_ERROR)
+  {
+	return POPPLER_DATADIR;
+  }
+
+  // we split to the different values
+  _splitpath(sExeName, sDrive, sDir, NULL, NULL);
+  strncat(sDrive, sDir, strlen(sDir) -1);
+  strcpy(retval, sDrive);
+
+  // now we see if there is a datadir in the exe dir  
+  // allocate buffer large enough to append "/nameToUnicode"
+  size_t bufSize = strlen(retval) + strlen("/nameToUnicode") + 1;
+  char *dataPathBuffer = new char[bufSize];
+  
+  snprintf(dataPathBuffer, bufSize, "%s/nameToUnicode", retval);
+  dir = opendir(dataPathBuffer);
+  if (!dir)
+  {
+    retval[0] = '\0';
+    strncpy(retval, POPPLER_DATADIR, sizeof(retval) -1);
+  } 
+  if (dir)
+  closedir(dir);
+  
+  delete[] dataPathBuffer;
 
   beenhere = 1;
 
