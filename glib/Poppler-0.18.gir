@@ -7,43 +7,56 @@ and/or use gtk-doc annotations.  -->
             xmlns:c="http://www.gtk.org/introspection/c/1.0"
             xmlns:glib="http://www.gtk.org/introspection/glib/1.0">
   <include name="GLib" version="2.0"/>
-  <include name="GModule" version="2.0"/>
   <include name="GObject" version="2.0"/>
-  <include name="Gdk" version="2.0"/>
-  <include name="GdkPixbuf" version="2.0"/>
-  <include name="Gio" version="2.0"/>
-  <include name="Pango" version="1.0"/>
   <include name="cairo" version="1.0"/>
   <namespace name="Poppler"
-             version="0.16"
-             shared-library="libpoppler-glib.so.6"
+             version="0.18"
+             shared-library="libpoppler-glib.so.8"
              c:identifier-prefixes="Poppler"
              c:symbol-prefixes="poppler">
-    <constant name="ANNOT_TEXT_ICON_CIRCLE" value="Circle">
+    <constant name="ANNOT_TEXT_ICON_CIRCLE"
+              value="Circle"
+              c:type="POPPLER_ANNOT_TEXT_ICON_CIRCLE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_COMMENT" value="Comment">
+    <constant name="ANNOT_TEXT_ICON_COMMENT"
+              value="Comment"
+              c:type="POPPLER_ANNOT_TEXT_ICON_COMMENT">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_CROSS" value="Cross">
+    <constant name="ANNOT_TEXT_ICON_CROSS"
+              value="Cross"
+              c:type="POPPLER_ANNOT_TEXT_ICON_CROSS">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_HELP" value="Help">
+    <constant name="ANNOT_TEXT_ICON_HELP"
+              value="Help"
+              c:type="POPPLER_ANNOT_TEXT_ICON_HELP">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_INSERT" value="Insert">
+    <constant name="ANNOT_TEXT_ICON_INSERT"
+              value="Insert"
+              c:type="POPPLER_ANNOT_TEXT_ICON_INSERT">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_KEY" value="Key">
+    <constant name="ANNOT_TEXT_ICON_KEY"
+              value="Key"
+              c:type="POPPLER_ANNOT_TEXT_ICON_KEY">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_NEW_PARAGRAPH" value="NewParagraph">
+    <constant name="ANNOT_TEXT_ICON_NEW_PARAGRAPH"
+              value="NewParagraph"
+              c:type="POPPLER_ANNOT_TEXT_ICON_NEW_PARAGRAPH">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_NOTE" value="Note">
+    <constant name="ANNOT_TEXT_ICON_NOTE"
+              value="Note"
+              c:type="POPPLER_ANNOT_TEXT_ICON_NOTE">
       <type name="utf8" c:type="gchar*"/>
     </constant>
-    <constant name="ANNOT_TEXT_ICON_PARAGRAPH" value="Paragraph">
+    <constant name="ANNOT_TEXT_ICON_PARAGRAPH"
+              value="Paragraph"
+              c:type="POPPLER_ANNOT_TEXT_ICON_PARAGRAPH">
       <type name="utf8" c:type="gchar*"/>
     </constant>
     <union name="Action"
@@ -81,6 +94,9 @@ and/or use gtk-doc annotations.  -->
       </field>
       <field name="ocg_state" writable="1">
         <type name="ActionOCGState" c:type="PopplerActionOCGState"/>
+      </field>
+      <field name="javascript" writable="1">
+        <type name="ActionJavascript" c:type="PopplerActionJavascript"/>
       </field>
       <method name="copy" c:identifier="poppler_action_copy">
         <doc xml:whitespace="preserve">Copies @action, creating an identical #PopplerAction.</doc>
@@ -127,6 +143,17 @@ and/or use gtk-doc annotations.  -->
       </field>
       <field name="dest" writable="1">
         <type name="Dest" c:type="PopplerDest*"/>
+      </field>
+    </record>
+    <record name="ActionJavascript" c:type="PopplerActionJavascript">
+      <field name="type" writable="1">
+        <type name="ActionType" c:type="PopplerActionType"/>
+      </field>
+      <field name="title" writable="1">
+        <type name="utf8" c:type="gchar*"/>
+      </field>
+      <field name="script" writable="1">
+        <type name="utf8" c:type="gchar*"/>
       </field>
     </record>
     <record name="ActionLaunch" c:type="PopplerActionLaunch">
@@ -294,6 +321,10 @@ and/or use gtk-doc annotations.  -->
               value="9"
               c:identifier="POPPLER_ACTION_OCG_STATE"
               glib:nick="ocg-state"/>
+      <member name="javascript"
+              value="10"
+              c:identifier="POPPLER_ACTION_JAVASCRIPT"
+              glib:nick="javascript"/>
     </enumeration>
     <record name="ActionUri" c:type="PopplerActionUri">
       <field name="type" writable="1">
@@ -321,7 +352,9 @@ and/or use gtk-doc annotations.  -->
         </return-value>
       </method>
       <method name="get_color" c:identifier="poppler_annot_get_color">
-        <doc xml:whitespace="preserve">Retrieves the color of @poppler_annot.</doc>
+        <doc xml:whitespace="preserve">Retrieves the color of @poppler_annot.
+
+@poppler_annot, or %NULL. It must be freed with g_free() when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated #PopplerColor with the color values of</doc>
           <type name="Color" c:type="PopplerColor*"/>
@@ -329,6 +362,7 @@ and/or use gtk-doc annotations.  -->
       </method>
       <method name="get_contents" c:identifier="poppler_annot_get_contents">
         <doc xml:whitespace="preserve">Retrieves the contents of @poppler_annot.
+
 must be freed with g_free() when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string with the contents of @poppler_annot. It</doc>
@@ -336,14 +370,19 @@ must be freed with g_free() when done.</doc>
         </return-value>
       </method>
       <method name="get_flags" c:identifier="poppler_annot_get_flags">
+        <doc xml:whitespace="preserve">Retrieves the flag field specifying various characteristics of the
+@poppler_annot.</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the flag field of @poppler_annot.</doc>
           <type name="AnnotFlag" c:type="PopplerAnnotFlag"/>
         </return-value>
       </method>
       <method name="get_modified" c:identifier="poppler_annot_get_modified">
         <doc xml:whitespace="preserve">Retrieves the last modification data of @poppler_annot. The returned
 string will be either a PDF format date or a text string.
-See also #poppler_date_parse()</doc>
+See also #poppler_date_parse()
+
+@poppler_annot. It must be freed with g_free() when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string with the last modification data of</doc>
           <type name="utf8" c:type="gchar*"/>
@@ -351,6 +390,7 @@ See also #poppler_date_parse()</doc>
       </method>
       <method name="get_name" c:identifier="poppler_annot_get_name">
         <doc xml:whitespace="preserve">Retrieves the name of @poppler_annot.
+
 be freed with g_free() when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string with the name of @poppler_annot. It must</doc>
@@ -426,6 +466,7 @@ replacing the current contents.</doc>
       </field>
       <constructor name="new" c:identifier="poppler_annot_callout_line_new">
         <doc xml:whitespace="preserve">Creates a new empty #PopplerAnnotCalloutLine.
+
 It must be freed when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated #PopplerAnnotCalloutLine, NULL in other case.</doc>
@@ -433,7 +474,9 @@ It must be freed when done.</doc>
         </return-value>
       </constructor>
       <method name="copy" c:identifier="poppler_annot_callout_line_copy">
-        <doc xml:whitespace="preserve">It does copy @callout to a new #PopplerAnnotCalloutLine.</doc>
+        <doc xml:whitespace="preserve">It does copy @callout to a new #PopplerAnnotCalloutLine.
+
+@callout, NULL in other case. It must be freed when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated #PopplerAnnotCalloutLine as exact copy of</doc>
           <type name="AnnotCalloutLine" c:type="PopplerAnnotCalloutLine*"/>
@@ -480,6 +523,7 @@ The #PopplerAttachment must be unrefed with g_object_unref by the caller.</doc>
               c:identifier="poppler_annot_file_attachment_get_name"
               version="0.14">
         <doc xml:whitespace="preserve">Retrieves the name of @poppler_annot.
+
 be freed with g_free() when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string with the name of @poppler_annot. It must</doc>
@@ -546,6 +590,7 @@ be freed with g_free() when done.</doc>
               c:identifier="poppler_annot_free_text_get_callout_line">
         <doc xml:whitespace="preserve">Retrieves a #PopplerCalloutLine of four or six numbers specifying a callout
 line attached to the @poppler_annot.
+
 line, NULL in other case. It must be freed with g_free() when
 done.</doc>
         <return-value transfer-ownership="full">
@@ -620,10 +665,9 @@ of @annot on the page</doc>
            parent="Annot"
            glib:type-name="PopplerAnnotMarkup"
            glib:get-type="poppler_annot_markup_get_type">
-      <method name="get_date"
-              c:identifier="poppler_annot_markup_get_date"
-              introspectable="0">
+      <method name="get_date" c:identifier="poppler_annot_markup_get_date">
         <doc xml:whitespace="preserve">Returns the date and time when the annotation was created
+
 when the annotation was created, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a #GDate representing the date and time</doc>
@@ -647,6 +691,7 @@ when the annotation was created, or %NULL</doc>
       <method name="get_opacity"
               c:identifier="poppler_annot_markup_get_opacity">
         <doc xml:whitespace="preserve">Retrieves the opacity value of @poppler_annot.
+
 between 0 (transparent) and 1 (opaque)</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the opacity value of @poppler_annot,</doc>
@@ -656,6 +701,7 @@ between 0 (transparent) and 1 (opaque)</doc>
       <method name="get_popup_is_open"
               c:identifier="poppler_annot_markup_get_popup_is_open">
         <doc xml:whitespace="preserve">Retrieves the state of the popup window related to @poppler_annot.
+
 other case.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the state of @poppler_annot. %TRUE if it's open, %FALSE in</doc>
@@ -785,6 +831,7 @@ Popup window shall be displayed by viewers at @popup_rect on the page.</doc>
               c:identifier="poppler_annot_movie_get_movie"
               version="0.14">
         <doc xml:whitespace="preserve">Retrieves the movie object (PopplerMovie) stored in the @poppler_annot.
+
 object is owned by #PopplerAnnotMovie and should not be freed</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the movie object stored in the @poppler_annot. The returned</doc>
@@ -811,6 +858,7 @@ object is owned by #PopplerAnnotMovie and should not be freed</doc>
               c:identifier="poppler_annot_screen_get_action"
               version="0.14">
         <doc xml:whitespace="preserve">Retrieves the action (#PopplerAction) that shall be performed when @poppler_annot is activated
+
 object is owned by @poppler_annot and should not be freed</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the action to perform. The returned</doc>
@@ -854,6 +902,7 @@ poppler_page_add_annot()</doc>
       </method>
       <method name="get_is_open" c:identifier="poppler_annot_text_get_is_open">
         <doc xml:whitespace="preserve">Retrieves the state of @poppler_annot.
+
 other case.</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the state of @poppler_annot. %TRUE if it's open, %FALSE in</doc>
@@ -1130,7 +1179,7 @@ whatever the save function generates.</doc>
         <type name="utf8" c:type="gchar*"/>
       </field>
       <field name="size">
-        <type name="gulong" c:type="gsize"/>
+        <type name="gsize" c:type="gsize"/>
       </field>
       <field name="mtime">
         <type name="GLib.Time" c:type="GTime"/>
@@ -1149,6 +1198,7 @@ whatever the save function generates.</doc>
 poppler_attachment_save_to_callback().  It is called once for each block of
 bytes that is "written" by poppler_attachment_save_to_callback().  If
 successful it should return %TRUE.  If an error occurs it should set
+@error and return %FALSE, in which case poppler_attachment_save_to_callback()
 will fail with the same error.</doc>
       <return-value transfer-ownership="none">
         <type name="gboolean" c:type="gboolean"/>
@@ -1160,7 +1210,7 @@ will fail with the same error.</doc>
         </parameter>
         <parameter name="count" transfer-ownership="none">
           <doc xml:whitespace="preserve">number of bytes in @buf.</doc>
-          <type name="gulong" c:type="gsize"/>
+          <type name="gsize" c:type="gsize"/>
         </parameter>
         <parameter name="data" transfer-ownership="none">
           <doc xml:whitespace="preserve">user data passed to poppler_attachment_save_to_callback()</doc>
@@ -1375,6 +1425,8 @@ domains.</doc>
       </constructor>
       <method name="find_dest" c:identifier="poppler_document_find_dest">
         <doc xml:whitespace="preserve">Finds named destination @link_name in @document
+
+@link_name is not a destination. Returned value must
 be freed with #poppler_dest_free</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">The #PopplerDest destination or %NULL if</doc>
@@ -1403,6 +1455,7 @@ g_list_free().</doc>
               c:identifier="poppler_document_get_author"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the author of the document
+
 of @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the author</doc>
@@ -1424,6 +1477,7 @@ of @document, or %NULL</doc>
         <doc xml:whitespace="preserve">Returns the creator of the document. If the document was converted
 from another format, the creator is the name of the product
 that created the original document from which it was converted.
+
 of @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the creator</doc>
@@ -1450,9 +1504,11 @@ g_object_unref()</doc>
               c:identifier="poppler_document_get_id"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the PDF file identifier represented as two byte string arrays of size 32.
+@permanent_id is the permanent identifier that is built based on the file
 contents at the time it was originally created, so that this identifer
 never changes. @update_id is the update identifier that is built based on
 the file contents at the time it was last updated.
+
 Note that returned strings are not null-terminated, they have a fixed
 size of 32 bytes.</doc>
         <return-value transfer-ownership="none">
@@ -1482,6 +1538,7 @@ size of 32 bytes.</doc>
               c:identifier="poppler_document_get_keywords"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the keywords associated to the document
+
 to @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing keywords associated</doc>
@@ -1492,6 +1549,7 @@ to @document, or %NULL</doc>
               c:identifier="poppler_document_get_metadata"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the XML metadata string of the document
+
 metadata, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the XML</doc>
@@ -1505,6 +1563,16 @@ metadata, or %NULL</doc>
         <return-value transfer-ownership="none">
           <doc xml:whitespace="preserve">the date the document was most recently modified, or -1</doc>
           <type name="glong" c:type="time_t"/>
+        </return-value>
+      </method>
+      <method name="get_n_attachments"
+              c:identifier="poppler_document_get_n_attachments"
+              version="0.18">
+        <doc xml:whitespace="preserve">Returns the number of attachments in a loaded document.
+See also poppler_document_get_attachments()</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">Number of attachments</doc>
+          <type name="guint" c:type="guint"/>
         </return-value>
       </method>
       <method name="get_n_pages" c:identifier="poppler_document_get_n_pages">
@@ -1533,6 +1601,7 @@ caller.</doc>
         <doc xml:whitespace="preserve">Returns the #PopplerPage reference by @label.  This object is owned by the
 caller.  @label is a human-readable string representation of the page number,
 and can be document specific.  Typically, it is a value such as "iii" or "3".
+
 By default, "1" refers to the first page.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">The #PopplerPage referenced by @label</doc>
@@ -1594,6 +1663,7 @@ be initially displayed when opened.</doc>
               c:identifier="poppler_document_get_pdf_version_string"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the PDF version of @document as a string (e.g. PDF-1.6)
+
 of @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the PDF version</doc>
@@ -1615,6 +1685,7 @@ of @document, or %NULL</doc>
         <doc xml:whitespace="preserve">Returns the producer of the document. If the document was converted
 from another format, the producer is the name of the product
 that converted it to PDF
+
 of @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the producer</doc>
@@ -1625,6 +1696,7 @@ of @document, or %NULL</doc>
               c:identifier="poppler_document_get_subject"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the subject of the document
+
 of @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the subject</doc>
@@ -1635,6 +1707,7 @@ of @document, or %NULL</doc>
               c:identifier="poppler_document_get_title"
               version="0.16">
         <doc xml:whitespace="preserve">Returns the document's title
+
 of @document, or %NULL</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the title</doc>
@@ -1767,7 +1840,7 @@ include those in the #G_FILE_ERROR domain.</doc>
                  glib:type-name="PopplerError"
                  glib:get-type="poppler_error_get_type"
                  c:type="PopplerError"
-                 glib:error-quark="poppler_error_quark">
+                 glib:error-domain="poppler-quark">
       <doc xml:whitespace="preserve">Error codes returned by #PopplerDocument</doc>
       <member name="invalid"
               value="0"
@@ -1789,6 +1862,11 @@ include those in the #G_FILE_ERROR domain.</doc>
               value="4"
               c:identifier="POPPLER_ERROR_DAMAGED"
               glib:nick="damaged"/>
+      <function name="quark" c:identifier="poppler_error_quark">
+        <return-value transfer-ownership="none">
+          <type name="GLib.Quark" c:type="GQuark"/>
+        </return-value>
+      </function>
     </enumeration>
     <class name="FontInfo"
            c:symbol-prefix="font_info"
@@ -1816,8 +1894,11 @@ include those in the #G_FILE_ERROR domain.</doc>
       </method>
       <method name="scan" c:identifier="poppler_font_info_scan">
         <doc xml:whitespace="preserve">Scans the document associated with @font_info for fonts. At most
+@n_pages will be scanned starting from the current iterator. @iter will
 point to the first font scanned.
+
 Here is a simple example of code to scan fonts in a document
+
 &lt;informalexample&gt;&lt;programlisting&gt;
 font_info = poppler_font_info_new (document);
 while (poppler_font_info_scan (font_info, 20, &amp;fonts_iter)) {
@@ -1825,6 +1906,7 @@ if (!fonts_iter)
 continue; /&lt;!-- --&gt;* No fonts found in these 20 pages *&lt;!-- --&gt;/
 do {
 /&lt;!-- --&gt;* Do something with font iter *&lt;!-- --&gt;/
+g_print ("Font Name: %s\n", poppler_fonts_iter_get_name (fonts_iter));
 } while (poppler_fonts_iter_next (fonts_iter));
 poppler_fonts_iter_free (fonts_iter);
 }
@@ -2012,23 +2094,31 @@ the font is embedded</doc>
            glib:get-type="poppler_form_field_get_type">
       <method name="button_get_button_type"
               c:identifier="poppler_form_field_button_get_button_type">
+        <doc xml:whitespace="preserve">Gets the button type of @field</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">#PopplerFormButtonType of @field</doc>
           <type name="FormButtonType" c:type="PopplerFormButtonType"/>
         </return-value>
       </method>
       <method name="button_get_state"
               c:identifier="poppler_form_field_button_get_state">
+        <doc xml:whitespace="preserve">Queries a #PopplerFormField and returns its current state. Returns %TRUE if
+@field is pressed in and %FALSE if it is raised.</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">current state of @field</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
       <method name="button_set_state"
               c:identifier="poppler_form_field_button_set_state">
+        <doc xml:whitespace="preserve">Sets the status of @field. Set to %TRUE if you want the #PopplerFormField
+to be 'pressed in', and %FALSE to raise it.</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
         <parameters>
           <parameter name="state" transfer-ownership="none">
+            <doc xml:whitespace="preserve">%TRUE or %FALSE</doc>
             <type name="gboolean" c:type="gboolean"/>
           </parameter>
         </parameters>
@@ -2161,6 +2251,18 @@ the font is embedded</doc>
           <type name="none" c:type="void"/>
         </return-value>
       </method>
+      <method name="get_action"
+              c:identifier="poppler_form_field_get_action"
+              version="0.18">
+        <doc xml:whitespace="preserve">Retrieves the action (#PopplerAction) that shall be
+performed when @field is activated, or %NULL
+
+object is owned by @field and should not be freed</doc>
+        <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the action to perform. The returned</doc>
+          <type name="Action" c:type="PopplerAction*"/>
+        </return-value>
+      </method>
       <method name="get_field_type"
               c:identifier="poppler_form_field_get_field_type">
         <doc xml:whitespace="preserve">Gets the type of @field</doc>
@@ -2171,7 +2273,9 @@ the font is embedded</doc>
       </method>
       <method name="get_font_size"
               c:identifier="poppler_form_field_get_font_size">
+        <doc xml:whitespace="preserve">Gets the font size of @field</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the font size of @field</doc>
           <type name="gdouble" c:type="gdouble"/>
         </return-value>
       </method>
@@ -2213,7 +2317,9 @@ the partial field names of the field and all of its ancestors.</doc>
       </method>
       <method name="is_read_only"
               c:identifier="poppler_form_field_is_read_only">
+        <doc xml:whitespace="preserve">Checks whether @field is read only</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if @field is read only</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
@@ -2403,12 +2509,15 @@ of an image on the page</doc>
       <constructor name="new" c:identifier="poppler_index_iter_new">
         <doc xml:whitespace="preserve">Returns the root #PopplerIndexIter for @document, or %NULL.  This must be
 freed with poppler_index_iter_free().
+
 Certain documents have an index associated with them.  This index can be used
 to help the user navigate the document, and is similar to a table of
 contents.  Each node in the index will contain a #PopplerAction that can be
 displayed to the user &amp;mdash; typically a #POPPLER_ACTION_GOTO_DEST or a
 #POPPLER_ACTION_URI&lt;!-- --&gt;.
+
 Here is a simple example of some code that walks the full index:
+
 &lt;informalexample&gt;&lt;programlisting&gt;
 static void
 walk_index (PopplerIndexIter *iter)
@@ -2496,32 +2605,54 @@ poppler_index_iter_new() for more information.</doc>
            glib:type-name="PopplerLayer"
            glib:get-type="poppler_layer_get_type">
       <method name="get_radio_button_group_id"
-              c:identifier="poppler_layer_get_radio_button_group_id">
+              c:identifier="poppler_layer_get_radio_button_group_id"
+              version="0.12">
+        <doc xml:whitespace="preserve">Returns the numeric ID the radio button group associated with @layer.
+
+or 0 if the layer is not associated to any radio button group</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">the ID of the radio button group associated with @layer,</doc>
           <type name="gint" c:type="gint"/>
         </return-value>
       </method>
-      <method name="get_title" c:identifier="poppler_layer_get_title">
+      <method name="get_title"
+              c:identifier="poppler_layer_get_title"
+              version="0.12">
+        <doc xml:whitespace="preserve">Returns the name of the layer suitable for
+presentation as a title in a viewer's GUI</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">a string containing the title of the layer</doc>
           <type name="utf8" c:type="gchar*"/>
         </return-value>
       </method>
-      <method name="hide" c:identifier="poppler_layer_hide">
+      <method name="hide" c:identifier="poppler_layer_hide" version="0.12">
+        <doc xml:whitespace="preserve">Hides @layer. If @layer is the parent of other nested layers,
+such layers will be also hidden and will be blocked until @layer
+is shown again</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
       </method>
-      <method name="is_parent" c:identifier="poppler_layer_is_parent">
+      <method name="is_parent"
+              c:identifier="poppler_layer_is_parent"
+              version="0.12">
+        <doc xml:whitespace="preserve">Returns whether @layer is parent of other nested layers.</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if @layer is a parent layer</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
-      <method name="is_visible" c:identifier="poppler_layer_is_visible">
+      <method name="is_visible"
+              c:identifier="poppler_layer_is_visible"
+              version="0.12">
+        <doc xml:whitespace="preserve">Returns whether @layer is visible</doc>
         <return-value transfer-ownership="none">
+          <doc xml:whitespace="preserve">%TRUE if @layer is visible</doc>
           <type name="gboolean" c:type="gboolean"/>
         </return-value>
       </method>
-      <method name="show" c:identifier="poppler_layer_show">
+      <method name="show" c:identifier="poppler_layer_show" version="0.12">
+        <doc xml:whitespace="preserve">Shows @layer</doc>
         <return-value transfer-ownership="none">
           <type name="none" c:type="void"/>
         </return-value>
@@ -2548,6 +2679,8 @@ poppler_index_iter_new() for more information.</doc>
       <method name="copy" c:identifier="poppler_layers_iter_copy">
         <doc xml:whitespace="preserve">Creates a new #PopplerLayersIter as a copy of @iter.  This must be freed with
 poppler_layers_iter_free().
+
+
 Since 0.12</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new #PopplerLayersIter</doc>
@@ -2588,6 +2721,7 @@ poppler_layer_free().</doc>
               version="0.12">
         <doc xml:whitespace="preserve">Returns the title associated with @iter.  It must be freed with
 g_free().
+
 The returned string should be freed with g_free() when no longer needed.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new string containing the @iter's title or %NULL if @iter doesn't have a title.</doc>
@@ -2726,6 +2860,7 @@ whatever the save function generates.</doc>
 poppler_media_save_to_callback().  It is called once for each block of
 bytes that is "written" by poppler_media_save_to_callback().  If
 successful it should return %TRUE.  If an error occurs it should set
+@error and return %FALSE, in which case poppler_media_save_to_callback()
 will fail with the same error.</doc>
       <return-value transfer-ownership="none">
         <doc xml:whitespace="preserve">%TRUE if successful, %FALSE (with @error set) if failed.</doc>
@@ -2738,7 +2873,7 @@ will fail with the same error.</doc>
         </parameter>
         <parameter name="count" transfer-ownership="none">
           <doc xml:whitespace="preserve">number of bytes in @buf.</doc>
-          <type name="gulong" c:type="gsize"/>
+          <type name="gsize" c:type="gsize"/>
         </parameter>
         <parameter name="data" transfer-ownership="none">
           <doc xml:whitespace="preserve">user data passed to poppler_media_save_to_callback()</doc>
@@ -2875,7 +3010,8 @@ generated PostScript.</doc>
            glib:type-name="PopplerPage"
            glib:get-type="poppler_page_get_type">
       <function name="free_annot_mapping"
-                c:identifier="poppler_page_free_annot_mapping">
+                c:identifier="poppler_page_free_annot_mapping"
+                introspectable="0">
         <doc xml:whitespace="preserve">Frees a list of #PopplerAnnotMapping&lt;!-- --&gt;s allocated by
 poppler_page_get_annot_mapping().  It also frees the #PopplerAnnot&lt;!-- --&gt;s
 that each mapping contains, so if you want to keep them around, you need to
@@ -2893,7 +3029,8 @@ copy them with poppler_annot_copy().</doc>
         </parameters>
       </function>
       <function name="free_form_field_mapping"
-                c:identifier="poppler_page_free_form_field_mapping">
+                c:identifier="poppler_page_free_form_field_mapping"
+                introspectable="0">
         <doc xml:whitespace="preserve">Frees a list of #PopplerFormFieldMapping&lt;!-- --&gt;s allocated by
 poppler_page_get_form_field_mapping().</doc>
         <return-value transfer-ownership="none">
@@ -2909,7 +3046,8 @@ poppler_page_get_form_field_mapping().</doc>
         </parameters>
       </function>
       <function name="free_image_mapping"
-                c:identifier="poppler_page_free_image_mapping">
+                c:identifier="poppler_page_free_image_mapping"
+                introspectable="0">
         <doc xml:whitespace="preserve">Frees a list of #PopplerImageMapping&lt;!-- --&gt;s allocated by
 poppler_page_get_image_mapping().</doc>
         <return-value transfer-ownership="none">
@@ -2925,7 +3063,8 @@ poppler_page_get_image_mapping().</doc>
         </parameters>
       </function>
       <function name="free_link_mapping"
-                c:identifier="poppler_page_free_link_mapping">
+                c:identifier="poppler_page_free_link_mapping"
+                introspectable="0">
         <doc xml:whitespace="preserve">Frees a list of #PopplerLinkMapping&lt;!-- --&gt;s allocated by
 poppler_page_get_link_mapping().  It also frees the #PopplerAction&lt;!-- --&gt;s
 that each mapping contains, so if you want to keep them around, you need to
@@ -2942,8 +3081,23 @@ copy them with poppler_action_copy().</doc>
           </parameter>
         </parameters>
       </function>
+      <function name="free_text_attributes"
+                c:identifier="poppler_page_free_text_attributes"
+                introspectable="0">
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+        <parameters>
+          <parameter name="list" transfer-ownership="none">
+            <type name="GLib.List" c:type="GList*">
+              <type name="gpointer" c:type="gpointer"/>
+            </type>
+          </parameter>
+        </parameters>
+      </function>
       <function name="selection_region_free"
                 c:identifier="poppler_page_selection_region_free"
+                introspectable="0"
                 deprecated="0.16">
         <doc xml:whitespace="preserve">Frees @region</doc>
         <return-value transfer-ownership="none">
@@ -2991,6 +3145,7 @@ The coordinates are in PDF points.</doc>
       <method name="get_annot_mapping"
               c:identifier="poppler_page_get_annot_mapping">
         <doc xml:whitespace="preserve">Returns a list of #PopplerAnnotMapping items that map from a location on
+@page to a #PopplerAnnot.  This list must be freed with
 poppler_page_free_annot_mapping() when done.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">A #GList of #PopplerAnnotMapping</doc>
@@ -3070,6 +3225,7 @@ with poppler_page_free_image_mapping() when done.</doc>
               version="0.16">
         <doc xml:whitespace="preserve">Returns the label of @page. Note that page labels
 and page indices might not coincide.
+
 or %NULL if @page doesn't have a label</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a new allocated string containing the label of @page,</doc>
@@ -3118,6 +3274,7 @@ The returned region must be freed with cairo_region_destroy()</doc>
               c:identifier="poppler_page_get_selected_text"
               version="0.16">
         <doc xml:whitespace="preserve">Retrieves the contents of the specified @selection as text.
+
 as a string</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a pointer to the contents of the @selection</doc>
@@ -3192,10 +3349,27 @@ poppler_page_selection_region_free().</doc>
               c:identifier="poppler_page_get_text"
               version="0.16">
         <doc xml:whitespace="preserve">Retrieves the text of @page.
+
 as a string</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">a pointer to the text of the @page</doc>
           <type name="utf8" c:type="char*"/>
+        </return-value>
+      </method>
+      <method name="get_text_attributes"
+              c:identifier="poppler_page_get_text_attributes"
+              version="0.18">
+        <doc xml:whitespace="preserve">Obtains the attributes of the text as a GList of #PopplerTextAttributes.
+This list must be freed with poppler_page_free_text_attributes() when done.
+
+Each list element is a #PopplerTextAttributes struct where start_index and
+end_index indicates the range of text (as returned by poppler_page_get_text())
+to which text attributes apply.</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">A #GList of #PopplerTextAttributes</doc>
+          <type name="GLib.List" c:type="GList*">
+            <type name="TextAttributes"/>
+          </type>
         </return-value>
       </method>
       <method name="get_text_layout"
@@ -3203,6 +3377,7 @@ as a string</doc>
               version="0.16">
         <doc xml:whitespace="preserve">Obtains the layout of the text as a list of #PopplerRectangle
 This array must be freed with g_free () when done.
+
 The position in the array represents an offset in the text returned by
 poppler_page_get_text()</doc>
         <return-value transfer-ownership="none">
@@ -3215,8 +3390,8 @@ poppler_page_get_text()</doc>
                      caller-allocates="0"
                      transfer-ownership="container">
             <doc xml:whitespace="preserve">return location for an array of #PopplerRectangle</doc>
-            <array length="1" c:type="PopplerRectangle**">
-              <type name="Rectangle"/>
+            <array length="1" zero-terminated="0" c:type="PopplerRectangle**">
+              <type name="Rectangle" c:type="PopplerRectangle*"/>
             </array>
           </parameter>
           <parameter name="n_rectangles"
@@ -3232,23 +3407,11 @@ poppler_page_get_text()</doc>
         <doc xml:whitespace="preserve">Get the embedded thumbnail for the specified page.  If the document
 doesn't have an embedded thumbnail for the page, this function
 returns %NULL.
+
 doesn't have a thumbnail for this page.</doc>
         <return-value transfer-ownership="full">
           <doc xml:whitespace="preserve">the tumbnail as a cairo_surface_t or %NULL if the document</doc>
           <type name="cairo.Surface" c:type="cairo_surface_t*"/>
-        </return-value>
-      </method>
-      <method name="get_thumbnail_pixbuf"
-              c:identifier="poppler_page_get_thumbnail_pixbuf"
-              introspectable="0"
-              deprecated="0.16">
-        <doc xml:whitespace="preserve">Get the embedded thumbnail for the specified page.  If the document
-doesn't have an embedded thumbnail for the page, this function
-returns %NULL.
-doesn't have a thumbnail for this page.</doc>
-        <return-value>
-          <doc xml:whitespace="preserve">the tumbnail as a #GdkPixbuf or %NULL if the document</doc>
-          <type name="GdkPixbuf.Pixbuf" c:type="GdkPixbuf*"/>
         </return-value>
       </method>
       <method name="get_thumbnail_size"
@@ -3330,7 +3493,9 @@ with the specified options</doc>
               c:identifier="poppler_page_render_selection">
         <doc xml:whitespace="preserve">Render the selection specified by @selection for @page to
 the given cairo context.  The selection will be rendered, using
+@glyph_color for the glyphs and @background_color for the selection
 background.
+
 If non-NULL, @old_selection specifies the selection that is already
 rendered to @cairo, in which case this function will (some day)
 only render the changed part of the selection.</doc>
@@ -3361,136 +3526,6 @@ only render the changed part of the selection.</doc>
           <parameter name="background_color" transfer-ownership="none">
             <doc xml:whitespace="preserve">color to use for the selection background</doc>
             <type name="Color" c:type="PopplerColor*"/>
-          </parameter>
-        </parameters>
-      </method>
-      <method name="render_selection_to_pixbuf"
-              c:identifier="poppler_page_render_selection_to_pixbuf"
-              deprecated="0.16">
-        <doc xml:whitespace="preserve">Render the selection specified by @selection for @page into
-background.
-If non-NULL, @old_selection specifies the selection that is already
-rendered in @pixbuf, in which case this function will (some day)
-only render the changed part of the selection.</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="scale" transfer-ownership="none">
-            <doc xml:whitespace="preserve">scale specified as pixels per point</doc>
-            <type name="gdouble" c:type="gdouble"/>
-          </parameter>
-          <parameter name="rotation" transfer-ownership="none">
-            <doc xml:whitespace="preserve">rotate the document by the specified degree</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="pixbuf" transfer-ownership="none">
-            <doc xml:whitespace="preserve">pixbuf to render to</doc>
-            <type name="GdkPixbuf.Pixbuf" c:type="GdkPixbuf*"/>
-          </parameter>
-          <parameter name="selection" transfer-ownership="none">
-            <doc xml:whitespace="preserve">start and end point of selection as a rectangle</doc>
-            <type name="Rectangle" c:type="PopplerRectangle*"/>
-          </parameter>
-          <parameter name="old_selection" transfer-ownership="none">
-            <doc xml:whitespace="preserve">previous selection</doc>
-            <type name="Rectangle" c:type="PopplerRectangle*"/>
-          </parameter>
-          <parameter name="style" transfer-ownership="none">
-            <doc xml:whitespace="preserve">a #PopplerSelectionStyle</doc>
-            <type name="SelectionStyle" c:type="PopplerSelectionStyle"/>
-          </parameter>
-          <parameter name="glyph_color" transfer-ownership="none">
-            <doc xml:whitespace="preserve">color to use for drawing glyphs</doc>
-            <type name="Gdk.Color" c:type="GdkColor*"/>
-          </parameter>
-          <parameter name="background_color" transfer-ownership="none">
-            <doc xml:whitespace="preserve">color to use for the selection background</doc>
-            <type name="Gdk.Color" c:type="GdkColor*"/>
-          </parameter>
-        </parameters>
-      </method>
-      <method name="render_to_pixbuf"
-              c:identifier="poppler_page_render_to_pixbuf"
-              deprecated="0.16">
-        <doc xml:whitespace="preserve">First scale the document to match the specified pixels per point,
-then render the rectangle given by the upper left corner at
-(src_x, src_y) and src_width and src_height.
-This function is for rendering a page that will be displayed.
-If you want to render a page that will be printed use
-poppler_page_render_to_pixbuf_for_printing() instead</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="src_x" transfer-ownership="none">
-            <doc xml:whitespace="preserve">x coordinate of upper left corner</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="src_y" transfer-ownership="none">
-            <doc xml:whitespace="preserve">y coordinate of upper left corner</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="src_width" transfer-ownership="none">
-            <doc xml:whitespace="preserve">width of rectangle to render</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="src_height" transfer-ownership="none">
-            <doc xml:whitespace="preserve">height of rectangle to render</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="scale" transfer-ownership="none">
-            <doc xml:whitespace="preserve">scale specified as pixels per point</doc>
-            <type name="gdouble" c:type="double"/>
-          </parameter>
-          <parameter name="rotation" transfer-ownership="none">
-            <doc xml:whitespace="preserve">rotate the document by the specified degree</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="pixbuf" transfer-ownership="none">
-            <doc xml:whitespace="preserve">pixbuf to render into</doc>
-            <type name="GdkPixbuf.Pixbuf" c:type="GdkPixbuf*"/>
-          </parameter>
-        </parameters>
-      </method>
-      <method name="render_to_pixbuf_for_printing"
-              c:identifier="poppler_page_render_to_pixbuf_for_printing"
-              deprecated="0.16">
-        <doc xml:whitespace="preserve">First scale the document to match the specified pixels per point,
-then render the rectangle given by the upper left corner at
-(src_x, src_y) and src_width and src_height.
-This function is for rendering a page that will be printed.</doc>
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void"/>
-        </return-value>
-        <parameters>
-          <parameter name="src_x" transfer-ownership="none">
-            <doc xml:whitespace="preserve">x coordinate of upper left corner</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="src_y" transfer-ownership="none">
-            <doc xml:whitespace="preserve">y coordinate of upper left corner</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="src_width" transfer-ownership="none">
-            <doc xml:whitespace="preserve">width of rectangle to render</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="src_height" transfer-ownership="none">
-            <doc xml:whitespace="preserve">height of rectangle to render</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="scale" transfer-ownership="none">
-            <doc xml:whitespace="preserve">scale specified as pixels per point</doc>
-            <type name="gdouble" c:type="double"/>
-          </parameter>
-          <parameter name="rotation" transfer-ownership="none">
-            <doc xml:whitespace="preserve">rotate the document by the specified degree</doc>
-            <type name="gint" c:type="int"/>
-          </parameter>
-          <parameter name="pixbuf" transfer-ownership="none">
-            <doc xml:whitespace="preserve">pixbuf to render into</doc>
-            <type name="GdkPixbuf.Pixbuf" c:type="GdkPixbuf*"/>
           </parameter>
         </parameters>
       </method>
@@ -3739,8 +3774,20 @@ and #POPPLER_PAGE_TRANSITION_BLINDS transition types</doc>
               value="16"
               c:identifier="POPPLER_PERMISSIONS_OK_TO_FILL_FORM"
               glib:nick="ok-to-fill-form"/>
+      <member name="ok_to_extract_contents"
+              value="32"
+              c:identifier="POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS"
+              glib:nick="ok-to-extract-contents"/>
+      <member name="ok_to_assemble"
+              value="64"
+              c:identifier="POPPLER_PERMISSIONS_OK_TO_ASSEMBLE"
+              glib:nick="ok-to-assemble"/>
+      <member name="ok_to_print_high_resolution"
+              value="128"
+              c:identifier="POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION"
+              glib:nick="ok-to-print-high-resolution"/>
       <member name="full"
-              value="31"
+              value="255"
               c:identifier="POPPLER_PERMISSIONS_FULL"
               glib:nick="full"/>
     </bitfield>
@@ -3825,6 +3872,58 @@ locations on a page and bounding boxes</doc>
               c:identifier="POPPLER_SELECTION_LINE"
               glib:nick="line"/>
     </enumeration>
+    <record name="TextAttributes"
+            c:type="PopplerTextAttributes"
+            version="0.18"
+            glib:type-name="PopplerTextAttributes"
+            glib:get-type="poppler_text_attributes_get_type"
+            c:symbol-prefix="text_attributes">
+      <doc xml:whitespace="preserve">A #PopplerTextInfo is used to describe text attriutes of a reange of text</doc>
+      <field name="font_name" writable="1">
+        <type name="utf8" c:type="gchar*"/>
+      </field>
+      <field name="font_size" writable="1">
+        <type name="gdouble" c:type="gdouble"/>
+      </field>
+      <field name="is_underlined" writable="1">
+        <type name="gboolean" c:type="gboolean"/>
+      </field>
+      <field name="color" writable="1">
+        <type name="Color" c:type="PopplerColor"/>
+      </field>
+      <field name="start_index" writable="1">
+        <type name="gint" c:type="gint"/>
+      </field>
+      <field name="end_index" writable="1">
+        <type name="gint" c:type="gint"/>
+      </field>
+      <constructor name="new"
+                   c:identifier="poppler_text_attributes_new"
+                   version="0.18">
+        <doc xml:whitespace="preserve">Creates a new #PopplerTextAttributes</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new #PopplerTextAttributes, use poppler_text_attributes_free() to free it</doc>
+          <type name="TextAttributes" c:type="PopplerTextAttributes*"/>
+        </return-value>
+      </constructor>
+      <method name="copy"
+              c:identifier="poppler_text_attributes_copy"
+              version="0.18">
+        <doc xml:whitespace="preserve">Creates a copy of @text_attrs</doc>
+        <return-value transfer-ownership="full">
+          <doc xml:whitespace="preserve">a new allocated copy of @text_attrs</doc>
+          <type name="TextAttributes" c:type="PopplerTextAttributes*"/>
+        </return-value>
+      </method>
+      <method name="free"
+              c:identifier="poppler_text_attributes_free"
+              version="0.18">
+        <doc xml:whitespace="preserve">Frees the given #PopplerTextAttributes</doc>
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void"/>
+        </return-value>
+      </method>
+    </record>
     <bitfield name="ViewerPreferences"
               glib:type-name="PopplerViewerPreferences"
               glib:get-type="poppler_viewer_preferences_get_type"
@@ -3888,7 +3987,9 @@ if the parsing fails or the input string is not a valid PDF format date string</
         </parameter>
       </parameters>
     </function>
-    <function name="error_quark" c:identifier="poppler_error_quark">
+    <function name="error_quark"
+              c:identifier="poppler_error_quark"
+              moved-to="Error.quark">
       <return-value transfer-ownership="none">
         <type name="GLib.Quark" c:type="GQuark"/>
       </return-value>

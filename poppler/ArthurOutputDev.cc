@@ -14,11 +14,12 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005-2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
-// Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
+// Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,7 +87,8 @@ private:
 //------------------------------------------------------------------------
 
 ArthurOutputDev::ArthurOutputDev(QPainter *painter):
-  m_painter(painter)
+  m_painter(painter),
+  m_fontHinting(NoHinting)
 {
   m_currentBrush = QBrush(Qt::SolidPattern);
   m_fontEngine = 0;
@@ -104,13 +106,18 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
   xref = xrefA;
 #ifdef HAVE_SPLASH
   delete m_fontEngine;
+
+  const bool isHintingEnabled = m_fontHinting != NoHinting;
+  const bool isSlightHinting = m_fontHinting == SlightHinting;
+
   m_fontEngine = new SplashFontEngine(
 #if HAVE_T1LIB_H
   globalParams->getEnableT1lib(),
 #endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   globalParams->getEnableFreeType(),
-  gFalse,
+  isHintingEnabled,
+  isSlightHinting,
 #endif
   m_painter->testRenderHint(QPainter::TextAntialiasing));
 #endif
@@ -131,10 +138,6 @@ void ArthurOutputDev::startPage(int pageNum, GfxState *state)
 }
 
 void ArthurOutputDev::endPage() {
-}
-
-void ArthurOutputDev::drawLink(Link *link, Catalog *catalog)
-{
 }
 
 void ArthurOutputDev::saveState(GfxState *state)
@@ -281,7 +284,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
   double *textMat;
   double m11, m12, m21, m22, fontSize;
   SplashCoord mat[4];
-  int substIdx, n;
+  int n;
   int faceIndex = 0;
   SplashCoord matrix[6];
 
@@ -289,7 +292,6 @@ void ArthurOutputDev::updateFont(GfxState *state)
   m_font = NULL;
   fileName = NULL;
   tmpBuf = NULL;
-  substIdx = -1;
 
   if (!(gfxFont = state->getFont())) {
     goto err1;
@@ -770,7 +772,6 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   int i;
   double *ctm;
   QMatrix matrix;
-  int is_identity_transform;
   QImage image;
   int stride;
   
@@ -780,12 +781,6 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			   colorMap->getBits());
   imgStr->reset();
   
-  /* ICCBased color space doesn't do any color correction
-   * so check its underlying color space as well */
-  is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased && 
-		  ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
-
   image = QImage(width, height, QImage::Format_ARGB32);
   data = (unsigned int *)image.bits();
   stride = image.bytesPerLine()/4;

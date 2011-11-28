@@ -15,6 +15,7 @@ poppler_goo_include_HEADERS =			\
 	FixedPoint.h				\
 	PNGWriter.h				\
 	JpegWriter.h				\
+	TiffWriter.h				\
 	ImgWriter.h				\
 	GooLikely.h				\
 	gstrtod.h
@@ -40,5 +41,7 @@ libgoo_la_SOURCES =				\
 	FixedPoint.cc				\
 	PNGWriter.cc				\
 	JpegWriter.cc				\
+	TiffWriter.cc				\
 	ImgWriter.cc				\
+	gtypes_p.h				\
 	gstrtod.cc

@@ -476,6 +476,29 @@ poppler_document_get_page_by_label (PopplerDocument  *document,
 }
 
 /**
+ * poppler_document_get_n_attachments:
+ * @document: A #PopplerDocument
+ *
+ * Returns the number of attachments in a loaded document.
+ * See also poppler_document_get_attachments()
+ *
+ * Return value: Number of attachments
+ *
+ * Since: 0.18
+ */
+guint
+poppler_document_get_n_attachments (PopplerDocument *document)
+{
+  Catalog *catalog;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), 0);
+
+  catalog = document->doc->getCatalog ();
+
+  return catalog && catalog->isOk () ? catalog->numEmbeddedFiles () : 0;
+}
+
+/**
  * poppler_document_has_attachments:
  * @document: A #PopplerDocument
  * 
@@ -486,18 +509,9 @@ poppler_document_get_page_by_label (PopplerDocument  *document,
 gboolean
 poppler_document_has_attachments (PopplerDocument *document)
 {
-  Catalog *catalog;
-  int n_files = 0;
-
   g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), FALSE);
 
-  catalog = document->doc->getCatalog ();
-  if (catalog && catalog->isOk ())
-    {
-      n_files = catalog->numEmbeddedFiles ();
-    }
-
-  return (n_files != 0);
+  return (poppler_document_get_n_attachments (document) != 0);
 }
 
 /**
@@ -527,13 +541,14 @@ poppler_document_get_attachments (PopplerDocument *document)
   for (i = 0; i < n_files; i++)
     {
       PopplerAttachment *attachment;
-      EmbFile *emb_file;
+      FileSpec *emb_file;
 
       emb_file = catalog->embeddedFile (i);
-      if (!emb_file->isOk ()) {
+      if (!emb_file->isOk () || !emb_file->getEmbeddedFile()->isOk()) {
         delete emb_file;
 	continue;
       }
+
       attachment = _poppler_attachment_new (emb_file);
       delete emb_file;
 
@@ -1048,6 +1063,12 @@ poppler_document_get_permissions (PopplerDocument *document)
     flag |= POPPLER_PERMISSIONS_OK_TO_ADD_NOTES;
   if (document->doc->okToFillForm ())
     flag |= POPPLER_PERMISSIONS_OK_TO_FILL_FORM;
+  if (document->doc->okToAccessibility())
+    flag |= POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS;
+  if (document->doc->okToAssemble())
+    flag |= POPPLER_PERMISSIONS_OK_TO_ASSEMBLE;
+  if (document->doc->okToPrintHighRes())
+    flag |= POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION;
 
   return (PopplerPermissions)flag;
 }
@@ -2493,7 +2514,7 @@ poppler_document_get_form_field (PopplerDocument *document,
   if (!page)
     return NULL;
 
-  widgets = page->getPageWidgets ();
+  widgets = page->getFormWidgets (document->doc->getCatalog ());
   if (!widgets)
     return NULL;
 

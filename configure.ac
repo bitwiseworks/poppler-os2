@@ -1,6 +1,6 @@
 m4_define([poppler_version_major],[0])
-m4_define([poppler_version_minor],[16])
-m4_define([poppler_version_micro],[3])
+m4_define([poppler_version_minor],[18])
+m4_define([poppler_version_micro],[1])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
 AC_PREREQ(2.59)
@@ -114,6 +114,7 @@ AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])
 dnl ##### Checks for header files.
 AC_PATH_XTRA
 AC_HEADER_DIRENT
+AC_CHECK_HEADERS([stdint.h])
 
 dnl ##### Switch over to C++.  This will make the checks below a little
 dnl ##### bit stricter (requiring function prototypes in include files).
@@ -173,6 +174,37 @@ AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$enable_libopenjpeg = xyes)
 AH_TEMPLATE([ENABLE_LIBOPENJPEG],
 	    [Use libopenjpeg instead of builtin jpeg2000 decoder.])
 
+dnl ##### Test for libtiff
+AC_ARG_ENABLE(libtiff,
+		AC_HELP_STRING([--disable-libtiff],
+				[Don't build against libtiff.]),
+		enable_libtiff=$enableval,
+		enable_libtiff="try")
+
+if test x$enable_libtiff = xyes; then
+  AC_CHECK_LIB([tiff], [TIFFOpen],,
+		AC_MSG_ERROR("*** libtiff library not found ***"))
+  AC_CHECK_HEADERS([tiffio.h],,
+		AC_MSG_ERROR("*** libtiff headers not found ***"))
+elif test x$enable_libtiff = xtry; then
+  AC_CHECK_LIB([tiff], [TIFFOpen],
+		[enable_libtiff="yes"],
+		[enable_libtiff="no"])
+  AC_CHECK_HEADERS([tiffio.h],,
+		[enable_libtiff="no"])
+fi
+
+if test x$enable_libtiff = xyes; then
+  LIBTIFF_LIBS="-ltiff"
+  AC_SUBST(LIBTIFF_LIBS)
+  AC_DEFINE(ENABLE_LIBTIFF)
+fi
+
+AM_CONDITIONAL(BUILD_LIBTIFF, test x$enable_libtiff = xyes)
+AH_TEMPLATE([ENABLE_LIBTIFF], [Build against libtiff.])
+if test x$enable_libtiff = xyes; then
+  AC_DEFINE(ENABLE_LIBTIFF, 1, [Build against libtiff.])
+fi
 
 dnl ##### Checks for library functions.
 AC_CHECK_FUNCS(popen mkstemp mkstemps)
@@ -393,7 +425,6 @@ if test x$enable_cairo_output = xyes; then
     # Check for introspection
     GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
-    GLIB_REQ="glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION"
     AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
     POPPLER_GLIB_DISABLE_DEPRECATED="$POPPLER_GLIB_DISABLE_DEPRECATED -DG_DISABLE_DEPRECATED"
     POPPLER_GLIB_DISABLE_SINGLE_INCLUDES="$POPPLER_GLIB_DISABLE_SINGLE_INCLUDES -DG_DISABLE_SINGLE_INCLUDES"
@@ -403,72 +434,14 @@ else
     AC_MSG_ERROR("Cairo output is required to build glib frontend")
   fi
   enable_poppler_glib="no"
-  GLIB_REQ=""
 fi
 AM_CONDITIONAL(BUILD_POPPLER_GLIB, test x$enable_poppler_glib = xyes)
 AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")
 AC_SUBST(GLIB_REQ)
-
-GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
-
-dnl
-dnl GDK
-dnl
-AC_ARG_ENABLE(gdk,
-              AC_HELP_STRING([--disable-gdk],
-	                     [Compile without gdk.]),
-              enable_gdk=$enableval,
-	      enable_gdk="try")
-
-if test x$enable_poppler_glib = xyes; then
-  if test x$enable_gdk = xyes; then
-    PKG_CHECK_MODULES(GDK, gdk-2.0)
-  elif test x$enable_gdk = xtry; then
-    PKG_CHECK_MODULES(GDK, gdk-2.0,
-                      [enable_gdk="yes"],
-                      [enable_gdk="no"])
-  fi
-  if test x$enable_gdk = xyes; then
-    GDK_REQ="gdk-2.0 gdk-pixbuf-2.0"
-    AC_DEFINE(POPPLER_WITH_GDK,[1], [Have GDK])
-    GDK_FEATURE="#define POPPLER_WITH_GDK 1"
-    POPPLER_GLIB_DISABLE_DEPRECATED="$POPPLER_GLIB_DISABLE_DEPRECATED -DGDK_DISABLE_DEPRECATED -DGDK_PIXBUF_DISABLE_DEPRECATED"
-    POPPLER_GLIB_DISABLE_SINGLE_INCLUDES="$POPPLER_GLIB_DISABLE_SINGLE_INCLUDES -DGTK_DISABLE_SINGLE_INCLUDES"
-  else
-    enable_gdk="no"
-    GDK_FEATURE=""
-    GDK_REQ=""
-  fi
-else
-  enable_gdk="no"
-  GDK_REQ=""
-fi
-AM_CONDITIONAL(BUILD_WITH_GDK, test x$enable_gdk = xyes)
-AC_SUBST(GDK_CFLAGS)
-AC_SUBST(GDK_LIBS)
-AC_SUBST(GDK_FEATURE)
-AC_SUBST(GDK_REQ)
-
 AC_SUBST(POPPLER_GLIB_DISABLE_DEPRECATED)
 AC_SUBST(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES)
 
-AC_ARG_ENABLE(poppler-qt,
-	      AC_HELP_STRING([--disable-poppler-qt],
-			     [Don't compile poppler qt wrapper.]),
-	      enable_poppler_qt=$enableval,
-	      enable_poppler_qt="try")
-
-if test x$enable_poppler_qt = xyes; then
-  POPPLER_FIND_QT(POPPLER_QT,,)
-elif test x$enable_poppler_qt = xtry; then
-  POPPLER_FIND_QT(POPPLER_QT,
-		  [enable_poppler_qt="yes"],
-                  [enable_poppler_qt="no"])
-fi
-AC_SUBST(POPPLER_QT_CXXFLAGS)
-AC_SUBST(POPPLER_QT_LIBS)
-
-AM_CONDITIONAL(BUILD_POPPLER_QT, test "x$enable_poppler_qt" = "xyes")
+GTK_DOC_CHECK([1.14],[--flavour no-tmpl])
 
 dnl 
 dnl Try Qt4
@@ -556,21 +529,6 @@ elif test x$enable_gtk_test = xtry; then
 fi
 AM_CONDITIONAL(BUILD_GTK_TEST, test x$enable_gtk_test = xyes -a x$enable_poppler_glib = xyes)
 
-AC_ARG_ENABLE(abiword-output,
-              AC_HELP_STRING([--disable-abiword-output],
-                             [Don't build the abiword backend.]),
-              enable_abiword_output=$enableval,
-              enable_abiword_output="try")
-if test x$enable_abiword_output = xyes; then
-  PKG_CHECK_MODULES(ABIWORD, libxml-2.0)
-elif test x$enable_abiword_output = xtry; then
-  PKG_CHECK_MODULES(ABIWORD, libxml-2.0,
-                    [enable_abiword_output="yes"],
-                    [enable_abiword_output="no"])
-fi
-
-AM_CONDITIONAL(BUILD_ABIWORD_OUTPUT, test x$enable_abiword_output = xyes)
-
 AC_ARG_ENABLE(utils,
               AC_HELP_STRING([--disable-utils],
 	                     [Don't compile poppler command line utils.]),
@@ -647,7 +605,6 @@ glib/reference/Makefile
 glib/reference/version.xml
 glib/demo/Makefile
 test/Makefile
-qt/Makefile
 qt4/Makefile
 qt4/src/Makefile
 qt4/tests/Makefile
@@ -663,8 +620,6 @@ poppler-splash.pc
 poppler-splash-uninstalled.pc
 poppler-glib.pc
 poppler-glib-uninstalled.pc
-poppler-qt.pc
-poppler-qt-uninstalled.pc
 poppler-qt4.pc
 poppler-qt4-uninstalled.pc
 poppler-cpp.pc
@@ -676,16 +631,14 @@ echo "Building poppler with support for:"
 echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
 echo "  cairo output:       $enable_cairo_output"
-echo "  abiword output:     $enable_abiword_output"
-echo "  qt wrapper:         $enable_poppler_qt"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
 echo "  glib wrapper:       $enable_poppler_glib"
-echo "    use GDK:          $enable_gdk"
 echo "    introspection:    $found_introspection"
 echo "  cpp wrapper:        $enable_poppler_cpp"
 echo "  use gtk-doc:        $enable_gtk_doc"
 echo "  use libjpeg:        $enable_libjpeg"
 echo "  use libpng:         $enable_libpng"
+echo "  use libtiff:        $enable_libtiff"
 echo "  use zlib:           $enable_zlib"
 echo "  use libcurl:        $enable_libcurl"
 echo "  use libopenjpeg:    $enable_libopenjpeg"

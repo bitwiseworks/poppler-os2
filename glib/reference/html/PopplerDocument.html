@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="poppler-poppler.html" title="poppler">
 <link rel="next" href="PopplerPage.html" title="PopplerPage">
-<meta name="generator" content="GTK-Doc V1.17 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -97,6 +97,7 @@ enum                <a class="link" href="PopplerDocument.html#PopplerPermission
                                                          <em class="parameter"><code>const <span class="type">char</span> *label</code></em>);
 <a class="link" href="poppler-PopplerAction.html#PopplerDest" title="PopplerDest"><span class="returnvalue">PopplerDest</span></a> *       <a class="link" href="PopplerDocument.html#poppler-document-find-dest" title="poppler_document_find_dest ()">poppler_document_find_dest</a>          (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
                                                          <em class="parameter"><code>const <span class="type">gchar</span> *link_name</code></em>);
+<span class="returnvalue">guint</span>               <a class="link" href="PopplerDocument.html#poppler-document-get-n-attachments" title="poppler_document_get_n_attachments ()">poppler_document_get_n_attachments</a>  (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);
 <span class="returnvalue">gboolean</span>            <a class="link" href="PopplerDocument.html#poppler-document-has-attachments" title="poppler_document_has_attachments ()">poppler_document_has_attachments</a>    (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);
 <span class="returnvalue">GList</span> *             <a class="link" href="PopplerDocument.html#poppler-document-get-attachments" title="poppler_document_get_attachments ()">poppler_document_get_attachments</a>    (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);
 <a class="link" href="PopplerFormField.html" title="PoppplerFormField"><span class="returnvalue">PopplerFormField</span></a> *  <a class="link" href="PopplerDocument.html#poppler-document-get-form-field" title="poppler_document_get_form_field ()">poppler_document_get_form_field</a>     (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
@@ -200,8 +201,7 @@ The <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span cl
 <hr>
 <div class="refsect2">
 <a name="PopplerPageLayout"></a><h3>enum PopplerPageLayout</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_PAGE_LAYOUT_UNSET,
   POPPLER_PAGE_LAYOUT_SINGLE_PAGE,
   POPPLER_PAGE_LAYOUT_ONE_COLUMN,
@@ -258,8 +258,7 @@ Page layout types
 <hr>
 <div class="refsect2">
 <a name="PopplerPageMode"></a><h3>enum PopplerPageMode</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_PAGE_MODE_UNSET,
   POPPLER_PAGE_MODE_NONE,
   POPPLER_PAGE_MODE_USE_OUTLINES,
@@ -323,8 +322,7 @@ Page modes
 <hr>
 <div class="refsect2">
 <a name="PopplerFontType"></a><h3>enum PopplerFontType</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_FONT_TYPE_UNKNOWN,
   POPPLER_FONT_TYPE_TYPE1,
   POPPLER_FONT_TYPE_TYPE1C,
@@ -407,8 +405,7 @@ Font types
 <hr>
 <div class="refsect2">
 <a name="PopplerViewerPreferences"></a><h3>enum PopplerViewerPreferences</h3>
-<pre class="programlisting">typedef enum /*&lt; flags &gt;*/
-{
+<pre class="programlisting">typedef enum {
   POPPLER_VIEWER_PREFERENCES_UNSET = 0,
   POPPLER_VIEWER_PREFERENCES_HIDE_TOOLBAR = 1 &lt;&lt; 0,
   POPPLER_VIEWER_PREFERENCES_HIDE_MENUBAR = 1 &lt;&lt; 1,
@@ -470,15 +467,16 @@ Viewer preferences
 <hr>
 <div class="refsect2">
 <a name="PopplerPermissions"></a><h3>enum PopplerPermissions</h3>
-<pre class="programlisting">typedef enum /*&lt; flags &gt;*/
-{
+<pre class="programlisting">typedef enum {
   POPPLER_PERMISSIONS_OK_TO_PRINT = 1 &lt;&lt; 0,
   POPPLER_PERMISSIONS_OK_TO_MODIFY = 1 &lt;&lt; 1,
   POPPLER_PERMISSIONS_OK_TO_COPY = 1 &lt;&lt; 2,
   POPPLER_PERMISSIONS_OK_TO_ADD_NOTES = 1 &lt;&lt; 3,
   POPPLER_PERMISSIONS_OK_TO_FILL_FORM = 1 &lt;&lt; 4,
-  POPPLER_PERMISSIONS_FULL = (POPPLER_PERMISSIONS_OK_TO_PRINT | POPPLER_PERMISSIONS_OK_TO_MODIFY | POPPLER_PERMISSIONS_OK_TO_COPY | POPPLER_PERMISSIONS_OK_TO_ADD_NOTES | POPPLER_PERMISSIONS_OK_TO_FILL_FORM)
-
+  POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS = 1 &lt;&lt; 5,
+  POPPLER_PERMISSIONS_OK_TO_ASSEMBLE = 1 &lt;&lt; 6,
+  POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION = 1 &lt;&lt; 7,
+  POPPLER_PERMISSIONS_FULL = (POPPLER_PERMISSIONS_OK_TO_PRINT | POPPLER_PERMISSIONS_OK_TO_MODIFY | POPPLER_PERMISSIONS_OK_TO_COPY | POPPLER_PERMISSIONS_OK_TO_ADD_NOTES | POPPLER_PERMISSIONS_OK_TO_FILL_FORM | POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS | POPPLER_PERMISSIONS_OK_TO_ASSEMBLE | POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION)
 } PopplerPermissions;
 </pre>
 <p>
@@ -510,6 +508,23 @@ Permissions
 <tr>
 <td><p><a name="POPPLER-PERMISSIONS-OK-TO-FILL-FORM:CAPS"></a><span class="term"><code class="literal">POPPLER_PERMISSIONS_OK_TO_FILL_FORM</code></span></p></td>
 <td>interactive form fields can be filled in
+</td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-PERMISSIONS-OK-TO-EXTRACT-CONTENTS:CAPS"></a><span class="term"><code class="literal">POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS</code></span></p></td>
+<td>extract text and graphics
+(in support of accessibility to users with disabilities or for other purposes). Since 0.18
+</td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-PERMISSIONS-OK-TO-ASSEMBLE:CAPS"></a><span class="term"><code class="literal">POPPLER_PERMISSIONS_OK_TO_ASSEMBLE</code></span></p></td>
+<td>assemble the document (insert, rotate, or delete pages and create
+bookmarks or thumbnail images). Since 0.18
+</td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-PERMISSIONS-OK-TO-PRINT-HIGH-RESOLUTION:CAPS"></a><span class="term"><code class="literal">POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION</code></span></p></td>
+<td>document can be printer at high resolution. Since 0.18
 </td>
 </tr>
 <tr>
@@ -1209,6 +1224,30 @@ be freed with <a class="link" href="poppler-PopplerAction.html#poppler-dest-free
 </tr>
 </tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-document-get-n-attachments"></a><h3>poppler_document_get_n_attachments ()</h3>
+<pre class="programlisting"><span class="returnvalue">guint</span>               poppler_document_get_n_attachments  (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);</pre>
+<p>
+Returns the number of attachments in a loaded document.
+See also <a class="link" href="PopplerDocument.html#poppler-document-get-attachments" title="poppler_document_get_attachments ()"><code class="function">poppler_document_get_attachments()</code></a>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>document</code></em> :</span></p></td>
+<td>A <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Number of attachments</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.18</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2138,7 +2177,7 @@ The mode that should be used when the document is opened
 <p>
 Flags specifying which operations are permitted when the document is opened
 </p>
-<p>Default value: POPPLER_PERMISSIONS_OK_TO_PRINT|POPPLER_PERMISSIONS_OK_TO_MODIFY|POPPLER_PERMISSIONS_OK_TO_COPY|POPPLER_PERMISSIONS_OK_TO_ADD_NOTES|POPPLER_PERMISSIONS_OK_TO_FILL_FORM</p>
+<p>Default value: POPPLER_PERMISSIONS_OK_TO_PRINT|POPPLER_PERMISSIONS_OK_TO_MODIFY|POPPLER_PERMISSIONS_OK_TO_COPY|POPPLER_PERMISSIONS_OK_TO_ADD_NOTES|POPPLER_PERMISSIONS_OK_TO_FILL_FORM|POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS|POPPLER_PERMISSIONS_OK_TO_ASSEMBLE|POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2177,6 +2216,6 @@ The document's title or <code class="literal">NULL</code>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.17</div>
+          Generated by GTK-Doc V1.18</div>
 </body>
 </html>

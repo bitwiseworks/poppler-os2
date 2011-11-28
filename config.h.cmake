@@ -9,6 +9,9 @@
 /* Use libopenjpeg instead of builtin jpeg2000 decoder. */
 #cmakedefine ENABLE_LIBOPENJPEG 1
 
+/* Build against libtiff. */
+#cmakedefine ENABLE_LIBTIFF 1
+
 /* Build against libpng. */
 #cmakedefine ENABLE_LIBPNG 1
 
@@ -161,9 +164,6 @@
 
 /* Support for curl based doc builder is compiled in. */
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1
-
-/* Have GDK */
-#cmakedefine POPPLER_WITH_GDK 1
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

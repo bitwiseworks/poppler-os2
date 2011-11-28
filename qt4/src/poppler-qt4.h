@@ -1,12 +1,13 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2010, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2011, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
- * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
+ * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -304,6 +305,8 @@ delete it;
        Container class for an embedded file with a PDF document
     */
     class POPPLER_QT4_EXPORT EmbeddedFile {
+	friend class DocumentData;
+	friend class Page;
     public:
 	/// \cond PRIVATE
 	EmbeddedFile(EmbFile *embfile);
@@ -376,6 +379,7 @@ delete it;
 
     private:
 	Q_DISABLE_COPY(EmbeddedFile)
+	EmbeddedFile(EmbeddedFileData &dd);
 
 	EmbeddedFileData *m_embeddedFile;
     };
@@ -674,6 +678,7 @@ delete it;
 
 	/**
 	 Returns the form fields on the page
+	 The caller gets the ownership of the returned objects.
 
 	 \since 0.6
 	*/
@@ -800,7 +805,8 @@ delete it;
 	enum RenderHint {
 	    Antialiasing = 0x00000001,      ///< Antialiasing for graphics
 	    TextAntialiasing = 0x00000002,  ///< Antialiasing for text
-	    TextHinting = 0x00000004        ///< Hinting for text \since 0.12.1
+	    TextHinting = 0x00000004,       ///< Hinting for text \since 0.12.1
+	    TextSlightHinting = 0x00000008  ///< Lighter hinting for text when combined with TextHinting \since 0.18
 	};
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
 
@@ -1415,7 +1421,7 @@ height = dummy.height();
               \since 0.10
              */
             enum PSOption {
-                Printing = 0x00000001,              ///< The PS is generated for priting purpouses
+                Printing = 0x00000001,              ///< The PS is generated for printing purposes
                 StrictMargins = 0x00000002,
                 ForceRasterization = 0x00000004
             };

@@ -61,7 +61,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -260,8 +260,6 @@ CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ABIWORD_CFLAGS = @ABIWORD_CFLAGS@
-ABIWORD_LIBS = @ABIWORD_LIBS@
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -302,14 +300,12 @@ FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
 FREETYPE_CFLAGS = @FREETYPE_CFLAGS@
 FREETYPE_CONFIG = @FREETYPE_CONFIG@
 FREETYPE_LIBS = @FREETYPE_LIBS@
-GDK_CFLAGS = @GDK_CFLAGS@
-GDK_FEATURE = @GDK_FEATURE@
-GDK_LIBS = @GDK_LIBS@
-GDK_REQ = @GDK_REQ@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GLIB_REQ = @GLIB_REQ@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
+GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
 GTK_TEST_CFLAGS = @GTK_TEST_CFLAGS@
@@ -341,6 +337,7 @@ LIBOPENJPEG_LIBS = @LIBOPENJPEG_LIBS@
 LIBPNG_CFLAGS = @LIBPNG_CFLAGS@
 LIBPNG_LIBS = @LIBPNG_LIBS@
 LIBS = @LIBS@
+LIBTIFF_LIBS = @LIBTIFF_LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
@@ -382,8 +379,6 @@ POPPLER_QT4_CXXFLAGS = @POPPLER_QT4_CXXFLAGS@
 POPPLER_QT4_LIBS = @POPPLER_QT4_LIBS@
 POPPLER_QT4_TEST_CFLAGS = @POPPLER_QT4_TEST_CFLAGS@
 POPPLER_QT4_TEST_LIBS = @POPPLER_QT4_TEST_LIBS@
-POPPLER_QT_CXXFLAGS = @POPPLER_QT_CXXFLAGS@
-POPPLER_QT_LIBS = @POPPLER_QT_LIBS@
 POPPLER_VERSION = @POPPLER_VERSION@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
@@ -439,8 +434,6 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libqt3_CFLAGS = @libqt3_CFLAGS@
-libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@

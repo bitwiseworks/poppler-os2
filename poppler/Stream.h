@@ -15,10 +15,11 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2011 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -32,6 +33,7 @@
 #pragma interface
 #endif
 
+#include "poppler-config.h"
 #include <stdio.h>
 #include "goo/gtypes.h"
 #include "Object.h"
@@ -839,7 +841,6 @@ public:
   virtual int lookChar();
   virtual GooString *getPSFilter(int psLevel, char *indent);
   virtual GBool isBinary(GBool last = gTrue);
-  Stream *getRawStream() { return str; }
 
   virtual void unfilteredReset();
 
@@ -1136,6 +1137,35 @@ private:
   char *bufPtr;
   char *bufEnd;
   char *nextEnd;
+  GBool eof;
+
+  GBool fillBuf();
+};
+
+//------------------------------------------------------------------------
+// CMKYGrayEncoder
+//------------------------------------------------------------------------
+
+class CMKYGrayEncoder: public FilterStream {
+public:
+
+  CMKYGrayEncoder(Stream *strA);
+  virtual ~CMKYGrayEncoder();
+  virtual StreamKind getKind() { return strWeird; }
+  virtual void reset();
+  virtual int getChar()
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
+  virtual int lookChar()
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
+  virtual GooString *getPSFilter(int /*psLevel*/, char * /*indent*/) { return NULL; }
+  virtual GBool isBinary(GBool /*last = gTrue*/) { return gFalse; }
+  virtual GBool isEncoder() { return gTrue; }
+
+private:
+
+  char buf[2];
+  char *bufPtr;
+  char *bufEnd;
   GBool eof;
 
   GBool fillBuf();
