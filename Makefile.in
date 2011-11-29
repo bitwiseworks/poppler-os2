@@ -43,8 +43,6 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/poppler-cpp.pc.in \
 	$(srcdir)/poppler-glib-uninstalled.pc.in \
 	$(srcdir)/poppler-glib.pc.in \
-	$(srcdir)/poppler-qt-uninstalled.pc.in \
-	$(srcdir)/poppler-qt.pc.in \
 	$(srcdir)/poppler-qt4-uninstalled.pc.in \
 	$(srcdir)/poppler-qt4.pc.in \
 	$(srcdir)/poppler-splash-uninstalled.pc.in \
@@ -60,7 +58,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -70,8 +68,7 @@ CONFIG_HEADER = config.h $(top_builddir)/poppler/poppler-config.h
 CONFIG_CLEAN_FILES = poppler.pc poppler-uninstalled.pc \
 	poppler-cairo.pc poppler-cairo-uninstalled.pc \
 	poppler-splash.pc poppler-splash-uninstalled.pc \
-	poppler-glib.pc poppler-glib-uninstalled.pc poppler-qt.pc \
-	poppler-qt-uninstalled.pc poppler-qt4.pc \
+	poppler-glib.pc poppler-glib-uninstalled.pc poppler-qt4.pc \
 	poppler-qt4-uninstalled.pc poppler-cpp.pc \
 	poppler-cpp-uninstalled.pc
 CONFIG_CLEAN_VPATH_FILES =
@@ -120,7 +117,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir dist dist-all distcheck
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = goo fofi splash poppler utils glib qt test qt4 cpp
+DIST_SUBDIRS = goo fofi splash poppler utils glib test qt4 cpp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -157,8 +154,6 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ABIWORD_CFLAGS = @ABIWORD_CFLAGS@
-ABIWORD_LIBS = @ABIWORD_LIBS@
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -199,14 +194,12 @@ FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
 FREETYPE_CFLAGS = @FREETYPE_CFLAGS@
 FREETYPE_CONFIG = @FREETYPE_CONFIG@
 FREETYPE_LIBS = @FREETYPE_LIBS@
-GDK_CFLAGS = @GDK_CFLAGS@
-GDK_FEATURE = @GDK_FEATURE@
-GDK_LIBS = @GDK_LIBS@
-GDK_REQ = @GDK_REQ@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GLIB_REQ = @GLIB_REQ@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
+GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
 GTK_TEST_CFLAGS = @GTK_TEST_CFLAGS@
@@ -238,6 +231,7 @@ LIBOPENJPEG_LIBS = @LIBOPENJPEG_LIBS@
 LIBPNG_CFLAGS = @LIBPNG_CFLAGS@
 LIBPNG_LIBS = @LIBPNG_LIBS@
 LIBS = @LIBS@
+LIBTIFF_LIBS = @LIBTIFF_LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
@@ -279,8 +273,6 @@ POPPLER_QT4_CXXFLAGS = @POPPLER_QT4_CXXFLAGS@
 POPPLER_QT4_LIBS = @POPPLER_QT4_LIBS@
 POPPLER_QT4_TEST_CFLAGS = @POPPLER_QT4_TEST_CFLAGS@
 POPPLER_QT4_TEST_LIBS = @POPPLER_QT4_TEST_LIBS@
-POPPLER_QT_CXXFLAGS = @POPPLER_QT_CXXFLAGS@
-POPPLER_QT_LIBS = @POPPLER_QT_LIBS@
 POPPLER_VERSION = @POPPLER_VERSION@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
@@ -336,8 +328,6 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libqt3_CFLAGS = @libqt3_CFLAGS@
-libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
@@ -363,36 +353,32 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
 @BUILD_CAIRO_OUTPUT_TRUE@cairo_pc_file = poppler-cairo.pc
 @BUILD_POPPLER_GLIB_TRUE@glib_subdir = glib
 @BUILD_POPPLER_GLIB_TRUE@glib_pc_file = poppler-glib.pc
-@BUILD_POPPLER_QT_TRUE@qt_subdir = qt
-@BUILD_POPPLER_QT_TRUE@qt_pc_file = poppler-qt.pc
 @BUILD_POPPLER_QT4_TRUE@qt4_subdir = qt4
 @BUILD_POPPLER_QT4_TRUE@qt4_pc_file = poppler-qt4.pc
 @BUILD_POPPLER_CPP_TRUE@cpp_subdir = cpp
 @BUILD_POPPLER_CPP_TRUE@cpp_pc_file = poppler-cpp.pc
 @BUILD_UTILS_TRUE@utils_subdir = utils
-SUBDIRS = goo fofi $(splash_subdir) poppler $(utils_subdir) $(glib_subdir) $(qt_subdir) test $(qt4_subdir) $(cpp_subdir)
+SUBDIRS = goo fofi $(splash_subdir) poppler $(utils_subdir) $(glib_subdir) test $(qt4_subdir) $(cpp_subdir)
 
 # Add CMake buildsystem files here so they get added on make dist
 EXTRA_DIST = README-XPDF poppler.pc.in poppler-uninstalled.pc.in \
 	poppler-cairo.pc.in poppler-cairo-uninstalled.pc.in \
 	poppler-splash.pc.in poppler-splash-uninstalled.pc.in \
-	poppler-qt.pc.in poppler-qt-uninstalled.pc.in \
 	poppler-qt4.pc.in poppler-qt4-uninstalled.pc.in \
 	poppler-cpp.pc.in poppler-cpp-uninstalled.pc.in \
 	cpp/tests/CMakeLists.txt cpp/CMakeLists.txt \
 	glib/demo/CMakeLists.txt glib/CMakeLists.txt \
-	glib/poppler-features.h.cmake qt/CMakeLists.txt \
-	qt4/src/CMakeLists.txt qt4/tests/CMakeLists.txt \
-	qt4/CMakeLists.txt qt4/demos/CMakeLists.txt \
-	test/CMakeLists.txt utils/CMakeLists.txt CMakeLists.txt \
-	ConfigureChecks.cmake cmake/modules/COPYING-CMAKE-SCRIPTS \
+	glib/poppler-features.h.cmake qt4/src/CMakeLists.txt \
+	qt4/tests/CMakeLists.txt qt4/CMakeLists.txt \
+	qt4/demos/CMakeLists.txt test/CMakeLists.txt \
+	utils/CMakeLists.txt CMakeLists.txt ConfigureChecks.cmake \
+	cmake/modules/COPYING-CMAKE-SCRIPTS \
 	cmake/modules/FindCairo.cmake \
-	cmake/modules/FindFontconfig.cmake cmake/modules/FindGDK.cmake \
+	cmake/modules/FindFontconfig.cmake \
 	cmake/modules/FindGLIB.cmake \
 	cmake/modules/FindGObjectIntrospection.cmake \
 	cmake/modules/FindGTK.cmake cmake/modules/FindIconv.cmake \
-	cmake/modules/FindLCMS.cmake cmake/modules/FindQt3.cmake \
-	cmake/modules/FindQt4.cmake \
+	cmake/modules/FindLCMS.cmake cmake/modules/FindQt4.cmake \
 	cmake/modules/GObjectIntrospectionMacros.cmake \
 	cmake/modules/MacroBoolTo01.cmake \
 	cmake/modules/MacroEnsureVersion.cmake \
@@ -402,7 +388,7 @@ EXTRA_DIST = README-XPDF poppler.pc.in poppler-uninstalled.pc.in \
 	cmake/modules/PopplerMacros.cmake \
 	cmake/modules/FindLIBOPENJPEG.cmake config.h.cmake \
 	poppler-cairo.pc.cmake poppler/poppler-config.h.cmake \
-	poppler-cpp.pc.cmake poppler-glib.pc.cmake poppler-qt.pc.cmake \
+	poppler-cpp.pc.cmake poppler-glib.pc.cmake \
 	poppler-qt4.pc.cmake poppler-splash.pc.cmake poppler.pc.cmake
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
@@ -410,7 +396,6 @@ pkgconfig_DATA = \
 	$(cairo_pc_file)			\
 	$(splash_pc_file)			\
 	$(glib_pc_file)				\
-	$(qt_pc_file)                           \
 	$(qt4_pc_file)				\
 	$(cpp_pc_file)
 
@@ -484,10 +469,6 @@ poppler-splash-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/poppler-s
 poppler-glib.pc: $(top_builddir)/config.status $(srcdir)/poppler-glib.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 poppler-glib-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/poppler-glib-uninstalled.pc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-poppler-qt.pc: $(top_builddir)/config.status $(srcdir)/poppler-qt.pc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-poppler-qt-uninstalled.pc: $(top_builddir)/config.status $(srcdir)/poppler-qt-uninstalled.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 poppler-qt4.pc: $(top_builddir)/config.status $(srcdir)/poppler-qt4.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

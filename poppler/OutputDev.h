@@ -16,9 +16,9 @@
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2009, 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2007, 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
@@ -51,9 +51,11 @@ class GfxAxialShading;
 class GfxGouraudTriangleShading;
 class GfxPatchMeshShading;
 class GfxRadialShading;
+class GfxGouraudTriangleShading;
+class GfxPatchMeshShading;
 class Stream;
 class Links;
-class Link;
+class AnnotLink;
 class Catalog;
 class Page;
 class Function;
@@ -175,6 +177,7 @@ public:
   virtual void updateStrokeOpacity(GfxState * /*state*/) {}
   virtual void updateFillOverprint(GfxState * /*state*/) {}
   virtual void updateStrokeOverprint(GfxState * /*state*/) {}
+  virtual void updateOverprintMode(GfxState * /*state*/) {}
   virtual void updateTransfer(GfxState * /*state*/) {}
   virtual void updateFillColorStop(GfxState * /*state*/, double /*offset*/) {}
 
@@ -193,8 +196,8 @@ public:
   virtual void stroke(GfxState * /*state*/) {}
   virtual void fill(GfxState * /*state*/) {}
   virtual void eoFill(GfxState * /*state*/) {}
-  virtual GBool tilingPatternFill(GfxState * /*state*/, Object * /*str*/,
-				  int /*paintType*/, Dict * /*resDict*/,
+  virtual GBool tilingPatternFill(GfxState * /*state*/, Catalog * /*cat*/, Object * /*str*/,
+				  double * /*pmat*/, int /*paintType*/, int /*tilingType*/, Dict * /*resDict*/,
 				  double * /*mat*/, double * /*bbox*/,
 				  int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/,
 				  double /*xStep*/, double /*yStep*/)
@@ -302,7 +305,7 @@ public:
   virtual void clearSoftMask(GfxState * /*state*/) {}
 
   //----- links
-  virtual void processLink(Link * /*link*/, Catalog * /*catalog*/) {}
+  virtual void processLink(AnnotLink * /*link*/, Catalog * /*catalog*/) {}
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   virtual GBool getVectorAntialias() { return gFalse; }

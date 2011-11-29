@@ -20,6 +20,7 @@
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
+// Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -220,6 +221,9 @@ public:
   virtual int getNextChar(char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) = 0;
+
+  // Does this font have a toUnicode map?
+  GBool hasToUnicodeCMap() { return hasToUnicode; }
 
   /* XXX: dfp shouldn't be public, however the font finding code is currently in
    * GlobalParams. Instead it should be inside the GfxFont class. However,

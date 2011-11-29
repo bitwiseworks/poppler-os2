@@ -46,7 +46,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
 	$(top_srcdir)/m4/libjpeg.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/qt.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -101,12 +101,12 @@ am__DEPENDENCIES_1 =
 @USE_CMS_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
 @BUILD_SPLASH_OUTPUT_TRUE@am__DEPENDENCIES_3 =  \
 @BUILD_SPLASH_OUTPUT_TRUE@	$(top_builddir)/splash/libsplash.la
-@BUILD_LIBJPEG_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
-@BUILD_LIBPNG_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1)
-@BUILD_ZLIB_TRUE@am__DEPENDENCIES_6 = $(am__DEPENDENCIES_1)
-@BUILD_LIBCURL_TRUE@am__DEPENDENCIES_7 = $(am__DEPENDENCIES_1)
-@BUILD_LIBOPENJPEG_TRUE@am__DEPENDENCIES_8 = $(am__DEPENDENCIES_1)
-@BUILD_ABIWORD_OUTPUT_TRUE@am__DEPENDENCIES_9 = $(am__DEPENDENCIES_1)
+@BUILD_LIBTIFF_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
+@BUILD_LIBJPEG_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1)
+@BUILD_LIBPNG_TRUE@am__DEPENDENCIES_6 = $(am__DEPENDENCIES_1)
+@BUILD_ZLIB_TRUE@am__DEPENDENCIES_7 = $(am__DEPENDENCIES_1)
+@BUILD_LIBCURL_TRUE@am__DEPENDENCIES_8 = $(am__DEPENDENCIES_1)
+@BUILD_LIBOPENJPEG_TRUE@am__DEPENDENCIES_9 = $(am__DEPENDENCIES_1)
 libpoppler_la_DEPENDENCIES = $(top_builddir)/goo/libgoo.la \
 	$(top_builddir)/fofi/libfofi.la $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -117,48 +117,46 @@ libpoppler_la_DEPENDENCIES = $(top_builddir)/goo/libgoo.la \
 	$(am__DEPENDENCIES_1)
 am__libpoppler_la_SOURCES_DIST = SplashOutputDev.cc DCTStream.h \
 	DCTStream.cc FlateStream.h FlateStream.cc JPXStream.h \
-	JPXStream.cc JPEG2000Stream.h JPEG2000Stream.cc ABWOutputDev.h \
-	ABWOutputDev.cc CurlCachedFile.cc CurlPDFDocBuilder.cc \
-	Annot.cc Array.cc BuiltinFont.cc BuiltinFontTables.cc \
-	CachedFile.cc Catalog.cc CharCodeToUnicode.cc CMap.cc \
-	DateInfo.cc Decrypt.cc Dict.cc Error.cc FileSpec.cc \
-	FontEncodingTables.cc Form.cc FontInfo.cc Function.cc Gfx.cc \
-	GfxFont.cc GfxState.cc GlobalParams.cc Hints.cc \
-	JArithmeticDecoder.cc JBIG2Stream.cc Lexer.cc Linearization.cc \
-	Link.cc LocalPDFDocBuilder.cc Movie.cc NameToCharCode.cc \
-	Object.cc OptionalContent.cc Outline.cc OutputDev.cc Page.cc \
-	PageTransition.cc Parser.cc PDFDoc.cc PDFDocEncoding.cc \
-	PDFDocFactory.cc PopplerCache.cc ProfileData.cc \
-	PreScanOutputDev.cc PSTokenizer.cc Rendition.cc \
+	JPXStream.cc JPEG2000Stream.h JPEG2000Stream.cc \
+	CurlCachedFile.cc CurlPDFDocBuilder.cc Annot.cc Array.cc \
+	BuiltinFont.cc BuiltinFontTables.cc CachedFile.cc Catalog.cc \
+	CharCodeToUnicode.cc CMap.cc DateInfo.cc Decrypt.cc Dict.cc \
+	Error.cc FileSpec.cc FontEncodingTables.cc Form.cc FontInfo.cc \
+	Function.cc Gfx.cc GfxFont.cc GfxState.cc GlobalParams.cc \
+	Hints.cc JArithmeticDecoder.cc JBIG2Stream.cc Lexer.cc \
+	Linearization.cc Link.cc LocalPDFDocBuilder.cc Movie.cc \
+	NameToCharCode.cc Object.cc OptionalContent.cc Outline.cc \
+	OutputDev.cc Page.cc PageTransition.cc Parser.cc PDFDoc.cc \
+	PDFDocEncoding.cc PDFDocFactory.cc PopplerCache.cc \
+	ProfileData.cc PreScanOutputDev.cc PSTokenizer.cc Rendition.cc \
 	StdinCachedFile.cc StdinPDFDocBuilder.cc Stream.cc \
-	strtok_r.cpp UnicodeMap.cc UnicodeTypeTable.cc XRef.cc \
-	PSOutputDev.cc TextOutputDev.cc PageLabelInfo.h \
-	PageLabelInfo.cc SecurityHandler.cc Sound.cc XpdfPluginAPI.cc
+	strtok_r.cpp UnicodeMap.cc UnicodeTypeTable.cc \
+	ViewerPreferences.cc XRef.cc PSOutputDev.cc TextOutputDev.cc \
+	PageLabelInfo.h PageLabelInfo.cc SecurityHandler.cc Sound.cc \
+	XpdfPluginAPI.cc
 @BUILD_SPLASH_OUTPUT_TRUE@am__objects_1 = SplashOutputDev.lo
 @BUILD_LIBJPEG_TRUE@am__objects_2 = DCTStream.lo
 @BUILD_ZLIB_TRUE@am__objects_3 = FlateStream.lo
 @BUILD_LIBOPENJPEG_FALSE@am__objects_4 = JPXStream.lo
 @BUILD_LIBOPENJPEG_TRUE@am__objects_4 = JPEG2000Stream.lo
-@BUILD_ABIWORD_OUTPUT_TRUE@am__objects_5 = ABWOutputDev.lo
-@BUILD_LIBCURL_TRUE@am__objects_6 = CurlCachedFile.lo \
+@BUILD_LIBCURL_TRUE@am__objects_5 = CurlCachedFile.lo \
 @BUILD_LIBCURL_TRUE@	CurlPDFDocBuilder.lo
 am_libpoppler_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6) Annot.lo Array.lo BuiltinFont.lo \
-	BuiltinFontTables.lo CachedFile.lo Catalog.lo \
-	CharCodeToUnicode.lo CMap.lo DateInfo.lo Decrypt.lo Dict.lo \
-	Error.lo FileSpec.lo FontEncodingTables.lo Form.lo FontInfo.lo \
-	Function.lo Gfx.lo GfxFont.lo GfxState.lo GlobalParams.lo \
-	Hints.lo JArithmeticDecoder.lo JBIG2Stream.lo Lexer.lo \
-	Linearization.lo Link.lo LocalPDFDocBuilder.lo Movie.lo \
-	NameToCharCode.lo Object.lo OptionalContent.lo Outline.lo \
-	OutputDev.lo Page.lo PageTransition.lo Parser.lo PDFDoc.lo \
-	PDFDocEncoding.lo PDFDocFactory.lo PopplerCache.lo \
+	$(am__objects_3) $(am__objects_4) $(am__objects_5) Annot.lo \
+	Array.lo BuiltinFont.lo BuiltinFontTables.lo CachedFile.lo \
+	Catalog.lo CharCodeToUnicode.lo CMap.lo DateInfo.lo Decrypt.lo \
+	Dict.lo Error.lo FileSpec.lo FontEncodingTables.lo Form.lo \
+	FontInfo.lo Function.lo Gfx.lo GfxFont.lo GfxState.lo \
+	GlobalParams.lo Hints.lo JArithmeticDecoder.lo JBIG2Stream.lo \
+	Lexer.lo Linearization.lo Link.lo LocalPDFDocBuilder.lo \
+	Movie.lo NameToCharCode.lo Object.lo OptionalContent.lo \
+	Outline.lo OutputDev.lo Page.lo PageTransition.lo Parser.lo \
+	PDFDoc.lo PDFDocEncoding.lo PDFDocFactory.lo PopplerCache.lo \
 	ProfileData.lo PreScanOutputDev.lo PSTokenizer.lo Rendition.lo \
 	StdinCachedFile.lo StdinPDFDocBuilder.lo Stream.lo strtok_r.lo \
-	UnicodeMap.lo UnicodeTypeTable.lo XRef.lo PSOutputDev.lo \
-	TextOutputDev.lo PageLabelInfo.lo SecurityHandler.lo Sound.lo \
-	XpdfPluginAPI.lo
+	UnicodeMap.lo UnicodeTypeTable.lo ViewerPreferences.lo XRef.lo \
+	PSOutputDev.lo TextOutputDev.lo PageLabelInfo.lo \
+	SecurityHandler.lo Sound.lo XpdfPluginAPI.lo
 libpoppler_la_OBJECTS = $(am_libpoppler_la_OBJECTS)
 libpoppler_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
@@ -225,16 +223,14 @@ am__poppler_include_HEADERS_DIST = SplashOutputDev.h CurlCachedFile.h \
 	PreScanOutputDev.h PSTokenizer.h Rendition.h StdinCachedFile.h \
 	StdinPDFDocBuilder.h Stream-CCITT.h Stream.h UnicodeMap.h \
 	UnicodeMapTables.h UnicodeTypeTable.h UnicodeCClassTables.h \
-	UnicodeCompTables.h UnicodeDecompTables.h XRef.h CharTypes.h \
-	CompactFontTables.h ErrorCodes.h NameToUnicodeTable.h \
-	PSOutputDev.h TextOutputDev.h SecurityHandler.h UTF8.h \
-	XpdfPluginAPI.h Sound.h
+	UnicodeCompTables.h UnicodeDecompTables.h ViewerPreferences.h \
+	XRef.h CharTypes.h CompactFontTables.h ErrorCodes.h \
+	NameToUnicodeTable.h PSOutputDev.h TextOutputDev.h \
+	SecurityHandler.h UTF8.h XpdfPluginAPI.h Sound.h
 HEADERS = $(nodist_poppler_include_HEADERS) $(poppler_include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ABIWORD_CFLAGS = @ABIWORD_CFLAGS@
-ABIWORD_LIBS = @ABIWORD_LIBS@
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -275,14 +271,12 @@ FONTCONFIG_LIBS = @FONTCONFIG_LIBS@
 FREETYPE_CFLAGS = @FREETYPE_CFLAGS@
 FREETYPE_CONFIG = @FREETYPE_CONFIG@
 FREETYPE_LIBS = @FREETYPE_LIBS@
-GDK_CFLAGS = @GDK_CFLAGS@
-GDK_FEATURE = @GDK_FEATURE@
-GDK_LIBS = @GDK_LIBS@
-GDK_REQ = @GDK_REQ@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GLIB_REQ = @GLIB_REQ@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
+GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
 GTK_TEST_CFLAGS = @GTK_TEST_CFLAGS@
@@ -314,6 +308,7 @@ LIBOPENJPEG_LIBS = @LIBOPENJPEG_LIBS@
 LIBPNG_CFLAGS = @LIBPNG_CFLAGS@
 LIBPNG_LIBS = @LIBPNG_LIBS@
 LIBS = @LIBS@
+LIBTIFF_LIBS = @LIBTIFF_LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
@@ -355,8 +350,6 @@ POPPLER_QT4_CXXFLAGS = @POPPLER_QT4_CXXFLAGS@
 POPPLER_QT4_LIBS = @POPPLER_QT4_LIBS@
 POPPLER_QT4_TEST_CFLAGS = @POPPLER_QT4_TEST_CFLAGS@
 POPPLER_QT4_TEST_LIBS = @POPPLER_QT4_TEST_LIBS@
-POPPLER_QT_CXXFLAGS = @POPPLER_QT_CXXFLAGS@
-POPPLER_QT_LIBS = @POPPLER_QT_LIBS@
 POPPLER_VERSION = @POPPLER_VERSION@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
@@ -412,8 +405,6 @@ infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-libqt3_CFLAGS = @libqt3_CFLAGS@
-libqt3_LIBS = @libqt3_LIBS@
 localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
@@ -484,6 +475,12 @@ win32_libs = @win32_libs@
 @BUILD_LIBPNG_TRUE@libpng_includes = \
 @BUILD_LIBPNG_TRUE@	$(LIBPNG_CFLAGS)
 
+@BUILD_LIBTIFF_TRUE@libtiff_libs = \
+@BUILD_LIBTIFF_TRUE@	$(LIBTIFF_LIBS)
+
+@BUILD_LIBTIFF_TRUE@libtiff_includes = \
+@BUILD_LIBTIFF_TRUE@	$(LIBTIFF_CFLAGS)
+
 @BUILD_LIBOPENJPEG_FALSE@libjpeg2000_sources = \
 @BUILD_LIBOPENJPEG_FALSE@	JPXStream.h			\
 @BUILD_LIBOPENJPEG_FALSE@	JPXStream.cc
@@ -516,16 +513,6 @@ win32_libs = @win32_libs@
 @BUILD_LIBCURL_TRUE@	CurlCachedFile.cc			\
 @BUILD_LIBCURL_TRUE@	CurlPDFDocBuilder.cc
 
-@BUILD_ABIWORD_OUTPUT_TRUE@abiword_sources = \
-@BUILD_ABIWORD_OUTPUT_TRUE@	ABWOutputDev.h				\
-@BUILD_ABIWORD_OUTPUT_TRUE@	ABWOutputDev.cc
-
-@BUILD_ABIWORD_OUTPUT_TRUE@abiword_includes = \
-@BUILD_ABIWORD_OUTPUT_TRUE@	$(ABIWORD_CFLAGS)
-
-@BUILD_ABIWORD_OUTPUT_TRUE@abiword_libs = \
-@BUILD_ABIWORD_OUTPUT_TRUE@	$(ABIWORD_LIBS)
-
 @USE_CMS_TRUE@cms_includes = $(LCMS_CFLAGS)
 @USE_CMS_TRUE@cms_libs = $(LCMS_LIBS)
 INCLUDES = \
@@ -535,7 +522,7 @@ INCLUDES = \
 	$(splash_includes)			\
 	$(cairo_includes)			\
 	$(arthur_includes)			\
-	$(abiword_includes)			\
+	$(libtiff_includes)			\
 	$(libpng_includes)			\
 	$(libcurl_includes)			\
 	$(FREETYPE_CFLAGS)			\
@@ -550,18 +537,18 @@ libpoppler_la_LIBADD = \
 	$(top_builddir)/fofi/libfofi.la		\
 	$(cms_libs)				\
 	$(splash_libs)				\
+	$(libtiff_libs)				\
 	$(libjpeg_libs)				\
 	$(libpng_libs)				\
 	$(zlib_libs)				\
 	$(libcurl_libs)				\
 	$(libjpeg2000_libs)			\
-	$(abiword_libs)				\
 	$(FREETYPE_LIBS)			\
 	$(FONTCONFIG_LIBS)			\
 	$(PTHREAD_LIBS)				\
 	$(win32_libs)
 
-libpoppler_la_LDFLAGS = -version-info 13:0:0 @create_shared_lib@ @auto_import_flags@
+libpoppler_la_LDFLAGS = -version-info 19:0:0 @create_shared_lib@ @auto_import_flags@
 @ENABLE_XPDF_HEADERS_TRUE@poppler_includedir = $(includedir)/poppler
 @ENABLE_XPDF_HEADERS_TRUE@poppler_include_HEADERS = \
 @ENABLE_XPDF_HEADERS_TRUE@	$(splash_headers)	\
@@ -623,6 +610,7 @@ libpoppler_la_LDFLAGS = -version-info 13:0:0 @create_shared_lib@ @auto_import_fl
 @ENABLE_XPDF_HEADERS_TRUE@	UnicodeCClassTables.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	UnicodeCompTables.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	UnicodeDecompTables.h	\
+@ENABLE_XPDF_HEADERS_TRUE@	ViewerPreferences.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	XRef.h			\
 @ENABLE_XPDF_HEADERS_TRUE@	CharTypes.h		\
 @ENABLE_XPDF_HEADERS_TRUE@	CompactFontTables.h	\
@@ -643,7 +631,6 @@ libpoppler_la_SOURCES = \
 	$(libjpeg_sources)	\
 	$(zlib_sources)		\
 	$(libjpeg2000_sources)	\
-	$(abiword_sources)	\
 	$(curl_sources)		\
 	Annot.cc		\
 	Array.cc 		\
@@ -696,6 +683,7 @@ libpoppler_la_SOURCES = \
 	strtok_r.cpp		\
 	UnicodeMap.cc		\
 	UnicodeTypeTable.cc	\
+	ViewerPreferences.cc	\
 	XRef.cc			\
 	PSOutputDev.cc		\
 	TextOutputDev.cc	\
@@ -813,7 +801,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ABWOutputDev.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Annot.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Array.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArthurOutputDev.Plo@am__quote@
@@ -880,6 +867,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TextOutputDev.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UnicodeMap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UnicodeTypeTable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ViewerPreferences.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XRef.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XpdfPluginAPI.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strtok_r.Plo@am__quote@

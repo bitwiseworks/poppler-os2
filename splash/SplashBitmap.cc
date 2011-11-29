@@ -18,6 +18,8 @@
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2010 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,6 +41,7 @@
 #include "poppler/Error.h"
 #include "goo/JpegWriter.h"
 #include "goo/PNGWriter.h"
+#include "goo/TiffWriter.h"
 #include "goo/ImgWriter.h"
 
 //------------------------------------------------------------------------
@@ -274,7 +277,7 @@ Guchar SplashBitmap::getAlpha(int x, int y) {
   return alpha[y * width + x];
 }
 
-SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI) {
+SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, const char *compressionString) {
   FILE *f;
   SplashError e;
 
@@ -282,13 +285,13 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileN
     return splashErrOpenFile;
   }
 
-  e = writeImgFile(format, f, hDPI, vDPI);
+  e = writeImgFile(format, f, hDPI, vDPI, compressionString);
   
   fclose(f);
   return e;
 }
 
-SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI) {
+SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI, const char *compressionString) {
   ImgWriter *writer;
 	SplashError e;
   
@@ -300,11 +303,26 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     #endif
 
     #ifdef ENABLE_LIBJPEG
+    #ifdef SPLASH_CMYK
+    case splashFormatJpegCMYK:
+      writer = new JpegWriter(JCS_CMYK);
+      break;
+    #endif
     case splashFormatJpeg:
       writer = new JpegWriter();
       break;
     #endif
 	
+    #ifdef ENABLE_LIBTIFF
+    case splashFormatTiff:
+      writer = new TiffWriter();
+      if (writer) {
+        ((TiffWriter *)writer)->setCompressionString(compressionString);
+        ((TiffWriter *)writer)->setSplashMode(mode);
+      }
+      break;
+    #endif
+
     default:
       // Not the greatest error message, but users of this function should
       // have already checked whether their desired format is compiled in.
@@ -317,8 +335,35 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
 	return e;
 }
 
+#include "poppler/GfxState_helpers.h"
+
+void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
+  SplashColor col;
+  double c, m, y, k, c1, m1, y1, k1, r, g, b;
+
+  for (int x = 0; x < width; x++) {
+    getPixel(x, yl, col);
+    c = byteToDbl(col[0]);
+    m = byteToDbl(col[1]);
+    y = byteToDbl(col[2]);
+    k = byteToDbl(col[3]);
+    c1 = 1 - c;
+    m1 = 1 - m;
+    y1 = 1 - y;
+    k1 = 1 - k;
+    cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
+    *line++ = dblToByte(clip01(r));
+    *line++ = dblToByte(clip01(g));
+    *line++ = dblToByte(clip01(b));
+  }
+}
+
 SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI) {
-  if (mode != splashModeRGB8 && mode != splashModeMono8 && mode != splashModeMono1 && mode != splashModeXBGR8) {
+  if (mode != splashModeRGB8 && mode != splashModeMono8 && mode != splashModeMono1 && mode != splashModeXBGR8
+#if SPLASH_CMYK
+      && mode != splashModeCMYK8
+#endif
+     ) {
     error(-1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
   }
@@ -328,6 +373,35 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
   }
 
   switch (mode) {
+#if SPLASH_CMYK
+    case splashModeCMYK8:
+      if (writer->supportCMYK()) {
+        SplashColorPtr row;
+        unsigned char **row_pointers = new unsigned char*[height];
+        row = data;
+
+        for (int y = 0; y < height; ++y) {
+          row_pointers[y] = row;
+          row += rowSize;
+        }
+        if (!writer->writePointers(row_pointers, height)) {
+          delete[] row_pointers;
+          return splashErrGeneric;
+        }
+        delete[] row_pointers;
+      } else {
+        unsigned char *row = new unsigned char[3 * width];
+        for (int y = 0; y < height; y++) {
+          getRGBLine(y, row);
+          if (!writer->writeRow(&row)) {
+            delete[] row;
+            return splashErrGeneric;
+          }
+        }
+        delete[] row;
+      }
+    break;
+#endif
     case splashModeRGB8:
     {
       SplashColorPtr row;

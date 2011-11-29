@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerDocument.html" title="PopplerDocument">
 <link rel="next" href="poppler-PopplerAction.html" title="PopplerAction">
-<meta name="generator" content="GTK-Doc V1.17 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -55,6 +55,7 @@ enum                <a class="link" href="PopplerPage.html#PopplerPageTransition
 enum                <a class="link" href="PopplerPage.html#PopplerPageTransitionAlignment" title="enum PopplerPageTransitionAlignment">PopplerPageTransitionAlignment</a>;
 enum                <a class="link" href="PopplerPage.html#PopplerPageTransitionDirection" title="enum PopplerPageTransitionDirection">PopplerPageTransitionDirection</a>;
 enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle">PopplerSelectionStyle</a>;
+                    <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes">PopplerTextAttributes</a>;
 <span class="returnvalue">int</span>                 <a class="link" href="PopplerPage.html#poppler-page-get-index" title="poppler_page_get_index ()">poppler_page_get_index</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">gchar</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-label" title="poppler_page_get_label ()">poppler_page_get_label</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-get-size" title="poppler_page_get_size ()">poppler_page_get_size</a>               (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
@@ -68,7 +69,6 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
                                                          <em class="parameter"><code><span class="type">int</span> *width</code></em>,
                                                          <em class="parameter"><code><span class="type">int</span> *height</code></em>);
 <a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *   <a class="link" href="PopplerPage.html#poppler-page-get-thumbnail" title="poppler_page_get_thumbnail ()">poppler_page_get_thumbnail</a>          (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="returnvalue">GdkPixbuf</span></a> *         <a class="link" href="PopplerPage.html#poppler-page-get-thumbnail-pixbuf" title="poppler_page_get_thumbnail_pixbuf ()">poppler_page_get_thumbnail_pixbuf</a>   (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render" title="poppler_page_render ()">poppler_page_render</a>                 (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-for-printing" title="poppler_page_render_for_printing ()">poppler_page_render_for_printing</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
@@ -77,23 +77,6 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
                                                         (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerPrintFlags" title="enum PopplerPrintFlags"><span class="type">PopplerPrintFlags</span></a> options</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-to-pixbuf" title="poppler_page_render_to_pixbuf ()">poppler_page_render_to_pixbuf</a>       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_x</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_y</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_width</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_height</code></em>,
-                                                         <em class="parameter"><code><span class="type">double</span> scale</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> rotation</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> *pixbuf</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-to-pixbuf-for-printing" title="poppler_page_render_to_pixbuf_for_printing ()">poppler_page_render_to_pixbuf_for_printing</a>
-                                                        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_x</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_y</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_width</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_height</code></em>,
-                                                         <em class="parameter"><code><span class="type">double</span> scale</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> rotation</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> *pixbuf</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-to-ps" title="poppler_page_render_to_ps ()">poppler_page_render_to_ps</a>           (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerDocument.html#PopplerPSFile" title="PopplerPSFile"><span class="type">PopplerPSFile</span></a> *ps_file</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()">poppler_page_render_selection</a>       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
@@ -103,16 +86,6 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *glyph_color</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *background_color</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-selection-to-pixbuf" title="poppler_page_render_selection_to_pixbuf ()">poppler_page_render_selection_to_pixbuf</a>
-                                                        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> rotation</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> *pixbuf</code></em>,
-                                                         <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>,
-                                                         <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *old_selection</code></em>,
-                                                         <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
-                                                         <em class="parameter"><code><span class="type">GdkColor</span> *glyph_color</code></em>,
-                                                         <em class="parameter"><code><span class="type">GdkColor</span> *background_color</code></em>);
 <a href="/usr/share/gtk-doc/html/cairo/cairo-Regions.html#cairo-region-t"><span class="returnvalue">cairo_region_t</span></a> *    <a class="link" href="PopplerPage.html#poppler-page-get-selected-region" title="poppler_page_get_selected_region ()">poppler_page_get_selected_region</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
@@ -131,6 +104,8 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
 <span class="returnvalue">gboolean</span>            <a class="link" href="PopplerPage.html#poppler-page-get-text-layout" title="poppler_page_get_text_layout ()">poppler_page_get_text_layout</a>        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> **rectangles</code></em>,
                                                          <em class="parameter"><code><span class="type">guint</span> *n_rectangles</code></em>);
+<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-text-attributes" title="poppler_page_get_text_attributes ()">poppler_page_get_text_attributes</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-text-attributes" title="poppler_page_free_text_attributes ()">poppler_page_free_text_attributes</a>   (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
 <span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-link-mapping" title="poppler_page_get_link_mapping ()">poppler_page_get_link_mapping</a>       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-link-mapping" title="poppler_page_free_link_mapping ()">poppler_page_free_link_mapping</a>      (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
 <span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-image-mapping" title="poppler_page_get_image_mapping ()">poppler_page_get_image_mapping</a>      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
@@ -164,6 +139,9 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
 <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="returnvalue">PopplerAnnotMapping</span></a> * <a class="link" href="PopplerPage.html#poppler-annot-mapping-new" title="poppler_annot_mapping_new ()">poppler_annot_mapping_new</a>         (<em class="parameter"><code><span class="type">void</span></code></em>);
 <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="returnvalue">PopplerAnnotMapping</span></a> * <a class="link" href="PopplerPage.html#poppler-annot-mapping-copy" title="poppler_annot_mapping_copy ()">poppler_annot_mapping_copy</a>        (<em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a> *mapping</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-annot-mapping-free" title="poppler_annot_mapping_free ()">poppler_annot_mapping_free</a>          (<em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a> *mapping</code></em>);
+<a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="returnvalue">PopplerTextAttributes</span></a> * <a class="link" href="PopplerPage.html#poppler-text-attributes-new" title="poppler_text_attributes_new ()">poppler_text_attributes_new</a>     (<em class="parameter"><code><span class="type">void</span></code></em>);
+<a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="returnvalue">PopplerTextAttributes</span></a> * <a class="link" href="PopplerPage.html#poppler-text-attributes-copy" title="poppler_text_attributes_copy ()">poppler_text_attributes_copy</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> *text_attrs</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-text-attributes-free" title="poppler_text_attributes_free ()">poppler_text_attributes_free</a>        (<em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> *text_attrs</code></em>);
 </pre>
 </div>
 <div class="refsect1">
@@ -394,8 +372,7 @@ of <em class="parameter"><code>annot</code></em> on the page
 <hr>
 <div class="refsect2">
 <a name="PopplerPageTransitionType"></a><h3>enum PopplerPageTransitionType</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_PAGE_TRANSITION_REPLACE,
   POPPLER_PAGE_TRANSITION_SPLIT,
   POPPLER_PAGE_TRANSITION_BLINDS,
@@ -486,8 +463,7 @@ sweeps across the page in a wide band moving from one side of the screen to the 
 <hr>
 <div class="refsect2">
 <a name="PopplerPageTransitionAlignment"></a><h3>enum PopplerPageTransitionAlignment</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_PAGE_TRANSITION_HORIZONTAL,
   POPPLER_PAGE_TRANSITION_VERTICAL
 } PopplerPageTransitionAlignment;
@@ -515,8 +491,7 @@ and <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-BLINDS:CAPS">
 <hr>
 <div class="refsect2">
 <a name="PopplerPageTransitionDirection"></a><h3>enum PopplerPageTransitionDirection</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_PAGE_TRANSITION_INWARD,
   POPPLER_PAGE_TRANSITION_OUTWARD
 } PopplerPageTransitionDirection;
@@ -544,8 +519,7 @@ Page transition direction types for <a class="link" href="PopplerPage.html#POPPL
 <hr>
 <div class="refsect2">
 <a name="PopplerSelectionStyle"></a><h3>enum PopplerSelectionStyle</h3>
-<pre class="programlisting">typedef enum
-{
+<pre class="programlisting">typedef enum {
   POPPLER_SELECTION_GLYPH,
   POPPLER_SELECTION_WORD,
   POPPLER_SELECTION_LINE
@@ -574,6 +548,53 @@ Selection styles
 </tr>
 </tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="PopplerTextAttributes"></a><h3>PopplerTextAttributes</h3>
+<pre class="programlisting">typedef struct {
+  gchar *font_name;
+  gdouble font_size;
+  gboolean is_underlined;
+  PopplerColor color;
+
+  gint start_index;
+  gint end_index;
+} PopplerTextAttributes;
+</pre>
+<p>
+A <span class="type">PopplerTextInfo</span> is used to describe text attriutes of a reange of text
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><span class="type">gchar</span> *<em class="structfield"><code><a name="PopplerTextAttributes.font-name"></a>font_name</code></em>;</span></p></td>
+<td>font name</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerTextAttributes.font-size"></a>font_size</code></em>;</span></p></td>
+<td>font size</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="type">gboolean</span> <em class="structfield"><code><a name="PopplerTextAttributes.is-underlined"></a>is_underlined</code></em>;</span></p></td>
+<td>if text is underlined</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> <em class="structfield"><code><a name="PopplerTextAttributes.color"></a>color</code></em>;</span></p></td>
+<td>a <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>, the foreground color</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerTextAttributes.start-index"></a>start_index</code></em>;</span></p></td>
+<td>start position this text attributes apply</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerTextAttributes.end-index"></a>end_index</code></em>;</span></p></td>
+<td>end position this text text attributes apply</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.18</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -783,34 +804,6 @@ doesn't have a thumbnail for this page.</td>
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-page-get-thumbnail-pixbuf"></a><h3>poppler_page_get_thumbnail_pixbuf ()</h3>
-<pre class="programlisting"><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="returnvalue">GdkPixbuf</span></a> *         poppler_page_get_thumbnail_pixbuf   (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
-<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
-<h3 class="title">Warning</h3>
-<p><code class="literal">poppler_page_get_thumbnail_pixbuf</code> is deprecated and should not be used in newly-written code. 0.16</p>
-</div>
-<p>
-Get the embedded thumbnail for the specified page.  If the document
-doesn't have an embedded thumbnail for the page, this function
-returns <code class="literal">NULL</code>.
-</p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>page</code></em> :</span></p></td>
-<td>the <span class="type">PopperPage</span> to get the thumbnail for</td>
-</tr>
-<tr>
-<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>the tumbnail as a <a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> or <code class="literal">NULL</code> if the document
-doesn't have a thumbnail for this page.</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<hr>
-<div class="refsect2">
 <a name="poppler-page-render"></a><h3>poppler_page_render ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render                 (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);</pre>
@@ -885,127 +878,6 @@ with the specified options
 </tbody>
 </table></div>
 <p class="since">Since 0.16</p>
-</div>
-<hr>
-<div class="refsect2">
-<a name="poppler-page-render-to-pixbuf"></a><h3>poppler_page_render_to_pixbuf ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render_to_pixbuf       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_x</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_y</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_width</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_height</code></em>,
-                                                         <em class="parameter"><code><span class="type">double</span> scale</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> rotation</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> *pixbuf</code></em>);</pre>
-<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
-<h3 class="title">Warning</h3>
-<p><code class="literal">poppler_page_render_to_pixbuf</code> is deprecated and should not be used in newly-written code. 0.16</p>
-</div>
-<p>
-First scale the document to match the specified pixels per point,
-then render the rectangle given by the upper left corner at
-(src_x, src_y) and src_width and src_height.
-This function is for rendering a page that will be displayed.
-If you want to render a page that will be printed use
-<a class="link" href="PopplerPage.html#poppler-page-render-to-pixbuf-for-printing" title="poppler_page_render_to_pixbuf_for_printing ()"><code class="function">poppler_page_render_to_pixbuf_for_printing()</code></a> instead
-</p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>page</code></em> :</span></p></td>
-<td>the page to render from</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_x</code></em> :</span></p></td>
-<td>x coordinate of upper left corner</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_y</code></em> :</span></p></td>
-<td>y coordinate of upper left corner</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_width</code></em> :</span></p></td>
-<td>width of rectangle to render</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_height</code></em> :</span></p></td>
-<td>height of rectangle to render</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>scale</code></em> :</span></p></td>
-<td>scale specified as pixels per point</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>rotation</code></em> :</span></p></td>
-<td>rotate the document by the specified degree</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>pixbuf</code></em> :</span></p></td>
-<td>pixbuf to render into</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="poppler-page-render-to-pixbuf-for-printing"></a><h3>poppler_page_render_to_pixbuf_for_printing ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render_to_pixbuf_for_printing
-                                                        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_x</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_y</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_width</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> src_height</code></em>,
-                                                         <em class="parameter"><code><span class="type">double</span> scale</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> rotation</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> *pixbuf</code></em>);</pre>
-<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
-<h3 class="title">Warning</h3>
-<p><code class="literal">poppler_page_render_to_pixbuf_for_printing</code> is deprecated and should not be used in newly-written code. 0.16</p>
-</div>
-<p>
-First scale the document to match the specified pixels per point,
-then render the rectangle given by the upper left corner at
-(src_x, src_y) and src_width and src_height.
-This function is for rendering a page that will be printed.
-</p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>page</code></em> :</span></p></td>
-<td>the page to render from</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_x</code></em> :</span></p></td>
-<td>x coordinate of upper left corner</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_y</code></em> :</span></p></td>
-<td>y coordinate of upper left corner</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_width</code></em> :</span></p></td>
-<td>width of rectangle to render</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>src_height</code></em> :</span></p></td>
-<td>height of rectangle to render</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>scale</code></em> :</span></p></td>
-<td>scale specified as pixels per point</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>rotation</code></em> :</span></p></td>
-<td>rotate the document by the specified degree</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>pixbuf</code></em> :</span></p></td>
-<td>pixbuf to render into</td>
-</tr>
-</tbody>
-</table></div>
 </div>
 <hr>
 <div class="refsect2">
@@ -1088,77 +960,6 @@ only render the changed part of the selection.
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-page-render-selection-to-pixbuf"></a><h3>poppler_page_render_selection_to_pixbuf ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render_selection_to_pixbuf
-                                                        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
-                                                         <em class="parameter"><code><span class="type">int</span> rotation</code></em>,
-                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/gdk-pixbuf/unstable/gdk-pixbuf-gdk-pixbuf.html#GdkPixbuf"><span class="type">GdkPixbuf</span></a> *pixbuf</code></em>,
-                                                         <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>,
-                                                         <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *old_selection</code></em>,
-                                                         <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
-                                                         <em class="parameter"><code><span class="type">GdkColor</span> *glyph_color</code></em>,
-                                                         <em class="parameter"><code><span class="type">GdkColor</span> *background_color</code></em>);</pre>
-<div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
-<h3 class="title">Warning</h3>
-<p><code class="literal">poppler_page_render_selection_to_pixbuf</code> is deprecated and should not be used in newly-written code. 0.16</p>
-</div>
-<p>
-Render the selection specified by <em class="parameter"><code>selection</code></em> for <em class="parameter"><code>page</code></em> into
-<em class="parameter"><code>pixbuf</code></em>.  The selection will be rendered at <em class="parameter"><code>scale</code></em>, using
-<em class="parameter"><code>glyph_color</code></em> for the glyphs and <em class="parameter"><code>background_color</code></em> for the selection
-background.
-</p>
-<p>
-If non-NULL, <em class="parameter"><code>old_selection</code></em> specifies the selection that is already
-rendered in <em class="parameter"><code>pixbuf</code></em>, in which case this function will (some day)
-only render the changed part of the selection.
-</p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>page</code></em> :</span></p></td>
-<td>the <a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> for which to render selection</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>scale</code></em> :</span></p></td>
-<td>scale specified as pixels per point</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>rotation</code></em> :</span></p></td>
-<td>rotate the document by the specified degree</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>pixbuf</code></em> :</span></p></td>
-<td>pixbuf to render to</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>selection</code></em> :</span></p></td>
-<td>start and end point of selection as a rectangle</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>old_selection</code></em> :</span></p></td>
-<td>previous selection</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>style</code></em> :</span></p></td>
-<td>a <a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a>
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>glyph_color</code></em> :</span></p></td>
-<td>color to use for drawing glyphs</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>background_color</code></em> :</span></p></td>
-<td>color to use for the selection background</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<hr>
-<div class="refsect2">
 <a name="poppler-page-get-selected-region"></a><h3>poppler_page_get_selected_region ()</h3>
 <pre class="programlisting"><a href="/usr/share/gtk-doc/html/cairo/cairo-Regions.html#cairo-region-t"><span class="returnvalue">cairo_region_t</span></a> *    poppler_page_get_selected_region    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
@@ -1167,7 +968,7 @@ only render the changed part of the selection.
 <p>
 Returns a region containing the area that would be rendered by
 <a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a> or
-<a class="link" href="PopplerPage.html#poppler-page-render-selection-to-pixbuf" title="poppler_page_render_selection_to_pixbuf ()"><code class="function">poppler_page_render_selection_to_pixbuf()</code></a>.
+<code class="function">poppler_page_render_selection_to_pixbuf()</code>.
 The returned region must be freed with <a href="/usr/share/gtk-doc/html/cairo/cairo-Regions.html#cairo-region-destroy"><code class="function">cairo_region_destroy()</code></a>
 </p>
 <div class="variablelist"><table border="0">
@@ -1214,7 +1015,7 @@ The returned region must be freed with <a href="/usr/share/gtk-doc/html/cairo/ca
 <p>
 Returns a region containing the area that would be rendered by
 <a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a> or 
-<a class="link" href="PopplerPage.html#poppler-page-render-selection-to-pixbuf" title="poppler_page_render_selection_to_pixbuf ()"><code class="function">poppler_page_render_selection_to_pixbuf()</code></a> as a <span class="type">GList</span> of
+<code class="function">poppler_page_render_selection_to_pixbuf()</code> as a <span class="type">GList</span> of
 <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>. The returned list must be freed with
 <a class="link" href="PopplerPage.html#poppler-page-selection-region-free" title="poppler_page_selection_region_free ()"><code class="function">poppler_page_selection_region_free()</code></a>.
 </p>
@@ -1394,6 +1195,41 @@ The position in the array represents an offset in the text returned by
 </tbody>
 </table></div>
 <p class="since">Since 0.16</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-page-get-text-attributes"></a><h3>poppler_page_get_text_attributes ()</h3>
+<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_text_attributes    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<p>
+Obtains the attributes of the text as a GList of <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>.
+This list must be freed with <a class="link" href="PopplerPage.html#poppler-page-free-text-attributes" title="poppler_page_free_text_attributes ()"><code class="function">poppler_page_free_text_attributes()</code></a> when done.
+</p>
+<p>
+Each list element is a <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> struct where start_index and
+end_index indicates the range of text (as returned by <a class="link" href="PopplerPage.html#poppler-page-get-text" title="poppler_page_get_text ()"><code class="function">poppler_page_get_text()</code></a>)
+to which text attributes apply.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>page</code></em> :</span></p></td>
+<td>A <a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>A <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.18</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-page-free-text-attributes"></a><h3>poppler_page_free_text_attributes ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_text_attributes   (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -1935,6 +1771,62 @@ Frees the given <a class="link" href="PopplerPage.html#PopplerAnnotMapping" titl
 </tr></tbody>
 </table></div>
 </div>
+<hr>
+<div class="refsect2">
+<a name="poppler-text-attributes-new"></a><h3>poppler_text_attributes_new ()</h3>
+<pre class="programlisting"><a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="returnvalue">PopplerTextAttributes</span></a> * poppler_text_attributes_new     (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>
+Creates a new <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a new <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>, use <a class="link" href="PopplerPage.html#poppler-text-attributes-free" title="poppler_text_attributes_free ()"><code class="function">poppler_text_attributes_free()</code></a> to free it</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since 0.18</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-text-attributes-copy"></a><h3>poppler_text_attributes_copy ()</h3>
+<pre class="programlisting"><a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="returnvalue">PopplerTextAttributes</span></a> * poppler_text_attributes_copy    (<em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> *text_attrs</code></em>);</pre>
+<p>
+Creates a copy of <em class="parameter"><code>text_attrs</code></em>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>text_attrs</code></em> :</span></p></td>
+<td>a <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> to copy</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>a new allocated copy of <em class="parameter"><code>text_attrs</code></em>
+</td>
+</tr>
+</tbody>
+</table></div>
+<p class="since">Since 0.18</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-text-attributes-free"></a><h3>poppler_text_attributes_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_text_attributes_free        (<em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> *text_attrs</code></em>);</pre>
+<p>
+Frees the given <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>text_attrs</code></em> :</span></p></td>
+<td>a <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since 0.18</p>
+</div>
 </div>
 <div class="refsect1">
 <a name="PopplerPage.property-details"></a><h2>Property Details</h2>
@@ -1950,6 +1842,6 @@ The label of the page or <code class="literal">NULL</code>. See also <a class="l
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.17</div>
+          Generated by GTK-Doc V1.18</div>
 </body>
 </html>

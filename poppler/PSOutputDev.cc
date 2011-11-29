@@ -15,17 +15,17 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2009, 2010 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2009-2011 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -85,7 +85,7 @@
 //------------------------------------------------------------------------
 
 // Resolution at which pages with transparency will be rasterized.
-#define splashDPI 300
+#define defaultSplashDPI 300
 
 //------------------------------------------------------------------------
 // PostScript prolog and setup
@@ -506,10 +506,13 @@ static char *prolog[] = {
   "         /pdfTextClipPath [] def } def",
   "~1ns",
   "% Level 1 image operators",
-  "~1n",
   "/pdfIm1 {",
   "  /pdfImBuf1 4 index string def",
   "  { currentfile pdfImBuf1 readhexstring pop } image",
+  "} def",
+  "/pdfIm1Bin {",
+  "  /pdfImBuf1 4 index string def",
+  "  { currentfile pdfImBuf1 readstring pop } image",
   "} def",
   "~1s",
   "/pdfIm1Sep {",
@@ -523,10 +526,25 @@ static char *prolog[] = {
   "  { currentfile pdfImBuf4 readhexstring pop }",
   "  true 4 colorimage",
   "} def",
+  "/pdfIm1SepBin {",
+  "  /pdfImBuf1 4 index string def",
+  "  /pdfImBuf2 4 index string def",
+  "  /pdfImBuf3 4 index string def",
+  "  /pdfImBuf4 4 index string def",
+  "  { currentfile pdfImBuf1 readstring pop }",
+  "  { currentfile pdfImBuf2 readstring pop }",
+  "  { currentfile pdfImBuf3 readstring pop }",
+  "  { currentfile pdfImBuf4 readstring pop }",
+  "  true 4 colorimage",
+  "} def",
   "~1ns",
   "/pdfImM1 {",
   "  fCol /pdfImBuf1 4 index 7 add 8 idiv string def",
   "  { currentfile pdfImBuf1 readhexstring pop } imagemask",
+  "} def",
+  "/pdfImM1Bin {",
+  "  fCol /pdfImBuf1 4 index 7 add 8 idiv string def",
+  "  { currentfile pdfImBuf1 readstring pop } imagemask",
   "} def",
   "/pdfImM1a {",
   "  { 2 copy get exch 1 add exch } imagemask",
@@ -1131,6 +1149,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
   processColors = 0;
   inType3Char = gFalse;
+  inUncoloredPattern = gFalse;
 
 #if OPI_SUPPORT
   // initialize OPI nesting levels
@@ -1297,6 +1316,7 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     writePS("%!PS-Adobe-3.0 Resource-Form\n");
     break;
   }
+  writePSFmt("%Produced by poppler pdftops version: {0:s} (http://poppler.freedesktop.org)\n", PACKAGE_VERSION);
   xref->getDocInfo(&info);
   if (info.isDict() && info.dictLookup("Creator", &obj1)->isString()) {
     writePS("%%Creator: ");
@@ -1315,6 +1335,9 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     writePS("%%DocumentCustomColors: (atend)\n");
   }
   writePS("%%DocumentSuppliedResources: (atend)\n");
+  if ((level == psLevel1 || level == psLevel1Sep) && globalParams->getPSBinary()) {
+    writePS("%%DocumentData: Binary\n");
+  }
 
   switch (mode) {
   case psModePSOrigPageSizes:
@@ -2969,11 +2992,15 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   Guchar col[4];
   double m0, m1, m2, m3, m4, m5;
   int c, w, h, x, y, comp, i;
+  double splashDPI;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
+  GBool useBinary;
+  GBool isGray;
+  int compCyan;
 
   if (!forceRasterize) {
-    scan = new PreScanOutputDev();
+    scan = new PreScanOutputDev(xref);
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,
                      sliceX, sliceY, sliceW, sliceH,
                      printing, catalog, abortCheckCbk, abortCheckCbkData);
@@ -2992,13 +3019,13 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
 				    paperColor, gTrue, gFalse);
 #if SPLASH_CMYK
-  } else if (level == psLevel1Sep) {
+  } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
     paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
     splashOut = new SplashOutputDev(splashModeCMYK8, 1, gFalse,
 				    paperColor, gTrue, gFalse);
 #else
-  } else if (level == psLevel1Sep) {
-    error(-1, "pdftops was built without CMYK support, level1sep needs it to work in this file");
+  } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
+    error(-1, "pdftops was built without CMYK support, levelnsep needs it to work in this file");
     return gFalse;
 #endif
   } else {
@@ -3007,6 +3034,10 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 				    paperColor, gTrue, gFalse);
   }
   splashOut->startDoc(xref);
+  splashDPI = globalParams->getSplashResolution();
+  if (splashDPI < 1.0) {
+    splashDPI = defaultSplashDPI;
+  }
   page->displaySlice(splashOut, splashDPI, splashDPI, rotateA,
 		     useMediaBox, crop,
 		     sliceX, sliceY, sliceW, sliceH,
@@ -3071,47 +3102,134 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 	     m0, m1, m2, m3, m4, m5);
   switch (level) {
   case psLevel1:
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1\n",
-	       w, h, w, -h, h);
+    useBinary = globalParams->getPSBinary();
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}\n",
+	       w, h, w, -h, h,
+	       useBinary ? "Bin" : "");
     p = bitmap->getDataPtr();
     i = 0;
-    for (y = 0; y < h; ++y) {
-      for (x = 0; x < w; ++x) {
-	digit = *p / 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	digit = *p++ % 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	if (i >= 64) {
-	  hexBuf[i++] = '\n';
-	  writePSBuf(hexBuf, i);
-	  i = 0;
+    if (useBinary) {
+      for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+	  hexBuf[i++] = *p++;
+	  if (i >= 64) {
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
+	}
+      }
+    } else {
+      for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+	  digit = *p / 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  digit = *p++ % 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  if (i >= 64) {
+	    hexBuf[i++] = '\n';
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
 	}
       }
     }
     if (i != 0) {
-      hexBuf[i++] = '\n';
+      if (!useBinary) {
+	hexBuf[i++] = '\n';
+      }
       writePSBuf(hexBuf, i);
     }
     break;
   case psLevel1Sep:
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep\n",
-	       w, h, w, -h, h);
+    useBinary = globalParams->getPSBinary();
+    p = bitmap->getDataPtr();
+    isGray = gTrue;
+    for (y = 0; y < h; ++y) {
+      for (x = 0; x < w; ++x) {
+	if (p[4*x] != p[4*x + 1] || p[4*x] != p[4*x + 2]) {
+	  isGray = gFalse;
+	  y = h;
+	  break;
+	}
+      }
+      p += bitmap->getRowSize();
+    }
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}{6:s}\n",
+	       w, h, w, -h, h,
+	       isGray ? "" : "Sep",
+	       useBinary ? "Bin" : "");
     p = bitmap->getDataPtr();
     i = 0;
     col[0] = col[1] = col[2] = col[3] = 0;
-    if (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0) {
-      for (y = 0; y < h; ++y) {
-        for (comp = 0; comp < 4; ++comp) {
+    if (isGray) {
+      int g;
+      if ((psProcessBlack & processColors) == 0) {
+	for (y = 0; y < h; ++y) {
 	  for (x = 0; x < w; ++x) {
-	    col[comp] |= p[4*x + comp];
-	    digit = p[4*x + comp] / 16;
+	    if (p[4*x] > 0 || p[4*x + 3] > 0) {
+	      col[3] = 1;
+	      y = h;
+	      break;
+	    }
+	  }
+          p += bitmap->getRowSize();
+	}
+        p = bitmap->getDataPtr();
+      }
+      for (y = 0; y < h; ++y) {
+	if (useBinary) {
+	  for (x = 0; x < w; ++x) {
+	    g = p[4*x] + p[4*x + 3];
+	    g = 255 - g;
+	    if (g < 0) g = 0;
+	    hexBuf[i++] = (Guchar) g;
+	    if (i >= 64) {
+	      writePSBuf(hexBuf, i);
+	      i = 0;
+	    }
+	  }
+	} else {
+	  for (x = 0; x < w; ++x) {
+	    g = p[4*x] + p[4*x + 3];
+	    g = 255 - g;
+	    if (g < 0) g = 0;
+	    digit = g / 16;
 	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    digit = p[4*x + comp] % 16;
+	    digit = g % 16;
 	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
 	    if (i >= 64) {
 	      hexBuf[i++] = '\n';
 	      writePSBuf(hexBuf, i);
 	      i = 0;
+	    }
+	  }
+        }
+        p += bitmap->getRowSize();
+      }
+    } else if (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0) {
+      for (y = 0; y < h; ++y) {
+        for (comp = 0; comp < 4; ++comp) {
+	  if (useBinary) {
+	    for (x = 0; x < w; ++x) {
+	      col[comp] |= p[4*x + comp];
+	      hexBuf[i++] = p[4*x + comp];
+	      if (i >= 64) {
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
+	    }
+	  } else {
+	    for (x = 0; x < w; ++x) {
+	      col[comp] |= p[4*x + comp];
+	      digit = p[4*x + comp] / 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      digit = p[4*x + comp] % 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      if (i >= 64) {
+	        hexBuf[i++] = '\n';
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
 	    }
 	  }
         }
@@ -3120,15 +3238,25 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     } else {
       for (y = 0; y < h; ++y) {
         for (comp = 0; comp < 4; ++comp) {
-	  for (x = 0; x < w; ++x) {
-	    digit = p[4*x + comp] / 16;
-	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    digit = p[4*x + comp] % 16;
-	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    if (i >= 64) {
-	      hexBuf[i++] = '\n';
-	      writePSBuf(hexBuf, i);
-	      i = 0;
+	  if (useBinary) {
+	    for (x = 0; x < w; ++x) {
+	      hexBuf[i++] = p[4*x + comp];
+	      if (i >= 64) {
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
+	    }
+	  } else {
+	    for (x = 0; x < w; ++x) {
+	      digit = p[4*x + comp] / 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      digit = p[4*x + comp] % 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      if (i >= 64) {
+	        hexBuf[i++] = '\n';
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
 	    }
 	  }
         }
@@ -3136,7 +3264,9 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       }
     }
     if (i != 0) {
-      hexBuf[i++] = '\n';
+      if (!useBinary) {
+        hexBuf[i++] = '\n';
+      }
       writePSBuf(hexBuf, i);
     }
     if (col[0]) {
@@ -3152,10 +3282,80 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       processColors |= psProcessBlack;
     }
     break;
-  case psLevel2:
   case psLevel2Sep:
-  case psLevel3:
   case psLevel3Sep:
+    obj.initNull();
+    str0 = new MemStream((char *)bitmap->getDataPtr(), 0, w * h * 4, &obj);
+    isGray = gTrue;
+    while ((compCyan = str0->getChar()) != EOF) {
+      if (str0->getChar() != compCyan ||
+          str0->getChar() != compCyan) {
+	isGray = gFalse;
+	break;
+      }
+      str0->getChar();
+    }
+    str0->reset();
+    if (isGray) {
+      writePS("/DeviceGray setcolorspace\n");
+      str = new RunLengthEncoder(new CMKYGrayEncoder(str0));
+    } else {
+      processColors |= psProcessCMYK;
+      writePS("/DeviceCMYK setcolorspace\n");
+      str = new RunLengthEncoder(str0);
+    }
+    writePS("<<\n  /ImageType 1\n");
+    writePSFmt("  /Width {0:d}\n", bitmap->getWidth());
+    writePSFmt("  /Height {0:d}\n", bitmap->getHeight());
+    writePSFmt("  /ImageMatrix [{0:d} 0 0 {1:d} 0 {2:d}]\n", w, -h, h);
+    writePS("  /BitsPerComponent 8\n");
+    if (isGray) {
+      writePS("  /Decode [1 0]\n");
+    } else {
+      writePS("  /Decode [0 1 0 1 0 1 0 1]\n");
+    }
+    writePS("  /DataSource currentfile\n");
+    useBinary = globalParams->getPSBinary();
+    if (useBinary) {
+      /* nothing to do */;
+    } else if (globalParams->getPSASCIIHex()) {
+      writePS("    /ASCIIHexDecode filter\n");
+    } else {
+      writePS("    /ASCII85Decode filter\n");
+    }
+    writePS("    /RunLengthDecode filter\n");
+    writePS(">>\n");
+    if (useBinary) {
+      /* nothing to do */;
+    } else if (globalParams->getPSASCIIHex()) {
+      str = new ASCIIHexEncoder(str);
+    } else {
+      str = new ASCII85Encoder(str);
+    }
+    str->reset();
+    if (useBinary) {
+      int len = 0;
+      while (str->getChar() != EOF) {
+	len++;
+      }
+      str->reset();
+      writePSFmt("%%BeginData: {0:d} Binary Bytes\n", len+6+1);
+    }
+    writePS("image\n");
+    while ((c = str->getChar()) != EOF) {
+      writePSChar(c);
+    }
+    if (useBinary) {
+      writePS("\n%%EndData\n");
+    } else if (isGray) {
+      writePSChar('\n');
+    }
+    str->close();
+    delete str;
+    delete str0;
+    break;
+  case psLevel2:
+  case psLevel3:
     writePS("/DeviceRGB setcolorspace\n");
     writePS("<<\n  /ImageType 1\n");
     writePSFmt("  /Width {0:d}\n", bitmap->getWidth());
@@ -3489,6 +3689,9 @@ void PSOutputDev::updateLineWidth(GfxState *state) {
 }
 
 void PSOutputDev::updateFillColorSpace(GfxState *state) {
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
   case psLevel1Sep:
@@ -3507,6 +3710,9 @@ void PSOutputDev::updateFillColorSpace(GfxState *state) {
 }
 
 void PSOutputDev::updateStrokeColorSpace(GfxState *state) {
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
   case psLevel1Sep:
@@ -3533,6 +3739,9 @@ void PSOutputDev::updateFillColor(GfxState *state) {
   double c, m, y, k;
   int i;
 
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
     state->getFillGray(&gray);
@@ -3596,6 +3805,9 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
   double c, m, y, k;
   int i;
 
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
     state->getStrokeGray(&gray);
@@ -3807,11 +4019,11 @@ void PSOutputDev::eoFill(GfxState *state) {
   writePS("f*\n");
 }
 
-GBool PSOutputDev::tilingPatternFill(GfxState *state, Object *str,
-				     int paintType, Dict *resDict,
-				     double *mat, double *bbox,
-				     int x0, int y0, int x1, int y1,
-				     double xStep, double yStep) {
+GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
+				       double *pmat, int paintType, int tilingType, Dict *resDict,
+				       double *mat, double *bbox,
+				       int x0, int y0, int x1, int y1,
+				       double xStep, double yStep) {
   PDFRectangle box;
   Gfx *gfx;
 
@@ -3853,9 +4065,21 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Object *str,
     }
   }
   inType3Char = gTrue;
+  if (paintType == 2) {
+    inUncoloredPattern = gTrue;
+    // ensure any PS procedures that contain sCol or fCol do not change the color
+    writePS("/pdfLastFill true def\n");
+    writePS("/pdfLastStroke true def\n");
+  }
   ++numTilingPatterns;
   gfx->display(str);
   --numTilingPatterns;
+  if (paintType == 2) {
+    inUncoloredPattern = gFalse;
+    // ensure the next PS procedures that uses sCol or fCol will update the color
+    writePS("/pdfLastFill false def\n");
+    writePS("/pdfLastStroke false def\n");
+  }
   inType3Char = gFalse;
   writePS("} def\n");
   delete gfx;
@@ -3872,6 +4096,92 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Object *str,
   writePS("grestore\n");
 
   return gTrue;
+}
+
+GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
+				       double *pmat, int paintType, int tilingType, Dict *resDict,
+				       double *mat, double *bbox,
+				       int x0, int y0, int x1, int y1,
+				       double xStep, double yStep) {
+  PDFRectangle box;
+  Gfx *gfx;
+
+  if (paintType == 2) {
+    // setpattern with PaintType 2 needs the paint color
+    writePS("currentcolor\n");
+  }
+  writePS("<<\n  /PatternType 1\n");
+  writePSFmt("  /PaintType {0:d}\n", paintType);
+  writePSFmt("  /TilingType {0:d}\n", tilingType);
+  writePSFmt("  /BBox [{0:.6g} {1:.6g} {2:.6g} {3:.6g}]\n", bbox[0], bbox[1], bbox[2], bbox[3]);
+  writePSFmt("  /XStep {0:.6g}\n", xStep);
+  writePSFmt("  /YStep {0:.6g}\n", yStep);
+  writePS("  /PaintProc { \n");
+  box.x1 = bbox[0];
+  box.y1 = bbox[1];
+  box.x2 = bbox[2];
+  box.y2 = bbox[3];
+  gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+  inType3Char = gTrue;
+  if (paintType == 2) {
+    inUncoloredPattern = gTrue;
+    // ensure any PS procedures that contain sCol or fCol do not change the color
+    writePS("/pdfLastFill true def\n");
+    writePS("/pdfLastStroke true def\n");
+  }
+  gfx->display(str);
+  if (paintType == 2) {
+    inUncoloredPattern = gFalse;
+    // ensure the next PS procedures that uses sCol or fCol will update the color
+    writePS("/pdfLastFill false def\n");
+    writePS("/pdfLastStroke false def\n");
+  }
+  inType3Char = gFalse;
+  delete gfx;
+  writePS("  }\n");
+  writePS(">>\n");
+  writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}]\n", mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+  writePS("makepattern setpattern\n");
+  writePS("clippath fill\n"); // Gfx sets up a clip before calling out->tilingPatternFill()
+
+  return gTrue;
+}
+
+GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+				     double *pmat, int paintType, int tilingType, Dict *resDict,
+				     double *mat, double *bbox,
+				     int x0, int y0, int x1, int y1,
+				     double xStep, double yStep) {
+  if (x1 - x0 == 1 && y1 - y0 == 1) {
+    // Don't need to use patterns if only one instance of the pattern is used
+    PDFRectangle box;
+    Gfx *gfx;
+    double x, y, tx, ty;
+
+    x = x0 * xStep;
+    y = y0 * yStep;
+    tx = x * mat[0] + y * mat[2] + mat[4];
+    ty = x * mat[1] + y * mat[3] + mat[5];
+    box.x1 = bbox[0];
+    box.y1 = bbox[1];
+    box.x2 = bbox[2];
+    box.y2 = bbox[3];
+    gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], tx, ty);
+    inType3Char = gTrue;
+    gfx->display(str);
+    inType3Char = gFalse;
+    delete gfx;
+    return gTrue;
+  }
+
+  if (level == psLevel1 || level == psLevel1Sep) {
+    return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict,
+			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
+  } else {
+    return tilingPatternFillL2(state, cat, str, pmat, paintType, tilingType, resDict,
+			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
+  }
 }
 
 GBool PSOutputDev::functionShadedFill(GfxState *state,
@@ -4543,6 +4853,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
   int col, x, y, c, i;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit, grayValue;
+  const GBool useBinary = globalParams->getPSBinary();
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -4593,13 +4904,15 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 	       width, height, invert ? "true" : "false",
 	       width, -height, height);
   } else if (colorMap) {
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1\n",
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}\n",
 	       width, height,
-	       width, -height, height);
+	       width, -height, height,
+	       useBinary ? "Bin" : "");
   } else {
-    writePSFmt("{0:d} {1:d} {2:s} [{3:d} 0 0 {4:d} 0 {5:d}] pdfImM1\n",
+    writePSFmt("{0:d} {1:d} {2:s} [{3:d} 0 0 {4:d} 0 {5:d}] pdfImM1{6:s}\n",
 	       width, height, invert ? "true" : "false",
-	       width, -height, height);
+	       width, -height, height,
+	       useBinary ? "Bin" : "");
   }
 
   // image data
@@ -4621,19 +4934,27 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 	  imgStr->getPixel(pixBuf);
 	  colorMap->getGray(pixBuf, &gray);
 	  grayValue = colToByte(gray);
-	  digit = grayValue / 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	  digit = grayValue % 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  if (useBinary) {
+	    hexBuf[i++] = grayValue;
+	  } else {
+	    digit = grayValue / 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	    digit = grayValue % 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  }
 	  if (i >= 64) {
-	    hexBuf[i++] = '\n';
+	    if (!useBinary) {
+	      hexBuf[i++] = '\n';
+	    }
 	    writePSBuf(hexBuf, i);
 	    i = 0;
 	  }
 	}
       }
       if (i != 0) {
-	hexBuf[i++] = '\n';
+	if (!useBinary) {
+	  hexBuf[i++] = '\n';
+	}
 	writePSBuf(hexBuf, i);
       }
       str->close();
@@ -4646,19 +4967,27 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
       for (y = 0; y < height; ++y) {
 	for (x = 0; x < width; x += 8) {
 	  grayValue = str->getChar();
-	  digit = grayValue / 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	  digit = grayValue % 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  if (useBinary) {
+	    hexBuf[i++] = grayValue;
+	  } else {
+	    digit = grayValue / 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	    digit = grayValue % 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  }
 	  if (i >= 64) {
-	    hexBuf[i++] = '\n';
+	    if (!useBinary) {
+	      hexBuf[i++] = '\n';
+	    }
 	    writePSBuf(hexBuf, i);
 	    i = 0;
 	  }
 	}
       }
       if (i != 0) {
-	hexBuf[i++] = '\n';
+	if (!useBinary) {
+	  hexBuf[i++] = '\n';
+	}
 	writePSBuf(hexBuf, i);
       }
       str->close();
@@ -4683,6 +5012,7 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
   GBool checkProcessColor;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
+  const GBool useBinary = globalParams->getPSBinary();
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -4690,9 +5020,10 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // width, height, matrix, bits per component
-  writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep\n",
+  writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep{5:s}\n",
 	     width, height,
-	     width, -height, height);
+	     width, -height, height,
+	     useBinary ? "Bin" : "");
 
   // allocate a line buffer
   lineBuf = (Guchar *)gmallocn(width, 4);
@@ -4734,23 +5065,37 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
     }
 
     // write one line of each color component
-    for (comp = 0; comp < 4; ++comp) {
-      for (x = 0; x < width; ++x) {
-	digit = lineBuf[4*x + comp] / 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
-	digit = lineBuf[4*x + comp] % 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
-	if (i >= 64) {
-	  hexBuf[i++] = '\n';
-	  writePSBuf(hexBuf, i);
-	  i = 0;
+    if (useBinary) {
+      for (comp = 0; comp < 4; ++comp) {
+        for (x = 0; x < width; ++x) {
+	  hexBuf[i++] = lineBuf[4*x + comp];
+	  if (i >= 64) {
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
+	}
+      }
+    } else {
+      for (comp = 0; comp < 4; ++comp) {
+        for (x = 0; x < width; ++x) {
+	  digit = lineBuf[4*x + comp] / 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	  digit = lineBuf[4*x + comp] % 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	  if (i >= 64) {
+	    hexBuf[i++] = '\n';
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
 	}
       }
     }
   }
 
   if (i != 0) {
-    hexBuf[i++] = '\n';
+    if (!useBinary) {
+      hexBuf[i++] = '\n';
+    }
     writePSBuf(hexBuf, i);
   }
 

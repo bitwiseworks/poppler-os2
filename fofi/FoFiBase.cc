@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Ed Avis <eda@waniasset.com>
+// Copyright (C) 2011 Jim Meyering <jim@meyering.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -62,6 +63,11 @@ char *FoFiBase::readFile(char *fileName, int *fileLen) {
     return NULL;
   }
   n = (int)ftell(f);
+  if (n < 0) {
+    error(-1, "Cannot determine length of '%s'", fileName);
+    fclose(f);
+    return NULL;
+  }
   if (fseek(f, 0, SEEK_SET) != 0) {
     error(-1, "Cannot seek to start of '%s'", fileName);
     fclose(f);

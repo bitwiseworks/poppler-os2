@@ -79,6 +79,9 @@
 <ANCHOR id="POPPLER-PERMISSIONS-OK-TO-COPY:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-OK-TO-COPY:CAPS">
 <ANCHOR id="POPPLER-PERMISSIONS-OK-TO-ADD-NOTES:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-OK-TO-ADD-NOTES:CAPS">
 <ANCHOR id="POPPLER-PERMISSIONS-OK-TO-FILL-FORM:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-OK-TO-FILL-FORM:CAPS">
+<ANCHOR id="POPPLER-PERMISSIONS-OK-TO-EXTRACT-CONTENTS:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-OK-TO-EXTRACT-CONTENTS:CAPS">
+<ANCHOR id="POPPLER-PERMISSIONS-OK-TO-ASSEMBLE:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-OK-TO-ASSEMBLE:CAPS">
+<ANCHOR id="POPPLER-PERMISSIONS-OK-TO-PRINT-HIGH-RESOLUTION:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-OK-TO-PRINT-HIGH-RESOLUTION:CAPS">
 <ANCHOR id="POPPLER-PERMISSIONS-FULL:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-FULL:CAPS">
 <ANCHOR id="poppler-document-new-from-file" href="poppler/PopplerDocument.html#poppler-document-new-from-file">
 <ANCHOR id="poppler-document-new-from-data" href="poppler/PopplerDocument.html#poppler-document-new-from-data">
@@ -104,6 +107,7 @@
 <ANCHOR id="poppler-document-get-page" href="poppler/PopplerDocument.html#poppler-document-get-page">
 <ANCHOR id="poppler-document-get-page-by-label" href="poppler/PopplerDocument.html#poppler-document-get-page-by-label">
 <ANCHOR id="poppler-document-find-dest" href="poppler/PopplerDocument.html#poppler-document-find-dest">
+<ANCHOR id="poppler-document-get-n-attachments" href="poppler/PopplerDocument.html#poppler-document-get-n-attachments">
 <ANCHOR id="poppler-document-has-attachments" href="poppler/PopplerDocument.html#poppler-document-has-attachments">
 <ANCHOR id="poppler-document-get-attachments" href="poppler/PopplerDocument.html#poppler-document-get-attachments">
 <ANCHOR id="poppler-document-get-form-field" href="poppler/PopplerDocument.html#poppler-document-get-form-field">
@@ -191,6 +195,7 @@
 <ANCHOR id="POPPLER-SELECTION-GLYPH:CAPS" href="poppler/PopplerPage.html#POPPLER-SELECTION-GLYPH:CAPS">
 <ANCHOR id="POPPLER-SELECTION-WORD:CAPS" href="poppler/PopplerPage.html#POPPLER-SELECTION-WORD:CAPS">
 <ANCHOR id="POPPLER-SELECTION-LINE:CAPS" href="poppler/PopplerPage.html#POPPLER-SELECTION-LINE:CAPS">
+<ANCHOR id="PopplerTextAttributes" href="poppler/PopplerPage.html#PopplerTextAttributes">
 <ANCHOR id="poppler-page-get-index" href="poppler/PopplerPage.html#poppler-page-get-index">
 <ANCHOR id="poppler-page-get-label" href="poppler/PopplerPage.html#poppler-page-get-label">
 <ANCHOR id="poppler-page-get-size" href="poppler/PopplerPage.html#poppler-page-get-size">
@@ -199,15 +204,11 @@
 <ANCHOR id="poppler-page-get-transition" href="poppler/PopplerPage.html#poppler-page-get-transition">
 <ANCHOR id="poppler-page-get-thumbnail-size" href="poppler/PopplerPage.html#poppler-page-get-thumbnail-size">
 <ANCHOR id="poppler-page-get-thumbnail" href="poppler/PopplerPage.html#poppler-page-get-thumbnail">
-<ANCHOR id="poppler-page-get-thumbnail-pixbuf" href="poppler/PopplerPage.html#poppler-page-get-thumbnail-pixbuf">
 <ANCHOR id="poppler-page-render" href="poppler/PopplerPage.html#poppler-page-render">
 <ANCHOR id="poppler-page-render-for-printing" href="poppler/PopplerPage.html#poppler-page-render-for-printing">
 <ANCHOR id="poppler-page-render-for-printing-with-options" href="poppler/PopplerPage.html#poppler-page-render-for-printing-with-options">
-<ANCHOR id="poppler-page-render-to-pixbuf" href="poppler/PopplerPage.html#poppler-page-render-to-pixbuf">
-<ANCHOR id="poppler-page-render-to-pixbuf-for-printing" href="poppler/PopplerPage.html#poppler-page-render-to-pixbuf-for-printing">
 <ANCHOR id="poppler-page-render-to-ps" href="poppler/PopplerPage.html#poppler-page-render-to-ps">
 <ANCHOR id="poppler-page-render-selection" href="poppler/PopplerPage.html#poppler-page-render-selection">
-<ANCHOR id="poppler-page-render-selection-to-pixbuf" href="poppler/PopplerPage.html#poppler-page-render-selection-to-pixbuf">
 <ANCHOR id="poppler-page-get-selected-region" href="poppler/PopplerPage.html#poppler-page-get-selected-region">
 <ANCHOR id="poppler-page-get-selection-region" href="poppler/PopplerPage.html#poppler-page-get-selection-region">
 <ANCHOR id="poppler-page-selection-region-free" href="poppler/PopplerPage.html#poppler-page-selection-region-free">
@@ -215,6 +216,8 @@
 <ANCHOR id="poppler-page-find-text" href="poppler/PopplerPage.html#poppler-page-find-text">
 <ANCHOR id="poppler-page-get-text" href="poppler/PopplerPage.html#poppler-page-get-text">
 <ANCHOR id="poppler-page-get-text-layout" href="poppler/PopplerPage.html#poppler-page-get-text-layout">
+<ANCHOR id="poppler-page-get-text-attributes" href="poppler/PopplerPage.html#poppler-page-get-text-attributes">
+<ANCHOR id="poppler-page-free-text-attributes" href="poppler/PopplerPage.html#poppler-page-free-text-attributes">
 <ANCHOR id="poppler-page-get-link-mapping" href="poppler/PopplerPage.html#poppler-page-get-link-mapping">
 <ANCHOR id="poppler-page-free-link-mapping" href="poppler/PopplerPage.html#poppler-page-free-link-mapping">
 <ANCHOR id="poppler-page-get-image-mapping" href="poppler/PopplerPage.html#poppler-page-get-image-mapping">
@@ -243,6 +246,9 @@
 <ANCHOR id="poppler-annot-mapping-new" href="poppler/PopplerPage.html#poppler-annot-mapping-new">
 <ANCHOR id="poppler-annot-mapping-copy" href="poppler/PopplerPage.html#poppler-annot-mapping-copy">
 <ANCHOR id="poppler-annot-mapping-free" href="poppler/PopplerPage.html#poppler-annot-mapping-free">
+<ANCHOR id="poppler-text-attributes-new" href="poppler/PopplerPage.html#poppler-text-attributes-new">
+<ANCHOR id="poppler-text-attributes-copy" href="poppler/PopplerPage.html#poppler-text-attributes-copy">
+<ANCHOR id="poppler-text-attributes-free" href="poppler/PopplerPage.html#poppler-text-attributes-free">
 <ANCHOR id="PopplerPage.property-details" href="poppler/PopplerPage.html#PopplerPage.property-details">
 <ANCHOR id="PopplerPage--label" href="poppler/PopplerPage.html#PopplerPage--label">
 <ANCHOR id="poppler-PopplerAction" href="poppler/poppler-PopplerAction.html">
@@ -260,6 +266,7 @@
 <ANCHOR id="PopplerActionMovie" href="poppler/poppler-PopplerAction.html#PopplerActionMovie">
 <ANCHOR id="PopplerActionRendition" href="poppler/poppler-PopplerAction.html#PopplerActionRendition">
 <ANCHOR id="PopplerActionOCGState" href="poppler/poppler-PopplerAction.html#PopplerActionOCGState">
+<ANCHOR id="PopplerActionJavascript" href="poppler/poppler-PopplerAction.html#PopplerActionJavascript">
 <ANCHOR id="PopplerActionType" href="poppler/poppler-PopplerAction.html#PopplerActionType">
 <ANCHOR id="POPPLER-ACTION-UNKNOWN:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-ACTION-UNKNOWN:CAPS">
 <ANCHOR id="POPPLER-ACTION-NONE:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-ACTION-NONE:CAPS">
@@ -271,6 +278,7 @@
 <ANCHOR id="POPPLER-ACTION-MOVIE:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-ACTION-MOVIE:CAPS">
 <ANCHOR id="POPPLER-ACTION-RENDITION:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-ACTION-RENDITION:CAPS">
 <ANCHOR id="POPPLER-ACTION-OCG-STATE:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-ACTION-OCG-STATE:CAPS">
+<ANCHOR id="POPPLER-ACTION-JAVASCRIPT:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-ACTION-JAVASCRIPT:CAPS">
 <ANCHOR id="PopplerDestType" href="poppler/poppler-PopplerAction.html#PopplerDestType">
 <ANCHOR id="POPPLER-DEST-UNKNOWN:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-DEST-UNKNOWN:CAPS">
 <ANCHOR id="POPPLER-DEST-XYZ:CAPS" href="poppler/poppler-PopplerAction.html#POPPLER-DEST-XYZ:CAPS">
@@ -322,6 +330,7 @@
 <ANCHOR id="poppler-form-field-get-partial-name" href="poppler/PopplerFormField.html#poppler-form-field-get-partial-name">
 <ANCHOR id="poppler-form-field-get-mapping-name" href="poppler/PopplerFormField.html#poppler-form-field-get-mapping-name">
 <ANCHOR id="poppler-form-field-get-name" href="poppler/PopplerFormField.html#poppler-form-field-get-name">
+<ANCHOR id="poppler-form-field-get-action" href="poppler/PopplerFormField.html#poppler-form-field-get-action">
 <ANCHOR id="poppler-form-field-button-get-button-type" href="poppler/PopplerFormField.html#poppler-form-field-button-get-button-type">
 <ANCHOR id="poppler-form-field-button-get-state" href="poppler/PopplerFormField.html#poppler-form-field-button-get-state">
 <ANCHOR id="poppler-form-field-button-set-state" href="poppler/PopplerFormField.html#poppler-form-field-button-set-state">
@@ -450,7 +459,6 @@
 <ANCHOR id="poppler-Version-and-Features-Information.description" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.description">
 <ANCHOR id="poppler-Version-and-Features-Information.details" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.details">
 <ANCHOR id="POPPLER-HAS-CAIRO:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-HAS-CAIRO:CAPS">
-<ANCHOR id="POPPLER-WITH-GDK:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-WITH-GDK:CAPS">
 <ANCHOR id="POPPLER-MAJOR-VERSION:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-MAJOR-VERSION:CAPS">
 <ANCHOR id="POPPLER-MINOR-VERSION:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS">
 <ANCHOR id="POPPLER-MICRO-VERSION:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-MICRO-VERSION:CAPS">

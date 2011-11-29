@@ -14,14 +14,14 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2006, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008 Pino Toscano <pino@kde.org>
+// Copyright (C) 2008, 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 //
@@ -50,6 +50,8 @@
 #include "Catalog.h"
 #include "Form.h"
 #include "OptionalContent.h"
+#include "ViewerPreferences.h"
+#include "FileSpec.h"
 
 //------------------------------------------------------------------------
 // Catalog
@@ -75,6 +77,7 @@ Catalog::Catalog(XRef *xrefA) {
   destNameTree = NULL;
   embeddedFileNameTree = NULL;
   jsNameTree = NULL;
+  viewerPrefs = NULL;
 
   pagesList = NULL;
   pagesRefList = NULL;
@@ -109,9 +112,12 @@ Catalog::Catalog(XRef *xrefA) {
   }
   optContentProps.free();
 
+  // get the ViewerPreferences dictionary
+  catDict.dictLookup("ViewerPreferences", &viewerPreferences);
+
   // perform form-related loading after all widgets have been loaded
   if (getForm())
-    getForm()->postWidgetsLoad();
+    getForm()->postWidgetsLoad(this);
 
   catDict.free();
   return;
@@ -160,10 +166,12 @@ Catalog::~Catalog() {
   delete pageLabelInfo;
   delete form;
   delete optContent;
+  delete viewerPrefs;
   metadata.free();
   structTreeRoot.free();
   outline.free();
   acroForm.free();
+  viewerPreferences.free();
 }
 
 GooString *Catalog::readMetadata() {
@@ -230,16 +238,23 @@ GBool Catalog::cachePageTree(int page)
 
     xref->getCatalog(&catDict);
 
-    Object pagesDictRef;
-    if (catDict.dictLookupNF("Pages", &pagesDictRef)->isRef() &&
-        pagesDictRef.getRefNum() >= 0 &&
-        pagesDictRef.getRefNum() < xref->getNumObjects()) {
-      pagesRef = pagesDictRef.getRef();
-      pagesDictRef.free();
+    if (catDict.isDict()) {
+      Object pagesDictRef;
+      if (catDict.dictLookupNF("Pages", &pagesDictRef)->isRef() &&
+          pagesDictRef.getRefNum() >= 0 &&
+          pagesDictRef.getRefNum() < xref->getNumObjects()) {
+        pagesRef = pagesDictRef.getRef();
+        pagesDictRef.free();
+      } else {
+        error(-1, "Catalog dictionary does not contain a valid \"Pages\" entry");
+        pagesDictRef.free();
+        catDict.free();
+        return gFalse;
+      }
     } else {
-       error(-1, "Catalog dictionary does not contain a valid \"Pages\" entry");
-       pagesDictRef.free();
-       return gFalse;
+      error(-1, "Could not find catalog dictionary");
+      catDict.free();
+      return gFalse;
     }
 
     Object obj;
@@ -440,31 +455,29 @@ LinkDest *Catalog::findDest(GooString *name) {
   return dest;
 }
 
-EmbFile *Catalog::embeddedFile(int i)
+FileSpec *Catalog::embeddedFile(int i)
 {
     Object efDict;
     Object obj;
     obj = getEmbeddedFileNameTree()->getValue(i);
-    EmbFile *embeddedFile = 0;
+    FileSpec *embeddedFile = 0;
     if (obj.isRef()) {
-        GooString desc(getEmbeddedFileNameTree()->getName(i));
-        embeddedFile = new EmbFile(obj.fetch(xref, &efDict), &desc);
-        efDict.free();
+      Object fsDict;
+      embeddedFile = new FileSpec(obj.fetch(xref, &fsDict));
+      fsDict.free();
     } else {
-        Object null;
-        embeddedFile = new EmbFile(&null);
+      Object null;
+      embeddedFile = new FileSpec(&null);
     }
     return embeddedFile;
 }
 
 GooString *Catalog::getJS(int i)
 {
-  Object obj = getJSNameTree()->getValue(i);
-  if (obj.isRef()) {
-    Ref r = obj.getRef();
-    obj.free();
-    xref->fetch(r.num, r.gen, &obj);
-  }
+  Object obj;
+  // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
+  // do not need to free it
+  getJSNameTree()->getValue(i).fetch(xref, &obj);
 
   if (!obj.isDict()) {
     obj.free();
@@ -731,109 +744,6 @@ GBool Catalog::indexToLabel(int index, GooString *label)
   }
 }
 
-EmbFile::EmbFile(Object *efDict, GooString *description)
-{
-  m_name = 0;
-  m_description = 0;
-  if (description)
-    m_description = description->copy();
-  m_size = -1;
-  m_createDate = 0;
-  m_modDate = 0;
-  m_checksum = 0;
-  m_mimetype = 0;
-  if (efDict->isDict()) {
-    Object fileSpec;
-    Object fileDesc;
-    Object paramDict;
-    Object paramObj;
-    Object obj2;
-    Stream *efStream = NULL;
-    // efDict matches Table 3.40 in the PDF1.6 spec
-    efDict->dictLookup("F", &fileSpec);
-    if (fileSpec.isString()) {
-      m_name = new GooString(fileSpec.getString());
-    }
-    fileSpec.free();
-
-    // the logic here is that the description from the name
-    // dictionary is used if we don't have a more specific
-    // description - see the Note: on page 157 of the PDF1.6 spec
-    efDict->dictLookup("Desc", &fileDesc);
-    if (fileDesc.isString()) {
-      delete m_description;
-      m_description = new GooString(fileDesc.getString());
-    } else {
-      efDict->dictLookup("Description", &fileDesc);
-      if (fileDesc.isString()) {
-        delete m_description;
-        m_description = new GooString(fileDesc.getString());
-      }
-    }
-    fileDesc.free();
-
-    efDict->dictLookup("EF", &obj2);
-    if (obj2.isDict()) {
-      // This gives us the raw data stream bytes
-
-      obj2.dictLookup("F", &m_objStr);
-      if (m_objStr.isStream()) {
-        efStream = m_objStr.getStream();
-
-        // dataDict corresponds to Table 3.41 in the PDF1.6 spec.
-        Dict *dataDict = efStream->getDict();
-
-        // subtype is normally the mimetype
-        Object subtypeName;
-        if (dataDict->lookup("Subtype", &subtypeName)->isName()) {
-          m_mimetype = new GooString(subtypeName.getName());
-        }
-        subtypeName.free();
-
-        // paramDict corresponds to Table 3.42 in the PDF1.6 spec
-        Object paramDict;
-        dataDict->lookup( "Params", &paramDict );
-        if (paramDict.isDict()) {
-          paramDict.dictLookup("ModDate", &paramObj);
-          if (paramObj.isString()) {
-            m_modDate = new GooString(paramObj.getString());
-          }
-          paramObj.free();
-          paramDict.dictLookup("CreationDate", &paramObj);
-          if (paramObj.isString()) {
-            m_createDate = new GooString(paramObj.getString());
-          }
-          paramObj.free();
-          paramDict.dictLookup("Size", &paramObj);
-          if (paramObj.isInt()) {
-            m_size = paramObj.getInt();
-          }
-          paramObj.free();
-          paramDict.dictLookup("CheckSum", &paramObj);
-          if (paramObj.isString()) {
-            m_checksum = new GooString(paramObj.getString());
-          }
-          paramObj.free();
-        }
-        paramDict.free();
-      }
-    }
-    obj2.free();
-  }
-  if (!m_name)
-    m_name = new GooString();
-  if (!m_description)
-    m_description = new GooString();
-  if (!m_createDate)
-    m_createDate = new GooString();
-  if (!m_modDate)
-    m_modDate = new GooString();
-  if (!m_checksum)
-    m_checksum = new GooString();
-  if (!m_mimetype)
-    m_mimetype = new GooString();
-}
-
 int Catalog::getNumPages()
 {
   if (numPages == -1)
@@ -841,6 +751,11 @@ int Catalog::getNumPages()
     Object catDict, pagesDict, obj;
 
     xref->getCatalog(&catDict);
+    if (!catDict.isDict()) {
+      error(-1, "Catalog object is wrong type (%s)", catDict.getTypeName());
+      catDict.free();
+      return 0;
+    }
     catDict.dictLookup("Pages", &pagesDict);
     catDict.free();
 
@@ -959,6 +874,17 @@ Form *Catalog::getForm()
   }
 
   return form;
+}
+
+ViewerPreferences *Catalog::getViewerPreferences()
+{
+  if (!viewerPrefs) {
+    if (viewerPreferences.isDict()) {
+      viewerPrefs = new ViewerPreferences(viewerPreferences.getDict());
+    }
+  }
+
+  return viewerPrefs;
 }
 
 Object *Catalog::getNames()

@@ -2,7 +2,8 @@
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2006-2009, 2011 by Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2007-2009 by Pino Toscano <pino@kde.org>
+ * Copyright (C) 2007-2009, 2011 by Pino Toscano <pino@kde.org>
+ * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -40,6 +41,7 @@
 #endif
 
 #include "poppler-qt4.h"
+#include "poppler-embeddedfile-private.h"
 
 class LinkDest;
 class FormWidget;
@@ -75,8 +77,10 @@ namespace Poppler {
     public:
 	DocumentData(GooString *filePath, GooString *ownerPassword, GooString *userPassword)
 	    {
+		init();
 		doc = new PDFDoc(filePath, ownerPassword, userPassword);
-		init(ownerPassword, userPassword);
+		delete ownerPassword;
+		delete userPassword;
 	    }
 	
 	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword)
@@ -85,11 +89,13 @@ namespace Poppler {
 		fileContents = data;
 		obj.initNull();
 		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), &obj);
-	        doc = new PDFDoc(str, ownerPassword, userPassword);
-		init(ownerPassword, userPassword);
+		init();
+		doc = new PDFDoc(str, ownerPassword, userPassword);
+		delete ownerPassword;
+		delete userPassword;
 	    }
 	
-	void init(GooString *ownerPassword, GooString *userPassword);
+	void init();
 	
 	~DocumentData();
 	
@@ -111,7 +117,7 @@ namespace Poppler {
 			GBool AA = m_hints & Document::TextAntialiasing ? gTrue : gFalse;
 			SplashOutputDev * splashOutputDev = new SplashOutputDev(splashModeXBGR8, 4, gFalse, bgColor, gTrue, AA);
 			splashOutputDev->setVectorAntialias(m_hints & Document::Antialiasing ? gTrue : gFalse);
-			splashOutputDev->setFreeTypeHinting(m_hints & Document::TextHinting ? gTrue : gFalse);
+			splashOutputDev->setFreeTypeHinting(m_hints & Document::TextHinting ? gTrue : gFalse, m_hints & Document::TextSlightHinting ? gTrue : gFalse);
 			splashOutputDev->startDoc(doc->getXRef());
 			m_outputDev = splashOutputDev;
 #endif
@@ -158,8 +164,8 @@ namespace Poppler {
 		if (!(0 == numEmb)) {
 			// we have some embedded documents, build the list
 			for (int yalv = 0; yalv < numEmb; ++yalv) {
-				EmbFile *ef = doc->getCatalog()->embeddedFile(yalv);
-				m_embeddedFiles.append(new EmbeddedFile(ef));
+				FileSpec *fs = doc->getCatalog()->embeddedFile(yalv);
+				m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(fs)));
 			}
 		}
 	}
@@ -257,31 +263,6 @@ namespace Poppler {
 		FormFieldData(DocumentData *_doc, ::Page *p, ::FormWidget *w) :
 		doc(_doc), page(p), fm(w), flags(0), annoflags(0)
 		{
-		}
-
-		Qt::Alignment textAlignment(Object *obj) const
-		{
-			Object tmp;
-			int align = 0;
-			if (obj->dictLookup("Q", &tmp)->isInt())
-			{
-				align = tmp.getInt();
-			}
-			tmp.free();
-			Qt::Alignment qtalign;
-			switch ( align )
-			{
-				case 1:
-					qtalign = Qt::AlignHCenter;
-					break;
-				case 2:
-					qtalign = Qt::AlignRight;
-					break;
-				case 0:
-				default:
-					qtalign = Qt::AlignLeft;
-			}
-			return qtalign;
 		}
 
 		DocumentData *doc;

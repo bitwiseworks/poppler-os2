@@ -17,11 +17,12 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2008 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
-// Copyright (C) 2009, 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
-// Copyright 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -209,8 +210,8 @@ public:
   virtual void stroke(GfxState *state);
   virtual void fill(GfxState *state);
   virtual void eoFill(GfxState *state);
-  virtual GBool tilingPatternFill(GfxState *state, Object *str,
-				  int paintType, Dict *resDict,
+  virtual GBool tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep);
@@ -338,6 +339,17 @@ private:
   void dumpColorSpaceL2(GfxColorSpace *colorSpace,
 			GBool genXform, GBool updateColors,
 			GBool map01);
+  GBool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
+			    double *pmat, int paintType, int tilingType, Dict *resDict,
+			    double *mat, double *bbox,
+			    int x0, int y0, int x1, int y1,
+			    double xStep, double yStep);
+  GBool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
+			    double *pmat, int paintType, int tilingType, Dict *resDict,
+			    double *mat, double *bbox,
+			    int x0, int y0, int x1, int y1,
+			    double xStep, double yStep);
+
 #if OPI_SUPPORT
   void opiBegin20(GfxState *state, Dict *dict);
   void opiBegin13(GfxState *state, Dict *dict);
@@ -438,6 +450,7 @@ private:
 				//   clipping render mode because of pattern colorspace
 
   GBool inType3Char;		// inside a Type 3 CharProc
+  GBool inUncoloredPattern;     // inside a uncolored pattern (PaintType = 2)
   GooString *t3String;		// Type 3 content string
   double t3WX, t3WY,		// Type 3 character parameters
          t3LLX, t3LLY, t3URX, t3URY;
