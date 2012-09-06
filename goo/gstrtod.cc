@@ -1,6 +1,6 @@
 /* This file is part of Libspectre.
  * 
- * Copyright (C) 2007 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2007, 2012 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
  *
  * Libspectre is free software; you can redistribute it and/or modify
@@ -22,17 +22,10 @@
 
 #include "gstrtod.h"
 
-#if !defined(OS2)
-#include <clocale>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#else
 #include <locale.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 #define ascii_isspace(c) \
   (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v')

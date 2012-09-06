@@ -13,12 +13,14 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
+// Copyright (C) 2012 Igor Slepchin <igor.redhat@gmail.com>
+// Copyright (C) 2012 Ihar Filipau <thephilips@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -45,6 +47,7 @@
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
+#include "Outline.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "HtmlOutputDev.h"
@@ -80,6 +83,7 @@ GBool stout=gFalse;
 GBool xml=gFalse;
 static GBool errQuiet=gFalse;
 static GBool noDrm=gFalse;
+double wordBreakThreshold=10;  // 10%, below converted into a coefficient - 0.1
 
 GBool showHidden = gFalse;
 GBool noMerge = gFalse;
@@ -88,8 +92,8 @@ static char userPassword[33] = "";
 static char gsDevice[33] = "none";
 static GBool printVersion = gFalse;
 
-static GooString* getInfoString(Dict *infoDict, char *key);
-static GooString* getInfoDate(Dict *infoDict, char *key);
+static GooString* getInfoString(Dict *infoDict, const char *key);
+static GooString* getInfoDate(Dict *infoDict, const char *key);
 
 static char textEncName[128] = "";
 
@@ -140,6 +144,8 @@ static const ArgDesc argDesc[] = {
    "user password (for encrypted files)"},
   {"-nodrm", argFlag, &noDrm, 0,
    "override document DRM settings"},
+  {"-wbt",    argFP,    &wordBreakThreshold, 0,
+   "word break threshold (default 10 percent)"},
   {NULL}
 };
 
@@ -181,11 +187,12 @@ int main(int argc, char *argv[]) {
   SplashOutputDev *splashOut = NULL;
 #endif
   PSOutputDev *psOut = NULL;
+  GBool doOutline;
   GBool ok;
   char *p;
   GooString *ownerPW, *userPW;
   Object info;
-  char * extsList[] = {"png", "jpeg", "bmp", "pcx", "tiff", "pbm", NULL};
+  const char * extsList[] = {"png", "jpeg", "bmp", "pcx", "tiff", "pbm", NULL};
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
@@ -217,6 +224,9 @@ int main(int argc, char *argv[]) {
 	goto error;    
     }
   }
+
+  // convert from user-friendly percents into a coefficient
+  wordBreakThreshold /= 100.0;
 
   // open PDF file
   if (ownerPassword[0]) {
@@ -252,7 +262,7 @@ int main(int argc, char *argv[]) {
   // check for copy permission
   if (!doc->okToCopy()) {
     if (!noDrm) {
-      error(-1, "Copying of text from this document is not allowed.");
+      error(errNotAllowed, -1, "Copying of text from this document is not allowed.");
       goto error;
     }
     fprintf(stderr, "Document has copy-protection bit set.\n");
@@ -281,7 +291,7 @@ int main(int argc, char *argv[]) {
     }
     delete tmp;
   } else if (fileName->cmp("fd://0") == 0) {
-      error(-1, "You have to provide an output filename when reading form stdin.");
+      error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
       goto error;
   } else {
     p = fileName->getCString() + fileName->getLength() - 4;
@@ -369,8 +379,13 @@ int main(int argc, char *argv[]) {
   else
       rawOrder = singleHtml;
 
+#ifdef DISABLE_OUTLINE
+  doOutline = gFalse;
+#else
+  doOutline = doc->getOutline()->getItems() != NULL;
+#endif
   // write text file
-  htmlOut = new HtmlOutputDev(htmlFileName->getCString(), 
+  htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
 	  docTitle->getCString(), 
 	  author ? author->getCString() : NULL,
 	  keywords ? keywords->getCString() : NULL, 
@@ -379,7 +394,7 @@ int main(int argc, char *argv[]) {
 	  extension,
 	  rawOrder, 
 	  firstPage,
-	  doc->getCatalog()->getOutline()->isDict());
+	  doOutline);
   delete docTitle;
   if( author )
   {   
@@ -402,10 +417,7 @@ int main(int argc, char *argv[]) {
   {
     doc->displayPages(htmlOut, firstPage, lastPage, 72 * scale, 72 * scale, 0,
 		      gTrue, gFalse, gFalse);
-  	if (!xml)
-	{
-		htmlOut->dumpDocOutline(doc->getCatalog());
-	}
+    htmlOut->dumpDocOutline(doc);
   }
   
   if ((complexMode || singleHtml) && !xml && !ignore) {
@@ -420,7 +432,7 @@ int main(int argc, char *argv[]) {
           splashFormatPng : splashFormatJpeg;
 
       splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, gFalse, color);
-      splashOut->startDoc(doc->getXRef());
+      splashOut->startDoc(doc);
 
       for (int pg = firstPage; pg <= lastPage; ++pg) {
         doc->displayPage(splashOut, pg,
@@ -448,8 +460,8 @@ int main(int argc, char *argv[]) {
       psFileName = new GooString(htmlFileName->getCString());
       psFileName->append(".ps");
 
-      psOut = new PSOutputDev(psFileName->getCString(), doc, doc->getXRef(),
-          doc->getCatalog(), NULL, firstPage, lastPage, psModePS, w, h);
+      psOut = new PSOutputDev(psFileName->getCString(), doc,
+          NULL, firstPage, lastPage, psModePS, w, h);
       psOut->setDisplayText(gFalse);
       doc->displayPages(psOut, firstPage, lastPage, 72, 72, 0,
           gTrue, gFalse, gFalse);
@@ -475,14 +487,13 @@ int main(int argc, char *argv[]) {
       gsCmd->append(tw);
       gsCmd->append("x");
       th = GooString::fromInt(static_cast<int>(scale*h));
-      th = GooString::fromInt(static_cast<int>(scale*h));
       gsCmd->append(th);
       gsCmd->append(" -q \"");
       gsCmd->append(psFileName);
       gsCmd->append("\"");
       //    printf("running: %s\n", gsCmd->getCString());
       if( !executeCommand(gsCmd->getCString()) && !errQuiet) {
-        error(-1, "Failed to launch Ghostscript!\n");
+        error(errIO, -1, "Failed to launch Ghostscript!\n");
       }
       unlink(psFileName->getCString());
       delete tw;
@@ -511,7 +522,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static GooString* getInfoString(Dict *infoDict, char *key) {
+static GooString* getInfoString(Dict *infoDict, const char *key) {
   Object obj;
   // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
   GooString *rawString;
@@ -527,7 +538,6 @@ static GooString* getInfoString(Dict *infoDict, char *key) {
     rawString = obj.getString();
 
     // Convert rawString to unicode
-    encodedString = new GooString();
     if (rawString->hasUnicodeMarker()) {
       isUnicode = gTrue;
       unicodeLength = (obj.getString()->getLength() - 2) / 2;
@@ -555,7 +565,7 @@ static GooString* getInfoString(Dict *infoDict, char *key) {
   return encodedString;
 }
 
-static GooString* getInfoDate(Dict *infoDict, char *key) {
+static GooString* getInfoDate(Dict *infoDict, const char *key) {
   Object obj;
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;

@@ -180,7 +180,9 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	action_area = gtk_dialog_get_action_area (dialog);
 
 	/* Set the dialog up with HIG properties */
+#if !GTK_CHECK_VERSION (2, 22, 0)
 	gtk_dialog_set_has_separator (dialog, FALSE);
+#endif
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 	gtk_box_set_spacing (GTK_BOX (content_area), 2); /* 2 * 5 + 2 = 12 */
 	gtk_container_set_border_width (GTK_CONTAINER (action_area), 5);
@@ -294,14 +296,19 @@ gint main (gint argc, gchar **argv)
 	gchar            *uri;
 	GTimer           *timer;
 	GError           *error = NULL;
+	GtkAccelGroup    *gtk_accel;
+	GClosure         *closure;
 
 	if (argc != 2) {
 		g_print ("Usage: poppler-glib-demo FILE\n");
 		return 1;
 	}
 
+/* Threading is always enabled starting from GLib 2.24.0 */
+#if !GLIB_CHECK_VERSION (2, 24, 0)
 	if (!g_thread_supported ())
 		g_thread_init (NULL);
+#endif
 
 	gtk_init (&argc, &argv);
 
@@ -358,6 +365,13 @@ gint main (gint argc, gchar **argv)
 	gtk_window_set_title (GTK_WINDOW (win), "Poppler GLib Demo");
 	g_signal_connect (G_OBJECT (win), "delete-event",
 			  G_CALLBACK (gtk_main_quit), NULL);
+
+	gtk_accel = gtk_accel_group_new ();
+	closure = g_cclosure_new (G_CALLBACK (gtk_main_quit), NULL, NULL);
+	gtk_accel_group_connect (gtk_accel, gdk_keyval_from_name ("q"),
+				 GDK_CONTROL_MASK, 0, closure);
+	g_closure_unref (closure);
+	gtk_window_add_accel_group (GTK_WINDOW(win), gtk_accel);
 
 	hbox = gtk_hbox_new (FALSE, 6);
 

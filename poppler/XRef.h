@@ -14,11 +14,13 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
-// Copyright 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@kabelmail.de>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,6 +68,8 @@ public:
 
   // Constructor, create an empty XRef, used for PDF writing
   XRef();
+  // Constructor, create an empty XRef but with info dict, used for PDF writing
+  XRef(Object *trailerDictA);
   // Constructor.  Read xref table from stream.
   XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = NULL, GBool reconstruct = false);
 
@@ -74,6 +78,9 @@ public:
 
   // Is xref table valid?
   GBool isOk() { return ok; }
+
+  // Is the last XRef section a stream or a table?
+  GBool isXRefStream() { return xRefStream; }
 
   // Get the error code (if isOk() returns false).
   int getErrorCode() { return errCode; }
@@ -96,12 +103,13 @@ public:
   GBool okToFillForm(GBool ignoreOwnerPW = gFalse);
   GBool okToAccessibility(GBool ignoreOwnerPW = gFalse);
   GBool okToAssemble(GBool ignoreOwnerPW = gFalse);
+  int getPermFlags() { return permFlags; }
 
   // Get catalog object.
   Object *getCatalog(Object *obj) { return fetch(rootNum, rootGen, obj); }
 
   // Fetch an indirect reference.
-  Object *fetch(int num, int gen, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+  Object *fetch(int num, int gen, Object *obj, int recursion = 0);
 
   // Return the document's Info dictionary (if any).
   Object *getDocInfo(Object *obj);
@@ -122,15 +130,19 @@ public:
   int getNumEntry(Guint offset);
 
   // Direct access.
-  int getSize() { return size; }
-  XRefEntry *getEntry(int i);
+  XRefEntry *getEntry(int i, GBool complainIfMissing = gTrue);
   Object *getTrailerDict() { return &trailerDict; }
 
   // Write access
   void setModifiedObject(Object* o, Ref r);
   Ref addIndirectObject (Object* o);
+  void removeIndirectObject(Ref r);
   void add(int num, int gen,  Guint offs, GBool used);
-  void writeToFile(OutStream* outStr, GBool writeAllEntries);
+
+  // Output XRef table to stream
+  void writeTableToFile(OutStream* outStr, GBool writeAllEntries);
+  // Output XRef stream contents to GooString and fill trailerDict fields accordingly
+  void writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref);
 
 private:
 
@@ -154,7 +166,7 @@ private:
   CryptAlgorithm encAlgorithm;	// encryption algorithm
   int keyLength;		// length of key, in bytes
   int permFlags;		// permission bits
-  Guchar fileKey[16];		// file decryption key
+  Guchar fileKey[32];		// file decryption key
   GBool ownerPasswordOk;	// true if owner password is correct
   Guint prevXRefOffset;		// position of prev XRef section (= next to read)
   Guint mainXRefEntriesOffset;	// offset of entries in main XRef table
@@ -171,6 +183,33 @@ private:
   GBool constructXRef(GBool *wasReconstructed);
   GBool parseEntry(Guint offset, XRefEntry *entry);
 
+  class XRefWriter {
+  public:
+    virtual void startSection(int first, int count) = 0;
+    virtual void writeEntry(Guint offset, int gen, XRefEntryType type) = 0;
+    virtual ~XRefWriter() {};
+  };
+
+  class XRefTableWriter: public XRefWriter {
+  public:
+    XRefTableWriter(OutStream* outStrA);
+    void startSection(int first, int count);
+    void writeEntry(Guint offset, int gen, XRefEntryType type);
+  private:
+    OutStream* outStr;
+  };
+
+  class XRefStreamWriter: public XRefWriter {
+  public:
+    XRefStreamWriter(Object *index, GooString *stmBuf);
+    void startSection(int first, int count);
+    void writeEntry(Guint offset, int gen, XRefEntryType type);
+  private:
+    Object *index;
+    GooString *stmBuf;
+  };
+
+  void writeXRef(XRefWriter *writer, GBool writeAllEntries);
 };
 
 #endif

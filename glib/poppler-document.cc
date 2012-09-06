@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "config.h"
 #include <string.h>
 
 #ifndef __GI_SCANNER__
@@ -83,8 +84,6 @@ _poppler_document_new_from_pdfdoc (PDFDoc  *newDoc,
 {
   PopplerDocument *document;
 
-  document = (PopplerDocument *) g_object_new (POPPLER_TYPE_DOCUMENT, NULL, NULL);
-
   if (!newDoc->isOk()) {
     int fopen_errno;
     switch (newDoc->getErrorCode())
@@ -124,12 +123,30 @@ _poppler_document_new_from_pdfdoc (PDFDoc  *newDoc,
     return NULL;
   }
 
+  document = (PopplerDocument *) g_object_new (POPPLER_TYPE_DOCUMENT, NULL);
   document->doc = newDoc;
 
   document->output_dev = new CairoOutputDev ();
-  document->output_dev->startDoc(document->doc->getXRef (), document->doc->getCatalog ());
+  document->output_dev->startDoc(document->doc);
 
   return document;
+}
+
+static GooString *
+poppler_password_to_latin1 (const gchar *password)
+{
+  gchar *password_latin;
+  GooString *password_g;
+
+  if (!password)
+    return NULL;
+
+  password_latin = g_convert(password, -1, "ISO-8859-1", "UTF-8",
+                             NULL, NULL, NULL);
+  password_g = new GooString (password_latin);
+  g_free (password_latin);
+
+  return password_g;
 }
 
 /**
@@ -162,21 +179,7 @@ poppler_document_new_from_file (const char  *uri,
   if (!filename)
     return NULL;
 
-  password_g = NULL;
-  if (password != NULL) {
-    if (g_utf8_validate (password, -1, NULL)) {
-      gchar *password_latin;
-      
-      password_latin = g_convert (password, -1,
-				  "ISO-8859-1",
-				  "UTF-8",
-				  NULL, NULL, NULL);
-      password_g = new GooString (password_latin);
-      g_free (password_latin);
-    } else {
-      password_g = new GooString (password);
-    }
-  }
+  password_g = poppler_password_to_latin1(password);
 
 #ifdef G_OS_WIN32
   wchar_t *filenameW;
@@ -191,7 +194,7 @@ poppler_document_new_from_file (const char  *uri,
   length = MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, length);
 
   newDoc = new PDFDoc(filenameW, length, password_g, password_g);
-  delete filenameW;
+  delete [] filenameW;
 #else
   filename_g = new GooString (filename);
   newDoc = new PDFDoc(filename_g, password_g, password_g);
@@ -235,10 +238,7 @@ poppler_document_new_from_data (char        *data,
   obj.initNull();
   str = new MemStream(data, 0, length, &obj);
 
-  password_g = NULL;
-  if (password != NULL)
-    password_g = new GooString (password);
-
+  password_g = poppler_password_to_latin1(password);
   newDoc = new PDFDoc(str, password_g, password_g);
   delete password_g;
 
@@ -733,7 +733,7 @@ poppler_document_get_pdf_version_string (PopplerDocument *document)
  * @major_version: (out) (allow-none): return location for the PDF major version number
  * @minor_version: (out) (allow-none): return location for the PDF minor version number
  *
- * Returns the major and minor PDF version numbers.
+ * Returns: the major and minor PDF version numbers
  *
  * Since: 0.16
  **/
@@ -1715,13 +1715,40 @@ poppler_fonts_iter_get_name (PopplerFontsIter *iter)
 }
 
 /**
+ * poppler_fonts_iter_get_substitute_name:
+ * @iter: a #PopplerFontsIter
+ *
+ * The name of the substitute font of the font associated with @iter or %NULL if
+ * the font is embedded
+ *
+ * Returns: the name of the substitute font or %NULL if font is embedded
+ *
+ * Since: 0.20
+ */
+const char *
+poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
+{
+	GooString *name;
+	FontInfo *info;
+
+	info = (FontInfo *)iter->items->get (iter->index);
+
+	name = info->getSubstituteName();
+	if (name != NULL) {
+		return name->getCString();
+	} else {
+		return NULL;
+	}
+}
+
+/**
  * poppler_fonts_iter_get_file_name:
  * @iter: a #PopplerFontsIter
  *
  * The filename of the font associated with @iter or %NULL if
  * the font is embedded
  *
- * Returns: the filename of the font or %NULL y font is emebedded
+ * Returns: the filename of the font or %NULL if font is embedded
  */
 const char *
 poppler_fonts_iter_get_file_name (PopplerFontsIter *iter)
@@ -1757,6 +1784,32 @@ poppler_fonts_iter_get_font_type (PopplerFontsIter *iter)
 	info = (FontInfo *)iter->items->get (iter->index);
 
 	return (PopplerFontType)info->getType ();
+}
+
+/**
+ * poppler_fonts_iter_get_encoding:
+ * @iter: a #PopplerFontsIter
+ *
+ * Returns the encoding of the font associated with @iter
+ *
+ * Returns: the font encoding
+ *
+ * Since: 0.20
+ */
+const char *
+poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
+{
+	GooString *encoding;
+	FontInfo *info;
+
+	info = (FontInfo *)iter->items->get (iter->index);
+
+	encoding = info->getEncoding();
+	if (encoding != NULL) {
+		return encoding->getCString();
+	} else {
+		return NULL;
+	}
 }
 
 /**
@@ -2319,11 +2372,11 @@ poppler_layers_iter_get_title (PopplerLayersIter *iter)
 /**
  * poppler_layers_iter_get_layer:
  * @iter: a #PopplerLayersIter
- * 
- * Returns the #PopplerLayer associated with @iter.  It must be freed with
- * poppler_layer_free().
- * 
- * Return value: a new #PopplerLayer, or %NULL if there isn't any layer associated with @iter
+ *
+ * Returns the #PopplerLayer associated with @iter.
+ *
+ * Return value: (transfer full): a new #PopplerLayer, or %NULL if
+ * there isn't any layer associated with @iter
  *
  * Since: 0.12
  **/
@@ -2496,7 +2549,8 @@ poppler_ps_file_free (PopplerPSFile *ps_file)
  * Returns the #PopplerFormField for the given @id. It must be freed with
  * g_object_unref()
  *
- * Return value: a new #PopplerFormField or NULL if not found
+ * Return value: (transfer full): a new #PopplerFormField or %NULL if
+ * not found
  **/
 PopplerFormField *
 poppler_document_get_form_field (PopplerDocument *document,
@@ -2514,7 +2568,7 @@ poppler_document_get_form_field (PopplerDocument *document,
   if (!page)
     return NULL;
 
-  widgets = page->getFormWidgets (document->doc->getCatalog ());
+  widgets = page->getFormWidgets ();
   if (!widgets)
     return NULL;
 
