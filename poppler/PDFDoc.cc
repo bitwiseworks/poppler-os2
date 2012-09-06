@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -26,7 +26,8 @@
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
 // Copyright (C) 2010 Philip Lorenz <lorenzph+freedesktop@gmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -119,11 +120,22 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   Object obj;
   int size = 0;
+#ifdef _WIN32
+  int n, i;
+#endif
 
   init();
 
   fileName = fileNameA;
   guiData = guiDataA;
+#ifdef _WIN32
+  n = fileName->getLength();
+  fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
+  for (i = 0; i < n; ++i) {
+    fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
+  }
+  fileNameU[n] = L'\0';
+#endif
 
   struct stat buf;
   if (stat(fileName->getCString(), &buf) == 0) {
@@ -141,8 +153,7 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
     // Keep a copy of the errno returned by fopen so that it can be 
     // referred to later.
     fopenErrno = errno;
-    error(-1, "Couldn't open file '%s': %s.", fileName->getCString(),
-                                              strerror(errno));
+    error(errIO, -1, "Couldn't open file '{0:t}': {0:s}.", fileName, strerror(errno));
     errCode = errOpenFile;
     return;
   }
@@ -158,7 +169,6 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   OSVERSIONINFO version;
-  wchar_t fileName2[MAX_PATH + 1];
   Object obj;
   int i;
 
@@ -166,17 +176,15 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
   guiData = guiDataA;
 
-  //~ file name should be stored in Unicode (?)
+  // save both Unicode and 8-bit copies of the file name
   fileName = new GooString();
+  fileNameU = (wchar_t *)gmallocn(fileNameLen + 1, sizeof(wchar_t));
   for (i = 0; i < fileNameLen; ++i) {
     fileName->append((char)fileNameA[i]);
+    fileNameU[i] = fileNameA[i];
   }
+  fileNameU[fileNameLen] = L'\0';
 
-  // zero-terminate the file name string
-  for (i = 0; i < fileNameLen && i < MAX_PATH; ++i) {
-    fileName2[i] = fileNameA[i];
-  }
-  fileName2[i] = 0;
 
   // try to open file
   // NB: _wfopen is only available in NT
@@ -185,10 +193,10 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   version.dwOSVersionInfoSize = sizeof(version);
   GetVersionEx(&version);
   if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-    if (_wstat(fileName2, &buf) == 0) {
+    if (_wstat(fileNameU, &buf) == 0) {
       size = buf.st_size;
     }
-    file = _wfopen(fileName2, L"rb");
+    file = _wfopen(fileNameU, L"rb");
   } else {
     if (_stat(fileName->getCString(), &buf) == 0) {
       size = buf.st_size;
@@ -196,7 +204,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
     file = fopen(fileName->getCString(), "rb");
   }
   if (!file) {
-    error(-1, "Couldn't open file '%s'", fileName->getCString());
+    error(errIO, -1, "Couldn't open file '{0:t}'", fileName);
     errCode = errOpenFile;
     return;
   }
@@ -211,13 +219,27 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
 PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
+#ifdef _WIN32
+  int n, i;
+#endif
 
   init();
   guiData = guiDataA;
   if (strA->getFileName()) {
     fileName = strA->getFileName()->copy();
+#ifdef _WIN32
+    n = fileName->getLength();
+    fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
+    for (i = 0; i < n; ++i) {
+      fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
+    }
+    fileNameU[n] = L'\0';
+#endif
   } else {
     fileName = NULL;
+#ifdef _WIN32
+    fileNameU = NULL;
+#endif
   }
   str = strA;
   ok = setup(ownerPassword, userPassword);
@@ -227,7 +249,7 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   str->setPos(0, -1);
   if (str->getPos() < 0)
   {
-    error(-1, "Document base stream is not seekable");
+    error(errSyntaxError, -1, "Document base stream is not seekable");
     return gFalse;
   }
 
@@ -245,7 +267,7 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   // read xref table
   xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed);
   if (!xref->isOk()) {
-    error(-1, "Couldn't read xref table");
+    error(errSyntaxError, -1, "Couldn't read xref table");
     errCode = xref->getErrorCode();
     return gFalse;
   }
@@ -257,7 +279,7 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   }
 
   // read catalog
-  catalog = new Catalog(xref);
+  catalog = new Catalog(this);
   if (catalog && !catalog->isOk()) {
     if (!wasReconstructed)
     {
@@ -265,11 +287,11 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
       delete catalog;
       delete xref;
       xref = new XRef(str, 0, 0, NULL, true);
-      catalog = new Catalog(xref);
+      catalog = new Catalog(this);
     }
 
     if (catalog && !catalog->isOk()) {
-      error(-1, "Couldn't read page catalog");
+      error(errSyntaxError, -1, "Couldn't read page catalog");
       errCode = errBadCatalog;
       return gFalse;
     }
@@ -315,6 +337,11 @@ PDFDoc::~PDFDoc() {
   if (fileName) {
     delete fileName;
   }
+#ifdef _WIN32
+  if (fileNameU) {
+    gfree(fileNameU);
+  }
+#endif
 }
 
 
@@ -343,7 +370,7 @@ GBool PDFDoc::checkFooter() {
   }
   if (!found)
   {
-    error(-1, "Document has not the mandatory ending %%EOF");
+    error(errSyntaxError, -1, "Document has not the mandatory ending %%EOF");
     errCode = errDamaged;
     delete[] eof;
     return gFalse;
@@ -373,12 +400,12 @@ void PDFDoc::checkHeader() {
     }
   }
   if (i >= headerSearchSize - 5) {
-    error(-1, "May not be a PDF file (continuing anyway)");
+    error(errSyntaxWarning, -1, "May not be a PDF file (continuing anyway)");
     return;
   }
   str->moveStart(i);
   if (!(p = strtok_r(&hdrBuf[i+5], " \t\n\r", &tokptr))) {
-    error(-1, "May not be a PDF file (continuing anyway)");
+    error(errSyntaxWarning, -1, "May not be a PDF file (continuing anyway)");
     return;
   }
   sscanf(p, "%d.%d", &pdfMajorVersion, &pdfMinorVersion);
@@ -393,7 +420,10 @@ GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword)
   xref->getTrailerDict()->dictLookup("Encrypt", &encrypt);
   if ((encrypted = encrypt.isDict())) {
     if ((secHdlr = SecurityHandler::make(this, &encrypt))) {
-      if (secHdlr->checkEncryption(ownerPassword, userPassword)) {
+      if (secHdlr->isUnencrypted()) {
+	// no encryption
+	ret = gTrue;
+      } else if (secHdlr->checkEncryption(ownerPassword, userPassword)) {
 	// authorization succeeded
        	xref->setEncryption(secHdlr->getPermissionFlags(),
 			    secHdlr->getOwnerPasswordOk(),
@@ -432,7 +462,7 @@ void PDFDoc::displayPage(OutputDev *out, int page,
 
   if (getPage(page))
     getPage(page)->display(out, hDPI, vDPI,
-				    rotate, useMediaBox, crop, printing, catalog,
+				    rotate, useMediaBox, crop, printing,
 				    abortCheckCbk, abortCheckCbkData,
 				    annotDisplayDecideCbk, annotDisplayDecideCbkData);
 
@@ -466,7 +496,7 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
     getPage(page)->displaySlice(out, hDPI, vDPI,
 					 rotate, useMediaBox, crop,
 					 sliceX, sliceY, sliceW, sliceH,
-					 printing, catalog,
+					 printing,
 					 abortCheckCbk, abortCheckCbkData,
 					 annotDisplayDecideCbk, annotDisplayDecideCbkData);
 }
@@ -476,12 +506,12 @@ Links *PDFDoc::getLinks(int page) {
   if (!p) {
     return new Links (NULL);
   }
-  return p->getLinks(catalog);
+  return p->getLinks();
 }
 
 void PDFDoc::processLinks(OutputDev *out, int page) {
   if (getPage(page))
-    getPage(page)->processLinks(out, catalog);
+    getPage(page)->processLinks(out);
 }
 
 Linearization *PDFDoc::getLinearization()
@@ -535,7 +565,7 @@ GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
 	  return gFalse;
 	}
       } else {
-        error(-1, "Invalid permanent ID");
+        error(errSyntaxError, -1, "Invalid permanent ID");
 	obj2.free();
 	return gFalse;
       }
@@ -549,7 +579,7 @@ GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
 	  return gFalse;
 	}
       } else {
-        error(-1, "Invalid update ID");
+        error(errSyntaxError, -1, "Invalid update ID");
 	obj2.free();
 	return gFalse;
       }
@@ -579,10 +609,10 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   FILE *f;
   OutStream *outStr;
   XRef *yRef, *countRef;
-  int rootNum = getXRef()->getSize() + 1;
+  int rootNum = getXRef()->getNumObjects() + 1;
 
   if (pageNo < 1 || pageNo > getNumPages()) {
-    error(-1, "Illegal pageNo: %d(%d)", pageNo, getNumPages() );
+    error(errInternal, -1, "Illegal pageNo: {0:d}({1:d})", pageNo, getNumPages() );
     return errOpenFile;
   }
   PDFRectangle *cropBox = NULL;
@@ -598,27 +628,48 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   getXRef()->fetch(refPage->num, refPage->gen, &page);
 
   if (!(f = fopen(name->getCString(), "wb"))) {
-    error(-1, "Couldn't open file '%s'", name->getCString());
+    error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
   outStr = new FileOutStream(f,0);
 
-  yRef = new XRef();
+  yRef = new XRef(getXRef()->getTrailerDict());
   countRef = new XRef();
   yRef->add(0, 65535, 0, gFalse);
   writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
 
-  // get and mark optional content groups
-  OCGs *ocgs = getCatalog()->getOptContentConfig();
-  if (ocgs != NULL) {
-    Object catDict, optContentProps;
-    getXRef()->getCatalog(&catDict);
-    catDict.dictLookup("OCProperties", &optContentProps);
-    Dict *pageDict = optContentProps.getDict();
-    markPageObjects(pageDict, yRef, countRef, 0);
-    catDict.free();
-    optContentProps.free();
+  // get and mark info dict
+  Object infoObj;
+  getXRef()->getDocInfo(&infoObj);
+  if (infoObj.isDict()) {
+    Dict *infoDict = infoObj.getDict();
+    markPageObjects(infoDict, yRef, countRef, 0);
+    Object *trailerObj = getXRef()->getTrailerDict();
+    if (trailerObj->isDict()) {
+      Dict *trailerDict = trailerObj->getDict();
+      Object ref;
+      trailerDict->lookupNF("Info", &ref);
+      if (ref.isRef()) {
+        yRef->add(ref.getRef().num, ref.getRef().gen, 0, gTrue);
+        if (getXRef()->getEntry(ref.getRef().num)->type == xrefEntryCompressed) {
+          yRef->getEntry(ref.getRef().num)->type = xrefEntryCompressed;
+        }
+      }
+      ref.free();
+    }
   }
+  infoObj.free();
+  
+  // get and mark output intents etc.
+  Object catObj, pagesObj, resourcesObj;
+  getXRef()->getCatalog(&catObj);
+  Dict *catDict = catObj.getDict();
+  catDict->lookup("Pages", &pagesObj);
+  Dict *pagesDict = pagesObj.getDict();
+  pagesDict->lookup("Resources", &resourcesObj);
+  if (resourcesObj.isDict())
+    markPageObjects(resourcesObj.getDict(), yRef, countRef, 0);
+  markPageObjects(catDict, yRef, countRef, 0);
 
   Dict *pageDict = page.getDict();
   markPageObjects(pageDict, yRef, countRef, 0);
@@ -627,30 +678,33 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   yRef->add(rootNum,0,outStr->getPos(),gTrue);
   outStr->printf("%d 0 obj\n", rootNum);
   outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1); 
-  if (ocgs != NULL) {
-    Object catDict, optContentProps;
-    getXRef()->getCatalog(&catDict);
-    catDict.dictLookup("OCProperties", &optContentProps);
-    outStr->printf(" /OCProperties <<");
-    Dict *pageDict = optContentProps.getDict();
-    for (int n = 0; n < pageDict->getLength(); n++) {
-      if (n > 0) outStr->printf(" ");
-      const char *key = pageDict->getKey(n);
-      Object value; pageDict->getValNF(n, &value);
+  for (int j = 0; j < catDict->getLength(); j++) {
+    const char *key = catDict->getKey(j);
+    if (strcmp(key, "Type") != 0 &&
+      strcmp(key, "Catalog") != 0 &&
+      strcmp(key, "Pages") != 0) 
+    {
+      if (j > 0) outStr->printf(" ");
+      Object value; catDict->getValNF(j, &value);
       outStr->printf("/%s ", key);
       writeObject(&value, NULL, outStr, getXRef(), 0);
       value.free();
     }
-    outStr->printf(" >> ");
-    catDict.free();
-    optContentProps.free();
   }
+  catObj.free();
+  pagesObj.free();
   outStr->printf(">>\nendobj\n");
   objectsCount++;
 
   yRef->add(rootNum + 1,0,outStr->getPos(),gTrue);
   outStr->printf("%d 0 obj\n", rootNum + 1);
-  outStr->printf("<< /Type /Pages /Kids [ %d 0 R ] /Count 1 >>\n", rootNum + 2);
+  outStr->printf("<< /Type /Pages /Kids [ %d 0 R ] /Count 1 ", rootNum + 2);
+  if (resourcesObj.isDict()) {
+    outStr->printf("/Resources ");
+    writeObject(&resourcesObj, NULL, outStr, getXRef(), 0);
+    resourcesObj.free();
+  }
+  outStr->printf(">>\n");
   outStr->printf("endobj\n");
   objectsCount++;
 
@@ -674,12 +728,14 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   page.free();
 
   Guint uxrefOffset = outStr->getPos();
-  yRef->writeToFile(outStr, gFalse /* do not write unnecessary entries */);
-
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
-  writeTrailer(uxrefOffset, objectsCount, outStr, gFalse, 0, &ref, getXRef(), name->getCString(), outStr->getPos());
+  Dict *trailerDict = createTrailerDict(objectsCount, gFalse, 0, &ref, getXRef(),
+                                        name->getCString(), uxrefOffset);
+  writeXRefTableTrailer(trailerDict, yRef, gFalse /* do not write unnecessary entries */,
+                        uxrefOffset, outStr, getXRef());
+  delete trailerDict;
 
   outStr->close();
   fclose(f);
@@ -695,7 +751,7 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
   int res;
 
   if (!(f = fopen(name->getCString(), "wb"))) {
-    error(-1, "Couldn't open file '%s'", name->getCString());
+    error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
   outStr = new FileOutStream(f,0);
@@ -707,34 +763,43 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
 
 int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
 
-  // we don't support files with Encrypt at the moment
+  // find if we have updated objects
+  GBool updated = gFalse;
+  for(int i=0; i<xref->getNumObjects(); i++) {
+    if (xref->getEntry(i)->updated) {
+      updated = gTrue;
+      break;
+    }
+  }
+
+  // we don't support rewriting files with Encrypt at the moment
   Object obj;
   xref->getTrailerDict()->getDict()->lookupNF("Encrypt", &obj);
   if (!obj.isNull())
   {
     obj.free();
-    return errEncrypted;
-  }
-  obj.free();
-
-  if (mode == writeForceRewrite) {
-    saveCompleteRewrite(outStr);
-  } else if (mode == writeForceIncremental) {
-    saveIncrementalUpdate(outStr); 
-  } else { // let poppler decide
-    // find if we have updated objects
-    GBool updated = gFalse;
-    for(int i=0; i<xref->getNumObjects(); i++) {
-      if (xref->getEntry(i)->updated) {
-        updated = gTrue;
-        break;
-      }
-    }
-    if(updated) { 
-      saveIncrementalUpdate(outStr);
-    } else {
+    if (!updated && mode == writeStandard) {
       // simply copy the original file
       saveWithoutChangesAs (outStr);
+    } else {
+      return errEncrypted;
+    }
+  }
+  else
+  {
+    obj.free();
+
+    if (mode == writeForceRewrite) {
+      saveCompleteRewrite(outStr);
+    } else if (mode == writeForceIncremental) {
+      saveIncrementalUpdate(outStr); 
+    } else { // let poppler decide
+      if(updated) { 
+        saveIncrementalUpdate(outStr);
+      } else {
+        // simply copy the original file
+        saveWithoutChangesAs (outStr);
+      }
     }
   }
 
@@ -747,7 +812,7 @@ int PDFDoc::saveWithoutChangesAs(GooString *name) {
   int res;
 
   if (!(f = fopen(name->getCString(), "wb"))) {
-    error(-1, "Couldn't open file '%s'", name->getCString());
+    error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
   
@@ -791,26 +856,50 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       continue;
 
     if (xref->getEntry(i)->updated) { //we have an updated object
-      Object obj1;
       Ref ref;
       ref.num = i;
       ref.gen = xref->getEntry(i)->type == xrefEntryCompressed ? 0 : xref->getEntry(i)->gen;
-      xref->fetch(ref.num, ref.gen, &obj1);
-      Guint offset = writeObject(&obj1, &ref, outStr);
-      uxref->add(ref.num, ref.gen, offset, gTrue);
-      obj1.free();
+      if (xref->getEntry(i)->type != xrefEntryFree) {
+        Object obj1;
+        xref->fetch(ref.num, ref.gen, &obj1);
+        Guint offset = writeObject(&obj1, &ref, outStr);
+        uxref->add(ref.num, ref.gen, offset, gTrue);
+        obj1.free();
+      } else {
+        uxref->add(ref.num, ref.gen, 0, gFalse);
+      }
     }
   }
-  if (uxref->getSize() == 0) { //we have nothing to update
+  if (uxref->getNumObjects() == 0) { //we have nothing to update
     delete uxref;
     return;
   }
 
   Guint uxrefOffset = outStr->getPos();
-  uxref->writeToFile(outStr, gFalse /* do not write unnecessary entries */);
+  int numobjects = xref->getNumObjects();
+  const char *fileNameA = fileName ? fileName->getCString() : NULL;
+  Ref rootRef, uxrefStreamRef;
+  rootRef.num = getXRef()->getRootNum();
+  rootRef.gen = getXRef()->getRootGen();
 
-  writeTrailer(uxrefOffset, xref->getSize(), outStr, gTrue);
+  // Output a xref stream if there is a xref stream already
+  GBool xRefStream = xref->isXRefStream();
 
+  if (xRefStream) {
+    // Append an entry for the xref stream itself
+    uxrefStreamRef.num = numobjects++;
+    uxrefStreamRef.gen = 0;
+    uxref->add(uxrefStreamRef.num, uxrefStreamRef.gen, uxrefOffset, gTrue);
+  }
+
+  Dict *trailerDict = createTrailerDict(numobjects, gTrue, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
+  if (xRefStream) {
+    writeXRefStreamTrailer(trailerDict, uxref, &uxrefStreamRef, uxrefOffset, outStr, getXRef());
+  } else {
+    writeXRefTableTrailer(trailerDict, uxref, gFalse, uxrefOffset, outStr, getXRef());
+  }
+
+  delete trailerDict;
   delete uxref;
 }
 
@@ -847,13 +936,9 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
     }
   }
   Guint uxrefOffset = outStr->getPos();
-  uxref->writeToFile(outStr, gTrue /* write all entries */);
-
-  writeTrailer(uxrefOffset, uxref->getSize(), outStr, gFalse);
-
-
+  writeXRefTableTrailer(uxrefOffset, uxref, gTrue /* write all entries */,
+                        uxref->getNumObjects(), outStr, gFalse /* complete rewrite */);
   delete uxref;
-
 }
 
 void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset)
@@ -886,7 +971,7 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   Object obj1;
   str->getDict()->lookup("Length", &obj1);
   if (!obj1.isInt()) {
-    error (-1, "PDFDoc::writeRawStream, no Length in stream dict");
+    error (errSyntaxError, -1, "PDFDoc::writeRawStream, no Length in stream dict");
     return;
   }
 
@@ -1046,7 +1131,7 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       outStr->printf("none\r\n");
       break;
     default:
-      error(-1,"Unhandled objType : %i, please report a bug with a testcase\r\n", obj->getType());
+      error(errUnimplemented, -1,"Unhandled objType : {0:d}, please report a bug with a testcase\r\n", obj->getType());
       break;
   }
   if (ref)
@@ -1054,17 +1139,14 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
   return offset;
 }
 
-void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize, 
-			  OutStream* outStr, GBool incrUpdate,
-			  Guint startxRef, Ref *root, XRef *xRef, const char *fileName,
-			  Guint fileSize)
+Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef,
+                                Ref *root, XRef *xRef, const char *fileName, Guint fileSize)
 {
   Dict *trailerDict = new Dict(xRef);
   Object obj1;
   obj1.initInt(uxrefSize);
   trailerDict->set("Size", &obj1);
   obj1.free();
-
 
   //build a new ID, as recommended in the reference, uses:
   // - current time
@@ -1075,7 +1157,9 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize,
   char buffer[256];
   sprintf(buffer, "%i", (int)time(NULL));
   message.append(buffer);
-  message.append(fileName);
+
+  if (fileName)
+    message.append(fileName);
 
   sprintf(buffer, "%i", fileSize);
   message.append(buffer);
@@ -1095,7 +1179,7 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize,
 
   //calculate md5 digest
   Guchar digest[16];
-  Decrypt::md5((Guchar*)message.getCString(), message.getLength(), digest);
+  md5((Guchar*)message.getCString(), message.getLength(), digest);
   obj1.initString(new GooString((const char*)digest, 16));
 
   //create ID array
@@ -1107,7 +1191,7 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize,
     //only update the second part of the array
     xRef->getTrailerDict()->getDict()->lookup("ID", &obj4);
     if (!obj4.isArray()) {
-      error(-1, "PDFDoc::writeTrailer original file's ID entry isn't an array. Trying to continue");
+      error(errSyntaxWarning, -1, "PDFDoc::createTrailerDict original file's ID entry isn't an array. Trying to continue");
     } else {
       //Get the first part of the ID
       obj4.arrayGet(0,&obj3); 
@@ -1139,24 +1223,44 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize,
       trailerDict->set("Info", &obj5);
     }
   }
-  
+
+  return trailerDict;
+}
+
+void PDFDoc::writeXRefTableTrailer(Dict *trailerDict, XRef *uxref, GBool writeAllEntries, Guint uxrefOffset, OutStream* outStr, XRef *xRef)
+{
+  uxref->writeTableToFile( outStr, writeAllEntries );
   outStr->printf( "trailer\r\n");
   writeDictionnary(trailerDict, outStr, xRef, 0);
   outStr->printf( "\r\nstartxref\r\n");
   outStr->printf( "%i\r\n", uxrefOffset);
   outStr->printf( "%%%%EOF\r\n");
-
-  delete trailerDict;
 }
 
-void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize, OutStream* outStr, GBool incrUpdate)
+void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef, Guint uxrefOffset, OutStream* outStr, XRef *xRef)
 {
-  char *fileNameA;
-  if (fileName)
-    fileNameA = fileName->getCString();
-  else
-    fileNameA = "streamwithoutfilename.pdf";
-  // file size
+  GooString stmData;
+
+  // Fill stmData and some trailerDict fields
+  uxref->writeStreamToBuffer(&stmData, trailerDict, xRef);
+
+  // Create XRef stream object and write it
+  Object obj1;
+  MemStream *mStream = new MemStream( stmData.getCString(), 0,
+                                      stmData.getLength(), obj1.initDict(trailerDict) );
+  writeObject(obj1.initStream(mStream), uxrefStreamRef, outStr, xRef, 0);
+  obj1.free();
+
+  outStr->printf( "startxref\r\n");
+  outStr->printf( "%i\r\n", uxrefOffset);
+  outStr->printf( "%%%%EOF\r\n");
+}
+
+void PDFDoc::writeXRefTableTrailer(Guint uxrefOffset, XRef *uxref, GBool writeAllEntries,
+                                   int uxrefSize, OutStream* outStr, GBool incrUpdate)
+{
+  const char *fileNameA = fileName ? fileName->getCString() : NULL;
+  // file size (doesn't include the trailer)
   unsigned int fileSize = 0;
   int c;
   str->reset();
@@ -1167,7 +1271,10 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize, OutStream* outStr, G
   Ref ref;
   ref.num = getXRef()->getRootNum();
   ref.gen = getXRef()->getRootGen();
-  writeTrailer(uxrefOffset, uxrefSize, outStr, incrUpdate, getStartXRef(), &ref, getXRef(), fileNameA, fileSize);
+  Dict * trailerDict = createTrailerDict(uxrefSize, incrUpdate, getStartXRef(), &ref,
+                                         getXRef(), fileNameA, fileSize);
+  writeXRefTableTrailer(trailerDict, uxref, writeAllEntries, uxrefOffset, outStr, getXRef());
+  delete trailerDict;
 }
 
 void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
@@ -1225,6 +1332,8 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
         } else {
           XRefEntry *entry = countRef->getEntry(obj->getRef().num + numOffset);
           entry->gen++;
+          if (entry->gen > 9)
+            break;
         } 
         Object obj1;
         getXRef()->fetch(obj->getRef().num, obj->getRef().gen, &obj1);
@@ -1282,6 +1391,9 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
     cropBoxObj->arrayAdd(cllx);
     cropBoxObj->arrayAdd(clly);
     pageDict->add(copyString("CropBox"), cropBoxObj);
+    pageDict->add(copyString("TrimBox"), cropBoxObj);
+  } else {
+    pageDict->add(copyString("TrimBox"), mediaBoxObj);
   }
   Object *rotateObj = new Object();
   rotateObj->initInt(rotate);
@@ -1314,10 +1426,16 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
 
 void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset) 
 {
+  pageDict->remove("Names");
+  pageDict->remove("OpenAction");
+  pageDict->remove("Outlines");
+  pageDict->remove("StructTreeRoot");
+
   for (int n = 0; n < pageDict->getLength(); n++) {
     const char *key = pageDict->getKey(n);
     Object value; pageDict->getValNF(n, &value);
-    if (strcmp(key, "Parent") != 0) {
+    if (strcmp(key, "Parent") != 0 &&
+	      strcmp(key, "Pages") != 0) {
       markObject(&value, xRef, countRef, numOffset);
     }
     value.free();
@@ -1366,13 +1484,16 @@ PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, GooString *fileNameA)
 }
 
 Guint PDFDoc::strToUnsigned(char *s) {
-  Guint x;
+  Guint x, d;
   char *p;
-  int i;
 
   x = 0;
-  for (p = s, i = 0; *p && isdigit(*p) && i < 10; ++p, ++i) {
-    x = 10 * x + (*p - '0');
+  for (p = s; *p && isdigit(*p & 0xff); ++p) {
+    d = *p - '0';
+    if (x > (UINT_MAX - d) / 10) {
+      break;
+    }
+    x = 10 * x + d;
   }
   return x;
 }
@@ -1472,13 +1593,13 @@ Page *PDFDoc::parsePage(int page)
 
   pageRef.num = getHints()->getPageObjectNum(page);
   if (!pageRef.num) {
-    error(-1, "Failed to get object num from hint tables for page %d", page);
+    error(errSyntaxWarning, -1, "Failed to get object num from hint tables for page {0:d}", page);
     return NULL;
   }
 
   // check for bogus ref - this can happen in corrupted PDF files
   if (pageRef.num < 0 || pageRef.num >= xref->getNumObjects()) {
-    error(-1, "Invalid object num (%d) for page %d", pageRef.num, page);
+    error(errSyntaxWarning, -1, "Invalid object num ({0:d}) for page {1:d}", pageRef.num, page);
     return NULL;
   }
 
@@ -1486,12 +1607,12 @@ Page *PDFDoc::parsePage(int page)
   xref->fetch(pageRef.num, pageRef.gen, &obj);
   if (!obj.isDict("Page")) {
     obj.free();
-    error(-1, "Object (%d %d) is not a pageDict", pageRef.num, pageRef.gen);
+    error(errSyntaxWarning, -1, "Object ({0:d} {1:d}) is not a pageDict", pageRef.num, pageRef.gen);
     return NULL;
   }
   pageDict = obj.getDict();
 
-  p = new Page(xref, page, pageDict, pageRef,
+  p = new Page(this, page, pageDict, pageRef,
                new PageAttrs(NULL, pageDict), catalog->getForm());
   obj.free();
 
@@ -1515,7 +1636,7 @@ Page *PDFDoc::getPage(int page)
     if (pageCache[page-1]) {
        return pageCache[page-1];
     } else {
-       error(-1, "Failed parsing page %d using hint tables", page);
+       error(errSyntaxWarning, -1, "Failed parsing page {0:d} using hint tables", page);
     }
   }
 

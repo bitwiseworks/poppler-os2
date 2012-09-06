@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
@@ -19,7 +19,8 @@
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Anthony Wesley <awesley@smartnetworks.com.au>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,7 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <limits.h>
 #include "goo/gmem.h"
@@ -99,24 +101,49 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
     rowSize += rowPad - 1;
     rowSize -= rowSize % rowPad;
   }
-  data = (SplashColorPtr)gmallocn(rowSize, height);
-  if (!topDown) {
-    data += (height - 1) * rowSize;
-    rowSize = -rowSize;
-  }
-  if (alphaA) {
-    alpha = (Guchar *)gmallocn(width, height);
+  data = (SplashColorPtr)gmallocn_checkoverflow(rowSize, height);
+  if (data != NULL) {
+    if (!topDown) {
+      data += (height - 1) * rowSize;
+      rowSize = -rowSize;
+    }
+    if (alphaA) {
+      alpha = (Guchar *)gmallocn(width, height);
+    } else {
+      alpha = NULL;
+    }
   } else {
     alpha = NULL;
   }
 }
 
+SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
+  SplashBitmap *result = new SplashBitmap(src->getWidth(), src->getHeight(), src->getRowPad(), 
+        src->getMode(), src->getAlphaPtr() != NULL, src->getRowSize() >= 0);
+  Guchar *dataSource = src->getDataPtr();
+  Guchar *dataDest = result->getDataPtr();
+  int amount = src->getRowSize();
+  if (amount < 0) {
+    dataSource = dataSource + (src->getHeight() - 1) * amount;
+    dataDest = dataDest + (src->getHeight() - 1) * amount;
+    amount *= -src->getHeight();
+  } else {
+    amount *= src->getHeight();
+  }
+  memcpy(dataDest, dataSource, amount);
+  if (src->getAlphaPtr() != NULL) {
+    memcpy(result->getAlphaPtr(), src->getAlphaPtr(), src->getWidth() * src->getHeight());
+  }
+  return result;
+}
 
 SplashBitmap::~SplashBitmap() {
-  if (rowSize < 0) {
-    gfree(data + (height - 1) * rowSize);
-  } else {
-    gfree(data);
+  if (data) {
+    if (rowSize < 0) {
+      gfree(data + (height - 1) * rowSize);
+    } else {
+      gfree(data);
+    }
   }
   gfree(alpha);
 }
@@ -160,11 +187,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     fprintf(f, "P5\n%d %d\n255\n", width, height);
     row = data;
     for (y = 0; y < height; ++y) {
-      p = row;
-      for (x = 0; x < width; ++x) {
-	fputc(*p, f);
-	++p;
-      }
+      fwrite(row, 1, width, f);
       row += rowSize;
     }
     break;
@@ -173,13 +196,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     fprintf(f, "P6\n%d %d\n255\n", width, height);
     row = data;
     for (y = 0; y < height; ++y) {
-      p = row;
-      for (x = 0; x < width; ++x) {
-	fputc(splashRGB8R(p), f);
-	fputc(splashRGB8G(p), f);
-	fputc(splashRGB8B(p), f);
-	p += 3;
-      }
+      fwrite(row, 1, 3 * width, f);
       row += rowSize;
     }
     break;
@@ -218,7 +235,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
 #if SPLASH_CMYK
   case splashModeCMYK8:
     // PNM doesn't support CMYK
-    error(-1, "unsupported SplashBitmap mode");
+    error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
     break;
 #endif
@@ -226,6 +243,20 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
   return splashOk;
 }
 
+SplashError SplashBitmap::writeAlphaPGMFile(char *fileName) {
+  FILE *f;
+
+  if (!alpha) {
+    return splashErrModeMismatch;
+  }
+  if (!(f = fopen(fileName, "wb"))) {
+    return splashErrOpenFile;
+  }
+  fprintf(f, "P5\n%d %d\n255\n", width, height);
+  fwrite(alpha, 1, width * height, f);
+  fclose(f);
+  return splashOk;
+}
 
 void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
   SplashColorPtr p;
@@ -277,6 +308,14 @@ Guchar SplashBitmap::getAlpha(int x, int y) {
   return alpha[y * width + x];
 }
 
+SplashColorPtr SplashBitmap::takeData() {
+  SplashColorPtr data2;
+
+  data2 = data;
+  data = NULL;
+  return data2;
+}
+
 SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, const char *compressionString) {
   FILE *f;
   SplashError e;
@@ -326,7 +365,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     default:
       // Not the greatest error message, but users of this function should
       // have already checked whether their desired format is compiled in.
-      error(-1, "Support for this image type not compiled in");
+      error(errInternal, -1, "Support for this image type not compiled in");
       return splashErrGeneric;
   }
 
@@ -364,7 +403,7 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
       && mode != splashModeCMYK8
 #endif
      ) {
-    error(-1, "unsupported SplashBitmap mode");
+    error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
   }
 
@@ -485,7 +524,7 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
     break;
   }
   
-  if (writer->close()) {
+  if (!writer->close()) {
     return splashErrGeneric;
   }
 

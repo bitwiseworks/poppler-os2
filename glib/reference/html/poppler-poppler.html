@@ -48,7 +48,7 @@ enum                <a class="link" href="poppler-poppler.html#PopplerBackend" t
 enum                <a class="link" href="poppler-poppler.html#PopplerPrintFlags" title="enum PopplerPrintFlags">PopplerPrintFlags</a>;
 <a class="link" href="poppler-poppler.html#PopplerBackend" title="enum PopplerBackend"><span class="returnvalue">PopplerBackend</span></a>      <a class="link" href="poppler-poppler.html#poppler-get-backend" title="poppler_get_backend ()">poppler_get_backend</a>                 (<em class="parameter"><code><span class="type">void</span></code></em>);
 const <span class="returnvalue">char</span> *        <a class="link" href="poppler-poppler.html#poppler-get-version" title="poppler_get_version ()">poppler_get_version</a>                 (<em class="parameter"><code><span class="type">void</span></code></em>);
-<span class="returnvalue">gboolean</span>            <a class="link" href="poppler-poppler.html#poppler-date-parse" title="poppler_date_parse ()">poppler_date_parse</a>                  (<em class="parameter"><code>const <span class="type">gchar</span> *date</code></em>,
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="poppler-poppler.html#poppler-date-parse" title="poppler_date_parse ()">poppler_date_parse</a>                  (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *date</code></em>,
                                                          <em class="parameter"><code><span class="type">time_t</span> *timet</code></em>);
 <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="returnvalue">PopplerColor</span></a> *      <a class="link" href="poppler-poppler.html#poppler-color-new" title="poppler_color_new ()">poppler_color_new</a>                   (<em class="parameter"><code><span class="type">void</span></code></em>);
 <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="returnvalue">PopplerColor</span></a> *      <a class="link" href="poppler-poppler.html#poppler-color-copy" title="poppler_color_copy ()">poppler_color_copy</a>                  (<em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *color</code></em>);
@@ -190,7 +190,7 @@ Printing flags
 </tr>
 <tr>
 <td><p><a name="POPPLER-PRINT-STAMP-ANNOTS-ONLY:CAPS"></a><span class="term"><code class="literal">POPPLER_PRINT_STAMP_ANNOTS_ONLY</code></span></p></td>
-<td>print doucment and only stamp annotations
+<td>print document and only stamp annotations
 </td>
 </tr>
 <tr>
@@ -235,10 +235,10 @@ Returns the version of poppler in use.  This result is not to be freed.
 <hr>
 <div class="refsect2">
 <a name="poppler-date-parse"></a><h3>poppler_date_parse ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>            poppler_date_parse                  (<em class="parameter"><code>const <span class="type">gchar</span> *date</code></em>,
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            poppler_date_parse                  (<em class="parameter"><code>const <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *date</code></em>,
                                                          <em class="parameter"><code><span class="type">time_t</span> *timet</code></em>);</pre>
 <p>
-Parses a PDF format date string and converts it to a <span class="type">time_t</span>. Returns <span class="type">FALSE</span>
+Parses a PDF format date string and converts it to a <span class="type">time_t</span>. Returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><span class="type">FALSE</span></a>
 if the parsing fails or the input string is not a valid PDF format date string
 </p>
 <div class="variablelist"><table border="0">
@@ -256,7 +256,7 @@ if the parsing fails or the input string is not a valid PDF format date string
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>
-<span class="type">TRUE</span>, if <em class="parameter"><code>timet</code></em> was set</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><span class="type">TRUE</span></a>, if <em class="parameter"><code>timet</code></em> was set</td>
 </tr>
 </tbody>
 </table></div>

@@ -57,7 +57,7 @@ enum                <a class="link" href="PopplerPage.html#PopplerPageTransition
 enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle">PopplerSelectionStyle</a>;
                     <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes">PopplerTextAttributes</a>;
 <span class="returnvalue">int</span>                 <a class="link" href="PopplerPage.html#poppler-page-get-index" title="poppler_page_get_index ()">poppler_page_get_index</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<span class="returnvalue">gchar</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-label" title="poppler_page_get_label ()">poppler_page_get_label</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-label" title="poppler_page_get_label ()">poppler_page_get_label</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-get-size" title="poppler_page_get_size ()">poppler_page_get_size</a>               (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><span class="type">double</span> *width</code></em>,
                                                          <em class="parameter"><code><span class="type">double</span> *height</code></em>);
@@ -65,58 +65,58 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>);
 <span class="returnvalue">double</span>              <a class="link" href="PopplerPage.html#poppler-page-get-duration" title="poppler_page_get_duration ()">poppler_page_get_duration</a>           (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <a class="link" href="PopplerPage.html#PopplerPageTransition" title="PopplerPageTransition"><span class="returnvalue">PopplerPageTransition</span></a> * <a class="link" href="PopplerPage.html#poppler-page-get-transition" title="poppler_page_get_transition ()">poppler_page_get_transition</a>     (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<span class="returnvalue">gboolean</span>            <a class="link" href="PopplerPage.html#poppler-page-get-thumbnail-size" title="poppler_page_get_thumbnail_size ()">poppler_page_get_thumbnail_size</a>     (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="PopplerPage.html#poppler-page-get-thumbnail-size" title="poppler_page_get_thumbnail_size ()">poppler_page_get_thumbnail_size</a>     (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><span class="type">int</span> *width</code></em>,
                                                          <em class="parameter"><code><span class="type">int</span> *height</code></em>);
-<a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *   <a class="link" href="PopplerPage.html#poppler-page-get-thumbnail" title="poppler_page_get_thumbnail ()">poppler_page_get_thumbnail</a>          (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<span class="returnvalue">cairo_surface_t</span> *   <a class="link" href="PopplerPage.html#poppler-page-get-thumbnail" title="poppler_page_get_thumbnail ()">poppler_page_get_thumbnail</a>          (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render" title="poppler_page_render ()">poppler_page_render</a>                 (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-for-printing" title="poppler_page_render_for_printing ()">poppler_page_render_for_printing</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-for-printing-with-options" title="poppler_page_render_for_printing_with_options ()">poppler_page_render_for_printing_with_options</a>
                                                         (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerPrintFlags" title="enum PopplerPrintFlags"><span class="type">PopplerPrintFlags</span></a> options</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-to-ps" title="poppler_page_render_to_ps ()">poppler_page_render_to_ps</a>           (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerDocument.html#PopplerPSFile" title="PopplerPSFile"><span class="type">PopplerPSFile</span></a> *ps_file</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()">poppler_page_render_selection</a>       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *old_selection</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *glyph_color</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *background_color</code></em>);
-<a href="/usr/share/gtk-doc/html/cairo/cairo-Regions.html#cairo-region-t"><span class="returnvalue">cairo_region_t</span></a> *    <a class="link" href="PopplerPage.html#poppler-page-get-selected-region" title="poppler_page_get_selected_region ()">poppler_page_get_selected_region</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
+<span class="returnvalue">cairo_region_t</span> *    <a class="link" href="PopplerPage.html#poppler-page-get-selected-region" title="poppler_page_get_selected_region ()">poppler_page_get_selected_region</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> scale</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-selection-region" title="poppler_page_get_selection_region ()">poppler_page_get_selection_region</a>   (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-selection-region" title="poppler_page_get_selection_region ()">poppler_page_get_selection_region</a>   (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> scale</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-selection-region-free" title="poppler_page_selection_region_free ()">poppler_page_selection_region_free</a>  (<em class="parameter"><code><span class="type">GList</span> *region</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-selection-region-free" title="poppler_page_selection_region_free ()">poppler_page_selection_region_free</a>  (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *region</code></em>);
 <span class="returnvalue">char</span> *              <a class="link" href="PopplerPage.html#poppler-page-get-selected-text" title="poppler_page_get_selected_text ()">poppler_page_get_selected_text</a>      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-find-text" title="poppler_page_find_text ()">poppler_page_find_text</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-find-text" title="poppler_page_find_text ()">poppler_page_find_text</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code>const <span class="type">char</span> *text</code></em>);
 <span class="returnvalue">char</span> *              <a class="link" href="PopplerPage.html#poppler-page-get-text" title="poppler_page_get_text ()">poppler_page_get_text</a>               (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<span class="returnvalue">gboolean</span>            <a class="link" href="PopplerPage.html#poppler-page-get-text-layout" title="poppler_page_get_text_layout ()">poppler_page_get_text_layout</a>        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="PopplerPage.html#poppler-page-get-text-layout" title="poppler_page_get_text_layout ()">poppler_page_get_text_layout</a>        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> **rectangles</code></em>,
-                                                         <em class="parameter"><code><span class="type">guint</span> *n_rectangles</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-text-attributes" title="poppler_page_get_text_attributes ()">poppler_page_get_text_attributes</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-text-attributes" title="poppler_page_free_text_attributes ()">poppler_page_free_text_attributes</a>   (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-link-mapping" title="poppler_page_get_link_mapping ()">poppler_page_get_link_mapping</a>       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-link-mapping" title="poppler_page_free_link_mapping ()">poppler_page_free_link_mapping</a>      (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-image-mapping" title="poppler_page_get_image_mapping ()">poppler_page_get_image_mapping</a>      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *   <a class="link" href="PopplerPage.html#poppler-page-get-image" title="poppler_page_get_image ()">poppler_page_get_image</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gint</span> image_id</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-image-mapping" title="poppler_page_free_image_mapping ()">poppler_page_free_image_mapping</a>     (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-form-field-mapping" title="poppler_page_get_form_field_mapping ()">poppler_page_get_form_field_mapping</a> (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *n_rectangles</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-text-attributes" title="poppler_page_get_text_attributes ()">poppler_page_get_text_attributes</a>    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-text-attributes" title="poppler_page_free_text_attributes ()">poppler_page_free_text_attributes</a>   (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-link-mapping" title="poppler_page_get_link_mapping ()">poppler_page_get_link_mapping</a>       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-link-mapping" title="poppler_page_free_link_mapping ()">poppler_page_free_link_mapping</a>      (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-image-mapping" title="poppler_page_get_image_mapping ()">poppler_page_get_image_mapping</a>      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<span class="returnvalue">cairo_surface_t</span> *   <a class="link" href="PopplerPage.html#poppler-page-get-image" title="poppler_page_get_image ()">poppler_page_get_image</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> image_id</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-image-mapping" title="poppler_page_free_image_mapping ()">poppler_page_free_image_mapping</a>     (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-form-field-mapping" title="poppler_page_get_form_field_mapping ()">poppler_page_get_form_field_mapping</a> (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-form-field-mapping" title="poppler_page_free_form_field_mapping ()">poppler_page_free_form_field_mapping</a>
-                                                        (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
-<span class="returnvalue">GList</span> *             <a class="link" href="PopplerPage.html#poppler-page-get-annot-mapping" title="poppler_page_get_annot_mapping ()">poppler_page_get_annot_mapping</a>      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
-<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-annot-mapping" title="poppler_page_free_annot_mapping ()">poppler_page_free_annot_mapping</a>     (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             <a class="link" href="PopplerPage.html#poppler-page-get-annot-mapping" title="poppler_page_get_annot_mapping ()">poppler_page_get_annot_mapping</a>      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-free-annot-mapping" title="poppler_page_free_annot_mapping ()">poppler_page_free_annot_mapping</a>     (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);
 <span class="returnvalue">void</span>                <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()">poppler_page_add_annot</a>              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="type">PopplerAnnot</span></a> *annot</code></em>);
 <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="returnvalue">PopplerRectangle</span></a> *  <a class="link" href="PopplerPage.html#poppler-rectangle-new" title="poppler_rectangle_new ()">poppler_rectangle_new</a>               (<em class="parameter"><code><span class="type">void</span></code></em>);
@@ -147,14 +147,14 @@ enum                <a class="link" href="PopplerPage.html#PopplerSelectionStyle
 <div class="refsect1">
 <a name="PopplerPage.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="synopsis">
-  GObject
+  <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
    +----PopplerPage
 </pre>
 </div>
 <div class="refsect1">
 <a name="PopplerPage.properties"></a><h2>Properties</h2>
 <pre class="synopsis">
-  "<a class="link" href="PopplerPage.html#PopplerPage--label" title='The "label" property'>label</a>"                    <span class="type">gchar</span>*                : Read
+  "<a class="link" href="PopplerPage.html#PopplerPage--label" title='The "label" property'>label</a>"                    <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read
 </pre>
 </div>
 <div class="refsect1">
@@ -184,19 +184,19 @@ locations on a page and bounding boxes
 <col align="left" valign="top">
 <tbody>
 <tr>
-<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerRectangle.x1"></a>x1</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="PopplerRectangle.x1"></a>x1</code></em>;</span></p></td>
 <td>x coordinate of lower left corner</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerRectangle.y1"></a>y1</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="PopplerRectangle.y1"></a>y1</code></em>;</span></p></td>
 <td>y coordinate of lower left corner</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerRectangle.x2"></a>x2</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="PopplerRectangle.x2"></a>x2</code></em>;</span></p></td>
 <td>x coordinate of upper right corner</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerRectangle.y2"></a>y2</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="PopplerRectangle.y2"></a>y2</code></em>;</span></p></td>
 <td>y coordinate of upper right corner</td>
 </tr>
 </tbody>
@@ -238,11 +238,11 @@ Only for <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-SPLIT:CA
 transition types</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerPageTransition.duration"></a>duration</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="PopplerPageTransition.duration"></a>duration</code></em>;</span></p></td>
 <td>the duration of the transition effect</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerPageTransition.angle"></a>angle</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="PopplerPageTransition.angle"></a>angle</code></em>;</span></p></td>
 <td>the direction in which the specified transition effect shall moves,
 expressed in degrees counterclockwise starting from a left-to-right direction.
 Only for <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-WIPE:CAPS"><span class="type">POPPLER_PAGE_TRANSITION_WIPE</span></a>, <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-GLITTER:CAPS"><span class="type">POPPLER_PAGE_TRANSITION_GLITTER</span></a>, <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-FLY:CAPS"><span class="type">POPPLER_PAGE_TRANSITION_FLY</span></a>,
@@ -250,12 +250,12 @@ Only for <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-WIPE:CAP
 transition types</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerPageTransition.scale"></a>scale</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="PopplerPageTransition.scale"></a>scale</code></em>;</span></p></td>
 <td>the starting or ending scale at which the changes shall be drawn.
 Only for <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-FLY:CAPS"><span class="type">POPPLER_PAGE_TRANSITION_FLY</span></a> transition type</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gboolean</span> <em class="structfield"><code><a name="PopplerPageTransition.rectangular"></a>rectangular</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> <em class="structfield"><code><a name="PopplerPageTransition.rectangular"></a>rectangular</code></em>;</span></p></td>
 <td>whether the area that will be flown is rectangular and opaque.
 Only for <a class="link" href="PopplerPage.html#POPPLER-PAGE-TRANSITION-FLY:CAPS"><span class="type">POPPLER_PAGE_TRANSITION_FLY</span></a> transition type</td>
 </tr>
@@ -309,7 +309,7 @@ of an image on the page
 <td>a <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> representing an area of the page</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerImageMapping.image-id"></a>image_id</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="PopplerImageMapping.image-id"></a>image_id</code></em>;</span></p></td>
 <td>an image identifier</td>
 </tr>
 </tbody>
@@ -363,7 +363,7 @@ of <em class="parameter"><code>annot</code></em> on the page
 </tr>
 <tr>
 <td><p><span class="term"><a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="type">PopplerAnnot</span></a> *<em class="structfield"><code><a name="PopplerAnnotMapping.annot"></a>annot</code></em>;</span></p></td>
-<td>a <span class="type">PopplerAannot</span>
+<td>a <a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="type">PopplerAnnot</span></a>
 </td>
 </tr>
 </tbody>
@@ -563,21 +563,21 @@ Selection styles
 } PopplerTextAttributes;
 </pre>
 <p>
-A <span class="type">PopplerTextInfo</span> is used to describe text attriutes of a reange of text
+A <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> is used to describe text attributes of a range of text
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
-<td><p><span class="term"><span class="type">gchar</span> *<em class="structfield"><code><a name="PopplerTextAttributes.font-name"></a>font_name</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="PopplerTextAttributes.font-name"></a>font_name</code></em>;</span></p></td>
 <td>font name</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gdouble</span> <em class="structfield"><code><a name="PopplerTextAttributes.font-size"></a>font_size</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="PopplerTextAttributes.font-size"></a>font_size</code></em>;</span></p></td>
 <td>font size</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gboolean</span> <em class="structfield"><code><a name="PopplerTextAttributes.is-underlined"></a>is_underlined</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> <em class="structfield"><code><a name="PopplerTextAttributes.is-underlined"></a>is_underlined</code></em>;</span></p></td>
 <td>if text is underlined</td>
 </tr>
 <tr>
@@ -585,11 +585,11 @@ A <span class="type">PopplerTextInfo</span> is used to describe text attriutes o
 <td>a <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>, the foreground color</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerTextAttributes.start-index"></a>start_index</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="PopplerTextAttributes.start-index"></a>start_index</code></em>;</span></p></td>
 <td>start position this text attributes apply</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="type">gint</span> <em class="structfield"><code><a name="PopplerTextAttributes.end-index"></a>end_index</code></em>;</span></p></td>
+<td><p><span class="term"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> <em class="structfield"><code><a name="PopplerTextAttributes.end-index"></a>end_index</code></em>;</span></p></td>
 <td>end position this text text attributes apply</td>
 </tr>
 </tbody>
@@ -622,7 +622,7 @@ Returns the index of <em class="parameter"><code>page</code></em>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-label"></a><h3>poppler_page_get_label ()</h3>
-<pre class="programlisting"><span class="returnvalue">gchar</span> *             poppler_page_get_label              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *             poppler_page_get_label              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Returns the label of <em class="parameter"><code>page</code></em>. Note that page labels
 and page indices might not coincide.
@@ -638,7 +638,7 @@ and page indices might not coincide.
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>a new allocated string containing the label of <em class="parameter"><code>page</code></em>,
-or <code class="literal">NULL</code> if <em class="parameter"><code>page</code></em> doesn't have a label</td>
+or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>page</code></em> doesn't have a label</td>
 </tr>
 </tbody>
 </table></div>
@@ -737,7 +737,7 @@ Returns the transition effect of <em class="parameter"><code>page</code></em>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a <a class="link" href="PopplerPage.html#PopplerPageTransition" title="PopplerPageTransition"><span class="type">PopplerPageTransition</span></a> or NULL.</td>
+<td>a <a class="link" href="PopplerPage.html#PopplerPageTransition" title="PopplerPageTransition"><span class="type">PopplerPageTransition</span></a> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</td>
 </tr>
 </tbody>
 </table></div>
@@ -745,11 +745,11 @@ Returns the transition effect of <em class="parameter"><code>page</code></em>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-thumbnail-size"></a><h3>poppler_page_get_thumbnail_size ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>            poppler_page_get_thumbnail_size     (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            poppler_page_get_thumbnail_size     (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><span class="type">int</span> *width</code></em>,
                                                          <em class="parameter"><code><span class="type">int</span> *height</code></em>);</pre>
 <p>
-Returns <code class="literal">TRUE</code> if <em class="parameter"><code>page</code></em> has a thumbnail associated with it.  It also
+Returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>page</code></em> has a thumbnail associated with it.  It also
 fills in <em class="parameter"><code>width</code></em> and <em class="parameter"><code>height</code></em> with the width and height of the
 thumbnail.  The values of width and height are not changed if no
 appropriate thumbnail exists.
@@ -773,7 +773,7 @@ appropriate thumbnail exists.
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>
-<code class="literal">TRUE</code>, if <em class="parameter"><code>page</code></em> has a thumbnail associated with it.</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if <em class="parameter"><code>page</code></em> has a thumbnail associated with it.</td>
 </tr>
 </tbody>
 </table></div>
@@ -781,22 +781,22 @@ appropriate thumbnail exists.
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-thumbnail"></a><h3>poppler_page_get_thumbnail ()</h3>
-<pre class="programlisting"><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *   poppler_page_get_thumbnail          (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">cairo_surface_t</span> *   poppler_page_get_thumbnail          (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Get the embedded thumbnail for the specified page.  If the document
 doesn't have an embedded thumbnail for the page, this function
-returns <code class="literal">NULL</code>.
+returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>page</code></em> :</span></p></td>
-<td>the <span class="type">PopperPage</span> to get the thumbnail for</td>
+<td>the <a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> to get the thumbnail for</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>the tumbnail as a cairo_surface_t or <code class="literal">NULL</code> if the document
+<td>the tumbnail as a cairo_surface_t or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the document
 doesn't have a thumbnail for this page.</td>
 </tr>
 </tbody>
@@ -806,7 +806,7 @@ doesn't have a thumbnail for this page.</td>
 <div class="refsect2">
 <a name="poppler-page-render"></a><h3>poppler_page_render ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render                 (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);</pre>
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>);</pre>
 <p>
 Render the page to the given cairo context. This function
 is for rendering a page that will be displayed. If you want
@@ -831,7 +831,7 @@ to render a page that will be printed use
 <div class="refsect2">
 <a name="poppler-page-render-for-printing"></a><h3>poppler_page_render_for_printing ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render_for_printing    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);</pre>
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>);</pre>
 <p>
 Render the page to the given cairo context for printing.
 </p>
@@ -854,7 +854,7 @@ Render the page to the given cairo context for printing.
 <a name="poppler-page-render-for-printing-with-options"></a><h3>poppler_page_render_for_printing_with_options ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render_for_printing_with_options
                                                         (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>,
                                                          <em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerPrintFlags" title="enum PopplerPrintFlags"><span class="type">PopplerPrintFlags</span></a> options</code></em>);</pre>
 <p>
 Render the page to the given cairo context for printing
@@ -906,7 +906,7 @@ Render the page on a postscript file
 <div class="refsect2">
 <a name="poppler-page-render-selection"></a><h3>poppler_page_render_selection ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_render_selection       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
+                                                         <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *old_selection</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
@@ -961,15 +961,14 @@ only render the changed part of the selection.
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-selected-region"></a><h3>poppler_page_get_selected_region ()</h3>
-<pre class="programlisting"><a href="/usr/share/gtk-doc/html/cairo/cairo-Regions.html#cairo-region-t"><span class="returnvalue">cairo_region_t</span></a> *    poppler_page_get_selected_region    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
+<pre class="programlisting"><span class="returnvalue">cairo_region_t</span> *    poppler_page_get_selected_region    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> scale</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>);</pre>
 <p>
 Returns a region containing the area that would be rendered by
-<a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a> or
-<code class="function">poppler_page_render_selection_to_pixbuf()</code>.
-The returned region must be freed with <a href="/usr/share/gtk-doc/html/cairo/cairo-Regions.html#cairo-region-destroy"><code class="function">cairo_region_destroy()</code></a>
+<a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a>.
+The returned region must be freed with <code class="function">cairo_region_destroy()</code>
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -1004,8 +1003,8 @@ The returned region must be freed with <a href="/usr/share/gtk-doc/html/cairo/ca
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-selection-region"></a><h3>poppler_page_get_selection_region ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_selection_region   (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gdouble</span> scale</code></em>,
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_get_selection_region   (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> scale</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>);</pre>
 <div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
@@ -1014,8 +1013,7 @@ The returned region must be freed with <a href="/usr/share/gtk-doc/html/cairo/ca
 </div>
 <p>
 Returns a region containing the area that would be rendered by
-<a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a> or 
-<code class="function">poppler_page_render_selection_to_pixbuf()</code> as a <span class="type">GList</span> of
+<a class="link" href="PopplerPage.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a> as a <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of
 <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>. The returned list must be freed with
 <a class="link" href="PopplerPage.html#poppler-page-selection-region-free" title="poppler_page_selection_region_free ()"><code class="function">poppler_page_selection_region_free()</code></a>.
 </p>
@@ -1042,7 +1040,7 @@ Returns a region containing the area that would be rendered by
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1051,7 +1049,7 @@ Returns a region containing the area that would be rendered by
 <hr>
 <div class="refsect2">
 <a name="poppler-page-selection-region-free"></a><h3>poppler_page_selection_region_free ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_selection_region_free  (<em class="parameter"><code><span class="type">GList</span> *region</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_selection_region_free  (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *region</code></em>);</pre>
 <div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;">
 <h3 class="title">Warning</h3>
 <p><code class="literal">poppler_page_selection_region_free</code> is deprecated and should not be used in newly-written code. 0.16</p>
@@ -1063,7 +1061,8 @@ Frees <em class="parameter"><code>region</code></em>
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>region</code></em> :</span></p></td>
-<td>a <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of
+<a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle]</span>
 </td>
 </tr></tbody>
 </table></div>
@@ -1106,10 +1105,10 @@ as a string</td>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-find-text"></a><h3>poppler_page_find_text ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_find_text              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_find_text              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code>const <span class="type">char</span> *text</code></em>);</pre>
 <p>
-A <span class="type">GList</span> of rectangles for each occurance of the text on the page.
+A <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of rectangles for each occurance of the text on the page.
 The coordinates are in PDF points.
 </p>
 <div class="variablelist"><table border="0">
@@ -1126,7 +1125,7 @@ The coordinates are in PDF points.
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>a <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>,. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>a <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>,. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1159,12 +1158,12 @@ as a string</td>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-text-layout"></a><h3>poppler_page_get_text_layout ()</h3>
-<pre class="programlisting"><span class="returnvalue">gboolean</span>            poppler_page_get_text_layout        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            poppler_page_get_text_layout        (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                                          <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> **rectangles</code></em>,
-                                                         <em class="parameter"><code><span class="type">guint</span> *n_rectangles</code></em>);</pre>
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *n_rectangles</code></em>);</pre>
 <p>
 Obtains the layout of the text as a list of <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a>
-This array must be freed with <code class="function">g_free()</code> when done.
+This array must be freed with <a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.
 </p>
 <p>
 The position in the array represents an offset in the text returned by
@@ -1190,7 +1189,7 @@ The position in the array represents an offset in the text returned by
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>
-<code class="literal">TRUE</code> if the page contains text, <code class="literal">FALSE</code> otherwise</td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the page contains text, <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise</td>
 </tr>
 </tbody>
 </table></div>
@@ -1199,7 +1198,7 @@ The position in the array represents an offset in the text returned by
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-text-attributes"></a><h3>poppler_page_get_text_attributes ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_text_attributes    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_get_text_attributes    (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Obtains the attributes of the text as a GList of <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>.
 This list must be freed with <a class="link" href="PopplerPage.html#poppler-page-free-text-attributes" title="poppler_page_free_text_attributes ()"><code class="function">poppler_page_free_text_attributes()</code></a> when done.
@@ -1219,7 +1218,7 @@ to which text attributes apply.
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>A <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1229,12 +1228,26 @@ to which text attributes apply.
 <hr>
 <div class="refsect2">
 <a name="poppler-page-free-text-attributes"></a><h3>poppler_page_free_text_attributes ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_text_attributes   (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_text_attributes   (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);</pre>
+<p>
+Frees a list of <a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>s allocated by
+<a class="link" href="PopplerPage.html#poppler-page-get-text-attributes" title="poppler_page_get_text_attributes ()"><code class="function">poppler_page_get_text_attributes()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>list</code></em> :</span></p></td>
+<td>A list of
+<a class="link" href="PopplerPage.html#PopplerTextAttributes" title="PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>s. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes]</span>
+</td>
+</tr></tbody>
+</table></div>
+<p class="since">Since 0.18</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-link-mapping"></a><h3>poppler_page_get_link_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_link_mapping       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_get_link_mapping       (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Returns a list of <a class="link" href="PopplerPage.html#PopplerLinkMapping" title="PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a> items that map from a
 location on <em class="parameter"><code>page</code></em> to a <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a>.  This list must be freed
@@ -1250,7 +1263,7 @@ with <a class="link" href="PopplerPage.html#poppler-page-free-link-mapping" titl
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>A <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerLinkMapping" title="PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerLinkMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerLinkMapping" title="PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerLinkMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1259,7 +1272,7 @@ with <a class="link" href="PopplerPage.html#poppler-page-free-link-mapping" titl
 <hr>
 <div class="refsect2">
 <a name="poppler-page-free-link-mapping"></a><h3>poppler_page_free_link_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_link_mapping      (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_link_mapping      (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);</pre>
 <p>
 Frees a list of <a class="link" href="PopplerPage.html#PopplerLinkMapping" title="PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>s allocated by
 <a class="link" href="PopplerPage.html#poppler-page-get-link-mapping" title="poppler_page_get_link_mapping ()"><code class="function">poppler_page_get_link_mapping()</code></a>.  It also frees the <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a>s
@@ -1270,14 +1283,16 @@ copy them with <a class="link" href="poppler-PopplerAction.html#poppler-action-c
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>list</code></em> :</span></p></td>
-<td>A list of <a class="link" href="PopplerPage.html#PopplerLinkMapping" title="PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>s</td>
+<td>A list of
+<a class="link" href="PopplerPage.html#PopplerLinkMapping" title="PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>s. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerLinkMapping]</span>
+</td>
 </tr></tbody>
 </table></div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-image-mapping"></a><h3>poppler_page_get_image_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_image_mapping      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_get_image_mapping      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Returns a list of <a class="link" href="PopplerPage.html#PopplerImageMapping" title="PopplerImageMapping"><span class="type">PopplerImageMapping</span></a> items that map from a
 location on <em class="parameter"><code>page</code></em> to an image of the page. This list must be freed
@@ -1293,7 +1308,7 @@ with <a class="link" href="PopplerPage.html#poppler-page-free-image-mapping" tit
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>A <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerImageMapping" title="PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerImageMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerImageMapping" title="PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerImageMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1302,8 +1317,8 @@ with <a class="link" href="PopplerPage.html#poppler-page-free-image-mapping" tit
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-image"></a><h3>poppler_page_get_image ()</h3>
-<pre class="programlisting"><a href="/usr/share/gtk-doc/html/cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *   poppler_page_get_image              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                                         <em class="parameter"><code><span class="type">gint</span> image_id</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">cairo_surface_t</span> *   poppler_page_get_image              (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a> image_id</code></em>);</pre>
 <p>
 Returns a cairo surface for the image of the <em class="parameter"><code>page</code></em>
 </p>
@@ -1317,7 +1332,7 @@ Returns a cairo surface for the image of the <em class="parameter"><code>page</c
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>image_id</code></em> :</span></p></td>
-<td>The image identificator</td>
+<td>The image identifier</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
@@ -1329,7 +1344,7 @@ Returns a cairo surface for the image of the <em class="parameter"><code>page</c
 <hr>
 <div class="refsect2">
 <a name="poppler-page-free-image-mapping"></a><h3>poppler_page_free_image_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_image_mapping     (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_image_mapping     (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);</pre>
 <p>
 Frees a list of <a class="link" href="PopplerPage.html#PopplerImageMapping" title="PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>s allocated by
 <a class="link" href="PopplerPage.html#poppler-page-get-image-mapping" title="poppler_page_get_image_mapping ()"><code class="function">poppler_page_get_image_mapping()</code></a>.
@@ -1338,14 +1353,16 @@ Frees a list of <a class="link" href="PopplerPage.html#PopplerImageMapping" titl
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>list</code></em> :</span></p></td>
-<td>A list of <a class="link" href="PopplerPage.html#PopplerImageMapping" title="PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>s</td>
+<td>A list of
+<a class="link" href="PopplerPage.html#PopplerImageMapping" title="PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>s. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerImageMapping]</span>
+</td>
 </tr></tbody>
 </table></div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-form-field-mapping"></a><h3>poppler_page_get_form_field_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_form_field_mapping (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_get_form_field_mapping (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Returns a list of <a class="link" href="PopplerPage.html#PopplerFormFieldMapping" title="PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a> items that map from a
 location on <em class="parameter"><code>page</code></em> to a form field.  This list must be freed
@@ -1361,7 +1378,7 @@ with <a class="link" href="PopplerPage.html#poppler-page-free-form-field-mapping
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>A <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerFormFieldMapping" title="PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerFormFieldMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerFormFieldMapping" title="PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerFormFieldMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1371,7 +1388,7 @@ with <a class="link" href="PopplerPage.html#poppler-page-free-form-field-mapping
 <div class="refsect2">
 <a name="poppler-page-free-form-field-mapping"></a><h3>poppler_page_free_form_field_mapping ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_form_field_mapping
-                                                        (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);</pre>
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);</pre>
 <p>
 Frees a list of <a class="link" href="PopplerPage.html#PopplerFormFieldMapping" title="PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>s allocated by
 <a class="link" href="PopplerPage.html#poppler-page-get-form-field-mapping" title="poppler_page_get_form_field_mapping ()"><code class="function">poppler_page_get_form_field_mapping()</code></a>.
@@ -1380,14 +1397,16 @@ Frees a list of <a class="link" href="PopplerPage.html#PopplerFormFieldMapping" 
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>list</code></em> :</span></p></td>
-<td>A list of <a class="link" href="PopplerPage.html#PopplerFormFieldMapping" title="PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>s</td>
+<td>A list of
+<a class="link" href="PopplerPage.html#PopplerFormFieldMapping" title="PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>s. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerFormFieldMapping]</span>
+</td>
 </tr></tbody>
 </table></div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-annot-mapping"></a><h3>poppler_page_get_annot_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">GList</span> *             poppler_page_get_annot_mapping      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="returnvalue">GList</span></a> *             poppler_page_get_annot_mapping      (<em class="parameter"><code><a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>
 Returns a list of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a> items that map from a location on
 <em class="parameter"><code>page</code></em> to a <a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="type">PopplerAnnot</span></a>.  This list must be freed with
@@ -1403,7 +1422,7 @@ Returns a list of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" ti
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td>A <span class="type">GList</span> of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAnnotMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAnnotMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span>
 </td>
 </tr>
 </tbody>
@@ -1412,18 +1431,20 @@ Returns a list of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" ti
 <hr>
 <div class="refsect2">
 <a name="poppler-page-free-annot-mapping"></a><h3>poppler_page_free_annot_mapping ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_annot_mapping     (<em class="parameter"><code><span class="type">GList</span> *list</code></em>);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                poppler_page_free_annot_mapping     (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *list</code></em>);</pre>
 <p>
 Frees a list of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>s allocated by
-<a class="link" href="PopplerPage.html#poppler-page-get-annot-mapping" title="poppler_page_get_annot_mapping ()"><code class="function">poppler_page_get_annot_mapping()</code></a>.  It also frees the <a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="type">PopplerAnnot</span></a>s
+<a class="link" href="PopplerPage.html#poppler-page-get-annot-mapping" title="poppler_page_get_annot_mapping ()"><code class="function">poppler_page_get_annot_mapping()</code></a>.  It also unreferences the <a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="type">PopplerAnnot</span></a>s
 that each mapping contains, so if you want to keep them around, you need to
-copy them with <code class="function">poppler_annot_copy()</code>.
+reference them with <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-ref"><code class="function">g_object_ref()</code></a>.
 </p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>list</code></em> :</span></p></td>
-<td>A list of <a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>s</td>
+<td>A list of
+<a class="link" href="PopplerPage.html#PopplerAnnotMapping" title="PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>s. <span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAnnotMapping]</span>
+</td>
 </tr></tbody>
 </table></div>
 </div>
@@ -1832,9 +1853,9 @@ Frees the given <a class="link" href="PopplerPage.html#PopplerTextAttributes" ti
 <a name="PopplerPage.property-details"></a><h2>Property Details</h2>
 <div class="refsect2">
 <a name="PopplerPage--label"></a><h3>The <code class="literal">"label"</code> property</h3>
-<pre class="programlisting">  "label"                    <span class="type">gchar</span>*                : Read</pre>
+<pre class="programlisting">  "label"                    <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a>*                : Read</pre>
 <p>
-The label of the page or <code class="literal">NULL</code>. See also <a class="link" href="PopplerPage.html#poppler-page-get-label" title="poppler_page_get_label ()"><code class="function">poppler_page_get_label()</code></a>
+The label of the page or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. See also <a class="link" href="PopplerPage.html#poppler-page-get-label" title="poppler_page_get_label ()"><code class="function">poppler_page_get_label()</code></a>
 </p>
 <p>Default value: NULL</p>
 </div>

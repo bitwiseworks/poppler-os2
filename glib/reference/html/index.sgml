@@ -126,7 +126,9 @@
 <ANCHOR id="poppler-fonts-iter-get-name" href="poppler/PopplerDocument.html#poppler-fonts-iter-get-name">
 <ANCHOR id="poppler-fonts-iter-get-full-name" href="poppler/PopplerDocument.html#poppler-fonts-iter-get-full-name">
 <ANCHOR id="poppler-fonts-iter-get-font-type" href="poppler/PopplerDocument.html#poppler-fonts-iter-get-font-type">
+<ANCHOR id="poppler-fonts-iter-get-substitute-name" href="poppler/PopplerDocument.html#poppler-fonts-iter-get-substitute-name">
 <ANCHOR id="poppler-fonts-iter-get-file-name" href="poppler/PopplerDocument.html#poppler-fonts-iter-get-file-name">
+<ANCHOR id="poppler-fonts-iter-get-encoding" href="poppler/PopplerDocument.html#poppler-fonts-iter-get-encoding">
 <ANCHOR id="poppler-fonts-iter-is-embedded" href="poppler/PopplerDocument.html#poppler-fonts-iter-is-embedded">
 <ANCHOR id="poppler-fonts-iter-is-subset" href="poppler/PopplerDocument.html#poppler-fonts-iter-is-subset">
 <ANCHOR id="poppler-fonts-iter-next" href="poppler/PopplerDocument.html#poppler-fonts-iter-next">
@@ -463,11 +465,12 @@
 <ANCHOR id="POPPLER-MINOR-VERSION:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS">
 <ANCHOR id="POPPLER-MICRO-VERSION:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-MICRO-VERSION:CAPS">
 <ANCHOR id="POPPLER-CHECK-VERSION:CAPS" href="poppler/poppler-Version-and-Features-Information.html#POPPLER-CHECK-VERSION:CAPS">
-<ANCHOR id="annotation-glossterm-array" href="poppler/annotation-glossary.html#annotation-glossterm-array">
 <ANCHOR id="annotation-glossterm-out" href="poppler/annotation-glossary.html#annotation-glossterm-out">
 <ANCHOR id="annotation-glossterm-allow-none" href="poppler/annotation-glossary.html#annotation-glossterm-allow-none">
+<ANCHOR id="annotation-glossterm-closure" href="poppler/annotation-glossary.html#annotation-glossterm-closure">
+<ANCHOR id="annotation-glossterm-transfer none" href="poppler/annotation-glossary.html#annotation-glossterm-transfer none">
+<ANCHOR id="annotation-glossterm-array" href="poppler/annotation-glossary.html#annotation-glossterm-array">
 <ANCHOR id="annotation-glossterm-element-type" href="poppler/annotation-glossary.html#annotation-glossterm-element-type">
 <ANCHOR id="annotation-glossterm-transfer container" href="poppler/annotation-glossary.html#annotation-glossterm-transfer container">
-<ANCHOR id="annotation-glossterm-scope call" href="poppler/annotation-glossary.html#annotation-glossterm-scope call">
 <ANCHOR id="annotation-glossterm-transfer full" href="poppler/annotation-glossary.html#annotation-glossterm-transfer full">
-<ANCHOR id="annotation-glossterm-transfer none" href="poppler/annotation-glossary.html#annotation-glossterm-transfer none">
+<ANCHOR id="annotation-glossterm-scope call" href="poppler/annotation-glossary.html#annotation-glossterm-scope call">

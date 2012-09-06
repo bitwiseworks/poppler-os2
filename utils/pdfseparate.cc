@@ -4,7 +4,8 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 #include "config.h"
@@ -17,6 +18,7 @@
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
+#include "GlobalParams.h"
 
 static int firstPage = 0;
 static int lastPage = 0;
@@ -47,11 +49,11 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   PDFDoc *doc = new PDFDoc (gfileName, NULL, NULL, NULL);
 
   if (!doc->isOk()) {
-    error(-1, "Could not extract page(s) from damaged file ('%s')", srcFileName);
+    error(errSyntaxError, -1, "Could not extract page(s) from damaged file ('{0:s}')", srcFileName);
     return false;
   }
   if (doc->isEncrypted()) {
-    error(-1, "Could not extract page(s) from encrypted file ('%s')", srcFileName);
+    error(errSyntaxError, -1, "Could not extract page(s) from encrypted file ('{0:s}')", srcFileName);
     return false;
   }
 
@@ -64,7 +66,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   if (firstPage == 0)
     firstPage = 1;
   if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
-    error(-1, "'%s' must contain '%%d' if more than one page should be extracted", destFileName);
+    error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
     return false;
   }
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
@@ -107,7 +109,12 @@ main (int argc, char *argv[])
 	exitCode = 0;
       goto err0;
     }
-  extractPages (argv[1], argv[2]);
+  globalParams = new GlobalParams();
+  ok = extractPages (argv[1], argv[2]);
+  if (ok) {
+    exitCode = 0;
+  }
+  delete globalParams;
 
 err0:
 

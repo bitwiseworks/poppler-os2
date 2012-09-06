@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pdftoppm.cc
+// pdftocairo.cc
 //
 // Copyright 2003 Glyph & Cog, LLC
 //
@@ -19,11 +19,13 @@
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2010, 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2010, 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,7 +51,11 @@
 #include "PDFDocFactory.h"
 #include "CairoOutputDev.h"
 #if USE_CMS
+#ifdef USE_LCMS1
 #include <lcms.h>
+#else
+#include <lcms2.h>
+#endif
 #endif
 #include <cairo.h>
 #if CAIRO_HAS_PS_SURFACE
@@ -256,10 +262,22 @@ void writePageImage(GooString *filename)
       writer = new PNGWriter(PNGWriter::RGB);
 
 #if USE_CMS
+#ifdef USE_LCMS1
     if (icc_data)
       static_cast<PNGWriter*>(writer)->setICCProfile(cmsTakeProductName(profile), icc_data, icc_data_size);
     else
       static_cast<PNGWriter*>(writer)->setSRGBProfile();
+#else
+    if (icc_data) {
+      cmsUInt8Number profileID[17];
+      profileID[16] = '\0';
+
+      cmsGetHeaderProfileID(profile,profileID);
+      static_cast<PNGWriter*>(writer)->setICCProfile(reinterpret_cast<char *>(profileID), icc_data, icc_data_size);
+    } else {
+      static_cast<PNGWriter*>(writer)->setSRGBProfile();
+    }
+#endif
 #endif
 #endif
 
@@ -532,7 +550,7 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
 
   status = cairo_status(cr);
   if (status)
-      error(-1, "cairo error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
   cairo_destroy (cr);
 }
 
@@ -547,7 +565,7 @@ static void endPage(GooString *imageFileName)
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
-      error(-1, "cairo error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
   }
 
@@ -561,7 +579,7 @@ static void endDocument()
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
-      error(-1, "cairo error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
     fclose(output_file);
   }
@@ -681,7 +699,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   return name;
 }
 
-static void checkInvalidPrintOption(GBool option, char *option_name)
+static void checkInvalidPrintOption(GBool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -png or -jpeg output options.\n", option_name);
@@ -689,7 +707,7 @@ static void checkInvalidPrintOption(GBool option, char *option_name)
   }
 }
 
-static void checkInvalidImageOption(GBool option, char *option_name)
+static void checkInvalidImageOption(GBool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -ps, -eps, -pdf, or -svg output options.\n", option_name);
@@ -903,8 +921,12 @@ int main(int argc, char *argv[]) {
     lastPage = firstPage;
   }
 
+  // Make sure firstPage is always used so that beginDocument() is called
+  if ((printOnlyEven && firstPage % 2 == 0) || (printOnlyOdd && firstPage % 2 == 1))
+    firstPage++;
+
   cairoOut = new CairoOutputDev();
-  cairoOut->startDoc(doc->getXRef(), doc->getCatalog());
+  cairoOut->startDoc(doc);
   if (sz != 0)
     crop_w = crop_h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
@@ -930,11 +952,15 @@ int main(int argc, char *argv[]) {
       resolution = (72.0 * scaleTo) / (pg_w > pg_h ? pg_w : pg_h);
       x_resolution = y_resolution = resolution;
     } else {
-      if (x_scaleTo != 0) {
+      if (x_scaleTo > 0) {
         x_resolution = (72.0 * x_scaleTo) / pg_w;
+        if (y_scaleTo == -1)
+          y_resolution = x_resolution;
       }
-      if (y_scaleTo != 0) {
+      if (y_scaleTo > 0) {
         y_resolution = (72.0 * y_scaleTo) / pg_h;
+        if (x_scaleTo == -1)
+          x_resolution = y_resolution;
       }
     }
     if ((doc->getPageRotate(pg) == 90) || (doc->getPageRotate(pg) == 270)) {

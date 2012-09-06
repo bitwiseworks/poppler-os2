@@ -74,7 +74,7 @@ libpoppler_glib_la_LIBADD =				\
 	$(FREETYPE_LIBS)				\
 	$(FONTCONFIG_LIBS)
 
-libpoppler_glib_la_LDFLAGS = -version-info 10:0:2 @create_shared_lib@ @auto_import_flags@
+libpoppler_glib_la_LDFLAGS = -version-info 12:0:4 @create_shared_lib@ @auto_import_flags@
 
 BUILT_SOURCES =					\
 	poppler-enums.c				\
@@ -91,12 +91,14 @@ INTROSPECTION_GIRS =
 INTROSPECTION_SCANNER_ARGS = --add-include-path=$(srcdir)
 INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 
-introspection_files = $(libpoppler_glib_la_SOURCES) $(poppler_glib_include_HEADERS)
+introspection_files = $(filter-out poppler-private.h, $(libpoppler_glib_la_SOURCES)) $(poppler_glib_include_HEADERS) $(nodist_poppler_glib_include_HEADERS)
 Poppler-0.18.gir: libpoppler-glib.la
 Poppler_0_18_gir_INCLUDES = GObject-2.0 cairo-1.0
 Poppler_0_18_gir_CFLAGS = $(INCLUDES) -I$(top_builddir)
 Poppler_0_18_gir_LIBS = libpoppler-glib.la
-Poppler_0_18_gir_FILES = $(addprefix $(srcdir)/, $(introspection_files))
+Poppler_0_18_gir_FILES = $(introspection_files)
+Poppler_0_18_gir_SCANNERFLAGS = --c-include poppler.h
+Poppler_0_18_gir_EXPORT_PACKAGES = poppler-glib
 
 INTROSPECTION_GIRS += Poppler-0.18.gir
 

@@ -15,8 +15,8 @@ include(TestBigEndian)
 test_big_endian(WORDS_BIGENDIAN)
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "18")
-set(POPPLER_MICRO_VERSION "1")
+set(POPPLER_MINOR_VERSION "20")
+set(POPPLER_MICRO_VERSION "3")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 # command line switches
@@ -40,6 +40,25 @@ else(WIN32)
 endif(WIN32)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
+
+set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
+if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
+  message(WARNING "
+ No test data found in $testdatadir.
+ You will not be able to run 'make test' successfully.
+
+ The test data is not included in the source packages
+ and is also not part of the main git repository. Instead,
+ you can checkout the test data from its own git
+ repository with:
+
+   git clone git://git.freedesktop.org/git/poppler/test
+
+ You should checkout the test data as a sibling of your
+ poppler source folder or specify the location of your
+ checkout with -DTESTDATADIR=/path/to/checkoutdir/test.
+  ")
+endif()
 
 if(WIN32)
   set(_default_fontconfiguration "win32")
@@ -118,8 +137,14 @@ if(ENABLE_LIBOPENJPEG)
   set(HAVE_OPENJPEG_H ON)
 endif(ENABLE_LIBOPENJPEG)
 if(ENABLE_LCMS)
-  find_package(LCMS)
-  set(USE_CMS ${LCMS_FOUND})
+  find_package(LCMS2)
+  if(LCMS2_FOUND)
+    set(USE_CMS ${LCMS2_FOUND})
+  else(LCMS2_FOUND)
+    find_package(LCMS)
+    set(USE_CMS ${LCMS_FOUND})
+    set(USE_LCMS1 ${LCMS_FOUND})
+  endif(LCMS2_FOUND)
 endif(ENABLE_LCMS)
 if(ENABLE_LIBCURL)
   find_package(CURL)
@@ -173,6 +198,9 @@ endif(LIBOPENJPEG_FOUND)
 if(LCMS_FOUND)
   include_directories(${LCMS_INCLUDE_DIR})
 endif(LCMS_FOUND)
+if(LCMS2_FOUND)
+  include_directories(${LCMS2_INCLUDE_DIR})
+endif(LCMS2_FOUND)
 
 if(DEFINED COMPILE_WARNINGS)
 else(DEFINED COMPILE_WARNINGS)
@@ -214,6 +242,7 @@ set(poppler_SRCS
   fofi/FoFiTrueType.cc
   fofi/FoFiType1.cc
   fofi/FoFiType1C.cc
+  fofi/FoFiIdentifier.cc
   poppler/Annot.cc
   poppler/Array.cc
   poppler/BuiltinFont.cc
@@ -332,7 +361,12 @@ else (LIBOPENJPEG_FOUND)
   )
 endif(LIBOPENJPEG_FOUND)
 if(USE_CMS)
-  set(poppler_LIBS ${poppler_LIBS} ${LCMS_LIBRARIES})
+  if(LCMS_FOUND)
+    set(poppler_LIBS ${poppler_LIBS} ${LCMS_LIBRARIES})
+  endif(LCMS_FOUND)
+  if(LCMS2_FOUND)
+    set(poppler_LIBS ${poppler_LIBS} ${LCMS2_LIBRARIES})
+  endif(LCMS2_FOUND)
 endif(USE_CMS)
 if(WIN32)
   # gdi32 is needed under win32
@@ -347,11 +381,12 @@ endif(TIFF_FOUND)
 
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+set(CMAKE_CXX_FLAGS "/Zc:wchar_t- ${CMAKE_CXX_FLAGS}")
 add_library(poppler STATIC ${poppler_SRCS})
 else(MSVC)
 add_library(poppler SHARED ${poppler_SRCS})
 endif(MSVC)
-set_target_properties(poppler PROPERTIES VERSION 19.0.0 SOVERSION 19)
+set_target_properties(poppler PROPERTIES VERSION 27.0.0 SOVERSION 27)
 target_link_libraries(poppler ${poppler_LIBS})
 target_link_libraries(poppler LINK_INTERFACE_LIBRARIES "")
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
@@ -460,6 +495,7 @@ if(ENABLE_XPDF_HEADERS)
     fofi/FoFiTrueType.h
     fofi/FoFiType1.h
     fofi/FoFiType1C.h
+    fofi/FoFiIdentifier.h
     DESTINATION include/poppler/fofi)
   if(ENABLE_LIBCURL)
     install(FILES
@@ -573,7 +609,14 @@ show_end_message_yesno("use zlib" ENABLE_ZLIB)
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg" LIBOPENJPEG_FOUND)
 show_end_message_yesno("use cms" USE_CMS)
+if(LCMS_FOUND)
+  message("      with lcms1")
+endif(LCMS_FOUND)
+if(LCMS2_FOUND)
+  message("      with lcms2")
+endif(LCMS2_FOUND)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
+show_end_message("test data dir" ${TESTDATADIR})
 
 if(USE_FIXEDPOINT AND USE_FLOAT)
   message("Warning: Single precision and fixed point options should not be enabled at the same time")

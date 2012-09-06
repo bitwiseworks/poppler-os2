@@ -84,6 +84,11 @@ do not merge paragraphs
 .TP
 .B \-nodrm
 override document DRM settings
+.TP
+.B \-wbt <fp>
+adjust the word break threshold percent. Default is 10.
+Word break occurs when distance between two adjacent characters is
+greater than this percent of character height.
 
 .SH AUTHOR
 
@@ -93,6 +98,7 @@ based and benefits a lot from Derek Noonburg's xpdf package.
 This manual page was written by Søren Boll Overgaard <boll@debian.org>,
 for the Debian GNU/Linux system (but may be used by others).
 .SH "SEE ALSO"
+.BR pdfdetach (1),
 .BR pdffonts (1),
 .BR pdfimages (1),
 .BR pdfinfo (1),

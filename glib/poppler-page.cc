@@ -175,7 +175,7 @@ poppler_page_get_duration (PopplerPage *page)
  *
  * Returns the transition effect of @page
  *
- * Return value: a #PopplerPageTransition or NULL.
+ * Return value: a #PopplerPageTransition or %NULL.
  **/
 PopplerPageTransition *
 poppler_page_get_transition (PopplerPage *page)
@@ -263,15 +263,14 @@ poppler_page_get_text_page (PopplerPage *page)
     TextOutputDev *text_dev;
     Gfx           *gfx;
 
-    text_dev = new TextOutputDev (NULL, gTrue, gFalse, gFalse);
+    text_dev = new TextOutputDev (NULL, gTrue, 0, gFalse, gFalse);
     gfx = page->page->createGfx(text_dev,
 				72.0, 72.0, 0,
 				gFalse, /* useMediaBox */
 				gTrue, /* Crop */
 				-1, -1, -1, -1,
 				gFalse, /* printing */
-				page->document->doc->getCatalog (),
-				NULL, NULL, NULL, NULL);
+				NULL, NULL);
     page->page->display(gfx);
     text_dev->endPage();
 
@@ -354,7 +353,6 @@ _poppler_page_render (PopplerPage      *page,
 			   -1, -1,
 			   -1, -1,
 			   printing,
-			   page->document->doc->getCatalog (),
 			   NULL, NULL,
 			   printing ? poppler_print_annot_cb : NULL,
                            printing ? GINT_TO_POINTER ((gint)print_flags) : NULL);
@@ -470,7 +468,7 @@ create_surface_from_thumbnail_data (guchar *data,
 
 /**
  * poppler_page_get_thumbnail:
- * @page: the #PopperPage to get the thumbnail for
+ * @page: the #PopplerPage to get the thumbnail for
  * 
  * Get the embedded thumbnail for the specified page.  If the document
  * doesn't have an embedded thumbnail for the page, this function
@@ -624,8 +622,7 @@ poppler_page_get_thumbnail_size (PopplerPage *page,
  * @selection: start and end point of selection as a rectangle
  * 
  * Returns a region containing the area that would be rendered by
- * poppler_page_render_selection() or 
- * poppler_page_render_selection_to_pixbuf() as a #GList of
+ * poppler_page_render_selection() as a #GList of
  * #PopplerRectangle. The returned list must be freed with
  * poppler_page_selection_region_free().
  * 
@@ -691,7 +688,8 @@ poppler_page_get_selection_region (PopplerPage           *page,
 
 /**
  * poppler_page_selection_region_free:
- * @region: a #GList of #PopplerRectangle
+ * @region: (element-type PopplerRectangle): a #GList of
+ *   #PopplerRectangle
  *
  * Frees @region
  *
@@ -715,8 +713,7 @@ poppler_page_selection_region_free (GList *region)
  * @selection: start and end point of selection as a rectangle
  *
  * Returns a region containing the area that would be rendered by
- * poppler_page_render_selection() or
- * poppler_page_render_selection_to_pixbuf().
+ * poppler_page_render_selection().
  * The returned region must be freed with cairo_region_destroy()
  *
  * Return value: (transfer full): a cairo_region_t
@@ -890,6 +887,7 @@ poppler_page_find_text (PopplerPage *page,
 			     gFalse, gTrue, // startAtTop, stopAtBottom
 			     gFalse, gFalse, // startAtLast, stopAtLast
 			     gFalse, gFalse, // caseSensitive, backwards
+			     gFalse, // wholeWord
 			     &xMin, &yMin, &xMax, &yMax))
     {
       match = poppler_rectangle_new ();
@@ -926,8 +924,7 @@ poppler_page_get_image_output_dev (PopplerPage *page,
 			      gTrue, /* Crop */
 			      -1, -1, -1, -1,
 			      gFalse, /* printing */
-			      page->document->doc->getCatalog (),
-			      NULL, NULL, NULL, NULL);
+			      NULL, NULL);
   page->page->display(gfx);
   delete gfx;
 
@@ -990,7 +987,7 @@ image_draw_decide_cb (int image_id, void *data)
 /**
  * poppler_page_get_image:
  * @page: A #PopplerPage
- * @image_id: The image identificator
+ * @image_id: The image identifier
  *
  * Returns a cairo surface for the image of the @page
  *
@@ -1030,7 +1027,8 @@ poppler_page_get_image (PopplerPage *page,
 
 /**
  * poppler_page_free_image_mapping:
- * @list: A list of #PopplerImageMapping<!-- -->s
+ * @list: (element-type PopplerImageMapping): A list of
+ *   #PopplerImageMapping<!-- -->s
  *
  * Frees a list of #PopplerImageMapping<!-- -->s allocated by
  * poppler_page_get_image_mapping().
@@ -1063,8 +1061,6 @@ poppler_page_render_to_ps (PopplerPage   *page,
   if (!ps_file->out)
     ps_file->out = new PSOutputDev (ps_file->filename,
                                     ps_file->document->doc,
-                                    ps_file->document->doc->getXRef(),
-                                    ps_file->document->doc->getCatalog(),
                                     NULL,
                                     ps_file->first_page, ps_file->last_page,
                                     psModePS, (int)ps_file->paper_width,
@@ -1141,7 +1137,7 @@ poppler_page_get_link_mapping (PopplerPage *page)
   
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
   
-  links = new Links (page->page->getAnnots (page->document->doc->getCatalog ()));
+  links = new Links (page->page->getAnnots ());
 
   if (links == NULL)
     return NULL;
@@ -1209,7 +1205,8 @@ poppler_page_get_link_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_link_mapping:
- * @list: A list of #PopplerLinkMapping<!-- -->s
+ * @list: (element-type PopplerLinkMapping): A list of
+ *   #PopplerLinkMapping<!-- -->s
  * 
  * Frees a list of #PopplerLinkMapping<!-- -->s allocated by
  * poppler_page_get_link_mapping().  It also frees the #PopplerAction<!-- -->s
@@ -1245,7 +1242,7 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
   
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  forms = page->page->getFormWidgets (page->document->doc->getCatalog ());
+  forms = page->page->getFormWidgets ();
 
   if (forms == NULL)
     return NULL;
@@ -1277,7 +1274,8 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_form_field_mapping:
- * @list: A list of #PopplerFormFieldMapping<!-- -->s
+ * @list: (element-type PopplerFormFieldMapping): A list of
+ *   #PopplerFormFieldMapping<!-- -->s
  *
  * Frees a list of #PopplerFormFieldMapping<!-- -->s allocated by
  * poppler_page_get_form_field_mapping().
@@ -1312,7 +1310,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  annots = page->page->getAnnots (page->document->doc->getCatalog ());
+  annots = page->page->getAnnots ();
   if (!annots)
     return NULL;
 
@@ -1396,12 +1394,13 @@ poppler_page_get_annot_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_annot_mapping:
- * @list: A list of #PopplerAnnotMapping<!-- -->s
+ * @list: (element-type PopplerAnnotMapping): A list of
+ *   #PopplerAnnotMapping<!-- -->s
  *
  * Frees a list of #PopplerAnnotMapping<!-- -->s allocated by
- * poppler_page_get_annot_mapping().  It also frees the #PopplerAnnot<!-- -->s
+ * poppler_page_get_annot_mapping().  It also unreferences the #PopplerAnnot<!-- -->s
  * that each mapping contains, so if you want to keep them around, you need to
- * copy them with poppler_annot_copy().
+ * reference them with g_object_ref().
  **/
 void
 poppler_page_free_annot_mapping (GList *list)
@@ -1429,7 +1428,7 @@ poppler_page_add_annot (PopplerPage  *page,
   g_return_if_fail (POPPLER_IS_PAGE (page));
   g_return_if_fail (POPPLER_IS_ANNOT (annot));
 
-  page->page->addAnnot (annot->annot, page->document->doc->getCatalog ());
+  page->page->addAnnot (annot->annot);
 }
 
 /* PopplerRectangle type */
@@ -2007,8 +2006,9 @@ poppler_page_get_text_layout (PopplerPage       *page,
 }
 
 /**
- * poppler_page_free_text_attributes;
- * @list: A list of #PopplerTextAttributes<!-- -->s
+ * poppler_page_free_text_attributes:
+ * @list: (element-type PopplerTextAttributes): A list of
+ *   #PopplerTextAttributes<!-- -->s
  *
  * Frees a list of #PopplerTextAttributes<!-- -->s allocated by
  * poppler_page_get_text_attributes().

@@ -61,9 +61,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `openjpeg' library (-lopenjpeg). */
-#undef HAVE_LIBOPENJPEG
-
 /* Define to 1 if you have the `tiff' library (-ltiff). */
 #undef HAVE_LIBTIFF
 
@@ -175,6 +172,9 @@
 /* Support for curl based doc builder is compiled in. */
 #undef POPPLER_HAS_CURL_SUPPORT
 
+/* Defines the poppler version */
+#undef POPPLER_VERSION
+
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
@@ -194,6 +194,9 @@
 /* Use single precision arithmetic in the Splash backend */
 #undef USE_FLOAT
 
+/* Defines if use lcms1 */
+#undef USE_LCMS1
+
 /* Version number of package */
 #undef VERSION
 
@@ -202,6 +205,9 @@
 
 /* Use win32 font configuration backend */
 #undef WITH_FONTCONFIGURATION_WIN32
+
+/* OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag. */
+#undef WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
