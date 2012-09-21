@@ -7365,7 +7365,7 @@ func_mode_link ()
 	  #
 	  case $version_type in
 	  # correct linux to gnu/linux during the next big refactor
-	  darwin|linux|osf|windows|none)
+	  darwin|linux|osf|windows|os2|none)
 	    func_arith $number_major + $number_minor
 	    current=$func_arith_result
 	    age="$number_minor"
@@ -7526,6 +7526,14 @@ func_mode_link ()
 	  func_arith $current - $age
 	  major=$func_arith_result
 	  versuffix="-$major"
+	  ;;
+
+	os2)
+	  # Use '' rather than '.', since we only want one
+	  # extension on DOS 8.3 filesystems.
+	  func_arith $current - $age
+	  major=$func_arith_result
+	  versuffix="$major"
 	  ;;
 
 	*)

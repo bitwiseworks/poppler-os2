@@ -10510,8 +10510,8 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
       hardcode_libdir_flag_spec='-L$libdir'
       hardcode_minus_L=yes
       allow_undefined_flag=unsupported
-      archive_cmds='ECHO "LIBRARY `eval $shortname_cmds` INITINSTANCE TERMINSTANCE" > $output_objdir/$libname.def~ECHO "DESCRIPTION \"$libname\"" >> $output_objdir/$libname.def~ECHO "DATA MULTIPLE" >> $output_objdir/$libname.def~ECHO EXPORTS >> $output_objdir/$libname.def~emxexp $libobjs >> $output_objdir/$libname.def~$CC -Zdll -Zbin-files -Zhigh-mem -Zomf -o $lib $libobjs $deplibs $linker_flags $output_objdir/$libname.def'
-      old_archive_from_new_cmds='emximp -o $output_objdir/$libname.a $output_objdir/$libname.def'
+      archive_cmds='ECHO "LIBRARY `eval $shortname_cmds`$versuffix INITINSTANCE TERMINSTANCE" > $output_objdir/$libname.def~ECHO "DESCRIPTION \"$libname\"" >> $output_objdir/$libname.def~ECHO "DATA MULTIPLE" >> $output_objdir/$libname.def~ECHO EXPORTS >> $output_objdir/$libname.def~emxexp $libobjs >> $output_objdir/$libname.def~$CC -Zdll -Zbin-files -Zhigh-mem -Zomf -o $lib $libobjs $deplibs $linker_flags $output_objdir/$libname.def'
+      old_archive_from_new_cmds='emximp -o $output_objdir/${libname}.a $output_objdir/$libname.def'
       ;;
 
     osf3*)
@@ -11562,11 +11562,13 @@ openbsd*)
   ;;
 
 os2*)
+  version_type=os2
+  need_lib_prefix=no
   libname_spec='$name'
   shrext_cmds=".dll"
   need_lib_prefix=no
-  shortname_cmds='ECHO $libname | cut -b -8'
-  library_names_spec='`eval $shortname_cmds`${shared_ext} $libname.a'
+  shortname_cmds='ECHO $libname | cut -b -4,8-'
+  library_names_spec='`eval $shortname_cmds`${versuffix}${shared_ext} ${libname}.a'
   dynamic_linker='OS/2 ld.exe'
   shlibpath_var=LIBPATH
   ;;
@@ -16496,11 +16498,13 @@ openbsd*)
   ;;
 
 os2*)
+  version_type=os2
+  need_lib_prefix=no
   libname_spec='$name'
   shrext_cmds=".dll"
   need_lib_prefix=no
-  shortname_cmds='ECHO $libname | cut -b -8'
-  library_names_spec='`eval $shortname_cmds`${shared_ext} $libname.a'
+  shortname_cmds='ECHO $libname | cut -b -4,8-'
+  library_names_spec='`eval $shortname_cmds`${versuffix}${shared_ext} ${libname}.a'
   dynamic_linker='OS/2 ld.exe'
   shlibpath_var=LIBPATH
   ;;
