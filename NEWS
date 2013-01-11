@@ -1,3 +1,146 @@
+Release 0.22.0
+        core:
+         * Fix crash in invalid files that define a <= 0 bits per image value
+         * Fix a few issues in JPX decoding when not using OpenJPEG
+         * TextOutputDev: Use page size for max value in TextPage::visitSelection
+         * Fix typo in error message
+
+        utils:
+         * Fix pdfunite regression (Bug #58569)
+         * Demo fixes and improvements
+
+        misc:
+         * pdf-inspector improvements
+
+Release 0.21.4
+        core:
+         * SplashOutputDev: Fix crash when rendering in monochrome mode
+         * SplashOutputDev: Fix line widths in monochrome mode (Bug #57294)
+         * PSOutputDev: Fix crop on EPS conversion (Bug #30692)
+         * TextOutputDev: Fix minor logic mistake
+         * Fix assert on some malformed files (Bug #58257)
+         * Move #include "jpeglib.h" into .cc file (Bug #57687)
+         * Filter text that may end up being written to the shell
+         * Fix windows compile warnings
+
+        glib:
+         * Add poppler_annot_set_flags (Bug #58015)
+         * Demo fixes and improvements
+
+        qt4:
+         * Fix check_lexer on 32-bit systems
+
+Release 0.21.3
+        core:
+         * Splash: Implement bilinear image scaling (Bug #22138)
+         * CairoOutputDev: Update fill and stroke color in startPage (Bug #54526)
+         * Fix GooString::insert()
+         * Allow large chars in TextPage
+         * Fix crash on ActualText::end
+         * Don't use memcpy to copy classes
+         * Fix warnings
+
+        glib:
+         * Check if words end with spaces (Bug #54504)
+         * Ensure text is only computed on first render
+         * Fix warnings while generating introspection file
+         * Fix returns tag in PopplerAttachmentSaveFunc api doc
+         * Minor demo fixes
+
+Release 0.21.2
+        core:
+         * CairoOutputDev: make drawImage work with images > 32767 in width/height (Bug #56858)
+         * CairoOutputDev: Fix soft mask when image resolution != smask resolution (Bug #57070)
+         * CairoOutputDev: Fix crash in CairoImageOutputDev with setSoftMaskFromImageMask (Bug #57067)
+         * Remove a check on fonts that we don't need (Bug #56753)
+         * Misc code cleanups
+
+        utils:
+         * pdftocairo: Add tiff output support (Bug #57006)
+         * pdfunite: Fix -v (Bug #56817)
+         * Misc code cleanups
+
+Release 0.21.1
+        core:
+         * Annotation improvements
+         * Form improvements
+         * CairoImageOutputDev: Support parameterized Gouraud shading (Bug #56463)
+         * UTF validation fixes
+         * Do not call drawing routines if we don't need non text (Bug #54617)
+         * Fix Memory leak in CharCodeToUnicode (Bug #54702)
+
+        qt4:
+         * Make LinkRendition properties available (Bug #55378)
+         * Accessors for FormWidgetChoice::editChoice
+         * Implement overprint
+
+Release 0.21.0
+        core:
+         * Support the modification of files with Encrypt
+         * Annotation improvements
+         * Form improvements
+         * Splash: Implement DeviceN support
+         * Splash: Avoid bogus memory error for tilingPattern
+         * TextOutputDev: Allow multiple fonts in a TextWord
+         * Kill the concept of base dir
+         * PSOutputDev: Always write HiResBoundingBox (Bug #53159)
+         * Convert UTF-16 to UCS-4 when reading toUnicode cmap
+         * GooString formatting: add support for uppercase hexadecimal
+         * Use error() instead of fprintf(stderr, ...) in Annot::layoutText
+         * poppler-config.h: remove WITH_FONTCONFIGURATION_* macros
+
+        glib:
+         * Annotation improvements
+         * Add poppler_page_remove_annot()
+         * Add poppler_document_new_from_stream
+         * Add poppler_document_new_from_gfile
+         * Add poppler_page_find_text_with_options (Bug #2951)
+         * Demo improvements
+         * Port tests and demo to GTK+3
+
+        qt4:
+         * Add accessor methods for movie poster information
+         * Make 'additional actions' available in Annotation API (Bug #53589)
+         * Add whole-page search method to Poppler::Page
+         * Small changes in tests
+
+        utils:
+         * pdftohtml: Make the output more xhtml compliant
+         * pdftohtml: Add -fontfullname. (Bug #49872)
+         * pdftohtml: Do not invoke gs anymore
+
+        build system:
+         * Add the possibility of using lcms1 even if lcms2 is installed
+         * Remove extra fontconfig CFLAGS and LIBS
+
+Release 0.20.5
+        core:
+         * Fix crashes in malformed documents
+         * Fix parsing of very big numbers
+         * Splash: Do not render invalid font outlines (Bug #55573)
+         * Check for NaN in TextPage::addChar
+
+        build system:
+         * Fix build using mingw64 with winpthread
+         * autotools: Fix compilation when lcms is on non standard locations (Bug #55326)
+         * Support automake-1.12 (Bug #55541)
+
+        glib:
+         * Chain up finalize to the parent class (Bug #55521)
+
+Release 0.20.4
+        core:
+         * Improvements regarding embedded file handling. (KDE Bug #306008)
+         * Fix opening some broken files (Bug #14303)
+         * Fix memory leaks
+         * Fix crashes in various broken files
+         * Refine warning to only complain when really needed
+         * Remove function declared but not implemented
+         * Remove execution permissions from a header file
+
+        qt4:
+         * Improvements regarding embedded file handling. (KDE Bug #306008)
+
 Release 0.20.3
         core:
          * If NULL, NULL fails as password try EMPTY, EMPTY before failing (Bug #3498)

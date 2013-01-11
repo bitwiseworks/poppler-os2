@@ -1,8 +1,8 @@
 INCLUDES =					\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/poppler			\
-	$(FONTCONFIG_CFLAGS)			\
-	$(POPPLER_QT4_CFLAGS)
+	$(POPPLER_QT4_CFLAGS)			\
+	$(LCMS_CFLAGS)
 
 SUFFIXES: .moc
 
@@ -59,10 +59,9 @@ libpoppler_qt4_la_CXXFLAGS = 			\
 libpoppler_qt4_la_LIBADD = 			\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(top_builddir)/poppler/libpoppler-arthur.la	\
-	$(FONTCONFIG_LIBS)				\
 	$(POPPLER_QT4_LIBS)
 
-libpoppler_qt4_la_LDFLAGS = -version-info 4:0:0 @create_shared_lib@ @auto_import_flags@
+libpoppler_qt4_la_LDFLAGS = -version-info 6:0:2 @create_shared_lib@ @auto_import_flags@
 
 # This rule lets GNU make create any *.moc from the equivalent *.h
 .h.moc:

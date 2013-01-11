@@ -23,6 +23,7 @@
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -43,6 +44,7 @@ class Gfx;
 class CharCodeToUnicode;
 class GfxFont;
 class GfxResources;
+class Page;
 class PDFDoc;
 class Form;
 class FormWidget;
@@ -471,6 +473,8 @@ private:
 //------------------------------------------------------------------------
 
 class Annot {
+  friend class Annots;
+  friend class Page;
 public:
   enum AnnotFlag {
     flagUnknown        = 0x0000,
@@ -515,6 +519,22 @@ public:
     type3D              // 3D             25
   };
 
+  /**
+   * Describes the additional actions of a screen or widget annotation.
+   */
+  enum AdditionalActionsType {
+    actionCursorEntering, ///< Performed when the cursor enters the annotation's active area
+    actionCursorLeaving,  ///< Performed when the cursor exists the annotation's active area
+    actionMousePressed,   ///< Performed when the mouse button is pressed inside the annotation's active area
+    actionMouseReleased,  ///< Performed when the mouse button is released inside the annotation's active area
+    actionFocusIn,        ///< Performed when the annotation receives the input focus
+    actionFocusOut,       ///< Performed when the annotation loses the input focus
+    actionPageOpening,    ///< Performed when the page containing the annotation is opened
+    actionPageClosing,    ///< Performed when the page containing the annotation is closed
+    actionPageVisible,    ///< Performed when the page containing the annotation becomes visible
+    actionPageInvisible   ///< Performed when the page containing the annotation becomes invisible
+  };
+
   Annot(PDFDoc *docA, PDFRectangle *rectA);
   Annot(PDFDoc *docA, Dict *dict);
   Annot(PDFDoc *docA, Dict *dict, Object *obj);
@@ -551,8 +571,6 @@ public:
   // new_color. 
   void setColor(AnnotColor *new_color);
 
-  void setPage(Ref *pageRef, int pageIndex);
-
   void setAppearanceState(const char *state);
 
   // Delete appearance streams and reset appearance state
@@ -587,10 +605,12 @@ private:
   // write vStr[i:j[ in appearBuf
 
   void initialize (PDFDoc *docA, Dict *dict);
+  void setPage (int new_page, GBool updateP); // Called by Page::addAnnot and Annots ctor
 
 
 protected:
   virtual ~Annot();
+  virtual void removeReferencedObjects(); // Called by Page::removeAnnot
   void setColor(AnnotColor *color, GBool fill);
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
@@ -699,6 +719,8 @@ public:
   void setDate(GooString *new_date);
 
 protected:
+  virtual void removeReferencedObjects();
+
   GooString *label;             // T            (Default autor)
   AnnotPopup *popup;            // Popup
   double opacity;               // CA           (Default 1.0)
@@ -800,7 +822,7 @@ class AnnotScreen: public Annot {
 
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction* getAction() { return action; }
-  Object* getAdditionActions() { return &additionAction; }
+  LinkAction *getAdditionalAction(AdditionalActionsType type);
 
  private:
   void initialize(PDFDoc *docA, Dict *dict);
@@ -811,7 +833,7 @@ class AnnotScreen: public Annot {
   AnnotAppearanceCharacs* appearCharacs; // MK
 
   LinkAction *action;                    // A
-  Object additionAction;                 // AA
+  Object additionalActions;              // AA
 };
 
 //------------------------------------------------------------------------
@@ -1269,11 +1291,12 @@ public:
   void drawFormFieldText(GfxResources *resources, GooString *da);
   void drawFormFieldChoice(GfxResources *resources, GooString *da);
   void generateFieldAppearance ();
+  void updateAppearanceStream ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction *getAction() { return action; }
-  Dict *getAdditionActions() { return additionActions; }
+  LinkAction *getAdditionalAction(AdditionalActionsType type);
   Dict *getParent() { return parent; }
 
 private:
@@ -1292,11 +1315,12 @@ private:
   AnnotWidgetHighlightMode mode;          // H  (Default I)
   AnnotAppearanceCharacs *appearCharacs;  // MK
   LinkAction *action;                     // A
-  Dict *additionActions;                  // AA
+  Object additionalActions;               // AA
   // inherited  from Annot
   // AnnotBorderBS border;                // BS
   Dict *parent;                           // Parent
   GBool addDingbatsResource;
+  Ref updatedAppearanceStream; // {-1,-1} if updateAppearanceStream has never been called
 };
 
 //------------------------------------------------------------------------
@@ -1365,8 +1389,8 @@ private:
 class Annots {
 public:
 
-  // Build a list of Annot objects.
-  Annots(PDFDoc *docA, Object *annotsObj);
+  // Build a list of Annot objects and call setPage on them
+  Annots(PDFDoc *docA, int page, Object *annotsObj);
 
   ~Annots();
 

@@ -25,7 +25,7 @@
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
 // Copyright (C) 2011 Pino Toscano <pino@kde.org>
@@ -166,7 +166,7 @@ DllMain (HINSTANCE hinstDLL,
 }
 }
 
-static char *
+static const char *
 get_poppler_datadir (void)
 {
   static char retval[MAX_PATH];
@@ -439,7 +439,7 @@ Plugin *Plugin::load(char *type, char *name) {
   void *dlA;
 #endif
 
-  path = globalParams->getBaseDir();
+  path = new GooString(POPPLER_DATADIR);
   appendToPath(path, "plugins");
   appendToPath(path, type);
   appendToPath(path, name);
@@ -574,11 +574,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   }
 
 #ifdef _WIN32
-  // baseDir will be set by a call to setBaseDir
-  baseDir = new GooString();
   substFiles = new GooHash(gTrue);
-#else
-  baseDir = appendToPath(getHomeDir(), ".xpdf");
 #endif
   nameToUnicode = new NameToCharCode();
   cidToUnicodes = new GooHash(gTrue);
@@ -800,7 +796,6 @@ GlobalParams::~GlobalParams() {
 
   delete macRomanReverseMap;
 
-  delete baseDir;
   delete nameToUnicode;
   deleteGooHash(cidToUnicodes, GooString);
   deleteGooHash(unicodeToUnicodes, GooString);
@@ -850,28 +845,12 @@ GlobalParams::~GlobalParams() {
 }
 
 //------------------------------------------------------------------------
-
-void GlobalParams::setBaseDir(const char *dir) {
-  delete baseDir;
-  baseDir = new GooString(dir);
-}
-
-//------------------------------------------------------------------------
 // accessors
 //------------------------------------------------------------------------
 
 CharCode GlobalParams::getMacRomanCharCode(char *charName) {
   // no need to lock - macRomanReverseMap is constant
   return macRomanReverseMap->lookup(charName);
-}
-
-GooString *GlobalParams::getBaseDir() {
-  GooString *s;
-
-  lockGlobalParams;
-  s = baseDir->copy();
-  unlockGlobalParams;
-  return s;
 }
 
 Unicode GlobalParams::mapNameToUnicode(const char *charName) {

@@ -18,6 +18,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,7 +49,7 @@
 #include "PDFDocFactory.h"
 #include "CharTypes.h"
 #include "UnicodeMap.h"
-#include "PDFDocEncoding.h"
+#include "UTF.h"
 #include "Error.h"
 #include "DateInfo.h"
 
@@ -107,8 +108,7 @@ int main(int argc, char *argv[]) {
   GooString *ownerPW, *userPW;
   UnicodeMap *uMap;
   Page *page;
-  Object info, xfa;
-  Object *acroForm;
+  Object info;
   char buf[256];
   double w, h, wISO, hISO;
   FILE *f;
@@ -228,16 +228,17 @@ int main(int argc, char *argv[]) {
 	 doc->getStructTreeRoot()->isDict() ? "yes" : "no");
 
   // print form info
-  if ((acroForm = doc->getCatalog()->getAcroForm())->isDict()) {
-    acroForm->dictLookup("XFA", &xfa);
-    if (xfa.isStream() || xfa.isArray()) {
-      printf("Form:           XFA\n");
-    } else {
+  switch (doc->getCatalog()->getFormType())
+  {
+    case Catalog::NoForm:
+      printf("Form:           none\n");
+      break;
+    case Catalog::AcroForm:
       printf("Form:           AcroForm\n");
-    }
-    xfa.free();
-  } else {
-    printf("Form:           none\n");
+      break;
+    case Catalog::XfaForm:
+      printf("Form:           XFA\n");
+      break;
   }
 
   // print page count
@@ -246,11 +247,31 @@ int main(int argc, char *argv[]) {
   // print encryption info
   printf("Encrypted:      ");
   if (doc->isEncrypted()) {
-    printf("yes (print:%s copy:%s change:%s addNotes:%s)\n",
+    Guchar *fileKey;
+    CryptAlgorithm encAlgorithm;
+    int keyLength;
+    doc->getXRef()->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+
+    const char *encAlgorithmName = "unknown";
+    switch (encAlgorithm)
+    {
+      case cryptRC4:
+	encAlgorithmName = "RC4";
+	break;
+      case cryptAES:
+	encAlgorithmName = "AES";
+	break;
+      case cryptAES256:
+	encAlgorithmName = "AES-256";
+	break;
+    }
+
+    printf("yes (print:%s copy:%s change:%s addNotes:%s algorithm:%s)\n",
 	   doc->okToPrint(gTrue) ? "yes" : "no",
 	   doc->okToCopy(gTrue) ? "yes" : "no",
 	   doc->okToChange(gTrue) ? "yes" : "no",
-	   doc->okToAddNotes(gTrue) ? "yes" : "no");
+	   doc->okToAddNotes(gTrue) ? "yes" : "no",
+	   encAlgorithmName);
   } else {
     printf("no\n");
   }
@@ -379,41 +400,16 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap) {
   Object obj;
   GooString *s1;
-  GBool isUnicode;
-  Unicode u, u2;
+  Unicode *u;
   char buf[8];
-  int i, n;
+  int i, n, len;
 
   if (infoDict->lookup(key, &obj)->isString()) {
     fputs(text, stdout);
     s1 = obj.getString();
-    if ((s1->getChar(0) & 0xff) == 0xfe &&
-	(s1->getChar(1) & 0xff) == 0xff) {
-      isUnicode = gTrue;
-      i = 2;
-    } else {
-      isUnicode = gFalse;
-      i = 0;
-    }
-    while (i < obj.getString()->getLength()) {
-      if (isUnicode) {
-	u = ((s1->getChar(i) & 0xff) << 8) |
-	    (s1->getChar(i+1) & 0xff);
-	i += 2;
-	if (u >= 0xd800 && u <= 0xdbff && i < obj.getString()->getLength()) {
-	  // surrogate pair
-	  u2 = ((s1->getChar(i) & 0xff) << 8) |
-	    (s1->getChar(i+1) & 0xff);
-	  i += 2;
-	  if (u2 >= 0xdc00 && u2 <= 0xdfff) {
-	    u = 0x10000 + ((u - 0xd800) << 10) + (u2 - 0xdc00);
-	  }
-	}
-      } else {
-	u = pdfDocEncoding[s1->getChar(i) & 0xff];
-	++i;
-      }
-      n = uMap->mapUnicode(u, buf, sizeof(buf));
+    len = TextStringToUCS4(s1, &u);
+    for (i = 0; i < len; i++) {
+      n = uMap->mapUnicode(u[i], buf, sizeof(buf));
       fwrite(buf, 1, n, stdout);
     }
     fputc('\n', stdout);

@@ -44,16 +44,6 @@
 #cmakedefine TEXTOUT_WORD_LIST 1
 #endif
 
-/* Use fontconfig font configuration backend */
-#ifndef WITH_FONTCONFIGURATION_FONTCONFIG
-#cmakedefine WITH_FONTCONFIGURATION_FONTCONFIG 1
-#endif
-
-/* Use win32 font configuration backend */
-#ifndef WITH_FONTCONFIGURATION_WIN32
-#cmakedefine WITH_FONTCONFIGURATION_WIN32 1
-#endif
-
 /* Support for curl is compiled in. */
 #ifndef POPPLER_HAS_CURL_SUPPORT
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1
@@ -158,7 +148,7 @@
 #if defined(_WIN32)
 #ifdef _MSC_VER
 #define strtok_r strtok_s
-#elif __MINGW32__
+#elif __MINGW32__ && !defined(__WINPTHREADS_VERSION)
 char * strtok_r (char *s, const char *delim, char **save_ptr);
 #endif
 #endif

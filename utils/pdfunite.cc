@@ -4,9 +4,10 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 #include <PDFDoc.h>
@@ -56,7 +57,8 @@ int main (int argc, char *argv[])
   int exitCode;
 
   exitCode = 99;
-  if (argc <= 3 || printVersion || printHelp) {
+  const GBool ok = parseArgs (argDesc, &argc, argv);
+  if (!ok || argc <= 3 || printVersion || printHelp) {
     fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
@@ -120,7 +122,7 @@ int main (int argc, char *argv[])
       Dict *pageDict = page.getDict();
       docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset);
     }
-    objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset);
+    objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, gTrue);
     numOffset = yRef->getNumObjects() + 1;
   }
 
@@ -154,7 +156,7 @@ int main (int argc, char *argv[])
         outStr->printf("/Parent %d 0 R", rootNum + 1);
       } else {
         outStr->printf("/%s ", key);
-        PDFDoc::writeObject(&value, NULL, outStr, yRef, offsets[i]);
+        PDFDoc::writeObject(&value, outStr, yRef, offsets[i], NULL, cryptRC4, 0, 0, 0);
       }
       value.free();
     }

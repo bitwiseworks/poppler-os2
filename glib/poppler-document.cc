@@ -38,6 +38,8 @@
 #include "poppler.h"
 #include "poppler-private.h"
 #include "poppler-enums.h"
+#include "poppler-input-stream.h"
+#include "poppler-cached-file-loader.h"
 
 /**
  * SECTION:poppler-document
@@ -167,7 +169,6 @@ poppler_document_new_from_file (const char  *uri,
 				GError     **error)
 {
   PDFDoc *newDoc;
-  GooString *filename_g;
   GooString *password_g;
   char *filename;
 
@@ -196,6 +197,7 @@ poppler_document_new_from_file (const char  *uri,
   newDoc = new PDFDoc(filenameW, length, password_g, password_g);
   delete [] filenameW;
 #else
+  GooString *filename_g;
   filename_g = new GooString (filename);
   newDoc = new PDFDoc(filename_g, password_g, password_g);
 #endif
@@ -243,6 +245,117 @@ poppler_document_new_from_data (char        *data,
   delete password_g;
 
   return _poppler_document_new_from_pdfdoc (newDoc, error);
+}
+
+static inline gboolean
+stream_is_memory_buffer_or_local_file (GInputStream *stream)
+{
+  return G_IS_MEMORY_INPUT_STREAM(stream) ||
+    (G_IS_FILE_INPUT_STREAM(stream) && strcmp(g_type_name_from_instance((GTypeInstance*)stream), "GLocalFileInputStream") == 0);
+}
+
+/**
+ * poppler_document_new_from_stream:
+ * @stream: a #GInputStream to read from
+ * @length: the stream length, or -1 if not known
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @cancellable: (allow-none): a #GCancellable, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument reading the PDF contents from @stream.
+ * Note that the given #GInputStream must be seekable or %G_IO_ERROR_NOT_SUPPORTED
+ * will be returned.
+ * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
+ * domains.
+ *
+ * Returns: (transfer full): a new #PopplerDocument, or %NULL
+ *
+ * Since: 0.22
+ */
+PopplerDocument *
+poppler_document_new_from_stream (GInputStream *stream,
+                                  goffset       length,
+                                  const char   *password,
+                                  GCancellable *cancellable,
+                                  GError      **error)
+{
+  Object obj;
+  PDFDoc *newDoc;
+  BaseStream *str;
+  GooString *password_g;
+
+  g_return_val_if_fail(G_IS_INPUT_STREAM(stream), NULL);
+  g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
+
+  if (!globalParams) {
+    globalParams = new GlobalParams();
+  }
+
+  if (!G_IS_SEEKABLE(stream) || !g_seekable_can_seek(G_SEEKABLE(stream))) {
+    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                        "Stream is not seekable");
+    return NULL;
+  }
+
+  obj.initNull();
+  if (stream_is_memory_buffer_or_local_file(stream)) {
+    str = new PopplerInputStream(stream, cancellable, 0, gFalse, 0, &obj);
+  } else {
+    CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
+    str = new CachedFileStream(cachedFile, 0, gFalse, cachedFile->getLength(), &obj);
+  }
+
+  password_g = poppler_password_to_latin1(password);
+  newDoc = new PDFDoc(str, password_g, password_g);
+  delete password_g;
+
+  return _poppler_document_new_from_pdfdoc (newDoc, error);
+}
+
+/**
+ * poppler_document_new_from_gfile:
+ * @file: a #GFile to load
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @cancellable: (allow-none): a #GCancellable, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument reading the PDF contents from @file.
+ * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
+ * domains.
+ *
+ * Returns: (transfer full): a new #PopplerDocument, or %NULL
+ *
+ * Since: 0.22
+ */
+PopplerDocument *
+poppler_document_new_from_gfile (GFile        *file,
+                                 const char   *password,
+                                 GCancellable *cancellable,
+                                 GError      **error)
+{
+  PopplerDocument *document;
+  GFileInputStream *stream;
+
+  g_return_val_if_fail(G_IS_FILE(file), NULL);
+
+  if (g_file_is_native(file)) {
+    gchar *uri;
+
+    uri = g_file_get_uri(file);
+    document = poppler_document_new_from_file(uri, password, error);
+    g_free(uri);
+
+    return document;
+  }
+
+  stream = g_file_read(file, cancellable, error);
+  if (!stream)
+    return NULL;
+
+  document = poppler_document_new_from_stream(G_INPUT_STREAM(stream), -1, password, cancellable, error);
+  g_object_unref(stream);
+
+  return document;
 }
 
 static gboolean
@@ -356,6 +469,8 @@ poppler_document_finalize (GObject *object)
   poppler_document_layers_free (document);
   delete document->output_dev;
   delete document->doc;
+
+  G_OBJECT_CLASS (poppler_document_parent_class)->finalize (object);
 }
 
 /**
@@ -1957,6 +2072,8 @@ poppler_font_info_finalize (GObject *object)
 
         delete font_info->scanner;
         g_object_unref (font_info->document);
+
+        G_OBJECT_CLASS (poppler_font_info_parent_class)->finalize (object);
 }
 
 /**
@@ -2458,6 +2575,8 @@ poppler_ps_file_finalize (GObject *object)
         delete ps_file->out;
         g_object_unref (ps_file->document);
         g_free (ps_file->filename);
+
+        G_OBJECT_CLASS (poppler_ps_file_parent_class)->finalize (object);
 }
 
 /**

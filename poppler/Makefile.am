@@ -177,7 +177,7 @@ libpoppler_la_LIBADD =				\
 	$(PTHREAD_LIBS)				\
 	$(win32_libs)
 
-libpoppler_la_LDFLAGS = -version-info 27:0:0 @create_shared_lib@ @auto_import_flags@
+libpoppler_la_LDFLAGS = -version-info 34:0:0 @create_shared_lib@ @auto_import_flags@
 
 if ENABLE_XPDF_HEADERS
 
@@ -251,6 +251,7 @@ poppler_include_HEADERS =	\
 	PSOutputDev.h		\
 	TextOutputDev.h		\
 	SecurityHandler.h	\
+	UTF.h			\
 	UTF8.h			\
 	XpdfPluginAPI.h		\
 	Sound.h
@@ -317,6 +318,7 @@ libpoppler_la_SOURCES =		\
 	strtok_r.cpp		\
 	UnicodeMap.cc		\
 	UnicodeTypeTable.cc	\
+	UTF.cc                  \
 	ViewerPreferences.cc	\
 	XRef.cc			\
 	PSOutputDev.cc		\

@@ -15,8 +15,8 @@ include(TestBigEndian)
 test_big_endian(WORDS_BIGENDIAN)
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "20")
-set(POPPLER_MICRO_VERSION "3")
+set(POPPLER_MINOR_VERSION "22")
+set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 # command line switches
@@ -28,7 +28,7 @@ option(ENABLE_SPLASH "Build the Splash graphics backend." ON)
 option(ENABLE_UTILS "Compile poppler command line utils." ON)
 option(ENABLE_CPP "Compile poppler cpp wrapper." ON)
 option(ENABLE_LIBOPENJPEG "Use libopenjpeg for JPX streams." ON)
-option(ENABLE_LCMS "Use liblcms for color management." ON)
+set(ENABLE_CMS "auto" CACHE STRING "Use color management system. Possible values: auto, lcms1, lcms2. 'auto' prefers lcms2 over lcms1 if both are available. Unset to disable color management system.")
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." OFF)
 option(ENABLE_ZLIB "Build with zlib (not totally safe)." OFF)
 option(USE_FIXEDPOINT "Use fixed point arithmetic in the Splash backend" OFF)
@@ -136,16 +136,22 @@ if(ENABLE_LIBOPENJPEG)
   set(ENABLE_LIBOPENJPEG ${LIBOPENJPEG_FOUND})
   set(HAVE_OPENJPEG_H ON)
 endif(ENABLE_LIBOPENJPEG)
-if(ENABLE_LCMS)
+if(ENABLE_CMS STREQUAL "auto")
   find_package(LCMS2)
-  if(LCMS2_FOUND)
-    set(USE_CMS ${LCMS2_FOUND})
-  else(LCMS2_FOUND)
+  set(USE_CMS ${LCMS2_FOUND})
+  if(NOT LCMS2_FOUND)
     find_package(LCMS)
     set(USE_CMS ${LCMS_FOUND})
     set(USE_LCMS1 ${LCMS_FOUND})
-  endif(LCMS2_FOUND)
-endif(ENABLE_LCMS)
+  endif(NOT LCMS2_FOUND)
+elseif(ENABLE_CMS STREQUAL "lcms1")
+  find_package(LCMS)
+  set(USE_CMS ${LCMS_FOUND})
+  set(USE_LCMS1 ${LCMS_FOUND})
+elseif(ENABLE_CMS STREQUAL "lcms2")
+  find_package(LCMS2)
+  set(USE_CMS ${LCMS2_FOUND})
+endif()
 if(ENABLE_LIBCURL)
   find_package(CURL)
   include_directories(${CURL_INCLUDE_DIR})
@@ -211,9 +217,11 @@ if(_comp_warnings STREQUAL "no")
   set(CMAKE_CXX_FLAGS "${DEFAULT_COMPILE_WARNINGS_NO} ${CMAKE_CXX_FLAGS}")
 endif(_comp_warnings STREQUAL "no")
 if(_comp_warnings STREQUAL "yes")
+  set(CMAKE_C_FLAGS "-Wall ${CMAKE_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "${DEFAULT_COMPILE_WARNINGS_YES} ${CMAKE_CXX_FLAGS}")
 endif(_comp_warnings STREQUAL "yes")
 if(_comp_warnings STREQUAL "kde")
+  set(CMAKE_C_FLAGS "-Wall ${CMAKE_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "${DEFAULT_COMPILE_WARNINGS_KDE} ${CMAKE_CXX_FLAGS}")
 endif(_comp_warnings STREQUAL "kde")
 
@@ -237,6 +245,7 @@ set(poppler_SRCS
   goo/JpegWriter.cc
   goo/ImgWriter.cc
   goo/gstrtod.cc
+  goo/grandom.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc
@@ -290,6 +299,7 @@ set(poppler_SRCS
   poppler/strtok_r.cpp
   poppler/UnicodeMap.cc
   poppler/UnicodeTypeTable.cc
+  poppler/UTF.cc
   poppler/XRef.cc
   poppler/PSOutputDev.cc
   poppler/TextOutputDev.cc
@@ -386,7 +396,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else(MSVC)
 add_library(poppler SHARED ${poppler_SRCS})
 endif(MSVC)
-set_target_properties(poppler PROPERTIES VERSION 27.0.0 SOVERSION 27)
+set_target_properties(poppler PROPERTIES VERSION 34.0.0 SOVERSION 34)
 target_link_libraries(poppler ${poppler_LIBS})
 target_link_libraries(poppler LINK_INTERFACE_LIBRARIES "")
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
@@ -460,6 +470,7 @@ if(ENABLE_XPDF_HEADERS)
     poppler/SecurityHandler.h
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
+    poppler/UTF.h
     poppler/UTF8.h
     poppler/XpdfPluginAPI.h
     poppler/Sound.h
@@ -478,6 +489,7 @@ if(ENABLE_XPDF_HEADERS)
     goo/ImgWriter.h
     goo/GooLikely.h
     goo/gstrtod.h
+    goo/grandom.h
     DESTINATION include/poppler/goo)
   if(PNG_FOUND)
     install(FILES

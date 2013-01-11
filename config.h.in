@@ -91,6 +91,9 @@
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
 
+/* Defines if rand_r is available on your system */
+#undef HAVE_RAND_R
+
 /* Use splash for rendering. */
 #undef HAVE_SPLASH
 
@@ -233,6 +236,11 @@
 #define HAVE_BOOLEAN
 #endif
 
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
