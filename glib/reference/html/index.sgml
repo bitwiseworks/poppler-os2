@@ -17,6 +17,11 @@
 <ANCHOR id="POPPLER-PRINT-MARKUP-ANNOTS:CAPS" href="poppler/poppler-poppler.html#POPPLER-PRINT-MARKUP-ANNOTS:CAPS">
 <ANCHOR id="POPPLER-PRINT-STAMP-ANNOTS-ONLY:CAPS" href="poppler/poppler-poppler.html#POPPLER-PRINT-STAMP-ANNOTS-ONLY:CAPS">
 <ANCHOR id="POPPLER-PRINT-ALL:CAPS" href="poppler/poppler-poppler.html#POPPLER-PRINT-ALL:CAPS">
+<ANCHOR id="PopplerFindFlags" href="poppler/poppler-poppler.html#PopplerFindFlags">
+<ANCHOR id="POPPLER-FIND-DEFAULT:CAPS" href="poppler/poppler-poppler.html#POPPLER-FIND-DEFAULT:CAPS">
+<ANCHOR id="POPPLER-FIND-CASE-SENSITIVE:CAPS" href="poppler/poppler-poppler.html#POPPLER-FIND-CASE-SENSITIVE:CAPS">
+<ANCHOR id="POPPLER-FIND-BACKWARDS:CAPS" href="poppler/poppler-poppler.html#POPPLER-FIND-BACKWARDS:CAPS">
+<ANCHOR id="POPPLER-FIND-WHOLE-WORDS-ONLY:CAPS" href="poppler/poppler-poppler.html#POPPLER-FIND-WHOLE-WORDS-ONLY:CAPS">
 <ANCHOR id="poppler-get-backend" href="poppler/poppler-poppler.html#poppler-get-backend">
 <ANCHOR id="poppler-get-version" href="poppler/poppler-poppler.html#poppler-get-version">
 <ANCHOR id="poppler-date-parse" href="poppler/poppler-poppler.html#poppler-date-parse">
@@ -85,6 +90,8 @@
 <ANCHOR id="POPPLER-PERMISSIONS-FULL:CAPS" href="poppler/PopplerDocument.html#POPPLER-PERMISSIONS-FULL:CAPS">
 <ANCHOR id="poppler-document-new-from-file" href="poppler/PopplerDocument.html#poppler-document-new-from-file">
 <ANCHOR id="poppler-document-new-from-data" href="poppler/PopplerDocument.html#poppler-document-new-from-data">
+<ANCHOR id="poppler-document-new-from-stream" href="poppler/PopplerDocument.html#poppler-document-new-from-stream">
+<ANCHOR id="poppler-document-new-from-gfile" href="poppler/PopplerDocument.html#poppler-document-new-from-gfile">
 <ANCHOR id="poppler-document-save" href="poppler/PopplerDocument.html#poppler-document-save">
 <ANCHOR id="poppler-document-save-a-copy" href="poppler/PopplerDocument.html#poppler-document-save-a-copy">
 <ANCHOR id="poppler-document-get-id" href="poppler/PopplerDocument.html#poppler-document-get-id">
@@ -216,6 +223,7 @@
 <ANCHOR id="poppler-page-selection-region-free" href="poppler/PopplerPage.html#poppler-page-selection-region-free">
 <ANCHOR id="poppler-page-get-selected-text" href="poppler/PopplerPage.html#poppler-page-get-selected-text">
 <ANCHOR id="poppler-page-find-text" href="poppler/PopplerPage.html#poppler-page-find-text">
+<ANCHOR id="poppler-page-find-text-with-options" href="poppler/PopplerPage.html#poppler-page-find-text-with-options">
 <ANCHOR id="poppler-page-get-text" href="poppler/PopplerPage.html#poppler-page-get-text">
 <ANCHOR id="poppler-page-get-text-layout" href="poppler/PopplerPage.html#poppler-page-get-text-layout">
 <ANCHOR id="poppler-page-get-text-attributes" href="poppler/PopplerPage.html#poppler-page-get-text-attributes">
@@ -230,6 +238,7 @@
 <ANCHOR id="poppler-page-get-annot-mapping" href="poppler/PopplerPage.html#poppler-page-get-annot-mapping">
 <ANCHOR id="poppler-page-free-annot-mapping" href="poppler/PopplerPage.html#poppler-page-free-annot-mapping">
 <ANCHOR id="poppler-page-add-annot" href="poppler/PopplerPage.html#poppler-page-add-annot">
+<ANCHOR id="poppler-page-remove-annot" href="poppler/PopplerPage.html#poppler-page-remove-annot">
 <ANCHOR id="poppler-rectangle-new" href="poppler/PopplerPage.html#poppler-rectangle-new">
 <ANCHOR id="poppler-rectangle-copy" href="poppler/PopplerPage.html#poppler-rectangle-copy">
 <ANCHOR id="poppler-rectangle-free" href="poppler/PopplerPage.html#poppler-rectangle-free">

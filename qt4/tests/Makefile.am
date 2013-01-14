@@ -5,13 +5,11 @@ INCLUDES =					\
 	-I$(top_srcdir)/poppler			\
 	-I$(top_srcdir)/qt4/src			\
 	-DTESTDATADIR=\"$(TESTDATADIR)\"        \
-	$(FONTCONFIG_CFLAGS)			\
 	$(POPPLER_QT4_CFLAGS)
 
 LDADDS =					\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(top_builddir)/qt4/src/libpoppler-qt4.la	\
-	$(FONTCONFIG_LIBS)				\
 	$(POPPLER_QT4_LIBS)
 
 SUFFIXES: .moc
@@ -79,7 +77,9 @@ TESTS = \
 	check_password    	\
 	check_pagelayout	\
 	check_search		\
-	check_strings
+	check_strings		\
+	check_lexer		\
+	check_goostring
 
 check_PROGRAMS = $(TESTS)
 
@@ -134,6 +134,14 @@ check_search_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 check_strings_SOURCES = check_strings.cpp
 check_strings.$(OBJEXT): check_strings.moc
 check_strings_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
+
+check_lexer_SOURCES = check_lexer.cpp
+check_lexer.$(OBJEXT): check_lexer.moc
+check_lexer_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
+
+check_goostring_SOURCES = check_goostring.cpp
+check_goostring.$(OBJEXT): check_goostring.moc
+check_goostring_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 
 endif
 

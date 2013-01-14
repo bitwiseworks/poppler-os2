@@ -15,6 +15,7 @@
 // Copyright (C) 2007, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -60,6 +61,7 @@ typedef GBool (*SplashImageSource)(void *data, SplashColorPtr colorLine,
 enum SplashPipeResultColorCtrl {
 #if SPLASH_CMYK
   splashPipeResultColorNoAlphaBlendCMYK,
+  splashPipeResultColorNoAlphaBlendDeviceN,
 #endif
   splashPipeResultColorNoAlphaBlendRGB,
   splashPipeResultColorNoAlphaBlendMono,
@@ -67,12 +69,14 @@ enum SplashPipeResultColorCtrl {
   splashPipeResultColorAlphaNoBlendRGB,
 #if SPLASH_CMYK
   splashPipeResultColorAlphaNoBlendCMYK,
+  splashPipeResultColorAlphaNoBlendDeviceN,
 #endif
   splashPipeResultColorAlphaBlendMono,
   splashPipeResultColorAlphaBlendRGB
 #if SPLASH_CMYK
   ,
-  splashPipeResultColorAlphaBlendCMYK
+  splashPipeResultColorAlphaBlendCMYK,
+  splashPipeResultColorAlphaBlendDeviceN
 #endif
 };
 
@@ -209,7 +213,8 @@ public:
   // The matrix behaves as for fillImageMask.
   SplashError drawImage(SplashImageSource src, void *srcData,
 			SplashColorMode srcMode, GBool srcAlpha,
-			int w, int h, SplashCoord *mat, GBool tilingPattern = gFalse);
+			int w, int h, SplashCoord *mat, GBool interpolate,
+			GBool tilingPattern = gFalse);
 
   // Composite a rectangular region from <src> onto this Splash
   // object.
@@ -285,6 +290,7 @@ private:
   void pipeRunSimpleBGR8(SplashPipe *pipe);
 #if SPLASH_CMYK
   void pipeRunSimpleCMYK8(SplashPipe *pipe);
+  void pipeRunSimpleDeviceN8(SplashPipe *pipe);
 #endif
   void pipeRunAAMono1(SplashPipe *pipe);
   void pipeRunAAMono8(SplashPipe *pipe);
@@ -293,6 +299,7 @@ private:
   void pipeRunAABGR8(SplashPipe *pipe);
 #if SPLASH_CMYK
   void pipeRunAACMYK8(SplashPipe *pipe);
+  void pipeRunAADeviceN8(SplashPipe *pipe);
 #endif
   void pipeSetXY(SplashPipe *pipe, int x, int y);
   void pipeIncX(SplashPipe *pipe);
@@ -348,11 +355,11 @@ private:
 			       SplashColorMode srcMode, int nComps,
 			       GBool srcAlpha,
 			       int srcWidth, int srcHeight,
-			       SplashCoord *mat, GBool tilingPattern = gFalse);
+                               SplashCoord *mat, GBool interpolate, GBool tilingPattern = gFalse);
   SplashBitmap *scaleImage(SplashImageSource src, void *srcData,
 			   SplashColorMode srcMode, int nComps,
 			   GBool srcAlpha, int srcWidth, int srcHeight,
-			   int scaledWidth, int scaledHeight);
+			   int scaledWidth, int scaledHeight, GBool interpolate);
   void scaleImageYdXd(SplashImageSource src, void *srcData,
 		      SplashColorMode srcMode, int nComps,
 		      GBool srcAlpha, int srcWidth, int srcHeight,
@@ -369,6 +376,11 @@ private:
 		      int scaledWidth, int scaledHeight,
 		      SplashBitmap *dest);
   void scaleImageYuXu(SplashImageSource src, void *srcData,
+		      SplashColorMode srcMode, int nComps,
+		      GBool srcAlpha, int srcWidth, int srcHeight,
+		      int scaledWidth, int scaledHeight,
+		      SplashBitmap *dest);
+  void scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
 		      SplashColorMode srcMode, int nComps,
 		      GBool srcAlpha, int srcWidth, int srcHeight,
 		      int scaledWidth, int scaledHeight,

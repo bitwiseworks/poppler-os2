@@ -33,6 +33,7 @@ poppler_page_get_selection_region
 poppler_page_selection_region_free
 poppler_page_get_selected_text
 poppler_page_find_text
+poppler_page_find_text_with_options
 poppler_page_get_text
 poppler_page_get_text_layout
 poppler_page_get_text_attributes
@@ -47,6 +48,7 @@ poppler_page_free_form_field_mapping
 poppler_page_get_annot_mapping
 poppler_page_free_annot_mapping
 poppler_page_add_annot
+poppler_page_remove_annot
 poppler_rectangle_new
 poppler_rectangle_copy
 poppler_rectangle_free
@@ -115,6 +117,8 @@ PopplerViewerPreferences
 PopplerPermissions
 poppler_document_new_from_file
 poppler_document_new_from_data
+poppler_document_new_from_stream
+poppler_document_new_from_gfile
 poppler_document_save
 poppler_document_save_a_copy
 poppler_document_get_id
@@ -335,6 +339,7 @@ PopplerOrientation
 PopplerBackend
 PopplerColor
 PopplerPrintFlags
+PopplerFindFlags
 poppler_get_backend
 poppler_get_version
 poppler_date_parse

@@ -15,8 +15,8 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2011 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2007-2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2007-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2012 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008, 2011 Pino Toscano <pino@kde.org>
@@ -25,6 +25,8 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2011 José Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -193,6 +195,34 @@ PDFRectangle *parseDiffRectangle(Array *array, PDFRectangle *rect) {
     }
   }
   return newRect;
+}
+
+static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object *additionalActions, PDFDoc *doc) {
+  Object additionalActionsObject;
+  LinkAction *linkAction = NULL;
+
+  if (additionalActions->fetch(doc->getXRef(), &additionalActionsObject)->isDict()) {
+    const char *key = (type == Annot::actionCursorEntering ? "E" :
+                       type == Annot::actionCursorLeaving ?  "X" :
+                       type == Annot::actionMousePressed ?   "D" :
+                       type == Annot::actionMouseReleased ?  "U" :
+                       type == Annot::actionFocusIn ?       "Fo" :
+                       type == Annot::actionFocusOut ?      "BI" :
+                       type == Annot::actionPageOpening ?   "PO" :
+                       type == Annot::actionPageClosing ?   "PC" :
+                       type == Annot::actionPageVisible ?   "PV" :
+                       type == Annot::actionPageInvisible ? "PI" : NULL);
+
+    Object actionObject;
+
+    if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+    actionObject.free();
+  }
+
+  additionalActionsObject.free();
+
+  return linkAction;
 }
 
 //------------------------------------------------------------------------
@@ -783,50 +813,38 @@ AnnotAppearance::~AnnotAppearance() {
   appearDict.free();
 }
 
-void AnnotAppearance::getAppearanceStream(AnnotAppearance::AnnotAppearanceType type, const char *state, Object *dest) {
+void AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char *state, Object *dest) {
   Object apData, stream;
   apData.initNull();
 
   // Obtain dictionary or stream associated to appearance type
-  if (type == appearRollover) {
-    appearDict.dictLookupNF("R", &apData);
-  } else if (type == appearDown) {
-    appearDict.dictLookupNF("D", &apData);
-  }
-  if (apData.isNull()) { // Normal appearance, also used as fallback
+  switch (type) {
+  case appearRollover:
+    if (appearDict.dictLookupNF("R", &apData)->isNull())
+      appearDict.dictLookupNF("N", &apData);
+    break;
+  case appearDown:
+    if (appearDict.dictLookupNF("D", &apData)->isNull())
+      appearDict.dictLookupNF("N", &apData);
+    break;
+  case appearNormal:
     appearDict.dictLookupNF("N", &apData);
-  }
-
-  // Search state if it's a subdictionary
-  if (apData.isDict() && state) {
-    Object obj1;
-    apData.dictLookupNF(state, &obj1);
-    apData.free();
-    obj1.copy(&apData);
-    obj1.free();
+    break;
   }
 
   dest->initNull();
-  // Sanity check on the value we are about to return: it must be a ref to stream
-  if (apData.isRef()) {
-    apData.fetch(xref, &stream);
-    if (stream.isStream()) {
-      apData.copy(dest);
-    } else {
-      error(errSyntaxWarning, -1, "AP points to a non-stream object");
-    }
-    stream.free();
-  }
+  if (apData.isDict() && state)
+    apData.dictLookupNF(state, dest);
+  else if (apData.isRef())
+    apData.copy(dest);
   apData.free();
 }
 
 GooString * AnnotAppearance::getStateKey(int i) {
   Object obj1;
   GooString * res = NULL;
-  appearDict.dictLookupNF("N", &obj1);
-  if (obj1.isDict()) {
+  if (appearDict.dictLookupNF("N", &obj1)->isDict())
     res = new GooString(obj1.dictGetKey(i));
-  }
   obj1.free();
   return res;
 }
@@ -834,10 +852,8 @@ GooString * AnnotAppearance::getStateKey(int i) {
 int AnnotAppearance::getNumStates() {
   Object obj1;
   int res = 0;
-  appearDict.dictLookupNF("N", &obj1);
-  if (obj1.isDict()) {
+  if (appearDict.dictLookupNF("N", &obj1)->isDict())
     res = obj1.dictGetLength();
-  }
   obj1.free();
   return res;
 }
@@ -1185,6 +1201,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
   obj1.free();
 
+  // Note: This value is overwritten by Annots ctor
   if (dict->lookupNF("P", &obj1)->isRef()) {
     Ref ref = obj1.getRef();
 
@@ -1416,13 +1433,22 @@ void Annot::setColor(AnnotColor *new_color) {
   }
 }
 
-void Annot::setPage(Ref *pageRef, int pageIndex)
-{
+void Annot::setPage(int pageIndex, GBool updateP) {
+  Page *pageobj = doc->getPage(pageIndex);
   Object obj1;
 
-  obj1.initRef(pageRef->num, pageRef->gen);
-  update("P", &obj1);
-  page = pageIndex;
+  if (pageobj) {
+    Ref pageRef = pageobj->getRef();
+    obj1.initRef(pageRef.num, pageRef.gen);
+    page = pageIndex;
+  } else {
+    obj1.initNull();
+    page = 0;
+  }
+
+  if (updateP) {
+    update("P", &obj1);
+  }
 }
 
 void Annot::setAppearanceState(const char *state) {
@@ -1482,6 +1508,11 @@ void Annot::readArrayNum(Object *pdfArray, int key, double *value) {
     ok = gFalse;
   }
   valueObject.free();
+}
+
+void Annot::removeReferencedObjects() {
+  // Remove appearance streams (if any)
+  invalidateAppearance();
 }
 
 void Annot::incRefCnt() {
@@ -1934,6 +1965,18 @@ void AnnotMarkup::setDate(GooString *new_date) {
   update ("CreationDate", &obj1);
 }
 
+void AnnotMarkup::removeReferencedObjects() {
+  Page *pageobj = doc->getPage(page);
+  assert(pageobj != NULL); // We're called when removing an annot from a page
+
+  // Remove popup
+  if (popup) {
+    pageobj->removeAnnot(popup);
+  }
+
+  Annot::removeReferencedObjects();
+}
+
 //------------------------------------------------------------------------
 // AnnotText
 //------------------------------------------------------------------------
@@ -2349,7 +2392,7 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
     appearBuf->append ("Q\n");
 
     // Force 24x24 rectangle
-    PDFRectangle fixedRect(rect->x1, rect->y1, rect->x1 + 24, rect->y1 + 24);
+    PDFRectangle fixedRect(rect->x1, rect->y2 - 24, rect->x1 + 24, rect->y2);
     appearBBox = new AnnotAppearanceBBox(&fixedRect);
     double bbox[4];
     appearBBox->getBBoxRect(bbox);
@@ -3717,10 +3760,9 @@ AnnotWidget::~AnnotWidget() {
   
   if (action)
     delete action;
-    
-  if (additionActions)
-    delete additionActions;
-    
+
+  additionalActions.free();
+
   if (parent)
     delete parent;
 }
@@ -3760,12 +3802,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   }
   obj1.free();
 
-  if(dict->lookup("AA", &obj1)->isDict()) {
-    additionActions = NULL;
-  } else {
-    additionActions = NULL;
-  }
-  obj1.free();
+  dict->lookupNF("AA", &additionalActions);
 
   if(dict->lookup("Parent", &obj1)->isDict()) {
     parent = NULL;
@@ -3773,6 +3810,13 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     parent = NULL;
   }
   obj1.free();
+
+  updatedAppearanceStream.num = updatedAppearanceStream.gen = -1;
+}
+
+LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
+{
+  return ::getAdditionalAction(type, &additionalActions, doc);
 }
 
 // Grand unified handler for preparing text strings to be drawn into form
@@ -3891,8 +3935,7 @@ void Annot::layoutText(GooString *text, GooString *outBuf, int *i,
         }
       } else {
         ccToUnicode->decRefCnt();
-        fprintf(stderr,
-                "warning: layoutText: cannot convert U+%04X\n", uChar);
+        error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04uX}", uChar);
       }
     }
 
@@ -4500,6 +4543,14 @@ void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
     wMax = 0;
     for (i = 0; i < fieldChoice->getNumChoices(); ++i) {
       j = 0;
+      if (fieldChoice->getChoice(i) == NULL) {
+        error(errSyntaxError, -1, "Invalid annotation listbox");
+        if (daToks) {
+          deleteGooList(daToks, GooString);
+        }
+        delete convertedText;
+        return;
+      }
       layoutText(fieldChoice->getChoice(i), convertedText, &j, font, &w, 0.0, NULL, gFalse);
       if (w > wMax) {
         wMax = w;
@@ -4856,6 +4907,48 @@ void AnnotWidget::generateFieldAppearance() {
   appearStream->setNeedFree(gTrue);
 }
 
+void AnnotWidget::updateAppearanceStream()
+{
+  // If this the first time updateAppearanceStream() is called on this widget,
+  // destroy the AP dictionary because we are going to create a new one.
+  if (updatedAppearanceStream.num == -1) {
+    invalidateAppearance(); // Delete AP dictionary and all referenced streams
+  }
+
+  // There's no need to create a new appearance stream if NeedAppearances is
+  // set, because it will be ignored next time anyway.
+  if (form && form->getNeedAppearances())
+    return;
+
+  // Create the new appearance
+  generateFieldAppearance();
+
+  // Fetch the appearance stream we've just created
+  Object obj1;
+  appearance.fetch(xref, &obj1);
+
+  // If this the first time updateAppearanceStream() is called on this widget,
+  // create a new AP dictionary containing the new appearance stream.
+  // Otherwise, just update the stream we had created previously.
+  if (updatedAppearanceStream.num == -1) {
+    // Write the appearance stream
+    updatedAppearanceStream = xref->addIndirectObject(&obj1);
+    obj1.free();
+
+    // Write the AP dictionary
+    Object obj2;
+    obj1.initDict(xref);
+    obj1.dictAdd(copyString("N"), obj2.initRef(updatedAppearanceStream.num, updatedAppearanceStream.gen));
+    update("AP", &obj1);
+
+    // Update our internal pointers to the appearance dictionary
+    appearStreams = new AnnotAppearance(doc, &obj1);
+  } else {
+    // Replace the existing appearance stream
+    xref->setModifiedObject(&obj1, updatedAppearanceStream);
+    obj1.free();
+  }
+}
 
 void AnnotWidget::draw(Gfx *gfx, GBool printing) {
   Object obj;
@@ -4867,13 +4960,9 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
 
   // Only construct the appearance stream when
   // - annot doesn't have an AP or
-  // - it's a field containing text (text and choices) and
-  // - NeedAppearances is true or
-  // - widget has been modified or
+  // - NeedAppearances is true
   if (field) {
-    if (appearance.isNull() || (form && form->getNeedAppearances()) ||
-        ((field->getType() == formText || field->getType() == formChoice) &&
-         field->isModified()))
+    if (appearance.isNull() || (form && form->getNeedAppearances()))
       generateFieldAppearance();
   }
 
@@ -5091,7 +5180,7 @@ AnnotScreen::~AnnotScreen() {
   if (action)
     delete action;
 
-  additionAction.free();
+  additionalActions.free();
 }
 
 void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
@@ -5115,14 +5204,21 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   }
   obj1.free();
 
-  dict->lookup("AA", &additionAction);
+  dict->lookupNF("AA", &additionalActions);
 
   appearCharacs = NULL;
   if(dict->lookup("MK", &obj1)->isDict()) {
     appearCharacs = new AnnotAppearanceCharacs(obj1.getDict());
   }
   obj1.free();
+}
 
+LinkAction* AnnotScreen::getAdditionalAction(AdditionalActionsType type)
+{
+  if (type == actionFocusIn || type == actionFocusOut) // not defined for screen annotation
+    return NULL;
+
+  return ::getAdditionalAction(type, &additionalActions, doc);
 }
 
 //------------------------------------------------------------------------
@@ -6401,7 +6497,7 @@ Annot3D::Activation::Activation(Dict *dict) {
 // Annots
 //------------------------------------------------------------------------
 
-Annots::Annots(PDFDoc *docA, Object *annotsObj) {
+Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
   Annot *annot;
   Object obj1;
   int i;
@@ -6422,6 +6518,7 @@ Annots::Annots(PDFDoc *docA, Object *annotsObj) {
         annot = createAnnot (obj1.getDict(), &obj2);
         if (annot) {
           if (annot->isOk()) {
+            annot->setPage(page, gFalse); // Don't change /P
             appendAnnot(annot);
           }
           annot->decRefCnt();

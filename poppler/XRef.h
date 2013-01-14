@@ -36,6 +36,7 @@
 
 #include "goo/gtypes.h"
 #include "Object.h"
+#include "Stream.h"
 
 #include <vector>
 
@@ -59,8 +60,31 @@ struct XRefEntry {
   Guint offset;
   int gen;
   XRefEntryType type;
-  bool updated;
+  int flags;
   Object obj; //if this entry was updated, obj will contains the updated object
+
+  enum Flag {
+    // Regular flags
+    Updated,     // Entry was modified
+
+    // Special flags -- available only after xref->scanSpecialFlags() is run
+    Unencrypted, // Entry is stored in unencrypted form (meaningless in unencrypted documents)
+    DontRewrite  // Entry must not be written back in case of full rewrite
+  };
+
+  inline GBool getFlag(Flag flag) {
+    const int mask = (1 << (int)flag);
+    return (flags & mask) != 0;
+  }
+
+  inline void setFlag(Flag flag, GBool value) {
+    const int mask = (1 << (int)flag);
+    if (value) {
+      flags |= mask;
+    } else {
+      flags &= ~mask;
+    }
+  }
 };
 
 class XRef {
@@ -90,6 +114,10 @@ public:
 		     Guchar *fileKeyA, int keyLengthA,
 		     int encVersionA, int encRevisionA,
 		     CryptAlgorithm encAlgorithmA);
+  // Mark Encrypt entry as Unencrypted
+  void markUnencrypted();
+
+  void getEncryptionParameters(Guchar **fileKeyA, CryptAlgorithm *encAlgorithmA, int *keyLengthA);
 
   // Is the file encrypted?
   GBool isEncrypted() { return encrypted; }
@@ -106,7 +134,7 @@ public:
   int getPermFlags() { return permFlags; }
 
   // Get catalog object.
-  Object *getCatalog(Object *obj) { return fetch(rootNum, rootGen, obj); }
+  Object *getCatalog(Object *obj);
 
   // Fetch an indirect reference.
   Object *fetch(int num, int gen, Object *obj, int recursion = 0);
@@ -128,6 +156,14 @@ public:
 
   // Retuns the entry that belongs to the offset
   int getNumEntry(Guint offset);
+
+  // Scans the document and sets special flags in all xref entries. One of those
+  // flags is Unencrypted, which affects how the object is fetched. Therefore,
+  // this function must be called before fetching unencrypted objects (e.g.
+  // Encrypt dictionary, XRef streams). Note that the code that initializes
+  // decryption doesn't need to call this function, because it runs before
+  // decryption is enabled, and therefore the Unencrypted flag is ignored.
+  void scanSpecialFlags();
 
   // Direct access.
   XRefEntry *getEntry(int i, GBool complainIfMissing = gTrue);
@@ -171,17 +207,20 @@ private:
   Guint prevXRefOffset;		// position of prev XRef section (= next to read)
   Guint mainXRefEntriesOffset;	// offset of entries in main XRef table
   GBool xRefStream;		// true if last XRef section is a stream
+  Guint mainXRefOffset;		// position of the main XRef table/stream
+  GBool scannedSpecialFlags;	// true if scanSpecialFlags has been called
 
   void init();
   int reserve(int newSize);
   int resize(int newSize);
-  Guint getStartXref();
-  GBool readXRef(Guint *pos, std::vector<Guint> *followedXRefStm);
-  GBool readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm);
+  GBool readXRef(Guint *pos, std::vector<Guint> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
+  GBool readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
   GBool readXRefStreamSection(Stream *xrefStr, int *w, int first, int n);
   GBool readXRefStream(Stream *xrefStr, Guint *pos);
-  GBool constructXRef(GBool *wasReconstructed);
+  GBool constructXRef(GBool *wasReconstructed, GBool needCatalogDict = gFalse);
   GBool parseEntry(Guint offset, XRefEntry *entry);
+  void readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum = NULL);
+  void markUnencrypted(Object *obj);
 
   class XRefWriter {
   public:

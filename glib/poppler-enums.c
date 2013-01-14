@@ -652,6 +652,28 @@ poppler_print_flags_get_type (void)
 }
 
 GType
+poppler_find_flags_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GFlagsValue values[] = {
+      { POPPLER_FIND_DEFAULT, "POPPLER_FIND_DEFAULT", "default" },
+      { POPPLER_FIND_CASE_SENSITIVE, "POPPLER_FIND_CASE_SENSITIVE", "case-sensitive" },
+      { POPPLER_FIND_BACKWARDS, "POPPLER_FIND_BACKWARDS", "backwards" },
+      { POPPLER_FIND_WHOLE_WORDS_ONLY, "POPPLER_FIND_WHOLE_WORDS_ONLY", "whole-words-only" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_flags_register_static (g_intern_static_string ("PopplerFindFlags"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
 poppler_backend_get_type (void)
 {
   static volatile gsize g_define_type_id__volatile = 0;

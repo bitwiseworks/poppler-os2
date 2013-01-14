@@ -1,7 +1,8 @@
-/* poppler-link-extractor-private.h: qt interface to poppler
+/* poppler-annotation-private.h: qt interface to poppler
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +32,7 @@
 
 class Annot;
 class AnnotPath;
+class Link;
 class Page;
 class PDFRectangle;
 
@@ -100,6 +102,8 @@ class AnnotationPrivate : public QSharedData
         static void removeAnnotationFromPage(::Page *pdfPage, const Annotation * ann);
 
         Ref pdfObjectReference() const;
+
+        Link* additionalAction( Annotation::AdditionalActionType type ) const;
 };
 
 }

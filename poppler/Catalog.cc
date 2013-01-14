@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -24,6 +24,7 @@
 // Copyright (C) 2008, 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -462,6 +463,8 @@ FileSpec *Catalog::embeddedFile(int i)
       Object fsDict;
       embeddedFile = new FileSpec(obj.fetch(xref, &fsDict));
       fsDict.free();
+    } else if (obj.isDict()) {
+      embeddedFile = new FileSpec(&obj);
     } else {
       Object null;
       embeddedFile = new FileSpec(&null);
@@ -860,6 +863,24 @@ Object *Catalog::getDests()
   }
 
   return &dests;
+}
+
+Catalog::FormType Catalog::getFormType()
+{
+  Object xfa;
+  FormType res = NoForm;
+
+  if (acroForm.isDict()) {
+    acroForm.dictLookup("XFA", &xfa);
+    if (xfa.isStream() || xfa.isArray()) {
+      res = XfaForm;
+    } else {
+      res = AcroForm;
+    }
+    xfa.free();
+  }
+
+  return res;
 }
 
 Form *Catalog::getForm()

@@ -79,6 +79,8 @@ poppler_page_finalize (GObject *object)
   if (page->text != NULL) 
     page->text->decRefCnt();
   /* page->page is owned by the document */
+
+  G_OBJECT_CLASS (poppler_page_parent_class)->finalize (object);
 }
 
 /**
@@ -340,9 +342,11 @@ _poppler_page_render (PopplerPage      *page,
   output_dev->setCairo (cairo);
   output_dev->setPrinting (printing);
 
-  if (!printing)
-    output_dev->setTextPage (page->text);
 
+  if (!printing && page->text == NULL) {
+    page->text = new TextPage (gFalse);
+    output_dev->setTextPage (page->text);
+  }
   /* NOTE: instead of passing -1 we should/could use cairo_clip_extents()
    * to get a bounding box */
   cairo_save (cairo);
@@ -377,9 +381,6 @@ poppler_page_render (PopplerPage *page,
 		     cairo_t *cairo)
 {
   g_return_if_fail (POPPLER_IS_PAGE (page));
-
-  if (!page->text)
-    page->text = new TextPage(gFalse);
 
   _poppler_page_render (page, cairo, gFalse, (PopplerPrintFlags)0);
 }
@@ -850,18 +851,23 @@ poppler_page_get_text (PopplerPage *page)
 }
 
 /**
- * poppler_page_find_text:
+ * poppler_page_find_text_with_options:
  * @page: a #PopplerPage
  * @text: the text to search for (UTF-8 encoded)
- * 
- * A #GList of rectangles for each occurance of the text on the page.
+ * @options: find options
+ *
+ * Finds @text in @page with the given #PopplerFindFlags options and
+ * returns a #GList of rectangles for each occurance of the text on the page.
  * The coordinates are in PDF points.
- * 
+ *
  * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,
+ *
+ * Since: 0.22
  **/
 GList *
-poppler_page_find_text (PopplerPage *page,
-			const char  *text)
+poppler_page_find_text_with_options (PopplerPage     *page,
+                                     const char      *text,
+                                     PopplerFindFlags options)
 {
   PopplerRectangle *match;
   GList *matches;
@@ -870,6 +876,7 @@ poppler_page_find_text (PopplerPage *page,
   glong ucs4_len;
   double height;
   TextPage *text_dev;
+  gboolean backwards;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
   g_return_val_if_fail (text != NULL, NULL);
@@ -878,17 +885,19 @@ poppler_page_find_text (PopplerPage *page,
 
   ucs4 = g_utf8_to_ucs4_fast (text, -1, &ucs4_len);
   poppler_page_get_size (page, NULL, &height);
-  
+
+  backwards = options & POPPLER_FIND_BACKWARDS;
   matches = NULL;
   xMin = 0;
-  yMin = 0;
+  yMin = backwards ? height : 0;
 
   while (text_dev->findText (ucs4, ucs4_len,
-			     gFalse, gTrue, // startAtTop, stopAtBottom
-			     gFalse, gFalse, // startAtLast, stopAtLast
-			     gFalse, gFalse, // caseSensitive, backwards
-			     gFalse, // wholeWord
-			     &xMin, &yMin, &xMax, &yMax))
+                             gFalse, gTrue, // startAtTop, stopAtBottom
+                             gTrue, gFalse, // startAtLast, stopAtLast
+                             options & POPPLER_FIND_CASE_SENSITIVE,
+                             backwards,
+                             options & POPPLER_FIND_WHOLE_WORDS_ONLY,
+                             &xMin, &yMin, &xMax, &yMax))
     {
       match = poppler_rectangle_new ();
       match->x1 = xMin;
@@ -901,6 +910,24 @@ poppler_page_find_text (PopplerPage *page,
   g_free (ucs4);
 
   return g_list_reverse (matches);
+}
+
+/**
+ * poppler_page_find_text:
+ * @page: a #PopplerPage
+ * @text: the text to search for (UTF-8 encoded)
+ *
+ * Finds @text in @page with the default options (%POPPLER_FIND_DEFAULT) and
+ * returns a #GList of rectangles for each occurance of the text on the page.
+ * The coordinates are in PDF points.
+ *
+ * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,
+ **/
+GList *
+poppler_page_find_text (PopplerPage *page,
+			const char  *text)
+{
+  return poppler_page_find_text_with_options (page, text, POPPLER_FIND_DEFAULT);
 }
 
 static CairoImageOutputDev *
@@ -1431,6 +1458,25 @@ poppler_page_add_annot (PopplerPage  *page,
   page->page->addAnnot (annot->annot);
 }
 
+/**
+ * poppler_page_remove_annot:
+ * @page: a #PopplerPage
+ * @annot: a #PopplerAnnot to remove
+ *
+ * Removes annotation @annot from @page
+ *
+ * Since: 0.22
+ */
+void
+poppler_page_remove_annot (PopplerPage  *page,
+                           PopplerAnnot *annot)
+{
+  g_return_if_fail (POPPLER_IS_PAGE (page));
+  g_return_if_fail (POPPLER_IS_ANNOT (annot));
+
+  page->page->removeAnnot (annot->annot);
+}
+
 /* PopplerRectangle type */
 
 POPPLER_DEFINE_BOXED_TYPE (PopplerRectangle, poppler_rectangle,
@@ -1500,9 +1546,9 @@ poppler_text_attributes_new (void)
 }
 
 static gchar *
-get_font_name_from_word (TextWord *word)
+get_font_name_from_word (TextWord *word, gint word_i)
 {
-  GooString *font_name = word->getFontName();
+  GooString *font_name = word->getFontName(word_i);
   const gchar *name;
   gboolean subset;
   gint i;
@@ -1528,12 +1574,12 @@ get_font_name_from_word (TextWord *word)
  * Allocates a new PopplerTextAttributes with word attributes
  */
 static PopplerTextAttributes *
-poppler_text_attributes_new_from_word (TextWord *word)
+poppler_text_attributes_new_from_word (TextWord *word, gint i)
 {
   PopplerTextAttributes *attrs = poppler_text_attributes_new ();
   gdouble r, g, b;
 
-  attrs->font_name = get_font_name_from_word (word);
+  attrs->font_name = get_font_name_from_word (word, i);
   attrs->font_size = word->getFontSize();
   attrs->is_underlined = word->isUnderlined();
   word->getColor (&r, &g, &b);
@@ -1933,7 +1979,9 @@ poppler_page_get_text_layout (PopplerPage       *page,
   TextWordList *wordlist;
   TextWord *word, *nextword;
   PopplerRectangle *rect;
-  int i, j, offset = 0;
+  int i, j;
+  guint offset = 0;
+  guint n_rects = 0;
   gdouble x1, y1, x2, y2;
   gdouble x3, y3, x4, y4;
 
@@ -1954,10 +2002,14 @@ poppler_page_get_text_layout (PopplerPage       *page,
   for (i = 0; i < wordlist->getLength (); i++)
     {
       word = wordlist->get (i);
-      *n_rectangles += word->getLength () + 1;
+      n_rects += word->getLength ();
+      if (!word->getNext () || word->getSpaceAfter ())
+	n_rects++;
     }
+  n_rects--;
 
-  *rectangles = g_new (PopplerRectangle, *n_rectangles);
+  *n_rectangles = n_rects;
+  *rectangles = g_new (PopplerRectangle, n_rects);
 
   // Calculating each char position
   for (i = 0; i < wordlist->getLength (); i++)
@@ -1981,23 +2033,27 @@ poppler_page_get_text_layout (PopplerPage       *page,
       nextword = word->getNext ();
       if (nextword)
         {
-	  nextword->getBBox (&x3, &y3, &x4, &y4);
-	  // space is from one word to other and with the same height as
-	  // first word.
-	  rect->x1 = x2;
-	  rect->y1 = y1;
-	  rect->x2 = x3;
-	  rect->y2 = y2;
-	}
-      else
+	  if (word->getSpaceAfter ())
+	    {
+	      nextword->getBBox (&x3, &y3, &x4, &y4);
+	      // space is from one word to other and with the same height as
+	      // first word.
+	      rect->x1 = x2;
+	      rect->y1 = y1;
+	      rect->x2 = x3;
+	      rect->y2 = y2;
+	      offset++;
+	    }
+	  }
+      else if (offset < n_rects)
         {
 	  // end of line
 	  rect->x1 = x2;
 	  rect->y1 = y2;
 	  rect->x2 = x2;
 	  rect->y2 = y2;
+	  offset++;
 	}
-      offset++;
     }
 
   delete wordlist;
@@ -2026,11 +2082,11 @@ poppler_page_free_text_attributes (GList *list)
 }
 
 static gboolean
-word_text_attributes_equal (TextWord *a, TextWord *b)
+word_text_attributes_equal (TextWord *a, gint ai, TextWord *b, gint bi)
 {
   double ar, ag, ab, br, bg, bb;
 
-  if (!a->getFontInfo()->matches (b->getFontInfo()))
+  if (!a->getFontInfo(ai)->matches (b->getFontInfo(bi)))
     return FALSE;
 
   if (a->getFontSize() != b->getFontSize())
@@ -2065,7 +2121,6 @@ poppler_page_get_text_attributes (PopplerPage *page)
   TextPage *text;
   TextWordList *wordlist;
   PopplerTextAttributes *attrs = NULL;
-  PopplerTextAttributes *previous = NULL;
   gint i, offset = 0;
   GList *attributes = NULL;
 
@@ -2080,24 +2135,32 @@ poppler_page_get_text_attributes (PopplerPage *page)
       return NULL;
     }
 
+  TextWord *word, *prev_word = NULL;
+  gint word_i, prev_word_i;
+
   // Calculating each word attributes
   for (i = 0; i < wordlist->getLength (); i++)
     {
-      TextWord *word = wordlist->get (i);
+      word = wordlist->get (i);
 
-      // each char of the word has the same attributes
-      if (i > 0 && word_text_attributes_equal (word, wordlist->get (i - 1))) {
-        attrs = previous;
-      } else {
-        attrs = poppler_text_attributes_new_from_word (word);
-        attrs->start_index = offset;
-        if (previous)
-          previous->end_index--;
-        previous = attrs;
-        attributes = g_list_prepend (attributes, attrs);
-      }
-      offset += word->getLength () + 1;
-      attrs->end_index = offset;
+      for (word_i = 0; word_i < word->getLength (); word_i++)
+	{
+	  if (!prev_word || !word_text_attributes_equal (word, word_i, prev_word, prev_word_i))
+            {
+              attrs = poppler_text_attributes_new_from_word (word, word_i);
+              attrs->start_index = offset;
+              attributes = g_list_prepend (attributes, attrs);
+            }
+	  attrs->end_index = offset;
+	  offset++;
+	  prev_word = word;
+	  prev_word_i = word_i;
+	}
+      if (!word->getNext () || word->getSpaceAfter ())
+        {
+          attrs->end_index = offset;
+          offset++;
+        }
     }
   if (attrs)
     attrs->end_index--;

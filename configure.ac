@@ -1,6 +1,6 @@
 m4_define([poppler_version_major],[0])
-m4_define([poppler_version_minor],[20])
-m4_define([poppler_version_micro],[3])
+m4_define([poppler_version_minor],[22])
+m4_define([poppler_version_micro],[0])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
 AC_PREREQ(2.59)
@@ -133,6 +133,7 @@ AC_LANG_CPLUSPLUS
 AC_CHECK_DECL(gettimeofday, [AC_CHECK_FUNC(gettimeofday, AC_DEFINE(HAVE_GETTIMEOFDAY, 1, [Defines if gettimeofday is available on your system]))],[],[#include <sys/time.h>])
 AC_CHECK_FUNC(localtime_r, AC_DEFINE(HAVE_LOCALTIME_R, 1, [Defines if localtime_r is available on your system]))
 AC_CHECK_FUNC(gmtime_r, AC_DEFINE(HAVE_GMTIME_R, 1, [Defines if gmtime_r is available on your system]))
+AC_CHECK_FUNC(rand_r, AC_DEFINE(HAVE_RAND_R, 1, [Defines if rand_r is available on your system]))
 
 dnl ##### Check for extra libraries needed by X.  (LynxOS needs this.)
 AC_CHECK_FUNC(gethostbyname)
@@ -531,12 +532,12 @@ if test x$enable_cairo_output = xyes; then
               		       enable_poppler_glib=$enableval,
 			       enable_poppler_glib="try")
   if test x$enable_poppler_glib = xyes; then
-    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)
+    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gio-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)
   elif test x$enable_poppler_glib = xtry; then
-    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION,
+    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gio-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION,
                       [enable_poppler_glib="yes"],
                       [enable_poppler_glib="no"
-                      use_glib="no (requires glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)"])
+                      use_glib="no (requires glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gio-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)"])
   fi
   if test x$enable_poppler_glib = xyes; then
     # Check for introspection
@@ -644,9 +645,9 @@ AC_ARG_ENABLE(gtk-test,
               enable_gtk_test=$enableval,
               enable_gtk_test="try")
 if test x$enable_gtk_test = xyes; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-2.0 >= 2.14 gdk-pixbuf-2.0 gthread-2.0 gio-2.0)
+  PKG_CHECK_MODULES(GTK_TEST, gtk+-3.0 >= 3.0 gdk-pixbuf-2.0)
 elif test x$enable_gtk_test = xtry; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-2.0 >= 2.14 gdk-pixbuf-2.0 gthread-2.0 gio-2.0,
+  PKG_CHECK_MODULES(GTK_TEST, gtk+-3.0 >= 3.0 gdk-pixbuf-2.0,
                     [enable_gtk_test="yes"],
                     [enable_gtk_test="no"])
 fi
@@ -660,7 +661,7 @@ AC_ARG_ENABLE(utils,
 AM_CONDITIONAL(BUILD_UTILS, test x$enable_utils = xyes)
 
 AC_ARG_ENABLE(compile-warnings,
-              AC_HELP_STRING([--enable-compile-warnings=@<:@no/yes/kde@:>@]
+              AC_HELP_STRING([--enable-compile-warnings=@<:@no/yes/kde@:>@],
                              [Turn on compiler warnings.]),,
               [enable_compile_warnings="yes"])
 
@@ -669,31 +670,30 @@ dnl   Color Management
 dnl
 
 AC_ARG_ENABLE(cms,
-	      AC_HELP_STRING([--disable-cms],
-	                     [Don't use color management system.]),
-              enable_cms=$enableval,
-              enable_cms="try")
-if test x$enable_cms = xyes; then
+              AC_HELP_STRING([--enable-cms=@<:@auto/lcms1/lcms2/none@:>@],
+                             [Use color management system. 'auto' prefers lcms2 over lcms1 if both are available [[default=auto]]]),
+              [enable_cms=$enableval],
+              [enable_cms="auto"])
+if test x$enable_cms = xauto; then
   PKG_CHECK_MODULES(LCMS, lcms2, [lcms2=yes], [lcms2=no])
   if test x$lcms2 = xno; then
-      PKG_CHECK_MODULES(LCMS, lcms)
+      PKG_CHECK_MODULES(LCMS, lcms, [lcms1=yes], [lcms1=no])
   fi
-elif test x$enable_cms = xtry; then
-  PKG_CHECK_MODULES(LCMS, lcms2,[lcms2=yes],[lcms2=no])
-  if test x$lcms2 = xyes; then
-    enable_cms=yes
-  else
-      PKG_CHECK_MODULES(LCMS, lcms,[enable_cms=yes],[enable_cms=no])
-  fi
+elif test x$enable_cms = xlcms1; then
+  PKG_CHECK_MODULES(LCMS, lcms, [lcms1=yes], [lcms1=no])
+elif test x$enable_cms = xlcms2; then
+  PKG_CHECK_MODULES(LCMS, lcms2, [lcms2=yes], [lcms2=no])
 fi
 
-if test "x$enable_cms" = "xyes"; then
+if test x$lcms1 = xyes || test x$lcms2 = xyes; then
+  enable_cms=yes
   AC_DEFINE(USE_CMS, 1, [Defines if use cms])
-  if test "x$lcms2" != "xyes"; then
+  if test x$lcms1 = xyes; then
     lcms1=yes;
     AC_DEFINE(USE_LCMS1, 1, [Defines if use lcms1])
   fi
 fi
+
 AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
 AM_CONDITIONAL(USE_LCMS1, test x$lcms1 = xyes)
 
@@ -743,7 +743,8 @@ if test "x$GCC" != xyes; then
 fi
 case "$enable_compile_warnings" in
   no)	;;
-  yes)	CXXFLAGS="-Wall -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common $CXXFLAGS" ;;
+  yes)	CXXFLAGS="-Wall -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common $CXXFLAGS";
+        CFLAGS="-Wall $CFLAGS" ;;
   kde)	CXXFLAGS="-Wnon-virtual-dtor -Wno-long-long -Wundef \
 		-D_XOPEN_SOURCE=600 -D_BSD_SOURCE -Wcast-align \
 		-Wconversion -Wall -W -Wpointer-arith \

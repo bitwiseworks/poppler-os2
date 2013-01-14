@@ -11,6 +11,9 @@
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
+ * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -601,6 +604,19 @@ delete it;
 	   \since 0.14
 	**/
 	bool search(const QString &text, double &rectLeft, double &rectTop, double &rectRight, double &rectBottom, SearchDirection direction, SearchMode caseSensitive, Rotation rotate = Rotate0) const;
+	
+	/**
+	   Returns a list of all occurrences of the specified text on the page.
+	   
+	   \param text the text to search
+	   \param caseSensitive whether to be case sensitive
+	   \param rotate the rotation to apply for the search order
+	   
+	   \warning Do not use the returned QRectF as arguments of another search call because of truncation issues if qreal is defined as float.
+	   
+	   \since 0.22
+	**/
+	QList<QRectF> search(const QString &text, SearchMode caseSensitive, Rotation rotate = Rotate0) const;
 
 	/**
 	   Returns a list of text of the page
@@ -831,9 +847,21 @@ delete it;
 	    Antialiasing = 0x00000001,      ///< Antialiasing for graphics
 	    TextAntialiasing = 0x00000002,  ///< Antialiasing for text
 	    TextHinting = 0x00000004,       ///< Hinting for text \since 0.12.1
-	    TextSlightHinting = 0x00000008  ///< Lighter hinting for text when combined with TextHinting \since 0.18
+	    TextSlightHinting = 0x00000008, ///< Lighter hinting for text when combined with TextHinting \since 0.18
+	    OverprintPreview = 0x00000010   ///< Overprint preview \since 0.22
 	};
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
+
+	/**
+	   Form types
+
+	   \since 0.22
+	*/
+	enum FormType {
+	    NoForm,    ///< Document doesn't contain forms
+	    AcroForm,  ///< AcroForm
+	    XfaForm    ///< Adobe XML Forms Architecture (XFA), currently unsupported
+	};
 
 	/**
 	  Set a color display profile for the current document.
@@ -1347,6 +1375,13 @@ QString subject = m_doc->info("Subject");
 	bool getPdfId(QByteArray *permanentId, QByteArray *updateId) const;
 
 	/**
+	   Returns the type of forms contained in the document
+
+	   \since 0.22
+	*/
+	FormType formType() const;
+
+	/**
 	   Destructor.
 	*/
 	~Document();
@@ -1609,6 +1644,13 @@ height = dummy.height();
        \since 0.12
     */
     POPPLER_QT4_EXPORT bool isCmsAvailable();
+    
+    /**
+       Whether the overprint preview functionality is available.
+
+       \since 0.22
+    */
+    POPPLER_QT4_EXPORT bool isOverprintPreviewAvailable();
 
     class SoundData;
     /**
@@ -1732,6 +1774,20 @@ height = dummy.height();
 	   How to play the movie
 	*/
 	PlayMode playMode() const;
+
+	/**
+	   Returns whether a poster image should be shown if the movie is not playing.
+	   \since 0.22
+	*/
+	bool showPosterImage() const;
+
+	/**
+	   Returns the poster image that should be shown if the movie is not playing.
+	   If the image is null but showImagePoster() returns @c true, the first frame of the movie
+	   should be used as poster image.
+	   \since 0.22
+	*/
+	QImage posterImage() const;
 
     private:
 	/// \cond PRIVATE

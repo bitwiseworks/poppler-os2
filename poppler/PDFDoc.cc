@@ -21,7 +21,7 @@
 // Copyright (C) 2009 Eric Toombs <ewtoombs@uwaterloo.ca>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009, 2011 Axel Struebing <axel.struebing@freenet.de>
-// Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010-2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
@@ -153,7 +153,7 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
     // Keep a copy of the errno returned by fopen so that it can be 
     // referred to later.
     fopenErrno = errno;
-    error(errIO, -1, "Couldn't open file '{0:t}': {0:s}.", fileName, strerror(errno));
+    error(errIO, -1, "Couldn't open file '{0:t}': {1:s}.", fileName, strerror(errno));
     errCode = errOpenFile;
     return;
   }
@@ -189,7 +189,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   // try to open file
   // NB: _wfopen is only available in NT
   struct _stat buf;
-  int size;
+  int size = 0;
   version.dwOSVersionInfoSize = sizeof(version);
   GetVersionEx(&version);
   if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
@@ -203,7 +203,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
     }
     file = fopen(fileName->getCString(), "rb");
   }
-  if (!file) {
+  if (!size || !file) {
     error(errIO, -1, "Couldn't open file '{0:t}'", fileName);
     errCode = errOpenFile;
     return;
@@ -611,6 +611,15 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   XRef *yRef, *countRef;
   int rootNum = getXRef()->getNumObjects() + 1;
 
+  // Make sure that special flags are set, because we are going to read
+  // all objects, including Unencrypted ones.
+  xref->scanSpecialFlags();
+
+  Guchar *fileKey;
+  CryptAlgorithm encAlgorithm;
+  int keyLength;
+  xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+
   if (pageNo < 1 || pageNo > getNumPages()) {
     error(errInternal, -1, "Illegal pageNo: {0:d}({1:d})", pageNo, getNumPages() );
     return errOpenFile;
@@ -634,7 +643,18 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   outStr = new FileOutStream(f,0);
 
   yRef = new XRef(getXRef()->getTrailerDict());
+  Object encrypt;
+  getXRef()->getTrailerDict()->dictLookup("Encrypt", &encrypt);
+
+  if (secHdlr != NULL && !secHdlr->isUnencrypted()) {
+    yRef->setEncryption(secHdlr->getPermissionFlags(), 
+      secHdlr->getOwnerPasswordOk(), fileKey, keyLength, secHdlr->getEncVersion(), secHdlr->getEncRevision(), encAlgorithm);
+  }
   countRef = new XRef();
+  Object *trailerObj = getXRef()->getTrailerDict();
+  if (trailerObj->isDict()) {
+    markPageObjects(trailerObj->getDict(), yRef, countRef, 0);
+  }
   yRef->add(0, 65535, 0, gFalse);
   writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
 
@@ -644,7 +664,6 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   if (infoObj.isDict()) {
     Dict *infoDict = infoObj.getDict();
     markPageObjects(infoDict, yRef, countRef, 0);
-    Object *trailerObj = getXRef()->getTrailerDict();
     if (trailerObj->isDict()) {
       Dict *trailerDict = trailerObj->getDict();
       Object ref;
@@ -673,6 +692,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
 
   Dict *pageDict = page.getDict();
   markPageObjects(pageDict, yRef, countRef, 0);
+  yRef->markUnencrypted();
   Guint objectsCount = writePageObjects(outStr, yRef, 0);
 
   yRef->add(rootNum,0,outStr->getPos(),gTrue);
@@ -687,7 +707,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
       if (j > 0) outStr->printf(" ");
       Object value; catDict->getValNF(j, &value);
       outStr->printf("/%s ", key);
-      writeObject(&value, NULL, outStr, getXRef(), 0);
+      writeObject(&value, outStr, getXRef(), 0, NULL, cryptRC4, 0, 0, 0);
       value.free();
     }
   }
@@ -701,7 +721,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   outStr->printf("<< /Type /Pages /Kids [ %d 0 R ] /Count 1 ", rootNum + 2);
   if (resourcesObj.isDict()) {
     outStr->printf("/Resources ");
-    writeObject(&resourcesObj, NULL, outStr, getXRef(), 0);
+    writeObject(&resourcesObj, outStr, getXRef(), 0, NULL, cryptRC4, 0, 0, 0);
     resourcesObj.free();
   }
   outStr->printf(">>\n");
@@ -719,7 +739,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
       outStr->printf("/Parent %d 0 R", rootNum + 1);
     } else {
       outStr->printf("/%s ", key);
-      writeObject(&value, NULL, outStr, getXRef(), 0); 
+      writeObject(&value, outStr, getXRef(), 0, NULL, cryptRC4, 0, 0, 0);
     }
     value.free();
   }
@@ -766,41 +786,19 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
   // find if we have updated objects
   GBool updated = gFalse;
   for(int i=0; i<xref->getNumObjects(); i++) {
-    if (xref->getEntry(i)->updated) {
+    if (xref->getEntry(i)->getFlag(XRefEntry::Updated)) {
       updated = gTrue;
       break;
     }
   }
 
-  // we don't support rewriting files with Encrypt at the moment
-  Object obj;
-  xref->getTrailerDict()->getDict()->lookupNF("Encrypt", &obj);
-  if (!obj.isNull())
-  {
-    obj.free();
-    if (!updated && mode == writeStandard) {
-      // simply copy the original file
-      saveWithoutChangesAs (outStr);
-    } else {
-      return errEncrypted;
-    }
-  }
-  else
-  {
-    obj.free();
-
-    if (mode == writeForceRewrite) {
-      saveCompleteRewrite(outStr);
-    } else if (mode == writeForceIncremental) {
-      saveIncrementalUpdate(outStr); 
-    } else { // let poppler decide
-      if(updated) { 
-        saveIncrementalUpdate(outStr);
-      } else {
-        // simply copy the original file
-        saveWithoutChangesAs (outStr);
-      }
-    }
+  if (!updated && mode == writeStandard) {
+    // simply copy the original file
+    saveWithoutChangesAs (outStr);
+  } if (mode == writeForceRewrite) {
+    saveCompleteRewrite(outStr);
+  } else {
+    saveIncrementalUpdate(outStr);
   }
 
   return errNone;
@@ -848,6 +846,11 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   }
   str->close();
 
+  Guchar *fileKey;
+  CryptAlgorithm encAlgorithm;
+  int keyLength;
+  xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+
   uxref = new XRef();
   uxref->add(0, 65535, 0, gFalse);
   for(int i=0; i<xref->getNumObjects(); i++) {
@@ -855,14 +858,16 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
         (xref->getEntry(i)->gen == 0)) //we skip the irrelevant free objects
       continue;
 
-    if (xref->getEntry(i)->updated) { //we have an updated object
+    if (xref->getEntry(i)->getFlag(XRefEntry::Updated)) { //we have an updated object
       Ref ref;
       ref.num = i;
       ref.gen = xref->getEntry(i)->type == xrefEntryCompressed ? 0 : xref->getEntry(i)->gen;
       if (xref->getEntry(i)->type != xrefEntryFree) {
         Object obj1;
         xref->fetch(ref.num, ref.gen, &obj1);
-        Guint offset = writeObject(&obj1, &ref, outStr);
+        Guint offset = writeObjectHeader(&ref, outStr);
+        writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+        writeObjectFooter(outStr);
         uxref->add(ref.num, ref.gen, offset, gTrue);
         obj1.free();
       } else {
@@ -905,6 +910,15 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
 
 void PDFDoc::saveCompleteRewrite (OutStream* outStr)
 {
+  // Make sure that special flags are set, because we are going to read
+  // all objects, including Unencrypted ones.
+  xref->scanSpecialFlags();
+
+  Guchar *fileKey;
+  CryptAlgorithm encAlgorithm;
+  int keyLength;
+  xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+
   outStr->printf("%%PDF-%d.%d\r\n",pdfMajorVersion,pdfMinorVersion);
   XRef *uxref = new XRef();
   uxref->add(0, 65535, 0, gFalse);
@@ -919,18 +933,32 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
           and we don't want the one with num=0 because it has already been added (gen = 65535)*/
       if (ref.gen > 0 && ref.num > 0)
         uxref->add(ref.num, ref.gen, 0, gFalse);
+    } else if (xref->getEntry(i)->getFlag(XRefEntry::DontRewrite)) {
+      // This entry must not be written, put a free entry instead (with incremented gen)
+      ref.num = i;
+      ref.gen = xref->getEntry(i)->gen + 1;
+      uxref->add(ref.num, ref.gen, 0, gFalse);
     } else if (type == xrefEntryUncompressed){ 
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
       xref->fetch(ref.num, ref.gen, &obj1);
-      Guint offset = writeObject(&obj1, &ref, outStr);
+      Guint offset = writeObjectHeader(&ref, outStr);
+      // Write unencrypted objects in unencrypted form
+      if (xref->getEntry(i)->getFlag(XRefEntry::Unencrypted)) {
+        writeObject(&obj1, outStr, NULL, cryptRC4, 0, 0, 0);
+      } else {
+        writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+      }
+      writeObjectFooter(outStr);
       uxref->add(ref.num, ref.gen, offset, gTrue);
       obj1.free();
     } else if (type == xrefEntryCompressed) {
       ref.num = i;
       ref.gen = 0; //compressed entries have gen == 0
       xref->fetch(ref.num, ref.gen, &obj1);
-      Guint offset = writeObject(&obj1, &ref, outStr);
+      Guint offset = writeObjectHeader(&ref, outStr);
+      writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+      writeObjectFooter(outStr);
       uxref->add(ref.num, ref.gen, offset, gTrue);
       obj1.free();
     }
@@ -941,7 +969,8 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   delete uxref;
 }
 
-void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset)
+void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+                               CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
   Object obj1;
   outStr->printf("<<");
@@ -950,7 +979,7 @@ void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint 
     GooString *keyNameToPrint = keyName.sanitizedName(gFalse /* non ps mode */);
     outStr->printf("/%s ", keyNameToPrint->getCString());
     delete keyNameToPrint;
-    writeObject(dict->getValNF(i, &obj1), NULL, outStr, xRef, numOffset);
+    writeObject(dict->getValNF(i, &obj1), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
     obj1.free();
   }
   outStr->printf(">> ");
@@ -988,8 +1017,27 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   outStr->printf("\r\nendstream\r\n");
 }
 
-void PDFDoc::writeString (GooString* s, OutStream* outStr)
+void PDFDoc::writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
+                          CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
+  // Encrypt string if encryption is enabled
+  GooString *sEnc = NULL;
+  if (fileKey) {
+    Object obj;
+    EncryptStream *enc = new EncryptStream(new MemStream(s->getCString(), 0, s->getLength(), obj.initNull()),
+                                           fileKey, encAlgorithm, keyLength, objNum, objGen);
+    sEnc = new GooString();
+    int c;
+    enc->reset();
+    while ((c = enc->getChar()) != EOF) {
+      sEnc->append((char)c);
+    }
+
+    delete enc;
+    s = sEnc;
+  }
+
+  // Write data
   if (s->hasUnicodeMarker()) {
     //unicode string don't necessary end with \0
     const char* c = s->getCString();
@@ -1021,17 +1069,23 @@ void PDFDoc::writeString (GooString* s, OutStream* outStr)
     }
     outStr->printf(") ");
   }
+
+  delete sEnc;
 }
 
-Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef, Guint numOffset)
+Guint PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
+{
+  Guint offset = outStr->getPos();
+  outStr->printf("%i %i obj ", ref->num, ref->gen);
+  return offset;
+}
+
+void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+                          CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
   Array *array;
   Object obj1;
-  Guint offset = outStr->getPos();
   int tmp;
-
-  if(ref) 
-    outStr->printf("%i %i obj ", ref->num, ref->gen);
 
   switch (obj->getType()) {
     case objBool:
@@ -1039,6 +1093,9 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       break;
     case objInt:
       outStr->printf("%i ", obj->getInt());
+      break;
+    case objUint:
+      outStr->printf("%u ", obj->getUint());
       break;
     case objReal:
     {
@@ -1048,7 +1105,7 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       break;
     }
     case objString:
-      writeString(obj->getString(), outStr);
+      writeString(obj->getString(), outStr, fileKey, encAlgorithm, keyLength, objNum, objGen);
       break;
     case objName:
     {
@@ -1065,13 +1122,13 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       array = obj->getArray();
       outStr->printf("[");
       for (int i=0; i<array->getLength(); i++) {
-        writeObject(array->getNF(i, &obj1), NULL,outStr, xRef, numOffset);
+        writeObject(array->getNF(i, &obj1), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
         obj1.free();
       }
       outStr->printf("] ");
       break;
     case objDict:
-      writeDictionnary (obj->getDict(),outStr, xRef, numOffset);
+      writeDictionnary (obj->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
       break;
     case objStream: 
       {
@@ -1080,6 +1137,15 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
         Stream *stream = obj->getStream();
         if (stream->getKind() == strWeird) {
           //we write the stream unencoded => TODO: write stream encoder
+
+          // Encrypt stream
+          EncryptStream *encStream = NULL;
+          if (fileKey) {
+            encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
+            encStream->setAutoDelete(gFalse);
+            stream = encStream;
+          }
+
           stream->reset();
           //recalculate stream length
           tmp = 0;
@@ -1093,8 +1159,9 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
           stream->getDict()->remove("Filter");
           stream->getDict()->remove("DecodeParms");
 
-          writeDictionnary (stream->getDict(),outStr, xRef, numOffset);
+          writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
           writeStream (stream,outStr);
+          delete encStream;
           obj1.free();
         } else {
           //raw stream copy
@@ -1110,7 +1177,7 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
                 }
               }
           }
-          writeDictionnary (stream->getDict(), outStr, xRef, numOffset);
+          writeDictionnary (stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
           writeRawStream (stream, outStr);
         }
         break;
@@ -1134,9 +1201,11 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       error(errUnimplemented, -1,"Unhandled objType : {0:d}, please report a bug with a testcase\r\n", obj->getType());
       break;
   }
-  if (ref)
-    outStr->printf("endobj\r\n");
-  return offset;
+}
+
+void PDFDoc::writeObjectFooter (OutStream* outStr)
+{
+  outStr->printf("endobj\r\n");
 }
 
 Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef,
@@ -1177,6 +1246,17 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef
   }
   obj1.free();
 
+  GBool hasEncrypt = gFalse;
+  if (!xRef->getTrailerDict()->isNone()) {
+    Object obj2;
+    xRef->getTrailerDict()->dictLookupNF("Encrypt", &obj2);
+    if (!obj2.isNull()) {
+      trailerDict->set("Encrypt", &obj2);
+      hasEncrypt = gTrue;
+      obj2.free();
+    }
+  }
+
   //calculate md5 digest
   Guchar digest[16];
   md5((Guchar*)message.getCString(), message.getLength(), digest);
@@ -1186,7 +1266,8 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef
   Object obj2,obj3,obj5;
   obj2.initArray(xRef);
 
-  if (incrUpdate) {
+  // In case of encrypted files, the ID must not be changed because it's used to calculate the key
+  if (incrUpdate || hasEncrypt) {
     Object obj4;
     //only update the second part of the array
     xRef->getTrailerDict()->getDict()->lookup("ID", &obj4);
@@ -1231,7 +1312,7 @@ void PDFDoc::writeXRefTableTrailer(Dict *trailerDict, XRef *uxref, GBool writeAl
 {
   uxref->writeTableToFile( outStr, writeAllEntries );
   outStr->printf( "trailer\r\n");
-  writeDictionnary(trailerDict, outStr, xRef, 0);
+  writeDictionnary(trailerDict, outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0);
   outStr->printf( "\r\nstartxref\r\n");
   outStr->printf( "%i\r\n", uxrefOffset);
   outStr->printf( "%%%%EOF\r\n");
@@ -1248,7 +1329,9 @@ void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefS
   Object obj1;
   MemStream *mStream = new MemStream( stmData.getCString(), 0,
                                       stmData.getLength(), obj1.initDict(trailerDict) );
-  writeObject(obj1.initStream(mStream), uxrefStreamRef, outStr, xRef, 0);
+  writeObjectHeader(uxrefStreamRef, outStr);
+  writeObject(obj1.initStream(mStream), outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0);
+  writeObjectFooter(outStr);
   obj1.free();
 
   outStr->printf( "startxref\r\n");
@@ -1435,16 +1518,21 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
     const char *key = pageDict->getKey(n);
     Object value; pageDict->getValNF(n, &value);
     if (strcmp(key, "Parent") != 0 &&
-	      strcmp(key, "Pages") != 0) {
+	      strcmp(key, "Pages") != 0 &&
+        strcmp(key, "Root") != 0) {
       markObject(&value, xRef, countRef, numOffset);
     }
     value.free();
   }
 }
 
-Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset) 
+Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, GBool combine) 
 {
   Guint objectsCount = 0; //count the number of objects in the XRef(s)
+  Guchar *fileKey;
+  CryptAlgorithm encAlgorithm;
+  int keyLength;
+  xRef->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
 
   for (int n = numOffset; n < xRef->getNumObjects(); n++) {
     if (xRef->getEntry(n)->type != xrefEntryFree) {
@@ -1454,7 +1542,15 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset)
       ref.gen = xRef->getEntry(n)->gen;
       objectsCount++;
       getXRef()->fetch(ref.num - numOffset, ref.gen, &obj);
-      Guint offset = writeObject(&obj, &ref, outStr, xRef, numOffset);
+      Guint offset = writeObjectHeader(&ref, outStr);
+      if (combine) {
+        writeObject(&obj, outStr, getXRef(), numOffset, NULL, cryptRC4, 0, 0, 0);
+      } else if (xRef->getEntry(n)->getFlag(XRefEntry::Unencrypted)) {
+        writeObject(&obj, outStr, NULL, cryptRC4, 0, 0, 0);
+      } else {
+        writeObject(&obj, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+      }
+      writeObjectFooter(outStr);
       xRef->add(ref.num, ref.gen, offset, gTrue);
       obj.free();
     }

@@ -36,6 +36,7 @@
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -567,7 +568,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
     baseMatrix[i] = state->getCTM()[i];
   }
   formDepth = 0;
-  textClipBBoxEmpty = gTrue;
   ocState = gTrue;
   parser = NULL;
   abortCheckCbk = abortCheckCbkA;
@@ -620,7 +620,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
     baseMatrix[i] = state->getCTM()[i];
   }
   formDepth = 0;
-  textClipBBoxEmpty = gTrue;
   ocState = gTrue;
   parser = NULL;
   abortCheckCbk = abortCheckCbkA;
@@ -1670,6 +1669,10 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs) {
       }
       state->setStrokeColor(&color);
       out->updateStrokeColor(state);
+    }
+    if (unlikely(numArgs <= 0)) {
+      error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
+      return;
     }
     if (args[numArgs-1].isName() &&
 	(pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
@@ -3613,7 +3616,6 @@ void Gfx::opBeginText(Object args[], int numArgs) {
   out->updateTextMat(state);
   out->updateTextPos(state);
   fontChanged = gTrue;
-  textClipBBoxEmpty = gTrue;
 }
 
 void Gfx::opEndText(Object args[], int numArgs) {
@@ -4281,7 +4283,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     obj1.free();
 
     // if drawing is disabled, skip over inline image data
-    if (!ocState) {
+    if (!ocState || !out->needNonText()) {
       str->reset();
       n = height * ((width + 7) / 8);
       for (i = 0; i < n; ++i) {
@@ -4356,6 +4358,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       dict->lookup("D", &obj1);
     }
     if (bits == 0) {
+      delete colorSpace;
       goto err2;
     }
     colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
@@ -4539,7 +4542,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     }
 
     // if drawing is disabled, skip over inline image data
-    if (!ocState) {
+    if (!ocState || !out->needNonText()) {
       str->reset();
       n = height * ((width * colorMap->getNumPixelComps() *
 		     colorMap->getBits() + 7) / 8);
@@ -4598,7 +4601,7 @@ GBool Gfx::checkTransparencyGroup(Dict *resDict) {
       Object obj1, obj2;
       GfxBlendMode mode;
 
-      if (res->lookupGState(dict->getKey(i), &obj1)) {
+      if (res->lookupGState(dict->getKey(i), &obj1) && obj1.isDict()) {
         if (!obj1.dictLookup("BM", &obj2)->isNull()) {
           if (state->parseBlendMode(&obj2, &mode)) {
             if (mode != gfxBlendNormal)
