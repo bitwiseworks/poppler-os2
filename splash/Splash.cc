@@ -11,10 +11,10 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2010 Christian Feuers‰nger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2010 Christian Feuers√§nger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -525,8 +525,9 @@ void Splash::pipeRun(SplashPipe *pipe) {
 	  cSrcNonIso[3] = clip255(pipe->cSrc[3] +
 				  ((pipe->cSrc[3] - cDest[3]) * t) / 255);
 #endif
+	case splashModeXBGR8:
+	  cSrcNonIso[3] = 255;
 	case splashModeRGB8:
-  case splashModeXBGR8:
 	case splashModeBGR8:
 	  cSrcNonIso[2] = clip255(pipe->cSrc[2] +
 				  ((pipe->cSrc[2] - cDest[2]) * t) / 255);
@@ -2252,10 +2253,13 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   lineDashStartOn = gTrue;
   lineDashStartIdx = 0;
   if (lineDashStartPhase > 0) {
-    while (lineDashStartPhase >= state->lineDash[lineDashStartIdx]) {
+    while (lineDashStartIdx < state->lineDashLength && lineDashStartPhase >= state->lineDash[lineDashStartIdx]) {
       lineDashStartOn = !lineDashStartOn;
       lineDashStartPhase -= state->lineDash[lineDashStartIdx];
       ++lineDashStartIdx;
+    }
+    if (unlikely(lineDashStartIdx == state->lineDashLength)) {
+      return new SplashPath();
     }
   }
 
@@ -2954,6 +2958,11 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
   // scale the input image
   scaledMask = scaleMask(src, srcData, srcWidth, srcHeight,
 			 scaledWidth, scaledHeight);
+  if (scaledMask->data == NULL) {
+    error(errInternal, -1, "scaledMask->data is NULL in Splash::arbitraryTransformMask");
+    delete scaledMask;
+    return;
+  }
 
   // construct the three sections
   i = (vy[2] <= vy[3]) ? 2 : 3;
@@ -3228,6 +3237,12 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
   Guchar *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
   int i, j;
+  
+  destPtr = dest->data;
+  if (destPtr == NULL) {
+    error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYdXu");
+    return;
+  }
 
   // Bresenham parameters for y scale
   yp = srcHeight / scaledHeight;
@@ -3244,7 +3259,6 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
   // init y scale Bresenham
   yt = 0;
 
-  destPtr = dest->data;
   for (y = 0; y < scaledHeight; ++y) {
 
     // y scale Bresenham
@@ -3303,6 +3317,12 @@ void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
   Guchar *destPtr0, *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, d, d0, d1;
   int i;
+  
+  destPtr0 = dest->data;
+  if (destPtr0 == NULL) {
+    error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYuXd");
+    return;
+  }
 
   // Bresenham parameters for y scale
   yp = scaledHeight / srcHeight;
@@ -3318,7 +3338,6 @@ void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
   // init y scale Bresenham
   yt = 0;
 
-  destPtr0 = dest->data;
   for (y = 0; y < srcHeight; ++y) {
 
     // y scale Bresenham
@@ -3381,6 +3400,12 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx;
   int i, j;
 
+  destPtr0 = dest->data;
+  if (destPtr0 == NULL) {
+    error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYuXu");
+    return;
+  }
+
   // Bresenham parameters for y scale
   yp = scaledHeight / srcHeight;
   yq = scaledHeight % srcHeight;
@@ -3395,7 +3420,6 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
   // init y scale Bresenham
   yt = 0;
 
-  destPtr0 = dest->data;
   for (y = 0; y < srcHeight; ++y) {
 
     // y scale Bresenham
@@ -3451,11 +3475,15 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 
   w = src->getWidth();
   h = src->getHeight();
+  p = src->getDataPtr();
+  if (p == NULL) {
+    error(errInternal, -1, "src->getDataPtr() is NULL in Splash::blitMask");
+    return;    
+  }
   if (vectorAntialias && clipRes != splashClipAllInside) {
     pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
     drawAAPixelInit();
-    p = src->getDataPtr();
     for (y = 0; y < h; ++y) {
       for (x = 0; x < w; ++x) {
 	pipe.shape = *p++;
@@ -3465,7 +3493,6 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
   } else {
     pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
-    p = src->getDataPtr();
     if (clipRes == splashClipAllInside) {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
@@ -3900,6 +3927,8 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
       xa = imgCoordMungeLower(section[i].xa0 +
 			      ((SplashCoord)y + 0.5 - section[i].ya0) *
 			        section[i].dxdya);
+      if (unlikely(xa < 0))
+        xa = 0;
       xb = imgCoordMungeUpper(section[i].xb0 +
 			      ((SplashCoord)y + 0.5 - section[i].yb0) *
 			        section[i].dxdyb);
@@ -4849,6 +4878,11 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height,
   Guchar *lineBuf;
   Guchar *p0, *p1;
   int w;
+  
+  if (unlikely(img->data == NULL)) {
+    error(errInternal, -1, "img->data is NULL in Splash::vertFlipImage");
+    return;
+  }
 
   w = width * nComps;
   lineBuf = (Guchar *)gmalloc(w);
@@ -5056,7 +5090,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  alpha = *ap++;
 	  // this uses shape instead of alpha, which isn't technically
 	  // correct, but works out the same
-    pipe.shape = alpha;
+	  pipe.shape = alpha;
 	  (this->*pipe.run)(&pipe);
 	}
       }
@@ -5074,7 +5108,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  if (state->clip->test(xDest + x, yDest + y)) {
 	    // this uses shape instead of alpha, which isn't technically
 	    // correct, but works out the same
-      pipe.shape = alpha;
+	    pipe.shape = alpha;
 	    (this->*pipe.run)(&pipe);
 	    updateModX(xDest + x);
 	    updateModY(yDest + y);

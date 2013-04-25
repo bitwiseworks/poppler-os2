@@ -20,8 +20,9 @@
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -224,7 +225,7 @@ private:
   virtual GBool hasGetChars() { return false; }
   virtual int getChars(int nChars, Guchar *buffer);
 
-  Stream *makeFilter(char *name, Stream *str, Object *params);
+  Stream *makeFilter(char *name, Stream *str, Object *params, Object *dict = NULL);
 
   int ref;			// reference count
 };
@@ -850,7 +851,7 @@ struct DCTHuffTable {
 class DCTStream: public FilterStream {
 public:
 
-  DCTStream(Stream *strA, int colorXformA);
+  DCTStream(Stream *strA, int colorXformA, Object *dict);
   virtual ~DCTStream();
   virtual StreamKind getKind() { return strDCT; }
   virtual void reset();
