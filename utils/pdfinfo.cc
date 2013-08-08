@@ -17,7 +17,7 @@
 // Copyright (C) 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
-// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -36,6 +36,7 @@
 #include "parseargs.h"
 #include "printencodings.h"
 #include "goo/GooString.h"
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "GlobalParams.h"
 #include "Object.h"
@@ -351,16 +352,8 @@ int main(int argc, char *argv[]) {
   f = fopen(fileName->getCString(), "rb");
 #endif
   if (f) {
-#if HAVE_FSEEKO
-    fseeko(f, 0, SEEK_END);
-    printf("File size:      %u bytes\n", (Guint)ftello(f));
-#elif HAVE_FSEEK64
-    fseek64(f, 0, SEEK_END);
-    printf("File size:      %u bytes\n", (Guint)ftell64(f));
-#else
-    fseek(f, 0, SEEK_END);
-    printf("File size:      %d bytes\n", (int)ftell(f));
-#endif
+    Gfseek(f, 0, SEEK_END);
+    printf("File size:      %lld bytes\n", (long long)Gftell(f));
     fclose(f);
   }
 

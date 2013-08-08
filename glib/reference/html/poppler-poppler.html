@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>poppler</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Poppler Reference Manual">
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="ch01.html" title="Poppler">
 <link rel="next" href="PopplerDocument.html" title="PopplerDocument">
-<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -80,8 +80,11 @@ const <span class="returnvalue">char</span> *        <a class="link" href="poppl
 <p>
 Error codes returned by <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><a name="POPPLER-ERROR-INVALID:CAPS"></a><span class="term"><code class="literal">POPPLER_ERROR_INVALID</code></span></p></td>
@@ -121,6 +124,30 @@ Error codes returned by <a class="link" href="PopplerDocument.html" title="Poppl
   POPPLER_ORIENTATION_SEASCAPE
 } PopplerOrientation;
 </pre>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><a name="POPPLER-ORIENTATION-PORTRAIT:CAPS"></a><span class="term"><code class="literal">POPPLER_ORIENTATION_PORTRAIT</code></span></p></td>
+<td></td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-ORIENTATION-LANDSCAPE:CAPS"></a><span class="term"><code class="literal">POPPLER_ORIENTATION_LANDSCAPE</code></span></p></td>
+<td></td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-ORIENTATION-UPSIDEDOWN:CAPS"></a><span class="term"><code class="literal">POPPLER_ORIENTATION_UPSIDEDOWN</code></span></p></td>
+<td></td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-ORIENTATION-SEASCAPE:CAPS"></a><span class="term"><code class="literal">POPPLER_ORIENTATION_SEASCAPE</code></span></p></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
 </div>
 <hr>
 <div class="refsect2">
@@ -131,6 +158,26 @@ Error codes returned by <a class="link" href="PopplerDocument.html" title="Poppl
   POPPLER_BACKEND_CAIRO
 } PopplerBackend;
 </pre>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><a name="POPPLER-BACKEND-UNKNOWN:CAPS"></a><span class="term"><code class="literal">POPPLER_BACKEND_UNKNOWN</code></span></p></td>
+<td></td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-BACKEND-SPLASH:CAPS"></a><span class="term"><code class="literal">POPPLER_BACKEND_SPLASH</code></span></p></td>
+<td></td>
+</tr>
+<tr>
+<td><p><a name="POPPLER-BACKEND-CAIRO:CAPS"></a><span class="term"><code class="literal">POPPLER_BACKEND_CAIRO</code></span></p></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
 </div>
 <hr>
 <div class="refsect2">
@@ -145,8 +192,11 @@ Error codes returned by <a class="link" href="PopplerDocument.html" title="Poppl
 A <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> describes a RGB color. Color components
 are values between 0 and 65535
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><span class="type">guint16</span> <em class="structfield"><code><a name="PopplerColor.red"></a>red</code></em>;</span></p></td>
@@ -176,8 +226,11 @@ are values between 0 and 65535
 <p>
 Printing flags
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><a name="POPPLER-PRINT-DOCUMENT:CAPS"></a><span class="term"><code class="literal">POPPLER_PRINT_DOCUMENT</code></span></p></td>
@@ -216,8 +269,11 @@ Printing flags
 <p>
 Flags using while searching text in a page
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><a name="POPPLER-FIND-DEFAULT:CAPS"></a><span class="term"><code class="literal">POPPLER_FIND_DEFAULT</code></span></p></td>
@@ -249,8 +305,11 @@ Flags using while searching text in a page
 <p>
 Returns the backend compiled into the poppler library.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>The backend used by poppler</td>
@@ -264,8 +323,11 @@ Returns the backend compiled into the poppler library.
 <p>
 Returns the version of poppler in use.  This result is not to be freed.
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>the version of poppler.</td>
@@ -281,8 +343,11 @@ Returns the version of poppler in use.  This result is not to be freed.
 Parses a PDF format date string and converts it to a <span class="type">time_t</span>. Returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><span class="type">FALSE</span></a>
 if the parsing fails or the input string is not a valid PDF format date string
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>date</code></em> :</span></p></td>
@@ -309,8 +374,11 @@ if the parsing fails or the input string is not a valid PDF format date string
 <p>
 Creates a new <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
 <td>a new <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>, use <a class="link" href="poppler-poppler.html#poppler-color-free" title="poppler_color_free ()"><code class="function">poppler_color_free()</code></a> to free it</td>
@@ -324,8 +392,11 @@ Creates a new <a class="link" href="poppler-poppler.html#PopplerColor" title="Po
 <p>
 Creates a copy of <em class="parameter"><code>color</code></em>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>color</code></em> :</span></p></td>
@@ -346,8 +417,11 @@ Creates a copy of <em class="parameter"><code>color</code></em>
 <p>
 Frees the given <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>
 </p>
-<div class="variablelist"><table border="0">
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
 <col align="left" valign="top">
+<col>
+</colgroup>
 <tbody><tr>
 <td><p><span class="term"><em class="parameter"><code>color</code></em> :</span></p></td>
 <td>a <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>
@@ -359,6 +433,6 @@ Frees the given <a class="link" href="poppler-poppler.html#PopplerColor" title="
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.18</div>
+          Generated by GTK-Doc V1.19</div>
 </body>
 </html>

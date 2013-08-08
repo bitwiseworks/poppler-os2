@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -25,6 +25,8 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,6 +57,11 @@
 #include "ViewerPreferences.h"
 #include "FileSpec.h"
 
+#if MULTITHREADED
+#  define catalogLocker()   MutexLocker locker(&mutex)
+#else
+#  define catalogLocker()
+#endif
 //------------------------------------------------------------------------
 // Catalog
 //------------------------------------------------------------------------
@@ -64,6 +71,9 @@ Catalog::Catalog(PDFDoc *docA) {
   Object obj, obj2;
   Object optContentProps;
 
+#if MULTITHREADED
+  gInitMutex(&mutex);
+#endif
   ok = gTrue;
   doc = docA;
   xref = doc->getXRef();
@@ -129,7 +139,7 @@ Catalog::~Catalog() {
   delete kidsIdxList;
   if (attrsList) {
     std::vector<PageAttrs *>::iterator it;
-    for (it = attrsList->begin() ; it < attrsList->end(); it++ ) {
+    for (it = attrsList->begin() ; it != attrsList->end(); ++it ) {
       delete *it;
     }
     delete attrsList;
@@ -137,7 +147,7 @@ Catalog::~Catalog() {
   delete pagesRefList;
   if (pagesList) {
     std::vector<Dict *>::iterator it;
-    for (it = pagesList->begin() ; it < pagesList->end(); it++ ) {
+    for (it = pagesList->begin() ; it != pagesList->end(); ++it ) {
       if (!(*it)->decRef()) {
          delete *it;
       }
@@ -170,6 +180,9 @@ Catalog::~Catalog() {
   outline.free();
   acroForm.free();
   viewerPreferences.free();
+#if MULTITHREADED
+  gDestroyMutex(&mutex);
+#endif
 }
 
 GooString *Catalog::readMetadata() {
@@ -177,6 +190,7 @@ GooString *Catalog::readMetadata() {
   Dict *dict;
   Object obj;
 
+  catalogLocker();
   if (metadata.isNone()) {
     Object catDict;
 
@@ -209,8 +223,12 @@ Page *Catalog::getPage(int i)
 {
   if (i < 1) return NULL;
 
+  catalogLocker();
   if (i > lastCachedPage) {
-     if (cachePageTree(i) == gFalse) return NULL;
+     GBool cached = cachePageTree(i);
+     if ( cached == gFalse) {
+       return NULL;
+     }
   }
   return pages[i-1];
 }
@@ -219,8 +237,12 @@ Ref *Catalog::getPageRef(int i)
 {
   if (i < 1) return NULL;
 
+  catalogLocker();
   if (i > lastCachedPage) {
-     if (cachePageTree(i) == gFalse) return NULL;
+     GBool cached = cachePageTree(i);
+     if ( cached == gFalse) {
+       return NULL;
+     }
   }
   return &pageRefs[i-1];
 }
@@ -423,6 +445,7 @@ LinkDest *Catalog::findDest(GooString *name) {
       obj1.free();
   }
   if (!found) {
+    catalogLocker();
     if (getDestNameTree()->lookup(name, &obj1))
       found = gTrue;
     else
@@ -457,6 +480,7 @@ FileSpec *Catalog::embeddedFile(int i)
 {
     Object efDict;
     Object obj;
+    catalogLocker();
     obj = getEmbeddedFileNameTree()->getValue(i);
     FileSpec *embeddedFile = 0;
     if (obj.isRef()) {
@@ -477,6 +501,7 @@ GooString *Catalog::getJS(int i)
   Object obj;
   // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
   // do not need to free it
+  catalogLocker();
   getJSNameTree()->getValue(i).fetch(xref, &obj);
 
   if (!obj.isDict()) {
@@ -512,6 +537,7 @@ GooString *Catalog::getJS(int i)
 
 Catalog::PageMode Catalog::getPageMode() {
 
+  catalogLocker();
   if (pageMode == pageModeNull) {
 
     Object catDict, obj;
@@ -547,6 +573,7 @@ Catalog::PageMode Catalog::getPageMode() {
 
 Catalog::PageLayout Catalog::getPageLayout() {
 
+  catalogLocker();
   if (pageLayout == pageLayoutNull) {
 
     Object catDict, obj;
@@ -746,6 +773,7 @@ GBool Catalog::indexToLabel(int index, GooString *label)
 
 int Catalog::getNumPages()
 {
+  catalogLocker();
   if (numPages == -1)
   {
     Object catDict, pagesDict, obj;
@@ -787,6 +815,7 @@ int Catalog::getNumPages()
 
 PageLabelInfo *Catalog::getPageLabelInfo()
 {
+  catalogLocker();
   if (!pageLabelInfo) {
     Object catDict;
     Object obj;
@@ -810,6 +839,7 @@ PageLabelInfo *Catalog::getPageLabelInfo()
 
 Object *Catalog::getStructTreeRoot()
 {
+  catalogLocker();
   if (structTreeRoot.isNone())
   {
      Object catDict;
@@ -829,6 +859,7 @@ Object *Catalog::getStructTreeRoot()
 
 Object *Catalog::getOutline()
 {
+  catalogLocker();
   if (outline.isNone())
   {
      Object catDict;
@@ -848,6 +879,7 @@ Object *Catalog::getOutline()
 
 Object *Catalog::getDests()
 {
+  catalogLocker();
   if (dests.isNone())
   {
      Object catDict;
@@ -885,6 +917,7 @@ Catalog::FormType Catalog::getFormType()
 
 Form *Catalog::getForm()
 {
+  catalogLocker();
   if (!form) {
     if (acroForm.isDict()) {
       form = new Form(doc, &acroForm);
@@ -898,6 +931,7 @@ Form *Catalog::getForm()
 
 ViewerPreferences *Catalog::getViewerPreferences()
 {
+  catalogLocker();
   if (!viewerPrefs) {
     if (viewerPreferences.isDict()) {
       viewerPrefs = new ViewerPreferences(viewerPreferences.getDict());

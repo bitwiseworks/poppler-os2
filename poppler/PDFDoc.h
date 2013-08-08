@@ -22,8 +22,10 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -37,7 +39,9 @@
 #pragma interface
 #endif
 
+#include "poppler-config.h"
 #include <stdio.h>
+#include "goo/GooMutex.h"
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -46,6 +50,7 @@
 #include "Stream.h"
 
 class GooString;
+class GooFile;
 class BaseStream;
 class OutputDev;
 class Links;
@@ -146,7 +151,7 @@ public:
 		   GBool (*abortCheckCbk)(void *data) = NULL,
 		   void *abortCheckCbkData = NULL,
                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                   void *annotDisplayDecideCbkData = NULL);
+                   void *annotDisplayDecideCbkData = NULL, GBool copyXRef = gFalse);
 
   // Display a range of pages.
   void displayPages(OutputDev *out, int firstPage, int lastPage,
@@ -165,7 +170,7 @@ public:
 			GBool (*abortCheckCbk)(void *data) = NULL,
 			void *abortCheckCbkData = NULL,
                         GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                        void *annotDisplayDecideCbkData = NULL);
+                        void *annotDisplayDecideCbkData = NULL, GBool copyXRef = gFalse);
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
@@ -249,12 +254,12 @@ public:
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   // Ownership goes to the caller
-  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Guint startxRef,
-                                  Ref *root, XRef *xRef, const char *fileName, Guint fileSize);
+  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
+                                  Ref *root, XRef *xRef, const char *fileName, Goffset fileSize);
   static void writeXRefTableTrailer (Dict *trailerDict, XRef *uxref, GBool writeAllEntries,
-                                     Guint uxrefOffset, OutStream* outStr, XRef *xRef);
+                                     Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
   static void writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef,
-                                      Guint uxrefOffset, OutStream* outStr, XRef *xRef);
+                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
 
 private:
   // insert referenced objects in XRef
@@ -264,7 +269,7 @@ private:
                                 CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
 
   // Write object header to current file stream and return its offset
-  static Guint writeObjectHeader (Ref *ref, OutStream* outStr);
+  static Goffset writeObjectHeader (Ref *ref, OutStream* outStr);
   static void writeObjectFooter (OutStream* outStr);
 
   void writeObject (Object *obj, OutStream* outStr, Guchar *fileKey, CryptAlgorithm encAlgorithm,
@@ -275,7 +280,7 @@ private:
   { writeDictionnary(dict, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
-  void writeXRefTableTrailer (Guint uxrefOffset, XRef *uxref, GBool writeAllEntries,
+  void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
                               int uxrefSize, OutStream* outStr, GBool incrUpdate);
   static void writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
@@ -294,17 +299,17 @@ private:
   void checkHeader();
   GBool checkEncryption(GooString *ownerPassword, GooString *userPassword);
   // Get the offset of the start xref table.
-  Guint getStartXRef();
+  Goffset getStartXRef();
   // Get the offset of the entries in the main XRef table of a
   // linearized document (0 for non linearized documents).
-  Guint getMainXRefEntriesOffset();
-  Guint strToUnsigned(char *s);
+  Goffset getMainXRefEntriesOffset();
+  long long strToLongLong(char *s);
 
   GooString *fileName;
 #ifdef _WIN32
   wchar_t *fileNameU;
 #endif
-  FILE *file;
+  GooFile *file;
   BaseStream *str;
   void *guiData;
   int pdfMajorVersion;
@@ -325,7 +330,10 @@ private:
   //then the POSIX errno will be here.
   int fopenErrno;
 
-  Guint startXRefPos;		// offset of last xref table
+  Goffset startXRefPos;		// offset of last xref table
+#if MULTITHREADED
+  GooMutex mutex;
+#endif
 };
 
 #endif

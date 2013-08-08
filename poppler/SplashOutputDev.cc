@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -30,6 +30,8 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
+// Copyright (C) 2013 Li Junling <lijunling@sina.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1210,7 +1212,9 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
 				 GBool reverseVideoA,
 				 SplashColorPtr paperColorA,
 				 GBool bitmapTopDownA,
-				 GBool allowAntialiasA) {
+				 GBool allowAntialiasA, 
+         SplashThinLineMode thinLineMode,
+         GBool overprintPreviewA) {
   colorMode = colorModeA;
   bitmapRowPad = bitmapRowPadA;
   bitmapTopDown = bitmapTopDownA;
@@ -1219,6 +1223,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   vectorAntialias = allowAntialias &&
 		      globalParams->getVectorAntialias() &&
 		      colorMode != splashModeMono1;
+  overprintPreview = overprintPreviewA;
   enableFreeTypeHinting = gFalse;
   enableSlightHinting = gFalse;
   setupScreenParams(72.0, 72.0);
@@ -1238,6 +1243,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
 			    colorMode != splashModeMono1, bitmapTopDown);
   splash = new Splash(bitmap, vectorAntialias, &screenParams);
   splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setThinLineMode(thinLineMode);
   splash->clear(paperColor, 0);
 
   fontEngine = NULL;
@@ -1250,6 +1256,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   textClipPath = NULL;
   transpGroupStack = NULL;
   nestCount = 0;
+  xref = NULL;
 }
 
 void SplashOutputDev::setupScreenParams(double hDPI, double vDPI) {
@@ -1345,12 +1352,13 @@ void SplashOutputDev::startDoc(PDFDoc *docA) {
   nT3Fonts = 0;
 }
 
-void SplashOutputDev::startPage(int pageNum, GfxState *state) {
+void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   int w, h;
   double *ctm;
   SplashCoord mat[6];
   SplashColor color;
 
+  xref = xrefA;
   if (state) {
     setupScreenParams(state->getHDPI(), state->getVDPI());
     w = (int)(state->getPageWidth() + 0.5);
@@ -1364,7 +1372,9 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state) {
   } else {
     w = h = 1;
   }
+  SplashThinLineMode thinLineMode = splashThinLineDefault;
   if (splash) {
+    thinLineMode = splash->getThinLineMode();
     delete splash;
     splash = NULL;
   }
@@ -1375,8 +1385,15 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state) {
     }
     bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode,
 			      colorMode != splashModeMono1, bitmapTopDown);
+    if (!bitmap->getDataPtr()) {
+      delete bitmap;
+      w = h = 1;
+      bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode,
+                              colorMode != splashModeMono1, bitmapTopDown);
+    }
   }
   splash = new Splash(bitmap, vectorAntialias, &screenParams);
+  splash->setThinLineMode(thinLineMode);
   splash->setMinLineWidth(globalParams->getMinLineWidth());
   if (state) {
     ctm = state->getCTM();
@@ -1667,7 +1684,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
 		     grayIndexed);
 		return;
 	}
-  if (overprintFlag && globalParams->getOverprintPreview()) {
+  if (overprintFlag && overprintPreview) {
     mask = colorSpace->getOverprintMask();
     if (singleColor && overprintMode &&
 	colorSpace->getMode() == csDeviceCMYK) {
@@ -1840,7 +1857,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 
   } else {
 
-    if (!(fontLoc = gfxFont->locateFont(doc->getXRef(), gFalse))) {
+    if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), gFalse))) {
       error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
 	    gfxFont->getName() ? gfxFont->getName()->getCString()
 	                       : "(unnamed)");
@@ -1850,7 +1867,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
     // embedded font
     if (fontLoc->locType == gfxFontLocEmbedded) {
       // if there is an embedded font, read it to memory
-      tmpBuf = gfxFont->readEmbFontFile(doc->getXRef(), &tmpBufLen);
+      tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef(), &tmpBufLen);
       if (! tmpBuf)
 	goto err2;
 
@@ -2581,6 +2598,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
     color[0] = 0xff;
   }
   splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setThinLineMode(splashThinLineDefault);
   splash->setFillPattern(new SplashSolidColor(color));
   splash->setStrokePattern(new SplashSolidColor(color));
   //~ this should copy other state from t3GlyphStack->origSplash?
@@ -3385,7 +3403,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   if (maskWidth > width || maskHeight > height) {
     decodeLow.initInt(maskInvert ? 0 : 1);
     decodeHigh.initInt(maskInvert ? 1 : 0);
-    maskDecode.initArray(doc->getXRef());
+    maskDecode.initArray((xref) ? xref : doc->getXRef());
     maskDecode.arrayAdd(&decodeLow);
     maskDecode.arrayAdd(&decodeHigh);
     maskColorMap = new GfxImageColorMap(1, &maskDecode,
@@ -3816,6 +3834,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
 			    bitmapTopDown, bitmap->getSeparationList());
   splash = new Splash(bitmap, vectorAntialias,
 		      transpGroup->origSplash->getScreen());
+  splash->setThinLineMode(transpGroup->origSplash->getThinLineMode());
   splash->setMinLineWidth(globalParams->getMinLineWidth());
   //~ Acrobat apparently copies at least the fill and stroke colors, and
   //~ maybe other state(?) -- but not the clipping path (and not sure
@@ -3837,7 +3856,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
     splash->setInNonIsolatedGroup(shape, tx, ty);
   }
   transpGroup->tBitmap = bitmap;
-  state->shiftCTM(-tx, -ty);
+  state->shiftCTMAndClip(-tx, -ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
   ++nestCount;
 }
@@ -3849,7 +3868,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state) {
   bitmap = transpGroupStack->origBitmap;
   colorMode = bitmap->getMode();
   splash = transpGroupStack->origSplash;
-  state->shiftCTM(transpGroupStack->tx, transpGroupStack->ty);
+  state->shiftCTMAndClip(transpGroupStack->tx, transpGroupStack->ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 
@@ -3975,7 +3994,12 @@ void SplashOutputDev::setSoftMask(GfxState *state, double *bbox,
   for (y = 0; y < yMax; ++y) {
     for (x = 0; x < xMax; ++x) {
       if (alpha) {
-	p[x] = tBitmap->getAlpha(x, y);
+	if (transferFunc) {
+	  lum = tBitmap->getAlpha(x, y) / 255.0;
+	  transferFunc->transform(&lum, &lum2);
+	  p[x] = (int)(lum2 * 255.0 + 0.5);
+	} else 
+	  p[x] = tBitmap->getAlpha(x, y);
       } else {
 	  tBitmap->getPixel(x, y, color);
 	  // convert to luminosity
@@ -4075,7 +4099,7 @@ void SplashOutputDev::setFreeTypeHinting(GBool enable, GBool enableSlightHinting
   enableSlightHinting = enableSlightHintingA;
 }
 
-GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *catalog, Object *str,
+GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, Object *str,
 					double *ptm, int paintType, int /*tilingType*/, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
@@ -4198,26 +4222,29 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *ca
 
   bitmap = new SplashBitmap(surface_width, surface_height, 1,
                             (paintType == 1) ? colorMode : splashModeMono8, gTrue);
-  memset(bitmap->getAlphaPtr(), 0, bitmap->getWidth() * bitmap->getHeight());
-  if (paintType == 2) {
-#if SPLASH_CMYK
-    memset(bitmap->getDataPtr(), 
-      (colorMode == splashModeCMYK8 || colorMode == splashModeDeviceN8) ? 0x00 : 0xFF, 
-      bitmap->getRowSize() * bitmap->getHeight());
-#else
-    memset(bitmap->getDataPtr(), 0xFF, bitmap->getRowSize() * bitmap->getHeight());
-#endif
-  }
   splash = new Splash(bitmap, gTrue);
+  if (paintType == 2) {
+    SplashColor clearColor;
+#if SPLASH_CMYK
+    clearColor[0] = (colorMode == splashModeCMYK8 || colorMode == splashModeDeviceN8) ? 0x00 : 0xFF;
+#else
+    clearColor[0] = 0xFF;
+#endif
+    splash->clear(clearColor, 0);
+  } else {
+    splash->clear(paperColor, 0);
+  }
+  splash->setThinLineMode(formerSplash->getThinLineMode());
   splash->setMinLineWidth(globalParams->getMinLineWidth());
 
   box.x1 = bbox[0]; box.y1 = bbox[1];
   box.x2 = bbox[2]; box.y2 = bbox[3];
-  gfx = new Gfx(doc, this, resDict, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL, NULL, NULL, gfxA->getXRef());
   // set pattern transformation matrix
   gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
   updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
   gfx->display(str);
+  delete splash;
   splash = formerSplash;
   TilingSplashOutBitmap imgData;
   imgData.bitmap = bitmap;
@@ -4247,7 +4274,20 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *ca
   matc[1] = ctm[1];
   matc[2] = ctm[2];
   matc[3] = ctm[3];
-  retValue = splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc, gTrue) == splashOk;
+  GBool minorAxisZero = matc[1] == 0 && matc[2] == 0;
+  if (matc[0] > 0 && minorAxisZero && matc[3] > 0) {
+    // draw the tiles
+    for (int y = 0; y < imgData.repeatY; ++y) {
+      for (int x = 0; x < imgData.repeatX; ++x) {
+        x0 = splashFloor(matc[4]) + x * tBitmap->getWidth();
+        y0 = splashFloor(matc[5]) + y * tBitmap->getHeight();
+        splash->blitImage(tBitmap, gTrue, x0, y0);
+      }
+    }
+    retValue = gTrue;
+  } else {
+    retValue = splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc, gFalse, gTrue) == splashOk;
+  }
   delete tBitmap;
   delete gfx;
   return retValue;

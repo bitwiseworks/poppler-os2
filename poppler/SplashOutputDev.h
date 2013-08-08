@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
@@ -40,6 +40,7 @@
 #include "poppler-config.h"
 #include "OutputDev.h"
 #include "GfxState.h"
+#include "GlobalParams.h"
 
 class PDFDoc;
 class Gfx8BitFont;
@@ -163,7 +164,9 @@ public:
   SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
 		  GBool reverseVideoA, SplashColorPtr paperColorA,
 		  GBool bitmapTopDownA = gTrue,
-		  GBool allowAntialiasA = gTrue);
+		  GBool allowAntialiasA = gTrue,
+		  SplashThinLineMode thinLineMode = splashThinLineDefault,
+      GBool overprintPreviewA = globalParams->getOverprintPreview());
 
   // Destructor.
   virtual ~SplashOutputDev();
@@ -195,7 +198,7 @@ public:
   //----- initialization and control
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref);
 
   // End a page.
   virtual void endPage();
@@ -258,7 +261,6 @@ public:
 			       CharCode code, Unicode *u, int uLen);
   virtual void endType3Char(GfxState *state);
   virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath; }
   virtual void endTextObject(GfxState *state);
 
   //----- image drawing
@@ -390,6 +392,7 @@ private:
   GBool bitmapUpsideDown;
   GBool allowAntialias;
   GBool vectorAntialias;
+  GBool overprintPreview;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
   GBool reverseVideo;		// reverse video mode
@@ -399,6 +402,7 @@ private:
   GBool skipRotatedText;
 
   PDFDoc *doc;			// the current document
+  XRef *xref;       // the xref of the current document
 
   SplashBitmap *bitmap;
   Splash *splash;

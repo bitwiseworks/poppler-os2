@@ -18,6 +18,7 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -194,7 +195,8 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   Object obj;
   BaseStream *baseStr;
   Stream *str;
-  Guint pos, endPos, length;
+  Goffset length;
+  Goffset pos, endPos;
 
   // get stream start position
   lexer->skipToNextLine();
@@ -206,7 +208,10 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   // get length
   dict->dictLookup("Length", &obj, recursion);
   if (obj.isInt()) {
-    length = (Guint)obj.getInt();
+    length = obj.getInt();
+    obj.free();
+  } else if (obj.isInt64()) {
+    length = obj.getInt64();
     obj.free();
   } else {
     error(errSyntaxError, getPos(), "Bad 'Length' attribute in stream");
@@ -237,7 +242,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
 
   // refill token buffers and check for 'endstream'
   shift();  // kill '>>'
-  shift();  // kill 'stream'
+  shift("endstream");  // kill 'stream'
   if (buf1.isCmd("endstream")) {
     shift();
   } else {
@@ -246,11 +251,11 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
     if (xref) {
       // shift until we find the proper endstream or we change to another object or reach eof
       while (!buf1.isCmd("endstream") && xref->getNumEntry(lexer->getPos()) == objNum && !buf1.isEOF()) {
-        shift();
+        shift("endstream");
       }
       length = lexer->getPos() - pos;
       if (buf1.isCmd("endstream")) {
-        obj.initInt(length);
+        obj.initInt64(length);
         dict->dictSet("Length", &obj);
         obj.free();
       }
@@ -272,7 +277,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   }
 
   // get filters
-  str = str->addFilters(dict);
+  str = str->addFilters(dict, recursion);
 
   return str;
 }
@@ -296,4 +301,28 @@ void Parser::shift(int objNum) {
     buf2.initNull();
   else
     lexer->getObj(&buf2, objNum);
+}
+
+void Parser::shift(const char *cmdA) {
+  if (inlineImg > 0) {
+    if (inlineImg < 2) {
+      ++inlineImg;
+    } else {
+      // in a damaged content stream, if 'ID' shows up in the middle
+      // of a dictionary, we need to reset
+      inlineImg = 0;
+    }
+  } else if (buf2.isCmd("ID")) {
+    lexer->skipChar();		// skip char after 'ID' command
+    inlineImg = 1;
+  }
+  buf1.free();
+  buf2.shallowCopy(&buf1);
+  if (inlineImg > 0) {
+    buf2.initNull();
+  } else if (buf1.isCmd(cmdA)) {
+    lexer->getObj(&buf2, -1);
+  } else {
+    lexer->getObj(&buf2, cmdA);
+  }
 }
