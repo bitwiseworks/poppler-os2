@@ -8,6 +8,8 @@
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 //
 //========================================================================
 #include <PDFDoc.h>
@@ -138,7 +140,7 @@ int main (int argc, char *argv[])
   outStr->printf("<< /Type /Pages /Kids [");
   for (j = 0; j < (int) pages.size(); j++)
     outStr->printf(" %d 0 R", rootNum + j + 2);
-  outStr->printf(" ] /Count %d >>\nendobj\n", pages.size());
+  outStr->printf(" ] /Count %zd >>\nendobj\n", pages.size());
   objectsCount++;
 
   for (i = 0; i < (int) pages.size(); i++) {
@@ -163,7 +165,7 @@ int main (int argc, char *argv[])
     outStr->printf(" >>\nendobj\n");
     objectsCount++;
   }
-  Guint uxrefOffset = outStr->getPos();
+  Goffset uxrefOffset = outStr->getPos();
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
