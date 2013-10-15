@@ -661,6 +661,8 @@ Goffset GooFile::size() const {
 GooFile* GooFile::open(const GooString *fileName) {
 #ifdef VMS
   int fd = ::open(fileName->getCString(), Q_RDONLY, "ctx=stm");
+#elif defined(OS2)
+  int fd = ::open(fileName->getCString(), O_RDONLY | O_BINARY);
 #else
   int fd = ::open(fileName->getCString(), O_RDONLY);
 #endif
