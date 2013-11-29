@@ -1,3 +1,474 @@
+commit a42a13be0a0cda71dc230a73f7b16eb4eb066251
+Author: suzuki toshiya <mpsuzuki@hiroshima-u.ac.jp>
+Date:   Wed Nov 27 00:05:57 2013 +0100
+
+    Warn the user if he provides a wrong range
+
+ utils/pdffonts.cc    | 7 +++++++
+ utils/pdfimages.cc   | 7 +++++++
+ utils/pdfinfo.cc     | 7 +++++++
+ utils/pdfseparate.cc | 7 +++++++
+ utils/pdftocairo.cc  | 7 +++++++
+ utils/pdftohtml.cc   | 8 +++++++-
+ utils/pdftoppm.cc    | 7 +++++++
+ utils/pdftops.cc     | 7 +++++++
+ utils/pdftotext.cc   | 6 ++++++
+ 9 files changed, 62 insertions(+), 1 deletion(-)
+
+commit 45552cafaeef6b883078db269437586add1dc32c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Nov 26 23:36:12 2013 +0100
+
+    Update copyrights
+
+ utils/pdftotext.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 9ae29c7a07d0f372dbfc4aca17bbb646126aedb5
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Thu Nov 21 23:53:53 2013 +0100
+
+    Don't end loop if reading from GooFile fails
+
+    Bug #71835
+
+ poppler/Stream.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 47605a8aaf85bee21601219b04c0c8e6cf982507
+Author: José Aliste <jaliste@src.gnome.org>
+Date:   Mon Nov 18 22:52:08 2013 +0100
+
+    Catalog: sort entries of NameTrees to make sure lookup works
+
+    Bug #26049
+
+ poppler/Catalog.cc | 12 ++++++++++++
+ poppler/Catalog.h  |  2 ++
+ 2 files changed, 14 insertions(+)
+
+commit 491f0a170c72271a7a9ce049fbcfe81f08cff162
+Author: suzuki toshiya <mpsuzuki@hiroshima-u.ac.jp>
+Date:   Fri Nov 15 20:35:12 2013 +0100
+
+    pdftotext: Escape the text of the xml headers
+
+ utils/pdftotext.cc | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 78c407ac7e8f48ae2d2c75ad0f5960390190d2e3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Nov 15 20:25:52 2013 +0100
+
+    destionation -> destination
+
+    And this is why the xml based api has to die
+
+    Bug #71643
+    Found by Hib
+
+ qt4/src/poppler-annotation.cc | 5 +++--
+ qt5/src/poppler-annotation.cc | 3 ++-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+commit c43a80e65fc570a8017892ba111a8c48ac33d9ad
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Fri Nov 15 19:59:52 2013 +0100
+
+    pdftotext: Silence warning for may be used uninitialized variable
+
+    Bug #71640
+
+ utils/pdftotext.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit f905d804c0d1c715d8423938f41b5a002c0ef15d
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Fri Nov 15 19:55:19 2013 +0100
+
+    Do not close stdout in pdftotext
+
+    Bug #71639
+
+ utils/pdftotext.cc | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 7c74bccdf514cce05987dde7fb1cce4ac65ff025
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Nov 15 19:48:07 2013 +0100
+
+    Forgot to update the copyrights
+
+ poppler/Lexer.cc  | 2 +-
+ poppler/Lexer.h   | 2 +-
+ poppler/Parser.cc | 2 +-
+ poppler/Parser.h  | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+commit ebe49d597a62aa94601c2e4595dbad1895ea7ef0
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Nov 15 19:33:00 2013 +0100
+
+    Fix regression in broken endstream detection
+
+    Rregression was caused by e1ffa9100cf6b4a444be7ed76b11698a5c5bb441
+    Fixes bug #70854
+
+ poppler/Lexer.cc  |  4 ++--
+ poppler/Lexer.h   |  2 +-
+ poppler/Parser.cc | 11 ++++-------
+ poppler/Parser.h  |  2 +-
+ 4 files changed, 8 insertions(+), 11 deletions(-)
+
+commit f4a72fd3c61091d6b455af9a881c2390da19b506
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Oct 26 19:06:34 2013 +0200
+
+    0.24.3
+
+ CMakeLists.txt   |  2 +-
+ NEWS             | 14 ++++++++++++++
+ configure.ac     |  2 +-
+ cpp/Doxyfile     |  2 +-
+ qt4/src/Doxyfile |  2 +-
+ qt5/src/Doxyfile |  2 +-
+ 6 files changed, 19 insertions(+), 5 deletions(-)
+
+commit 33a5af32cd5769cf1b6c6344077ac4a3f407ba21
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Oct 26 18:48:50 2013 +0200
+
+    Update copyrights
+
+ qt4/src/poppler-document.cc | 2 +-
+ utils/pdfseparate.cc        | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 61f79b8447c3ac8ab5a26e79e0c28053ffdccf75
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Oct 24 00:54:56 2013 +0200
+
+    Allow only one %d in the filename
+
+    Fixes crashes if you had %s and similar in the filename
+
+    Inspired from patch by Pedro Ribeiro <pedrib@gmail.com>
+
+    Bug #69434
+
+ utils/pdfseparate.cc | 31 ++++++++++++++++++++++++++++++-
+ 1 file changed, 30 insertions(+), 1 deletion(-)
+
+commit daa0990a7baf17d00d12574a4de815e070727a86
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Oct 10 02:16:25 2013 +0200
+
+    Return empty if getXRef()->copy() fails
+
+    Seems this can happen by looking at the backtrace in
+    https://bugs.kde.org/show_bug.cgi?id=325810
+
+ qt4/src/poppler-document.cc | 6 ++++++
+ qt5/src/poppler-document.cc | 6 ++++++
+ 2 files changed, 12 insertions(+)
+
+commit f4bfa940aa40a82a1080cdaf765da1d1615ccfb1
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Sat Oct 5 11:20:04 2013 +0200
+
+    cairo: Do not set an invalid matrix in drawImage()
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=70085
+
+ poppler/CairoOutputDev.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit e2fe85137ecb59eb0d177682c552febc64cda643
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Tue Oct 1 19:15:08 2013 +0200
+
+    Fix PFB font embedding
+
+    Bug #69717
+
+ poppler/PSOutputDev.cc | 52
+ ++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 46 insertions(+), 6 deletions(-)
+
+commit 06dabe1eed912e5f5c96fe9f371ab459516e5a99
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 27 12:41:23 2013 +0200
+
+    0.24.2
+
+ CMakeLists.txt   | 2 +-
+ NEWS             | 8 ++++++++
+ configure.ac     | 2 +-
+ cpp/Doxyfile     | 2 +-
+ qt4/src/Doxyfile | 2 +-
+ qt5/src/Doxyfile | 2 +-
+ 6 files changed, 13 insertions(+), 5 deletions(-)
+
+commit 78141da189c42a04b6a303767284de755a4a2d4d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 27 12:39:00 2013 +0200
+
+    Update copyrights
+
+ utils/pdfseparate.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit dc344b410f49410174ee902b7649ebd8c2cb0fa2
+Author: Lu Wang <coolwanglu@gmail.com>
+Date:   Sat Sep 21 10:37:30 2013 +0200
+
+    pdftocairo: check file opening failure in beginDocument()
+
+ utils/pdftocairo.cc | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+commit 1e612d331b79dabec66ad241d7ffe66674a10bc4
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Sat Sep 21 10:10:16 2013 +0200
+
+    Windows: Fix CreateFile fails with ERROR_SHARING_VIOLATION
+
+    Bug #69597
+
+ goo/gfile.cc | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit b8682d868ddf7f741e93b791588af0932893f95c
+Author: Pino Toscano <pino@kde.org>
+Date:   Mon Sep 16 19:46:55 2013 +0200
+
+    pdfseparate: improve the path building
+
+    Make use of snprintf to limit the output to the pathName buffer;
+    while I'm there, expand its size to 4096 (might help longer paths),
+    although a better fix would be dynamically allocate its length
+    (and/or using GooString, maybe).
+
+ utils/pdfseparate.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 563da2d375c003478d398897796ecbf45ce03482
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Aug 26 22:33:10 2013 +0200
+
+    0.24.1
+
+ CMakeLists.txt   |  2 +-
+ NEWS             | 23 +++++++++++++++++++++++
+ configure.ac     |  2 +-
+ cpp/Doxyfile     |  2 +-
+ qt4/src/Doxyfile |  2 +-
+ qt5/src/Doxyfile |  2 +-
+ 6 files changed, 28 insertions(+), 5 deletions(-)
+
+commit 2c73f1ea9116172692d8350cb7adf1b5376f795c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Aug 26 21:50:51 2013 +0200
+
+    Fix typo
+
+ qt5/src/poppler-qt5.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 16da389c61c495111a5a49f62539a423a0655c28
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Mon Aug 26 07:50:51 2013 +0930
+
+    fix typo in pdfimages.1
+
+ utils/pdfimages.1 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit ed3585efc8b259cb065eac361a6a499f9f26851f
+Author: William Bader <williambader@hotmail.com>
+Date:   Sun Aug 25 19:31:11 2013 +0200
+
+    Fix pdftops -eps -level1sep rendering of a file
+
+    Since 8fb243bf11a979af8bfa36427436940706c9f71d we have
+            case splashModeXBGR8:
+    +         cSrcNonIso[3] = 255;
+    and that means splashModeDeviceN8 and splashModeCMYK8 can't
+    skip their breaks anymore otherwise the cSrcNonIso[3] gets
+    overwritten
+
+    Bug #68321
+
+ splash/Splash.cc | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+commit 70298a021657a72ae80389687a86247144e6d6b6
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Tue Aug 20 19:46:01 2013 +0200
+
+    Don't copy not needed bitmap
+
+    Speeds up rendering of fixes from bug 67105
+    As example one file is down from 130s to 6.5s
+
+ poppler/SplashOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit fc78330072b9771fa39d21896703adb4836e5398
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Aug 20 00:37:56 2013 +0200
+
+    use getRGBLine images if available
+
+    Speeds up greatly files from bug #66928
+
+    E.g. some file went from 21s to 2s in my computer
+
+ poppler/SplashOutputDev.cc | 30 +++++++++++++++++++-----------
+ 1 file changed, 19 insertions(+), 11 deletions(-)
+
+commit 678c767584fa80620cc58a1d8a913cb3473209d4
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Aug 18 16:19:27 2013 +0200
+
+    Fix crash in 1026.asan.0.42.pdf
+
+    We were not checking that bitmapOff was in bounds
+
+ splash/Splash.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit fbea2241cccdde0106d2c34592b6ddda28a8d848
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Aug 17 01:32:51 2013 +0200
+
+    Revert "Tagged-PDF: Accessors in Catalog for the MarkInfo dictionary"
+
+    This reverts commit 402ee8b4e31630a42a0a38db1d39164cc5789f3c.
+
+    No clue how this ended up in the stable branch
+
+ poppler/Catalog.cc | 45 ---------------------------------------------
+ poppler/Catalog.h  | 10 ----------
+ 2 files changed, 55 deletions(-)
+
+commit 6d2771b8a8c0cb0f2288d0900fea3c9edc3dd172
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Aug 17 01:32:38 2013 +0200
+
+    Revert "pdfinfo: Use Catalog::getMarkInfo() to show mark info
+    properties"
+
+    This reverts commit 73cca518c479594e26605196d54b429fbf42dcdc.
+
+    No clue how this ended up in the stable branch
+
+ utils/pdfinfo.cc | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+commit ef6420656c7b88eb22a63ec2cb3e504e0bda0384
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Aug 17 01:11:37 2013 +0200
+
+    Fix jpeg image export
+
+    Use same logic than the one used in ImageOutputDev
+    Bug #48270
+
+ utils/HtmlOutputDev.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit 681f52a572b08c068cb376e5b2dc8a31676aad07
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Aug 16 23:58:44 2013 +0200
+
+    Fix exit(1) in 1026.asan.0.42.pdf
+
+    The main crash in discussion with Thomas
+
+ splash/Splash.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit 9f4d7796589e4c9c1645fbbcf0cfabd79a71bde9
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Thu Aug 8 20:33:54 2013 +0200
+
+    use copyString where memory is freed with gfree
+
+    Bug #67666
+
+ poppler/Annot.cc | 2 +-
+ poppler/Dict.cc  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 73cca518c479594e26605196d54b429fbf42dcdc
+Author: Adrian Perez de Castro <aperez@igalia.com>
+Date:   Thu Apr 25 09:52:56 2013 +0300
+
+    pdfinfo: Use Catalog::getMarkInfo() to show mark info properties
+
+ utils/pdfinfo.cc | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+commit 402ee8b4e31630a42a0a38db1d39164cc5789f3c
+Author: Adrian Perez de Castro <aperez@igalia.com>
+Date:   Thu Apr 25 09:52:56 2013 +0300
+
+    Tagged-PDF: Accessors in Catalog for the MarkInfo dictionary
+
+ poppler/Catalog.cc | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ poppler/Catalog.h  | 10 ++++++++++
+ 2 files changed, 55 insertions(+)
+
+commit c3f953dc87f83ac726f99cb8f1f959c486098391
+Author: Yury G. Kudryashov <urkud.urkud@gmail.com>
+Date:   Sat Aug 10 21:43:57 2013 +0300
+
+    Fix a typo
+
+ qt4/src/poppler-qt4.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 62d079b40a2f816f59cc533b1624ea57458331f3
+Author: Yury G. Kudryashov <urkud.urkud@gmail.com>
+Date:   Thu Aug 8 20:45:08 2013 +0200
+
+    Fix `pdftotext -bbox in.pdf -`
+
+    Print body text to stdout if invoked as above.
+
+    Bug #45163
+
+ utils/pdftotext.cc | 15 ++++++---------
+ 1 file changed, 6 insertions(+), 9 deletions(-)
+
+commit 86dbc5f6f850ba3919bed9979386e5a4d0e7dba3
+Author: Yury G. Kudryashov <urkud.urkud@gmail.com>
+Date:   Thu Aug 8 20:39:30 2013 +0200
+
+    pdfdetach: don't mention xpdfrc
+
+    - drop -cfg command line argument; the old code passed its value to
+      GlobalParams constructor which is the data dir, not a cfg file
+    - remove corresponding lines from pdfdetach.1
+    - fix '-enc' documentation in pdfdetach.1
+
+ utils/pdfdetach.1  | 23 +++--------------------
+ utils/pdfdetach.cc |  6 ++----
+ 2 files changed, 5 insertions(+), 24 deletions(-)
+
+commit 2724a7b9f723789491b4991ce7fe0cfa3e5488c3
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Tue Jul 30 09:36:44 2013 +0200
+
+    glib-demo: Remove GTK_DISABLE_DEPRECATED compilation flag
+
+    Deprecations are now compile warnings, there's no reason to make them
+    fatal.
+
+ glib/demo/Makefile.am | 1 -
+ 1 file changed, 1 deletion(-)
+
 commit eac752dc25942439de3e1c7a4ff815500a41dd2a
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Mon Jul 29 19:11:55 2013 +0200
