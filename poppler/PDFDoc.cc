@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -30,6 +30,7 @@
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -50,9 +51,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <time.h>
-#ifdef _WIN32
-#  include <windows.h>
-#endif
 #include <sys/stat.h>
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"
@@ -261,9 +259,16 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   // read xref table
   xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed);
   if (!xref->isOk()) {
-    error(errSyntaxError, -1, "Couldn't read xref table");
-    errCode = xref->getErrorCode();
-    return gFalse;
+    if (wasReconstructed) {
+      delete xref;
+      startXRefPos = -1;
+      xref = new XRef(str, getStartXRef(gTrue), getMainXRefEntriesOffset(gTrue), &wasReconstructed);
+    }
+    if (!xref->isOk()) {
+      error(errSyntaxError, -1, "Couldn't read xref table");
+      errCode = xref->getErrorCode();
+      return gFalse;
+    }
   }
 
   // check for encryption
@@ -519,12 +524,16 @@ Linearization *PDFDoc::getLinearization()
   return linearization;
 }
 
-GBool PDFDoc::isLinearized() {
+GBool PDFDoc::isLinearized(GBool tryingToReconstruct) {
   if ((str->getLength()) &&
       (getLinearization()->getLength() == str->getLength()))
     return gTrue;
-  else
-    return gFalse;
+  else {
+    if (tryingToReconstruct)
+      return getLinearization()->getLength() > 0;
+    else
+      return gFalse;
+  }
 }
 
 static GBool
@@ -1637,11 +1646,11 @@ long long PDFDoc::strToLongLong(char *s) {
 }
 
 // Read the 'startxref' position.
-Goffset PDFDoc::getStartXRef()
+Goffset PDFDoc::getStartXRef(GBool tryingToReconstruct)
 {
   if (startXRefPos == -1) {
 
-    if (isLinearized()) {
+    if (isLinearized(tryingToReconstruct)) {
       char buf[linearizationSearchSize+1];
       int c, n, i;
 
@@ -1699,11 +1708,11 @@ Goffset PDFDoc::getStartXRef()
   return startXRefPos;
 }
 
-Goffset PDFDoc::getMainXRefEntriesOffset()
+Goffset PDFDoc::getMainXRefEntriesOffset(GBool tryingToReconstruct)
 {
   Guint mainXRefEntriesOffset = 0;
 
-  if (isLinearized()) {
+  if (isLinearized(tryingToReconstruct)) {
     mainXRefEntriesOffset = getLinearization()->getMainXRefEntriesOffset();
   }
 

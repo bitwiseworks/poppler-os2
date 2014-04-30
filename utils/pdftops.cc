@@ -23,6 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2014 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -81,7 +82,7 @@ static GBool level2 = gFalse;
 static GBool level2Sep = gFalse;
 static GBool level3 = gFalse;
 static GBool level3Sep = gFalse;
-static GBool doOrigPageSizes = gFalse;
+static GBool origPageSizes = gFalse;
 static GBool doEPS = gFalse;
 static GBool doForm = gFalse;
 #if OPI_SUPPORT
@@ -129,7 +130,7 @@ static const ArgDesc argDesc[] = {
    "generate Level 3 PostScript"},
   {"-level3sep",  argFlag,     &level3Sep,      0,
    "generate Level 3 separable PostScript"},
-  {"-origpagesizes",argFlag,   &doOrigPageSizes,0,
+  {"-origpagesizes",argFlag,   &origPageSizes,0,
    "conserve original page sizes"},
   {"-eps",        argFlag,     &doEPS,          0,
    "generate Encapsulated PostScript (EPS)"},
@@ -231,10 +232,9 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Error: use only one of the 'level' options.\n");
     exit(1);
   }
-  if ((doOrigPageSizes ? 1 : 0) +
-      (doEPS ? 1 : 0) +
+  if ((doEPS ? 1 : 0) +
       (doForm ? 1 : 0) > 1) {
-    fprintf(stderr, "Error: use only one of -origpagesizes, -eps, and -form\n");
+    fprintf(stderr, "Error: use only one of -eps, and -form\n");
     exit(1);
   }
   if (level1) {
@@ -254,15 +254,21 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Error: forms are only available with Level 2 output.\n");
     exit(1);
   }
-  mode = doOrigPageSizes ? psModePSOrigPageSizes
-                         : doEPS ? psModeEPS
-                                 : doForm ? psModeForm
-                                          : psModePS;
+  mode = doEPS ? psModeEPS
+    : doForm ? psModeForm
+    : psModePS;
   fileName = new GooString(argv[1]);
 
   // read config file
   globalParams = new GlobalParams();
+  if (origPageSizes) {
+    paperWidth = paperHeight = -1;
+  }
   if (paperSize[0]) {
+    if (origPageSizes) {
+      fprintf(stderr, "Error: -origpagesizes and -paper may not be used together.\n");
+      exit(1);
+    }
     if (!setPSPaperSize(paperSize, paperWidth, paperHeight)) {
       fprintf(stderr, "Invalid paper size\n");
       delete fileName;
@@ -399,6 +405,7 @@ int main(int argc, char *argv[]) {
 			  NULL, firstPage, lastPage, mode,
 			  paperWidth,
 			  paperHeight,
+                          noCrop,
 			  duplex);
   if (psOut->isOk()) {
     doc->displayPages(psOut, firstPage, lastPage, 72, 72,
