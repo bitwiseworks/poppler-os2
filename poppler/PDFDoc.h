@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -26,6 +26,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2013 Adrian Perez de Castro <aperez@igalia.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -60,6 +61,7 @@ class Outline;
 class Linearization;
 class SecurityHandler;
 class Hints;
+class StructTreeRoot;
 
 enum PDFWriteMode {
   writeStandard,
@@ -139,7 +141,7 @@ public:
   GooString *readMetadata() { return catalog->readMetadata(); }
 
   // Return the structure tree root object.
-  Object *getStructTreeRoot() { return catalog->getStructTreeRoot(); }
+  StructTreeRoot *getStructTreeRoot() { return catalog->getStructTreeRoot(); }
 
   // Get page.
   Page *getPage(int page);
@@ -217,7 +219,7 @@ public:
 
 
   // Is this document linearized?
-  GBool isLinearized();
+  GBool isLinearized(GBool tryingToReconstruct = gFalse);
 
   // Return the document's Info dictionary (if any).
   Object *getDocInfo(Object *obj) { return xref->getDocInfo(obj); }
@@ -299,10 +301,10 @@ private:
   void checkHeader();
   GBool checkEncryption(GooString *ownerPassword, GooString *userPassword);
   // Get the offset of the start xref table.
-  Goffset getStartXRef();
+  Goffset getStartXRef(GBool tryingToReconstruct = gFalse);
   // Get the offset of the entries in the main XRef table of a
   // linearized document (0 for non linearized documents).
-  Goffset getMainXRefEntriesOffset();
+  Goffset getMainXRefEntriesOffset(GBool tryingToReconstruct = gFalse);
   long long strToLongLong(char *s);
 
   GooString *fileName;

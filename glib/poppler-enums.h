@@ -55,6 +55,40 @@ GType poppler_annot_text_state_get_type (void) G_GNUC_CONST;
 GType poppler_annot_free_text_quadding_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_ANNOT_FREE_TEXT_QUADDING (poppler_annot_free_text_quadding_get_type ())
 
+/* enumerations from "poppler-structure-element.h" */
+GType poppler_structure_element_kind_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_ELEMENT_KIND (poppler_structure_element_kind_get_type ())
+GType poppler_structure_get_text_flags_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_GET_TEXT_FLAGS (poppler_structure_get_text_flags_get_type ())
+GType poppler_structure_placement_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_PLACEMENT (poppler_structure_placement_get_type ())
+GType poppler_structure_writing_mode_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_WRITING_MODE (poppler_structure_writing_mode_get_type ())
+GType poppler_structure_border_style_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_BORDER_STYLE (poppler_structure_border_style_get_type ())
+GType poppler_structure_text_align_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_TEXT_ALIGN (poppler_structure_text_align_get_type ())
+GType poppler_structure_block_align_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_BLOCK_ALIGN (poppler_structure_block_align_get_type ())
+GType poppler_structure_inline_align_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_INLINE_ALIGN (poppler_structure_inline_align_get_type ())
+GType poppler_structure_text_decoration_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_TEXT_DECORATION (poppler_structure_text_decoration_get_type ())
+GType poppler_structure_ruby_align_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_RUBY_ALIGN (poppler_structure_ruby_align_get_type ())
+GType poppler_structure_ruby_position_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_RUBY_POSITION (poppler_structure_ruby_position_get_type ())
+GType poppler_structure_glyph_orientation_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_GLYPH_ORIENTATION (poppler_structure_glyph_orientation_get_type ())
+GType poppler_structure_list_numbering_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_LIST_NUMBERING (poppler_structure_list_numbering_get_type ())
+GType poppler_structure_form_role_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_FORM_ROLE (poppler_structure_form_role_get_type ())
+GType poppler_structure_form_state_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_FORM_STATE (poppler_structure_form_state_get_type ())
+GType poppler_structure_table_scope_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_STRUCTURE_TABLE_SCOPE (poppler_structure_table_scope_get_type ())
+
 /* enumerations from "poppler.h" */
 GType poppler_error_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_ERROR (poppler_error_get_type ())

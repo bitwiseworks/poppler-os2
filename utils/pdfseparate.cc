@@ -5,8 +5,9 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012, 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
+// Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 //========================================================================
@@ -56,6 +57,11 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     return false;
   }
 
+  // destFileName can have multiple %% and one %d
+  // We use auxDestFileName to replace all the valid % appearances
+  // by 'A' (random char that is not %), if at the end of replacing
+  // any of the valid appearances there is still any % around, the
+  // pattern is wrong
   if (firstPage == 0 && lastPage == 0) {
     firstPage = 1;
     lastPage = doc->getNumPages();
@@ -70,29 +76,38 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
           firstPage, lastPage);
     return false;
   }
-  if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
-    error(errSyntaxError, -1, "'{0:s}' must contain '%d' if more than one page should be extracted", destFileName);
+  bool foundmatch = false;
+  char *auxDestFileName = strdup(destFileName);
+  char *p = strstr(auxDestFileName, "%d");
+  if (p != NULL) {
+    foundmatch = true;
+    *p = 'A';
+  } else {
+    char pattern[5];
+    for (int i = 2; i < 10; i++) {
+      sprintf(pattern, "%%0%dd", i);
+      p = strstr(auxDestFileName, pattern);
+      if (p != NULL) {
+       foundmatch = true;
+       *p = 'A';
+       break;
+      }
+    }
+  }
+  if (!foundmatch && firstPage != lastPage) {
+    error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
+    free(auxDestFileName);
     return false;
   }
-  
-  // destFileName can have multiple %% and one %d
-  // We use auxDestFileName to replace all the valid % appearances
-  // by 'A' (random char that is not %), if at the end of replacing
-  // any of the valid appearances there is still any % around, the
-  // pattern is wrong
-  char *auxDestFileName = strdup(destFileName);
-  // %% can appear as many times as you want
-  char *p = strstr(auxDestFileName, "%%");
+
+  // at this point auxDestFileName can only contain %%
+  p = strstr(auxDestFileName, "%%");
   while (p != NULL) {
     *p = 'A';
     *(p + 1) = 'A';
     p = strstr(p, "%%"); 
   }
-  // %d can appear only one time
-  p = strstr(auxDestFileName, "%d");
-  if (p != NULL) {
-    *p = 'A';
-  }
+
   // at this point any other % is wrong
   p = strstr(auxDestFileName, "%");
   if (p != NULL) {

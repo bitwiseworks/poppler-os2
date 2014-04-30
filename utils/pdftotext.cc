@@ -394,9 +394,9 @@ int main(int argc, char *argv[]) {
       }
 
     } else {
-    delete textOut;
-    exitCode = 2;
-    goto err3;
+      delete textOut;
+      exitCode = 2;
+      goto err3;
     }
   }
   delete textOut;

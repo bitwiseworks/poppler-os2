@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -1195,6 +1195,7 @@ struct SplashTransparencyGroup {
   SplashBitmap *shape;
   GBool knockout;
   SplashCoord knockoutOpacity;
+  GBool fontAA;
 
   //----- saved state
   SplashBitmap *origBitmap;
@@ -2888,19 +2889,27 @@ GBool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine,
       break;
 #if SPLASH_CMYK
     case splashModeCMYK8:
-      for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
-	imgData->colorMap->getCMYK(p, &cmyk);
-	*q++ = colToByte(cmyk.c);
-	*q++ = colToByte(cmyk.m);
-	*q++ = colToByte(cmyk.y);
-	*q++ = colToByte(cmyk.k);
+      if (imgData->colorMap->useCMYKLine()) {
+	imgData->colorMap->getCMYKLine(p, (Guchar *) colorLine, imgData->width);
+      } else {
+	for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
+	  imgData->colorMap->getCMYK(p, &cmyk);
+	  *q++ = colToByte(cmyk.c);
+	  *q++ = colToByte(cmyk.m);
+	  *q++ = colToByte(cmyk.y);
+	  *q++ = colToByte(cmyk.k);
+	}
       }
       break;
     case splashModeDeviceN8:
-      for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
-	imgData->colorMap->getDeviceN(p, &deviceN);
-  for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-    *q++ = colToByte(deviceN.c[cp]);
+      if (imgData->colorMap->useDeviceNLine()) {
+	imgData->colorMap->getDeviceNLine(p, (Guchar *) colorLine, imgData->width);
+      } else {
+        for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
+	  imgData->colorMap->getDeviceN(p, &deviceN);
+          for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+            *q++ = colToByte(deviceN.c[cp]);
+	}
       }
       break;
 #endif
@@ -3803,7 +3812,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   transpGroup->blendingColorSpace = blendingColorSpace;
   transpGroup->isolated = isolated;
   transpGroup->shape = (knockout && !isolated) ? SplashBitmap::copy(bitmap) : NULL;
-  transpGroup->knockout = gFalse; 
+  transpGroup->knockout = (knockout && isolated);
   transpGroup->knockoutOpacity = 1.0;
   transpGroup->next = transpGroupStack;
   transpGroupStack = transpGroup;
@@ -3811,6 +3820,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   // save state
   transpGroup->origBitmap = bitmap;
   transpGroup->origSplash = splash;
+  transpGroup->fontAA = fontEngine->getAA();
 
   //~ this handles the blendingColorSpace arg for soft masks, but
   //~   not yet for transparency groups
@@ -3842,6 +3852,9 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
 			    bitmapTopDown, bitmap->getSeparationList());
   splash = new Splash(bitmap, vectorAntialias,
 		      transpGroup->origSplash->getScreen());
+  if (transpGroup->next != NULL && transpGroup->next->knockout) {
+    fontEngine->setAA(gFalse);
+  }
   splash->setThinLineMode(transpGroup->origSplash->getThinLineMode());
   splash->setMinLineWidth(globalParams->getMinLineWidth());
   //~ Acrobat apparently copies at least the fill and stroke colors, and
@@ -3860,8 +3873,12 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   } else {
     SplashBitmap *shape = (knockout) ? transpGroup->shape :
                                        (transpGroup->next != NULL && transpGroup->next->shape != NULL) ? transpGroup->next->shape : transpGroup->origBitmap;
+    int shapeTx = (knockout) ? tx :
+      (transpGroup->next != NULL && transpGroup->next->shape != NULL) ? transpGroup->next->tx + tx : tx;
+    int shapeTy = (knockout) ? ty :
+      (transpGroup->next != NULL && transpGroup->next->shape != NULL) ? transpGroup->next->ty + ty : ty;
     splash->blitTransparent(transpGroup->origBitmap, tx, ty, 0, 0, w, h);
-    splash->setInNonIsolatedGroup(shape, tx, ty);
+    splash->setInNonIsolatedGroup(shape, shapeTx, shapeTy);
   }
   transpGroup->tBitmap = bitmap;
   state->shiftCTMAndClip(-tx, -ty);
@@ -3898,8 +3915,9 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, double *bbox) {
                                                                    : transpGroupStack->knockoutOpacity;
     splash->setOverprintMask(0xffffffff, gFalse);
     splash->composite(tBitmap, 0, 0, tx, ty,
-	      tBitmap->getWidth(), tBitmap->getHeight(),
-	      gFalse, !isolated, transpGroupStack->next != NULL && transpGroupStack->next->knockout, knockoutOpacity);
+      tBitmap->getWidth(), tBitmap->getHeight(),
+      gFalse, !isolated, transpGroupStack->next != NULL && transpGroupStack->next->knockout, knockoutOpacity);
+    fontEngine->setAA(transpGroupStack->fontAA);
     if (transpGroupStack->next != NULL && transpGroupStack->next->shape != NULL) {
       transpGroupStack->next->knockout = gTrue;
     }
@@ -4328,6 +4346,7 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
     setVectorAntialias(vaa);
     return retVal;
   }
+  delete splashShading;
   return gFalse;
 }
 

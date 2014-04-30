@@ -1,3 +1,129 @@
+Release 0.26.0
+        qt4:
+         * Fix mismatched boolean logic in TextAnnotation::setInplaceIntent
+
+        qt5:
+         * Fix mismatched boolean logic in TextAnnotation::setInplaceIntent
+
+        core:
+         * Very small code cleanup
+
+        cpp:
+         * Very small code cleanup
+
+Release 0.25.3
+        core:
+         * Fix crashes on broken files
+         * Avoid MinGW/Cygwin warnings due to redefinition of NOMINMAX
+         * Fix some small memory leaks
+
+        qt5:
+         * Fix some kinds of OCG models
+         * Cleanup some deprecated methods
+
+        glib:
+         * Fix the first coord of the quadrilateral in create_poppler_quads_from_annot_quads(). Bug #76504
+
+        utils:
+         * pdftohtml: Fix typo in manpage
+
+        qt4:
+         * Fix some kinds of OCG models
+
+Release 0.25.2
+        core:
+         * Tagged-PDF support
+         * Open some broken files. Bug #75232
+         * Fix crashes on broken files
+         * Fix regression parsing some broken files. KDE Bug #329600
+         * Improve compilation under Win 8 with Visual Studio 2012. Bug #73111
+         * PSOutputDev: Ensure paper size takes into account rotation. Bug #72312
+         * PSOutputDev: Fix DocumentMedia/Page/Media/PageBBox DSC comments
+         * PSOutputDev: Use crop box as page size
+         * PSOutputDev: Remove origpagesizes mode and make -origpagesizes an alias for -paper match
+         * PSOutputDev: Only change paper size when different to previous size
+         * PSOutputDev: Ensure there is always a page size in the output
+         * PSOutputDev: Fix regression when creating level1 PS. Bug #75241 
+         * CairoOutputDev: Clip to crop box. Gnome Bug #649886
+         * Splash: Blend usage in PDF with spot colors casue random output. Bug #74883
+         * Splash: Fix off by one that caused crash in a file. Bug #76387
+         * Make sure number of least objects in hints table is valid. Bug #74741
+         * Limit numeric parsing of character names. Bug #38456
+
+        glib:
+         * Tagged-PDF support
+         * Annotation improvements
+         * Install error callback. Bug #73269
+         * Fix gobject-introspection warnings
+         * demo: Fix performance in text markup annotations
+         * Increase gtk3 dependency
+
+        qt4:
+         * Improve naming of internal export/import macros
+         * Add GCC visibility export attributes
+         * Expose document-supplied text direction
+
+        qt5:
+         * Improve naming of internal export/import macros
+         * Add GCC visibility export attributes
+         * Expose document-supplied text direction
+
+        utils: 
+         * pdftocairo: Ensure page size and crop box works the same as pdftops
+         * Fix TIFF writting in Windows. Bug #75969 
+
+        buildsystem:
+         * Learn about automake 1.14
+         * Do not define -ansi. Bug #72499
+         * cmake: Install JpegWriter.h depending on libjpeg
+         * cmake: Use c99 for the c compiler
+
+Release 0.25.1
+        core:
+         * GooString format: Added some tests + improved documentation
+         * GooString format: fixed bug with printing LLONG_MIN
+         * regression test improvements
+
+        qt4:
+         * Arthur backend font rendering improvements
+         * test program to save to file
+
+        qt5:
+         * Arthur backend font rendering improvements
+         * Improve detection of Qt5 moc. Bug #72744
+         * test program to save to file
+
+        utils:
+         * pdfunite: Work even if there's a single file given
+         * pdfunite: do not lose fonts when merging some files
+
+Release 0.25.0
+        core:
+         * Annotation improvements
+         * Tagged PDF work
+         * Improve speed on some files using ICC color space
+         * Use ICC profile in OutputIntents. Bug #34053
+         * Limit use of ZapfDingbats character names. Bug #60243
+         * Splash: correction for knockout transparency groups
+         * regression test improvements
+
+        utils:
+         * pdftoppm: Added thinlinemode option setting
+         * pdfinfo: Indicate if pdf contains javascript
+         * pdfinfo: Add option to print out javascript
+         * pdfimages: Print size, ratio, and ppi
+         * pdfimages: More image output format support
+         * pdfseparate: allow zero-padded pagespecs
+
+        glib:
+         * Annotation improvements
+         * Add API to get text, text layout and text attributes for a given area
+         * demo improvements
+
+Release 0.24.5
+        core:
+         * Fix crash due to wrong formatting of error message. KDE Bug #328511
+
 Release 0.24.4
         core:
          * Fix regression in broken endstream detection. Bug #70854

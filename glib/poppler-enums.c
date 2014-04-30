@@ -491,6 +491,415 @@ poppler_annot_free_text_quadding_get_type (void)
   return g_define_type_id__volatile;
 }
 
+/* enumerations from "poppler-structure-element.h" */
+#include "poppler-structure-element.h"
+GType
+poppler_structure_element_kind_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_ELEMENT_CONTENT, "POPPLER_STRUCTURE_ELEMENT_CONTENT", "content" },
+      { POPPLER_STRUCTURE_ELEMENT_OBJECT_REFERENCE, "POPPLER_STRUCTURE_ELEMENT_OBJECT_REFERENCE", "object-reference" },
+      { POPPLER_STRUCTURE_ELEMENT_DOCUMENT, "POPPLER_STRUCTURE_ELEMENT_DOCUMENT", "document" },
+      { POPPLER_STRUCTURE_ELEMENT_PART, "POPPLER_STRUCTURE_ELEMENT_PART", "part" },
+      { POPPLER_STRUCTURE_ELEMENT_ARTICLE, "POPPLER_STRUCTURE_ELEMENT_ARTICLE", "article" },
+      { POPPLER_STRUCTURE_ELEMENT_SECTION, "POPPLER_STRUCTURE_ELEMENT_SECTION", "section" },
+      { POPPLER_STRUCTURE_ELEMENT_DIV, "POPPLER_STRUCTURE_ELEMENT_DIV", "div" },
+      { POPPLER_STRUCTURE_ELEMENT_SPAN, "POPPLER_STRUCTURE_ELEMENT_SPAN", "span" },
+      { POPPLER_STRUCTURE_ELEMENT_QUOTE, "POPPLER_STRUCTURE_ELEMENT_QUOTE", "quote" },
+      { POPPLER_STRUCTURE_ELEMENT_NOTE, "POPPLER_STRUCTURE_ELEMENT_NOTE", "note" },
+      { POPPLER_STRUCTURE_ELEMENT_REFERENCE, "POPPLER_STRUCTURE_ELEMENT_REFERENCE", "reference" },
+      { POPPLER_STRUCTURE_ELEMENT_BIBENTRY, "POPPLER_STRUCTURE_ELEMENT_BIBENTRY", "bibentry" },
+      { POPPLER_STRUCTURE_ELEMENT_CODE, "POPPLER_STRUCTURE_ELEMENT_CODE", "code" },
+      { POPPLER_STRUCTURE_ELEMENT_LINK, "POPPLER_STRUCTURE_ELEMENT_LINK", "link" },
+      { POPPLER_STRUCTURE_ELEMENT_ANNOT, "POPPLER_STRUCTURE_ELEMENT_ANNOT", "annot" },
+      { POPPLER_STRUCTURE_ELEMENT_BLOCKQUOTE, "POPPLER_STRUCTURE_ELEMENT_BLOCKQUOTE", "blockquote" },
+      { POPPLER_STRUCTURE_ELEMENT_CAPTION, "POPPLER_STRUCTURE_ELEMENT_CAPTION", "caption" },
+      { POPPLER_STRUCTURE_ELEMENT_NONSTRUCT, "POPPLER_STRUCTURE_ELEMENT_NONSTRUCT", "nonstruct" },
+      { POPPLER_STRUCTURE_ELEMENT_TOC, "POPPLER_STRUCTURE_ELEMENT_TOC", "toc" },
+      { POPPLER_STRUCTURE_ELEMENT_TOC_ITEM, "POPPLER_STRUCTURE_ELEMENT_TOC_ITEM", "toc-item" },
+      { POPPLER_STRUCTURE_ELEMENT_INDEX, "POPPLER_STRUCTURE_ELEMENT_INDEX", "index" },
+      { POPPLER_STRUCTURE_ELEMENT_PRIVATE, "POPPLER_STRUCTURE_ELEMENT_PRIVATE", "private" },
+      { POPPLER_STRUCTURE_ELEMENT_PARAGRAPH, "POPPLER_STRUCTURE_ELEMENT_PARAGRAPH", "paragraph" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING, "POPPLER_STRUCTURE_ELEMENT_HEADING", "heading" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING_1, "POPPLER_STRUCTURE_ELEMENT_HEADING_1", "heading-1" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING_2, "POPPLER_STRUCTURE_ELEMENT_HEADING_2", "heading-2" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING_3, "POPPLER_STRUCTURE_ELEMENT_HEADING_3", "heading-3" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING_4, "POPPLER_STRUCTURE_ELEMENT_HEADING_4", "heading-4" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING_5, "POPPLER_STRUCTURE_ELEMENT_HEADING_5", "heading-5" },
+      { POPPLER_STRUCTURE_ELEMENT_HEADING_6, "POPPLER_STRUCTURE_ELEMENT_HEADING_6", "heading-6" },
+      { POPPLER_STRUCTURE_ELEMENT_LIST, "POPPLER_STRUCTURE_ELEMENT_LIST", "list" },
+      { POPPLER_STRUCTURE_ELEMENT_LIST_ITEM, "POPPLER_STRUCTURE_ELEMENT_LIST_ITEM", "list-item" },
+      { POPPLER_STRUCTURE_ELEMENT_LIST_LABEL, "POPPLER_STRUCTURE_ELEMENT_LIST_LABEL", "list-label" },
+      { POPPLER_STRUCTURE_ELEMENT_LIST_BODY, "POPPLER_STRUCTURE_ELEMENT_LIST_BODY", "list-body" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE, "POPPLER_STRUCTURE_ELEMENT_TABLE", "table" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE_ROW, "POPPLER_STRUCTURE_ELEMENT_TABLE_ROW", "table-row" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE_HEADING, "POPPLER_STRUCTURE_ELEMENT_TABLE_HEADING", "table-heading" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE_DATA, "POPPLER_STRUCTURE_ELEMENT_TABLE_DATA", "table-data" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE_HEADER, "POPPLER_STRUCTURE_ELEMENT_TABLE_HEADER", "table-header" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE_FOOTER, "POPPLER_STRUCTURE_ELEMENT_TABLE_FOOTER", "table-footer" },
+      { POPPLER_STRUCTURE_ELEMENT_TABLE_BODY, "POPPLER_STRUCTURE_ELEMENT_TABLE_BODY", "table-body" },
+      { POPPLER_STRUCTURE_ELEMENT_RUBY, "POPPLER_STRUCTURE_ELEMENT_RUBY", "ruby" },
+      { POPPLER_STRUCTURE_ELEMENT_RUBY_BASE_TEXT, "POPPLER_STRUCTURE_ELEMENT_RUBY_BASE_TEXT", "ruby-base-text" },
+      { POPPLER_STRUCTURE_ELEMENT_RUBY_ANNOT_TEXT, "POPPLER_STRUCTURE_ELEMENT_RUBY_ANNOT_TEXT", "ruby-annot-text" },
+      { POPPLER_STRUCTURE_ELEMENT_RUBY_PUNCTUATION, "POPPLER_STRUCTURE_ELEMENT_RUBY_PUNCTUATION", "ruby-punctuation" },
+      { POPPLER_STRUCTURE_ELEMENT_WARICHU, "POPPLER_STRUCTURE_ELEMENT_WARICHU", "warichu" },
+      { POPPLER_STRUCTURE_ELEMENT_WARICHU_TEXT, "POPPLER_STRUCTURE_ELEMENT_WARICHU_TEXT", "warichu-text" },
+      { POPPLER_STRUCTURE_ELEMENT_WARICHU_PUNCTUATION, "POPPLER_STRUCTURE_ELEMENT_WARICHU_PUNCTUATION", "warichu-punctuation" },
+      { POPPLER_STRUCTURE_ELEMENT_FIGURE, "POPPLER_STRUCTURE_ELEMENT_FIGURE", "figure" },
+      { POPPLER_STRUCTURE_ELEMENT_FORMULA, "POPPLER_STRUCTURE_ELEMENT_FORMULA", "formula" },
+      { POPPLER_STRUCTURE_ELEMENT_FORM, "POPPLER_STRUCTURE_ELEMENT_FORM", "form" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureElementKind"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_get_text_flags_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GFlagsValue values[] = {
+      { POPPLER_STRUCTURE_GET_TEXT_NONE, "POPPLER_STRUCTURE_GET_TEXT_NONE", "none" },
+      { POPPLER_STRUCTURE_GET_TEXT_RECURSIVE, "POPPLER_STRUCTURE_GET_TEXT_RECURSIVE", "recursive" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_flags_register_static (g_intern_static_string ("PopplerStructureGetTextFlags"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_placement_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_PLACEMENT_BLOCK, "POPPLER_STRUCTURE_PLACEMENT_BLOCK", "block" },
+      { POPPLER_STRUCTURE_PLACEMENT_INLINE, "POPPLER_STRUCTURE_PLACEMENT_INLINE", "inline" },
+      { POPPLER_STRUCTURE_PLACEMENT_BEFORE, "POPPLER_STRUCTURE_PLACEMENT_BEFORE", "before" },
+      { POPPLER_STRUCTURE_PLACEMENT_START, "POPPLER_STRUCTURE_PLACEMENT_START", "start" },
+      { POPPLER_STRUCTURE_PLACEMENT_END, "POPPLER_STRUCTURE_PLACEMENT_END", "end" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructurePlacement"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_writing_mode_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_WRITING_MODE_LR_TB, "POPPLER_STRUCTURE_WRITING_MODE_LR_TB", "lr-tb" },
+      { POPPLER_STRUCTURE_WRITING_MODE_RL_TB, "POPPLER_STRUCTURE_WRITING_MODE_RL_TB", "rl-tb" },
+      { POPPLER_STRUCTURE_WRITING_MODE_TB_RL, "POPPLER_STRUCTURE_WRITING_MODE_TB_RL", "tb-rl" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureWritingMode"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_border_style_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_BORDER_STYLE_NONE, "POPPLER_STRUCTURE_BORDER_STYLE_NONE", "none" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN, "POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN", "hidden" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_DOTTED, "POPPLER_STRUCTURE_BORDER_STYLE_DOTTED", "dotted" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_DASHED, "POPPLER_STRUCTURE_BORDER_STYLE_DASHED", "dashed" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_SOLID, "POPPLER_STRUCTURE_BORDER_STYLE_SOLID", "solid" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE, "POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE", "double" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_GROOVE, "POPPLER_STRUCTURE_BORDER_STYLE_GROOVE", "groove" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_INSET, "POPPLER_STRUCTURE_BORDER_STYLE_INSET", "inset" },
+      { POPPLER_STRUCTURE_BORDER_STYLE_OUTSET, "POPPLER_STRUCTURE_BORDER_STYLE_OUTSET", "outset" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureBorderStyle"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_text_align_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_TEXT_ALIGN_START, "POPPLER_STRUCTURE_TEXT_ALIGN_START", "start" },
+      { POPPLER_STRUCTURE_TEXT_ALIGN_CENTER, "POPPLER_STRUCTURE_TEXT_ALIGN_CENTER", "center" },
+      { POPPLER_STRUCTURE_TEXT_ALIGN_END, "POPPLER_STRUCTURE_TEXT_ALIGN_END", "end" },
+      { POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY, "POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY", "justify" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureTextAlign"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_block_align_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE, "POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE", "before" },
+      { POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE, "POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE", "middle" },
+      { POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER, "POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER", "after" },
+      { POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY, "POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY", "justify" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureBlockAlign"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_inline_align_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_INLINE_ALIGN_START, "POPPLER_STRUCTURE_INLINE_ALIGN_START", "start" },
+      { POPPLER_STRUCTURE_INLINE_ALIGN_CENTER, "POPPLER_STRUCTURE_INLINE_ALIGN_CENTER", "center" },
+      { POPPLER_STRUCTURE_INLINE_ALIGN_END, "POPPLER_STRUCTURE_INLINE_ALIGN_END", "end" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureInlineAlign"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_text_decoration_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_TEXT_DECORATION_NONE, "POPPLER_STRUCTURE_TEXT_DECORATION_NONE", "none" },
+      { POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE, "POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE", "underline" },
+      { POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE, "POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE", "overline" },
+      { POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH, "POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH", "linethrough" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureTextDecoration"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_ruby_align_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_RUBY_ALIGN_START, "POPPLER_STRUCTURE_RUBY_ALIGN_START", "start" },
+      { POPPLER_STRUCTURE_RUBY_ALIGN_CENTER, "POPPLER_STRUCTURE_RUBY_ALIGN_CENTER", "center" },
+      { POPPLER_STRUCTURE_RUBY_ALIGN_END, "POPPLER_STRUCTURE_RUBY_ALIGN_END", "end" },
+      { POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY, "POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY", "justify" },
+      { POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE, "POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE", "distribute" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureRubyAlign"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_ruby_position_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_RUBY_POSITION_BEFORE, "POPPLER_STRUCTURE_RUBY_POSITION_BEFORE", "before" },
+      { POPPLER_STRUCTURE_RUBY_POSITION_AFTER, "POPPLER_STRUCTURE_RUBY_POSITION_AFTER", "after" },
+      { POPPLER_STRUCTURE_RUBY_POSITION_WARICHU, "POPPLER_STRUCTURE_RUBY_POSITION_WARICHU", "warichu" },
+      { POPPLER_STRUCTURE_RUBY_POSITION_INLINE, "POPPLER_STRUCTURE_RUBY_POSITION_INLINE", "inline" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureRubyPosition"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_glyph_orientation_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO, "POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO", "auto" },
+      { POPPLER_STRUCTURE_GLYPH_ORIENTATION_0, "POPPLER_STRUCTURE_GLYPH_ORIENTATION_0", "0" },
+      { POPPLER_STRUCTURE_GLYPH_ORIENTATION_90, "POPPLER_STRUCTURE_GLYPH_ORIENTATION_90", "90" },
+      { POPPLER_STRUCTURE_GLYPH_ORIENTATION_180, "POPPLER_STRUCTURE_GLYPH_ORIENTATION_180", "180" },
+      { POPPLER_STRUCTURE_GLYPH_ORIENTATION_270, "POPPLER_STRUCTURE_GLYPH_ORIENTATION_270", "270" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureGlyphOrientation"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_list_numbering_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_LIST_NUMBERING_NONE, "POPPLER_STRUCTURE_LIST_NUMBERING_NONE", "none" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_DISC, "POPPLER_STRUCTURE_LIST_NUMBERING_DISC", "disc" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE, "POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE", "circle" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE, "POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE", "square" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL, "POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL", "decimal" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN, "POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN", "upper-roman" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN, "POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN", "lower-roman" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA, "POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA", "upper-alpha" },
+      { POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA, "POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA", "lower-alpha" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureListNumbering"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_form_role_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED, "POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED", "undefined" },
+      { POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON, "POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON", "radio-button" },
+      { POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON, "POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON", "push-button" },
+      { POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE, "POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE", "text-value" },
+      { POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX, "POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX", "checkbox" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureFormRole"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_form_state_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_FORM_STATE_ON, "POPPLER_STRUCTURE_FORM_STATE_ON", "on" },
+      { POPPLER_STRUCTURE_FORM_STATE_OFF, "POPPLER_STRUCTURE_FORM_STATE_OFF", "off" },
+      { POPPLER_STRUCTURE_FORM_STATE_NEUTRAL, "POPPLER_STRUCTURE_FORM_STATE_NEUTRAL", "neutral" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureFormState"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_structure_table_scope_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_STRUCTURE_TABLE_SCOPE_ROW, "POPPLER_STRUCTURE_TABLE_SCOPE_ROW", "row" },
+      { POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN, "POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN", "column" },
+      { POPPLER_STRUCTURE_TABLE_SCOPE_BOTH, "POPPLER_STRUCTURE_TABLE_SCOPE_BOTH", "both" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerStructureTableScope"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
 /* enumerations from "poppler.h" */
 #include "poppler.h"
 GType

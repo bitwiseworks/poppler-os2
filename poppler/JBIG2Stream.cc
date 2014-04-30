@@ -15,12 +15,13 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1495,7 +1496,7 @@ void JBIG2Stream::readSegments() {
 	// arithmetic-coded symbol dictionary segments when numNewSyms
 	// == 0.  Segments like this often occur for blank pages.
 	
-	error(errSyntaxError, curStr->getPos(), "{0:d} extraneous byte{1:s} after segment",
+	error(errSyntaxError, curStr->getPos(), "{0:lld} extraneous byte{1:s} after segment",
 	      segExtraBytes, (segExtraBytes > 1) ? "s" : "");
 	
 	// Burn through the remaining bytes -- inefficient, but
@@ -1839,7 +1840,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	  }
 	  refBitmap = bitmaps[symID];
 	  if (unlikely(refBitmap == NULL)) {
-	    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:d} in JBIG2 symbol dictionary", symID);
+	    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
 	    goto syntaxError;
 	  }
 	  bitmaps[numInputSyms + i] =
@@ -2289,8 +2290,8 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
 
  codeTableError:
   error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
-  gfree(codeTables);
-  delete syms;
+  delete codeTables;
+  gfree(syms);
   return;
 
  eofError:
@@ -3383,8 +3384,9 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 
 	if (atx[0] >= -8 && atx[0] <= 8) {
 	  // set up the adaptive context
-	  if (y + aty[0] >= 0) {
-	    atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
+	  const int atY = y + aty[0];
+	  if ((atY >= 0) && (atY < bitmap->getHeight())) {
+	    atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
 	    atBuf0 = *atP0++ << 8;
 	  } else {
 	    atP0 = NULL;
@@ -3498,8 +3500,9 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 
 	if (atx[0] >= -8 && atx[0] <= 8) {
 	  // set up the adaptive context
-	  if (y + aty[0] >= 0) {
-	    atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
+	  const int atY = y + aty[0];
+	  if ((atY >= 0) && (atY < bitmap->getHeight())) {
+	    atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
 	    atBuf0 = *atP0++ << 8;
 	  } else {
 	    atP0 = NULL;
@@ -3606,8 +3609,9 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 
 	if (atx[0] >= -8 && atx[0] <= 8) {
 	  // set up the adaptive context
-	  if (y + aty[0] >= 0) {
-	    atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
+	  const int atY = y + aty[0];
+	  if ((atY >= 0) && (atY < bitmap->getHeight())) {
+	    atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
 	    atBuf0 = *atP0++ << 8;
 	  } else {
 	    atP0 = NULL;
