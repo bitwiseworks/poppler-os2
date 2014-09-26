@@ -47,6 +47,7 @@
 #define INCL_DOSPROCESS
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS
+#include <os2.h>
 #endif
 
 #ifdef USE_GCC_PRAGMAS

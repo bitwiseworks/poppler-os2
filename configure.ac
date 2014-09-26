@@ -46,6 +46,9 @@ case "$host_os" in
   cygwin*)
     create_shared_lib="-no-undefined"
   ;;
+  os2*)
+    create_shared_lib="-no-undefined"
+  ;;
   mingw*)
     os_win32=yes
     win32_libs="-lgdi32"
@@ -809,7 +812,7 @@ case "$enable_compile_warnings" in
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
 		-fno-common $CXXFLAGS" ;;
 esac
-CXXFLAGS="-fPIC $CXXFLAGS";
+# CXXFLAGS="-fPIC $CXXFLAGS"; we don't have it and i dislike the warnings
 
 case `$PKG_CONFIG --version` in
   0.?|0.1[0-7])
