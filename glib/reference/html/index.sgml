@@ -1,7 +1,6 @@
 <ANCHOR id="poppler-poppler" href="poppler/poppler-poppler.html">
 <ANCHOR id="poppler-poppler.functions" href="poppler/poppler-poppler.html#poppler-poppler.functions">
 <ANCHOR id="poppler-poppler.other" href="poppler/poppler-poppler.html#poppler-poppler.other">
-<ANCHOR id="poppler-poppler.object-hierarchy" href="poppler/poppler-poppler.html#poppler-poppler.object-hierarchy">
 <ANCHOR id="poppler-poppler.includes" href="poppler/poppler-poppler.html#poppler-poppler.includes">
 <ANCHOR id="poppler-poppler.description" href="poppler/poppler-poppler.html#poppler-poppler.description">
 <ANCHOR id="poppler-poppler.functions_details" href="poppler/poppler-poppler.html#poppler-poppler.functions_details">
@@ -203,7 +202,6 @@
 <ANCHOR id="poppler-PopplerAction" href="poppler/poppler-PopplerAction.html">
 <ANCHOR id="poppler-PopplerAction.functions" href="poppler/poppler-PopplerAction.html#poppler-PopplerAction.functions">
 <ANCHOR id="poppler-PopplerAction.other" href="poppler/poppler-PopplerAction.html#poppler-PopplerAction.other">
-<ANCHOR id="poppler-PopplerAction.object-hierarchy" href="poppler/poppler-PopplerAction.html#poppler-PopplerAction.object-hierarchy">
 <ANCHOR id="poppler-PopplerAction.includes" href="poppler/poppler-PopplerAction.html#poppler-PopplerAction.includes">
 <ANCHOR id="poppler-PopplerAction.description" href="poppler/poppler-PopplerAction.html#poppler-PopplerAction.description">
 <ANCHOR id="poppler-PopplerAction.functions_details" href="poppler/poppler-PopplerAction.html#poppler-PopplerAction.functions_details">
@@ -528,7 +526,6 @@
 <ANCHOR id="poppler-Version-and-Features-Information" href="poppler/poppler-Version-and-Features-Information.html">
 <ANCHOR id="poppler-Version-and-Features-Information.functions" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.functions">
 <ANCHOR id="poppler-Version-and-Features-Information.other" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.other">
-<ANCHOR id="poppler-Version-and-Features-Information.object-hierarchy" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.object-hierarchy">
 <ANCHOR id="poppler-Version-and-Features-Information.includes" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.includes">
 <ANCHOR id="poppler-Version-and-Features-Information.description" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.description">
 <ANCHOR id="poppler-Version-and-Features-Information.functions_details" href="poppler/poppler-Version-and-Features-Information.html#poppler-Version-and-Features-Information.functions_details">
