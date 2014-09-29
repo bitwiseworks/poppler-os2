@@ -142,7 +142,7 @@ am__check_actualtext_SOURCES_DIST = check_actualtext.cpp
 check_actualtext_OBJECTS = $(am_check_actualtext_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/poppler/libpoppler.la \
-	$(top_builddir)/qt4/src/libpopplerqt4.la \
+	$(top_builddir)/qt4/src/libpoppler-qt4.la \
 	$(am__DEPENDENCIES_1)
 @BUILD_POPPLER_QT4_TRUE@check_actualtext_DEPENDENCIES =  \
 @BUILD_POPPLER_QT4_TRUE@	$(am__DEPENDENCIES_2) \
@@ -803,7 +803,7 @@ INCLUDES = \
 
 LDADDS = \
 	$(top_builddir)/poppler/libpoppler.la	\
-	$(top_builddir)/qt4/src/libpopplerqt4.la	\
+	$(top_builddir)/qt4/src/libpoppler-qt4.la	\
 	$(POPPLER_QT4_LIBS)
 
 test_poppler_qt4_SOURCES = \
