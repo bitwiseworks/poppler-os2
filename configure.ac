@@ -1,6 +1,6 @@
 m4_define([poppler_version_major],[0])
 m4_define([poppler_version_minor],[26])
-m4_define([poppler_version_micro],[0])
+m4_define([poppler_version_micro],[5])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
 AC_PREREQ(2.59)
@@ -176,7 +176,10 @@ if test x$enable_libopenjpeg = xyes; then
   AC_DEFINE(ENABLE_LIBOPENJPEG)
   PKG_CHECK_EXISTS(libopenjpeg >= 1.5,
       [AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])],
-      [])
+      [PKG_CHECK_EXISTS(libopenjpeg1 >= 1.5,
+       [AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])],
+       [])
+      ])
 fi
 
 AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$enable_libopenjpeg = xyes)
@@ -229,7 +232,7 @@ if test x$enable_libtiff = xyes; then
   if test x"$LIBTIFF_LIBS" = x; then
     LIBTIFF_LIBS="-ltiff"
   fi
-  AC_SUBST(LIBTIFF_CFLAGSS)
+  AC_SUBST(LIBTIFF_CFLAGS)
   AC_SUBST(LIBTIFF_LIBS)
   AC_DEFINE(ENABLE_LIBTIFF)
 fi
@@ -568,17 +571,17 @@ AC_ARG_ENABLE(poppler-qt4,
               enable_poppler_qt4="try")
 if test x$enable_poppler_qt4 = xyes; then
   PKG_CHECK_MODULES(POPPLER_QT4, 
-	            QtCore >= 4.4.0 QtGui >= 4.4.0 QtXml >= 4.4.0)
+	            QtCore >= 4.7.0 QtGui >= 4.7.0 QtXml >= 4.7.0)
   PKG_CHECK_MODULES(POPPLER_QT4_TEST, 
-	            QtTest >= 4.4.0)
+	            QtTest >= 4.7.0)
 elif test x$enable_poppler_qt4 = xtry; then
   PKG_CHECK_MODULES(POPPLER_QT4,
-                    QtCore >= 4.4.0 QtGui >= 4.4.0 QtXml >= 4.4.0,
+                    QtCore >= 4.7.0 QtGui >= 4.7.0 QtXml >= 4.7.0,
                     [enable_poppler_qt4="yes"],
                     [enable_poppler_qt4="no"])
   if test x$enable_poppler_qt4 = xyes; then
     PKG_CHECK_MODULES(POPPLER_QT4_TEST,
-                    QtTest >= 4.4.0,
+                    QtTest >= 4.7.0,
                     [enable_poppler_qt4="yes"],
                     [enable_poppler_qt4="no"])
   fi
@@ -656,7 +659,7 @@ if test x$enable_poppler_qt5 = xyes; then
     AC_CHECK_TOOL(MOCQT52, moc-qt5)
     AC_MSG_CHECKING([for Qt5 moc-qt5])
     mocversion=`$MOCQT52 -v 2>&1`
-    mocversiongrep=`echo $mocversion | grep "Qt 5\|moc 5"`
+    mocversiongrep=`echo $mocversion | grep "Qt 5\|moc-qt5 5\|moc 5"`
     if test x"$mocversiongrep" != x"$mocversion"; then
       AC_CHECK_TOOL(QTCHOOSER, qtchooser)
       AC_MSG_CHECKING([for qtchooser])
