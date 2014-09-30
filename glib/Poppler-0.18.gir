@@ -532,6 +532,7 @@ annotation @poppler_annot is placed.</doc>
           </instance-parameter>
           <parameter name="poppler_color"
                      transfer-ownership="none"
+                     nullable="1"
                      allow-none="1">
             <doc xml:space="preserve">a #PopplerColor, or %NULL</doc>
             <type name="Color" c:type="PopplerColor*"/>
@@ -714,6 +715,7 @@ poppler_page_add_annot()</doc>
           </instance-parameter>
           <parameter name="poppler_color"
                      transfer-ownership="none"
+                     nullable="1"
                      allow-none="1">
             <doc xml:space="preserve">a #PopplerColor, or %NULL</doc>
             <type name="Color" c:type="PopplerColor*"/>
@@ -1158,7 +1160,10 @@ of @annot on the page</doc>
             <doc xml:space="preserve">a #PopplerAnnotMarkup</doc>
             <type name="AnnotMarkup" c:type="PopplerAnnotMarkup*"/>
           </instance-parameter>
-          <parameter name="label" transfer-ownership="none" allow-none="1">
+          <parameter name="label"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
             <doc xml:space="preserve">a text string containing the new label, or %NULL</doc>
             <type name="utf8" c:type="const gchar*"/>
           </parameter>
@@ -1355,6 +1360,7 @@ poppler_page_add_annot()</doc>
           </instance-parameter>
           <parameter name="poppler_color"
                      transfer-ownership="none"
+                     nullable="1"
                      allow-none="1">
             <doc xml:space="preserve">a #PopplerColor, or %NULL</doc>
             <type name="Color" c:type="PopplerColor*"/>
@@ -2204,7 +2210,10 @@ domains.</doc>
             <doc xml:space="preserve">the length of #data</doc>
             <type name="gint" c:type="int"/>
           </parameter>
-          <parameter name="password" transfer-ownership="none" allow-none="1">
+          <parameter name="password"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
             <doc xml:space="preserve">password to unlock the file with, or %NULL</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
@@ -2225,7 +2234,10 @@ domains.</doc>
             <doc xml:space="preserve">uri of the file to load</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
-          <parameter name="password" transfer-ownership="none" allow-none="1">
+          <parameter name="password"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
             <doc xml:space="preserve">password to unlock the file with, or %NULL</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
@@ -2247,12 +2259,16 @@ domains.</doc>
             <doc xml:space="preserve">a #GFile to load</doc>
             <type name="Gio.File" c:type="GFile*"/>
           </parameter>
-          <parameter name="password" transfer-ownership="none" allow-none="1">
+          <parameter name="password"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
             <doc xml:space="preserve">password to unlock the file with, or %NULL</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
           <parameter name="cancellable"
                      transfer-ownership="none"
+                     nullable="1"
                      allow-none="1">
             <doc xml:space="preserve">a #GCancellable, or %NULL</doc>
             <type name="Gio.Cancellable" c:type="GCancellable*"/>
@@ -2281,12 +2297,16 @@ domains.</doc>
             <doc xml:space="preserve">the stream length, or -1 if not known</doc>
             <type name="gint64" c:type="goffset"/>
           </parameter>
-          <parameter name="password" transfer-ownership="none" allow-none="1">
+          <parameter name="password"
+                     transfer-ownership="none"
+                     nullable="1"
+                     allow-none="1">
             <doc xml:space="preserve">password to unlock the file with, or %NULL</doc>
             <type name="utf8" c:type="const char*"/>
           </parameter>
           <parameter name="cancellable"
                      transfer-ownership="none"
+                     nullable="1"
                      allow-none="1">
             <doc xml:space="preserve">a #GCancellable, or %NULL</doc>
             <type name="Gio.Cancellable" c:type="GCancellable*"/>
@@ -2423,6 +2443,7 @@ size of 32 bytes.</doc>
                      direction="out"
                      caller-allocates="0"
                      transfer-ownership="full"
+                     optional="1"
                      allow-none="1">
             <doc xml:space="preserve">location to store an allocated string, use g_free() to free the returned string</doc>
             <type name="utf8" c:type="gchar**"/>
@@ -2431,6 +2452,7 @@ size of 32 bytes.</doc>
                      direction="out"
                      caller-allocates="0"
                      transfer-ownership="full"
+                     optional="1"
                      allow-none="1">
             <doc xml:space="preserve">location to store an allocated string, use g_free() to free the returned string</doc>
             <type name="utf8" c:type="gchar**"/>
@@ -2600,6 +2622,7 @@ be initially displayed when opened.</doc>
                      direction="out"
                      caller-allocates="0"
                      transfer-ownership="full"
+                     optional="1"
                      allow-none="1">
             <doc xml:space="preserve">return location for the PDF major version number</doc>
             <type name="guint" c:type="guint*"/>
@@ -2608,6 +2631,7 @@ be initially displayed when opened.</doc>
                      direction="out"
                      caller-allocates="0"
                      transfer-ownership="full"
+                     optional="1"
                      allow-none="1">
             <doc xml:space="preserve">return location for the PDF minor version number</doc>
             <type name="guint" c:type="guint*"/>
@@ -2847,7 +2871,7 @@ include those in the #G_FILE_ERROR domain.</doc>
               value="0"
               c:identifier="POPPLER_ERROR_INVALID"
               glib:nick="invalid">
-        <doc xml:space="preserve">Generic error when a document opration fails</doc>
+        <doc xml:space="preserve">Generic error when a document operation fails</doc>
       </member>
       <member name="encrypted"
               value="1"
@@ -4279,7 +4303,7 @@ of @action on the page</doc>
       <type name="gint" c:type="gint"/>
     </constant>
     <constant name="MICRO_VERSION"
-              value="0"
+              value="5"
               c:type="POPPLER_MICRO_VERSION"
               version="0.12">
       <doc xml:space="preserve">The micro version number of the poppler header files (e.g. in poppler version
@@ -5031,6 +5055,7 @@ poppler_page_selection_region_free().</doc>
                      direction="out"
                      caller-allocates="0"
                      transfer-ownership="full"
+                     optional="1"
                      allow-none="1">
             <doc xml:space="preserve">return location for the width of @page</doc>
             <type name="gdouble" c:type="double*"/>
@@ -5039,6 +5064,7 @@ poppler_page_selection_region_free().</doc>
                      direction="out"
                      caller-allocates="0"
                      transfer-ownership="full"
+                     optional="1"
                      allow-none="1">
             <doc xml:space="preserve">return location for the height of @page</doc>
             <type name="gdouble" c:type="double*"/>

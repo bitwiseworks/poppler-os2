@@ -8,15 +8,14 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="ch01.html" title="Poppler">
 <link rel="next" href="PopplerDocument.html" title="PopplerDocument">
-<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.21 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
 <td width="100%" align="left" class="shortcuts">
-<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
-                  <a href="#poppler-poppler.description" class="shortcut">Description</a></span><span id="nav_hierarchy"> <span class="dim">|</span> 
-                  <a href="#poppler-poppler.object-hierarchy" class="shortcut">Object Hierarchy</a></span>
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#poppler-poppler.description" class="shortcut">Description</a></span>
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
@@ -130,11 +129,6 @@
 </table></div>
 </div>
 <div class="refsect1">
-<a name="poppler-poppler.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">
-</pre>
-</div>
-<div class="refsect1">
 <a name="poppler-poppler.includes"></a><h2>Includes</h2>
 <pre class="synopsis">#include &lt;poppler.h&gt;
 </pre>
@@ -150,7 +144,7 @@
 poppler_get_backend (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Returns the backend compiled into the poppler library.</p>
 <div class="refsect3">
-<a name="id-1.2.2.8.2.5"></a><h4>Returns</h4>
+<a name="id-1.2.2.7.2.5"></a><h4>Returns</h4>
 <p> The backend used by poppler</p>
 <p></p>
 </div>
@@ -162,7 +156,7 @@ poppler_get_backend (<em class="parameter"><code><span class="type">void</span><
 poppler_get_version (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Returns the version of poppler in use.  This result is not to be freed.</p>
 <div class="refsect3">
-<a name="id-1.2.2.8.3.5"></a><h4>Returns</h4>
+<a name="id-1.2.2.7.3.5"></a><h4>Returns</h4>
 <p> the version of poppler.</p>
 <p></p>
 </div>
@@ -176,7 +170,7 @@ poppler_date_parse (<em class="parameter"><code>const <a href="http://library.gn
 <p>Parses a PDF format date string and converts it to a <span class="type">time_t</span>. Returns <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><span class="type">FALSE</span></a>
 if the parsing fails or the input string is not a valid PDF format date string</p>
 <div class="refsect3">
-<a name="id-1.2.2.8.4.5"></a><h4>Parameters</h4>
+<a name="id-1.2.2.7.4.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -198,7 +192,7 @@ if the parsing fails or the input string is not a valid PDF format date string</
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.8.4.6"></a><h4>Returns</h4>
+<a name="id-1.2.2.7.4.6"></a><h4>Returns</h4>
 <p> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><span class="type">TRUE</span></a>, if <em class="parameter"><code>timet</code></em>
 was set</p>
 <p></p>
@@ -212,7 +206,7 @@ was set</p>
 poppler_color_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Creates a new <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a></p>
 <div class="refsect3">
-<a name="id-1.2.2.8.5.5"></a><h4>Returns</h4>
+<a name="id-1.2.2.7.5.5"></a><h4>Returns</h4>
 <p> a new <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>, use <a class="link" href="poppler-poppler.html#poppler-color-free" title="poppler_color_free ()"><code class="function">poppler_color_free()</code></a> to free it</p>
 <p></p>
 </div>
@@ -225,7 +219,7 @@ poppler_color_copy (<em class="parameter"><code><a class="link" href="poppler-po
 <p>Creates a copy of <em class="parameter"><code>color</code></em>
 </p>
 <div class="refsect3">
-<a name="id-1.2.2.8.6.5"></a><h4>Parameters</h4>
+<a name="id-1.2.2.7.6.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -240,7 +234,7 @@ poppler_color_copy (<em class="parameter"><code><a class="link" href="poppler-po
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.8.6.6"></a><h4>Returns</h4>
+<a name="id-1.2.2.7.6.6"></a><h4>Returns</h4>
 <p> a new allocated copy of <em class="parameter"><code>color</code></em>
 </p>
 <p></p>
@@ -253,7 +247,7 @@ poppler_color_copy (<em class="parameter"><code><a class="link" href="poppler-po
 poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *color</code></em>);</pre>
 <p>Frees the given <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a></p>
 <div class="refsect3">
-<a name="id-1.2.2.8.7.5"></a><h4>Parameters</h4>
+<a name="id-1.2.2.7.7.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -281,7 +275,7 @@ poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-po
 <a name="PopplerError"></a><h3>enum PopplerError</h3>
 <p>Error codes returned by <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p>
 <div class="refsect3">
-<a name="id-1.2.2.9.3.4"></a><h4>Members</h4>
+<a name="id-1.2.2.8.3.4"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -292,7 +286,7 @@ poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-po
 <tr>
 <td class="enum_member_name"><p><a name="POPPLER-ERROR-INVALID:CAPS"></a>POPPLER_ERROR_INVALID</p></td>
 <td class="enum_member_description">
-<p>Generic error when a document opration fails</p>
+<p>Generic error when a document operation fails</p>
 </td>
 <td class="enum_member_annotations"> </td>
 </tr>
@@ -332,7 +326,7 @@ poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-po
 <div class="refsect2">
 <a name="PopplerOrientation"></a><h3>enum PopplerOrientation</h3>
 <div class="refsect3">
-<a name="id-1.2.2.9.4.3"></a><h4>Members</h4>
+<a name="id-1.2.2.8.4.3"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -368,7 +362,7 @@ poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-po
 <div class="refsect2">
 <a name="PopplerBackend"></a><h3>enum PopplerBackend</h3>
 <div class="refsect3">
-<a name="id-1.2.2.9.5.3"></a><h4>Members</h4>
+<a name="id-1.2.2.8.5.3"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -407,7 +401,7 @@ poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-po
 <p>A <a class="link" href="poppler-poppler.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> describes a RGB color. Color components
 are values between 0 and 65535</p>
 <div class="refsect3">
-<a name="id-1.2.2.9.6.5"></a><h4>Members</h4>
+<a name="id-1.2.2.8.6.5"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -439,7 +433,7 @@ are values between 0 and 65535</p>
 <a name="PopplerPrintFlags"></a><h3>enum PopplerPrintFlags</h3>
 <p>Printing flags</p>
 <div class="refsect3">
-<a name="id-1.2.2.9.7.4"></a><h4>Members</h4>
+<a name="id-1.2.2.8.7.4"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -485,7 +479,7 @@ are values between 0 and 65535</p>
 <a name="PopplerFindFlags"></a><h3>enum PopplerFindFlags</h3>
 <p>Flags using while searching text in a page</p>
 <div class="refsect3">
-<a name="id-1.2.2.9.8.4"></a><h4>Members</h4>
+<a name="id-1.2.2.8.8.4"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -528,6 +522,6 @@ are values between 0 and 65535</p>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.20</div>
+          Generated by GTK-Doc V1.21</div>
 </body>
 </html>
