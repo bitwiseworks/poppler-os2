@@ -1,3 +1,65 @@
+Release 0.26.5
+        core:
+         * Fix rendering of broken file with a wrong embedded font. Bug #84270
+
+        glib:
+         * Fix use of uninitialized members in PopplerInputStream. Bug #82630
+
+Release 0.26.4
+        core:
+         * CairoOutputDev: Make sure we always push a transparency group in setSoftMaskFromImageMask(). Bug #81624
+         * Fix a crash when adding Annotation without contents
+         * Improve non-latin characters in inline notes. Bug #65956
+         * Don't check for inlineImg twice. Bug #82059
+         * printf() -> error()
+
+        glib:
+         * Return NULL in poppler_annot_get_contents also for empty strings
+         * Fix a memory leak when getting text layout and attributes
+
+Release 0.26.3
+        qt5:
+         * autoconf: Improve moc-qt5 detection
+         * Fix compilation with MinGW
+
+        glib:
+         * Fix typo in api docs
+         * use C90-style comments in public headers
+
+        core:
+         * Error out instead of exiting if allInter grows too much. Bug #78714
+
+        qt4:
+         * Update required version to Qt 4.7.0
+
+        build system:
+         * Include stdio.h from poppler-config.h
+
+        misc:
+         * Update .gitignore files
+
+Release 0.26.2
+        core:
+         * Make sure we have an xref before using. KDE Bug #335413
+
+        build system:
+         * autoconf: Fix typo in configure.ac
+
+        utils:
+         * pdftohtml: exit with 0 with -v and -h
+
+Release 0.26.1
+        core:
+         * Use field value V for radio buttons. Bug #75979
+         * Fix extraction of text in some files. Bug #78145
+         * Only add annotations of the current page when splitting. Bug #77549
+
+        build system:
+         * autoconf: Fix libopenjpeg 1.5 detection on some systems. Bug #78389
+
+        glib:
+         * Fix multiple definition of PopplerTextSpan
+
 Release 0.26.0
         qt4:
          * Fix mismatched boolean logic in TextAnnotation::setInplaceIntent
