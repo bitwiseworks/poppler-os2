@@ -54,7 +54,7 @@ typedef CRITICAL_SECTION GooMutex;
 #define gLockMutex(m) EnterCriticalSection(m)
 #define gUnlockMutex(m) LeaveCriticalSection(m)
 
-#elif defined(OS2)
+/* #elif defined(__OS2__) I don't think we still need that
 
 #define INCL_DOS
 #include <os2.h>
@@ -65,7 +65,7 @@ typedef HMTX GooMutex;
 #define gDestroyMutex(m) DosCloseMutexSem(*m)
 #define gLockMutex(m) DosRequestMutexSem(*m,SEM_INDEFINITE_WAIT)
 #define gUnlockMutex(m) DosReleaseMutexSem(*m)
-
+*/
 #else // assume pthreads
 
 #include <pthread.h>

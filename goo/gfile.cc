@@ -174,7 +174,7 @@ GooString *appendToPath(GooString *path, const char *fileName) {
   }
   return path;
 
-#elif defined(__EMX__) || defined(OS2)
+#elif defined(__EMX__) || defined(__OS2__)
   //---------- OS/2+EMX ----------
   int i;
 
@@ -261,7 +261,7 @@ GooString *grabPath(char *fileName) {
     return new GooString(fileName, p + 1 - fileName);
   return new GooString();
 
-#elif defined(__EMX__) || defined(_WIN32) || defined(OS2)
+#elif defined(__EMX__) || defined(_WIN32) || defined(__OS2__)
   //---------- OS/2+EMX and Win32 ----------
   char *p;
 
@@ -305,7 +305,7 @@ GBool isAbsolutePath(char *path) {
   return strchr(path, ':') ||
 	 (path[0] == '[' && path[1] != '.' && path[1] != '-');
 
-#elif defined(__EMX__) || defined(_WIN32) || defined(OS2)
+#elif defined(__EMX__) || defined(_WIN32) || defined(__OS2__)
   //---------- OS/2+EMX and Win32 ----------
   return path[0] == '/' || path[0] == '\\' || path[1] == ':';
 
@@ -662,7 +662,7 @@ Goffset GooFile::size() const {
 GooFile* GooFile::open(const GooString *fileName) {
 #ifdef VMS
   int fd = ::open(fileName->getCString(), Q_RDONLY, "ctx=stm");
-#elif defined(OS2)
+#elif defined(__OS2__)
   int fd = ::open(fileName->getCString(), O_RDONLY | O_BINARY);
 #else
   int fd = ::open(fileName->getCString(), O_RDONLY);
