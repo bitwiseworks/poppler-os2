@@ -14,6 +14,8 @@
       <sub name="PopplerMedia" link="PopplerMedia.html"/>
       <sub name="PopplerMovie" link="PopplerMovie.html"/>
       <sub name="PopplerStructureElement" link="PopplerStructureElement.html"/>
+      <sub name="PopplerColor" link="poppler-PopplerColor.html"/>
+      <sub name="PDF Utility functions" link="poppler-PDF-Utility-functions.html"/>
       <sub name="Version and Features Information" link="poppler-Version-and-Features-Information.html"/>
     </sub>
     <sub name="Index of all symbols" link="api-index-full.html"/>
@@ -27,19 +29,9 @@
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
   </chapters>
   <functions>
-    <keyword type="function" name="poppler_get_backend ()" link="poppler-poppler.html#poppler-get-backend"/>
-    <keyword type="function" name="poppler_get_version ()" link="poppler-poppler.html#poppler-get-version"/>
-    <keyword type="function" name="poppler_date_parse ()" link="poppler-poppler.html#poppler-date-parse" since="0.12"/>
-    <keyword type="function" name="poppler_color_new ()" link="poppler-poppler.html#poppler-color-new"/>
-    <keyword type="function" name="poppler_color_copy ()" link="poppler-poppler.html#poppler-color-copy"/>
-    <keyword type="function" name="poppler_color_free ()" link="poppler-poppler.html#poppler-color-free"/>
     <keyword type="macro" name="POPPLER_ERROR" link="poppler-poppler.html#POPPLER-ERROR:CAPS"/>
     <keyword type="enum" name="enum PopplerError" link="poppler-poppler.html#PopplerError"/>
     <keyword type="enum" name="enum PopplerOrientation" link="poppler-poppler.html#PopplerOrientation"/>
-    <keyword type="enum" name="enum PopplerBackend" link="poppler-poppler.html#PopplerBackend"/>
-    <keyword type="struct" name="PopplerColor" link="poppler-poppler.html#PopplerColor"/>
-    <keyword type="enum" name="enum PopplerPrintFlags" link="poppler-poppler.html#PopplerPrintFlags" since="0.16"/>
-    <keyword type="enum" name="enum PopplerFindFlags" link="poppler-poppler.html#PopplerFindFlags" since="0.22"/>
     <keyword type="function" name="poppler_document_new_from_file ()" link="PopplerDocument.html#poppler-document-new-from-file"/>
     <keyword type="function" name="poppler_document_new_from_data ()" link="PopplerDocument.html#poppler-document-new-from-data"/>
     <keyword type="function" name="poppler_document_new_from_stream ()" link="PopplerDocument.html#poppler-document-new-from-stream" since="0.22"/>
@@ -200,6 +192,8 @@
     <keyword type="enum" name="enum PopplerPageTransitionDirection" link="PopplerPage.html#PopplerPageTransitionDirection"/>
     <keyword type="enum" name="enum PopplerSelectionStyle" link="PopplerPage.html#PopplerSelectionStyle"/>
     <keyword type="struct" name="PopplerTextAttributes" link="PopplerPage.html#PopplerTextAttributes" since="0.18"/>
+    <keyword type="enum" name="enum PopplerPrintFlags" link="PopplerPage.html#PopplerPrintFlags" since="0.16"/>
+    <keyword type="enum" name="enum PopplerFindFlags" link="PopplerPage.html#PopplerFindFlags" since="0.22"/>
     <keyword type="property" name="The “label” property" link="PopplerPage.html#PopplerPage--label"/>
     <keyword type="function" name="poppler_action_copy ()" link="poppler-PopplerAction.html#poppler-action-copy"/>
     <keyword type="function" name="poppler_action_free ()" link="poppler-PopplerAction.html#poppler-action-free"/>
@@ -265,6 +259,7 @@
     <keyword type="enum" name="enum PopplerFormTextType" link="PopplerFormField.html#PopplerFormTextType"/>
     <keyword type="function" name="poppler_annot_get_annot_type ()" link="PopplerAnnot.html#poppler-annot-get-annot-type"/>
     <keyword type="function" name="poppler_annot_get_flags ()" link="PopplerAnnot.html#poppler-annot-get-flags"/>
+    <keyword type="function" name="poppler_annot_set_flags ()" link="PopplerAnnot.html#poppler-annot-set-flags" since="0.22"/>
     <keyword type="function" name="poppler_annot_get_name ()" link="PopplerAnnot.html#poppler-annot-get-name"/>
     <keyword type="function" name="poppler_annot_get_page_index ()" link="PopplerAnnot.html#poppler-annot-get-page-index" since="0.14"/>
     <keyword type="function" name="poppler_annot_get_color ()" link="PopplerAnnot.html#poppler-annot-get-color"/>
@@ -317,14 +312,12 @@
     <keyword type="function" name="poppler_annot_square_new ()" link="PopplerAnnot.html#poppler-annot-square-new" since="0.26"/>
     <keyword type="function" name="poppler_annot_square_get_interior_color ()" link="PopplerAnnot.html#poppler-annot-square-get-interior-color" since="0.26"/>
     <keyword type="function" name="poppler_annot_square_set_interior_color ()" link="PopplerAnnot.html#poppler-annot-square-set-interior-color" since="0.26"/>
+    <keyword type="function" name="poppler_point_new ()" link="PopplerAnnot.html#poppler-point-new" since="0.26"/>
     <keyword type="function" name="poppler_point_copy ()" link="PopplerAnnot.html#poppler-point-copy" since="0.26"/>
     <keyword type="function" name="poppler_point_free ()" link="PopplerAnnot.html#poppler-point-free" since="0.26"/>
-    <keyword type="function" name="poppler_point_get_type ()" link="PopplerAnnot.html#poppler-point-get-type"/>
-    <keyword type="function" name="poppler_point_new ()" link="PopplerAnnot.html#poppler-point-new" since="0.26"/>
+    <keyword type="function" name="poppler_quadrilateral_new ()" link="PopplerAnnot.html#poppler-quadrilateral-new" since="0.26"/>
     <keyword type="function" name="poppler_quadrilateral_copy ()" link="PopplerAnnot.html#poppler-quadrilateral-copy" since="0.26"/>
     <keyword type="function" name="poppler_quadrilateral_free ()" link="PopplerAnnot.html#poppler-quadrilateral-free" since="0.26"/>
-    <keyword type="function" name="poppler_quadrilateral_get_type ()" link="PopplerAnnot.html#poppler-quadrilateral-get-type"/>
-    <keyword type="function" name="poppler_quadrilateral_new ()" link="PopplerAnnot.html#poppler-quadrilateral-new" since="0.26"/>
     <keyword type="struct" name="PopplerAnnot" link="PopplerAnnot.html#PopplerAnnot-struct"/>
     <keyword type="struct" name="PopplerAnnotMarkup" link="PopplerAnnot.html#PopplerAnnotMarkup"/>
     <keyword type="struct" name="PopplerAnnotCircle" link="PopplerAnnot.html#PopplerAnnotCircle"/>
@@ -460,10 +453,18 @@
     <keyword type="enum" name="enum PopplerStructureFormRole" link="PopplerStructureElement.html#PopplerStructureFormRole"/>
     <keyword type="enum" name="enum PopplerStructureFormState" link="PopplerStructureElement.html#PopplerStructureFormState"/>
     <keyword type="struct" name="PopplerTextSpan" link="PopplerStructureElement.html#PopplerTextSpan"/>
+    <keyword type="function" name="poppler_color_new ()" link="poppler-PopplerColor.html#poppler-color-new"/>
+    <keyword type="function" name="poppler_color_copy ()" link="poppler-PopplerColor.html#poppler-color-copy"/>
+    <keyword type="function" name="poppler_color_free ()" link="poppler-PopplerColor.html#poppler-color-free"/>
+    <keyword type="struct" name="PopplerColor" link="poppler-PopplerColor.html#PopplerColor"/>
+    <keyword type="function" name="poppler_date_parse ()" link="poppler-PDF-Utility-functions.html#poppler-date-parse" since="0.12"/>
     <keyword type="macro" name="POPPLER_MAJOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MAJOR-VERSION:CAPS" since="0.12"/>
     <keyword type="macro" name="POPPLER_MINOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS" since="0.12"/>
     <keyword type="macro" name="POPPLER_MICRO_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MICRO-VERSION:CAPS" since="0.12"/>
     <keyword type="macro" name="POPPLER_CHECK_VERSION()" link="poppler-Version-and-Features-Information.html#POPPLER-CHECK-VERSION:CAPS" since="0.12"/>
+    <keyword type="function" name="poppler_get_version ()" link="poppler-Version-and-Features-Information.html#poppler-get-version"/>
+    <keyword type="function" name="poppler_get_backend ()" link="poppler-Version-and-Features-Information.html#poppler-get-backend"/>
     <keyword type="macro" name="POPPLER_HAS_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-HAS-CAIRO:CAPS"/>
+    <keyword type="enum" name="enum PopplerBackend" link="poppler-Version-and-Features-Information.html#PopplerBackend"/>
   </functions>
 </book>
