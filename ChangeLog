@@ -1,3 +1,769 @@
+commit fee700cfecb9d7d5fa938704a5f457f15aaa4676
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Dec 1 20:52:42 2014 +0100
+
+    Run dos2unix as suggested by Volker Grabsch
+
+ splash/SplashState.h            | 278 ++++++++++----------
+ test/perf-test-preview-dummy.cc |  44 ++--
+ test/perf-test-preview-win.cc   | 544
+ ++++++++++++++++++++--------------------
+ 3 files changed, 433 insertions(+), 433 deletions(-)
+
+commit d3fe0661c6dc6050e14cd5cb4afa089b7d7d66b0
+Author: Richard PALO <richard@netbsd.org>
+Date:   Sun Nov 30 22:46:22 2014 +0100
+
+    warning: "_FILE_OFFSET_BITS" redefined
+
+    Bug #86870
+
+ test/perf-test.cc | 2559
+ +++++++++++++++++++++++++++--------------------------
+ 1 file changed, 1280 insertions(+), 1279 deletions(-)
+
+commit 18884065e11fee82506915095619107a43172ecb
+Author: Richard PALO <richard@netbsd.org>
+Date:   Sun Nov 30 22:36:29 2014 +0100
+
+    The isfinite macro is defined on SunOS under c99
+
+    Bug #86869
+
+ poppler/SplashOutputDev.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit bcb470064dd9f75ab0b0a0d9b7319fe8f1e558ae
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Tue Nov 25 05:53:38 2014 +1030
+
+    cofigure: print "no" instead of "auto" if lcms not found
+
+ configure.ac | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 832046c57ab2909d329340f1c941b29e8246ff73
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Fri Nov 28 11:08:34 2014 +0100
+
+    Use correct LAB byte array for lcms input
+
+    Bug #86388
+
+ poppler/GfxState.cc | 51
+ ++++++++++++++++++++++++++++++++++++++-------------
+ poppler/GfxState.h  |  4 +++-
+ 2 files changed, 41 insertions(+), 14 deletions(-)
+
+commit a604bc3a2ed9f9181aa3b12d795608fcf5e08220
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Fri Nov 14 11:56:50 2014 +0100
+
+    Solve blend mode problem in CYMK and DeviceN for separable blend modes
+
+    Fixes part of #68986
+
+ poppler/SplashOutputDev.cc | 277
+ +++++++++++++++++++++++++--------------------
+ 1 file changed, 155 insertions(+), 122 deletions(-)
+
+commit b7802ff39db270dda2aa20f005fb87c22ed34137
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Fri Nov 14 11:47:38 2014 +0100
+
+    Use Default colorspaces if present instead of Device colorspaces
+
+    Fixes part of #68986
+
+ poppler/CairoOutputDev.cc |   4 +-
+ poppler/Gfx.cc            |  40 +++++-----
+ poppler/GfxState.cc       | 197
+ ++++++++++++++++++++++++++++++++++------------
+ poppler/GfxState.h        |  31 ++++----
+ poppler/Page.cc           |   4 +-
+ 5 files changed, 188 insertions(+), 88 deletions(-)
+
+commit 07aa6f4030418883d8d45a8dfa3d80d2dadca4e7
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Thu Nov 13 12:26:25 2014 +0100
+
+    write correct size in trailer dict
+
+    Bug #86063
+
+ poppler/PDFDoc.cc | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+commit 51e7c29cabedc72e097023e6d8d6d68ed43fa20c
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Fri Nov 7 18:30:36 2014 +0100
+
+    regtest: Update references also for tests that no longer crash
+
+    We are currently updating the refs only when we have checksums to
+    compare, but if a test used to crash there's no md5 file in refs.
+
+ regtest/TestRun.py           |  2 ++
+ regtest/backends/__init__.py | 24 ++++++++++++++++++++++++
+ 2 files changed, 26 insertions(+)
+
+commit d205908930d5dc4ec3a1a1a2c2b93fbb92c2c867
+Author: William Bader <williambader@hotmail.com>
+Date:   Wed Nov 5 20:23:49 2014 +0100
+
+    Make it proper C
+
+ glib/demo/annots.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit fa1d636b00210b9c52787ab3c833fe9aa2e293fa
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Nov 4 20:00:08 2014 +0100
+
+    0.28.1
+
+ configure.ac     | 2 +-
+ cpp/Doxyfile     | 2 +-
+ qt4/src/Doxyfile | 2 +-
+ qt5/src/Doxyfile | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 7debbb05df18afc86df8a4fd37980728ec2e5788
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Nov 4 19:29:58 2014 +0100
+
+    Fix typo
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d5489ef37742227176e800390a990f2b882d9710
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Nov 4 01:27:05 2014 +0100
+
+    0.28.0
+
+ CMakeLists.txt         |  6 +++---
+ NEWS                   | 43 +++++++++++++++++++++++++++++++++++++++++++
+ configure.ac           |  4 ++--
+ cpp/Doxyfile           |  2 +-
+ poppler/Makefile.am    |  2 +-
+ qt4/src/CMakeLists.txt |  2 +-
+ qt4/src/Doxyfile       |  2 +-
+ qt4/src/Makefile.am    |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ qt5/src/Makefile.am    |  2 +-
+ 11 files changed, 56 insertions(+), 13 deletions(-)
+
+commit f87115a1129e4e03802769181a3392c8dce3192a
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Tue Nov 4 01:25:18 2014 +0100
+
+    Don't ship the moc files
+
+ qt4/demos/Makefile.am | 1 -
+ qt5/demos/Makefile.am | 1 -
+ 2 files changed, 2 deletions(-)
+
+commit 0a9c38076f1555196029372b7e08714b43c7a58d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Nov 3 21:43:28 2014 +0100
+
+    Update (C)
+
+ fofi/FoFiType1.cc                    |  1 +
+ poppler/PDFDoc.cc                    |  4 ++--
+ poppler/PDFDoc.h                     |  2 +-
+ poppler/XRef.cc                      |  2 +-
+ qt4/src/poppler-annotation-private.h |  2 +-
+ qt4/src/poppler-annotation.cc        |  2 +-
+ qt4/src/poppler-page.cc              |  2 +-
+ qt4/src/poppler-qt4.h                |  2 +-
+ qt5/src/poppler-annotation-private.h |  2 +-
+ qt5/src/poppler-annotation.cc        |  2 +-
+ qt5/src/poppler-page.cc              |  2 +-
+ qt5/src/poppler-qt5.h                |  2 +-
+ utils/pdfdetach.cc                   |  1 +
+ utils/pdftocairo-win32.cc            | 12 ++++++++++++
+ utils/pdftocairo-win32.h             | 12 ++++++++++++
+ utils/pdftocairo.cc                  |  3 ++-
+ 16 files changed, 40 insertions(+), 13 deletions(-)
+
+commit 73cf1e87c9803bbe4271be297b486d9932677d46
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Nov 3 21:37:13 2014 +0100
+
+    Need to dist this file
+
+ utils/Makefile.am | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 2fd0cd652cfc03c9af35a59192729e4ed26e8146
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Nov 3 19:20:23 2014 +0100
+
+    Fix memory leaks when running pdfseparate
+
+    Bug #84768
+
+ poppler/PDFDoc.cc    | 102
+ +++++++++++++++++++++------------------------------
+ poppler/PDFDoc.h     |   2 +-
+ utils/pdfseparate.cc |   8 +++-
+ utils/pdfunite.cc    |   4 +-
+ 4 files changed, 50 insertions(+), 66 deletions(-)
+
+commit d6ea8acbb348fdb43601a963ba5407e933565003
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Mon Nov 3 19:11:25 2014 +0100
+
+    fix crash in Xref::getEntry
+
+    Bug 85234
+
+ poppler/XRef.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit bd142810b9f66b017a58b3e1840d4d72794f1ef4
+Author: Jason Crain <jason@aquaticape.us>
+Date:   Thu May 15 02:22:44 2014 -0500
+
+    cairo: Use matrix to determine pattern size
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=33364
+
+ poppler/CairoOutputDev.cc | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+commit 06dd7dc337c7db6122329e98783a126d59035aff
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Thu May 29 12:45:33 2014 +0200
+
+    Include windows.h, not Windows.h
+
+    Fixes building on file systems that are case sensitive, e.g. when
+    cross compiling on Linux for win32.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79407
+
+ qt4/tests/stress-threads-qt4.cpp | 2 +-
+ qt5/tests/stress-threads-qt5.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 76a350b11160ac203a41b27fbc85a3264bfe4735
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Thu Oct 30 18:25:06 2014 +0100
+
+    regtest: Try to fix again the paths of the resources in the generated
+    HTML report
+
+    Use always relatives paths for the resources under the out directory,
+    and absolute paths for all other resources when no-absolute-path
+    command
+    line option is used.
+
+ regtest/HTMLReport.py | 47
+ +++++++++++++++++++++++------------------------
+ 1 file changed, 23 insertions(+), 24 deletions(-)
+
+commit c93d6b264dc77c46c72281d966bf826274a43d15
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Wed Oct 29 17:37:06 2014 +0100
+
+    regtest: respect --no-absolute-paths when creating the pretty
+    diff links
+
+ regtest/HTMLReport.py | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+commit 9f953e47a6ea92d806aeea61e227af54c889c6be
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Mon Oct 27 19:53:28 2014 +0100
+
+    regtest: Add an option to create the HTML report without absolute
+    paths
+
+    It uses the paths as received from the command line attributes.
+
+ regtest/HTMLReport.py             | 15 +++++++++++----
+ regtest/commands/create-report.py |  4 ++++
+ 2 files changed, 15 insertions(+), 4 deletions(-)
+
+commit 3d840231bc6f0714da361493ef32913af2eb78d7
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Sun Oct 26 12:09:28 2014 +0100
+
+    regtest: Fix png diff generation with python-pil pillow fork
+
+    Use from PIL import Image instead of just import Image, since pillow
+    only doesn't support import Image without using PIL.Image.
+
+ regtest/backends/__init__.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 68e58ec5465efc289d85ae104941db92450a3168
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Sun Oct 26 11:21:23 2014 +0100
+
+    regtest: Limit the number of worker threads to the number of documents
+    to test
+
+    We are always spawning all the threads even if the documents to
+    test is
+    less than the worker threads. Also optimize the case of running
+    only one
+    test to not spwn any thread.
+
+ regtest/TestRun.py | 27 ++++++++++++++++++---------
+ 1 file changed, 18 insertions(+), 9 deletions(-)
+
+commit 7c21b95852e891060cd2e276949acf0945306ab7
+Author: Carlos Garcia Campos <cgarcia@igalia.com>
+Date:   Sun Oct 26 11:08:45 2014 +0100
+
+    regtest: Allow to run groups of tests individually
+
+    Now it's possible to pass more than one argument to run-tests
+    command and
+    optionally the docs directory. When more than one test is passed
+    and the
+    docs directory is not provided, the common base path of all passed
+    tests
+    is used as docs directory. The tests passed can be documents or
+    directories, using absolute paths or paths relative to the docs
+    directory.
+    This also allows us to update the refs for a group of tests.
+
+ regtest/TestRun.py            | 26 ++++++++++++++++++++++++--
+ regtest/Utils.py              |  7 +++++--
+ regtest/commands/run-tests.py | 29 ++++++++++++++++++++---------
+ 3 files changed, 49 insertions(+), 13 deletions(-)
+
+commit 53be607edc18a861aeb0b6663bac3c05de46c84c
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Fri Oct 24 11:35:17 2014 +0200
+
+    Fix warning on unused variable in pdftocairo.cc
+
+    Fixes warning:
+
+      CXX      pdftocairo-pdftocairo.o
+    pdftocairo.cc:130:14: warning: ‘setupdlg’ defined but not used
+    [-Wunused-variable]
+     static GBool setupdlg = gFalse;
+                  ^
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=85400
+
+ utils/pdftocairo.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit f966b8766d40b2c912e69a1e17ef8cc4bd52be95
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Tue Oct 21 16:42:27 2014 +0200
+
+    fofi: Fix a crash when parsing an invalid font due to a integer
+    overflow
+
+    This fixes a crash rendering trust_metrics.f2495.f0.pdf.
+
+ fofi/FoFiType1.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4963332ca4db13d8a9186b06d2aa0d59abbc10ee
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Oct 5 21:58:37 2014 +1030
+
+    pdftocairo: add -printdlg output option for win32
+
+    when set the win32 print dialog is displayed before printing
+
+ configure.ac              |   2 +-
+ utils/pdftocairo-win32.cc | 303
+ ++++++++++++++++++++++++++++++++++++++++++++--
+ utils/pdftocairo-win32.h  |  14 +--
+ utils/pdftocairo.1        |  14 ++-
+ utils/pdftocairo.cc       |  31 ++++-
+ 5 files changed, 337 insertions(+), 27 deletions(-)
+
+commit d8fe025c36f555a5438677e20df803eee216bb13
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Oct 5 18:11:09 2014 +1030
+
+    pdftocairo: add a -setupdlg option that will the show printer
+    properties
+
+    dialog when printing to a win32 printer.
+
+ utils/pdftocairo-win32.cc | 22 +++++++++++++++++++---
+ utils/pdftocairo-win32.h  |  3 ++-
+ utils/pdftocairo.1        |  5 +++++
+ utils/pdftocairo.cc       | 24 ++++++++++++++++--------
+ 4 files changed, 42 insertions(+), 12 deletions(-)
+
+commit c091aa14513859ab76223f5e4e6055d92082433c
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Sep 14 20:43:47 2014 +0930
+
+    pdftocairo: fix a number of bugs in win32 printing
+
+    - make origPageSizes work
+    - make landscape pages work
+    - make -noshrink option work
+    - return actual page size in use back to main() so fit page transform
+    works
+    - hdc should be destroyed after cairo surface
+    - improve option parsing and rename duplex values
+    - Add third call to DocumentProperties as discussed in bug 79936
+    - fix error messages
+
+ utils/pdftocairo-win32.cc | 181
+ ++++++++++++++++++++++++++--------------------
+ utils/pdftocairo-win32.h  |   2 +-
+ utils/pdftocairo.1        |   5 +-
+ utils/pdftocairo.cc       |  49 ++++++-------
+ 4 files changed, 132 insertions(+), 105 deletions(-)
+
+commit cc3b39d49c656e912a7461212f3bb4e58c6444e7
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Fri Sep 12 18:17:49 2014 +0930
+
+    make pdftocairo-win32.cc a standalone .cc file
+
+    instead of #including it in pdftocairo.cc
+
+ utils/CMakeLists.txt      |  1 +
+ utils/Makefile.am         |  3 +-
+ utils/pdftocairo-win32.cc | 74
+ +++++++++++++++++++++++------------------------
+ utils/pdftocairo-win32.h  | 22 ++++++++++++++
+ utils/pdftocairo.cc       | 24 +++++++++------
+ 5 files changed, 77 insertions(+), 47 deletions(-)
+
+commit 700205af19ef1ae5f2c713d118ebd5dd4a0afba3
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Sep 7 20:18:36 2014 +0930
+
+    pdftocairo: Allow an output file for win32 printing to be specified
+
+    Can be used for testing win32 print output without wasting paper.
+
+ utils/pdftocairo-win32.cc | 12 ++++++++----
+ utils/pdftocairo.1        |  4 ++++
+ utils/pdftocairo.cc       | 13 +++++++------
+ 3 files changed, 19 insertions(+), 10 deletions(-)
+
+commit 40d3ae87befad489fd8c0b38ff2561a0782cae0b
+Author: Rodrigo Rivas Costa <rodrigorivascosta@gmail.com>
+Date:   Sat Sep 6 21:04:10 2014 +0930
+
+    Add support for printing to a Windows printer from pdftocairo
+
+    Bug 79936
+
+ configure.ac              |   2 +-
+ utils/pdftocairo-win32.cc | 219
+ ++++++++++++++++++++++++++++++++++++++++++++++
+ utils/pdftocairo.1        |  23 ++++-
+ utils/pdftocairo.cc       |  61 ++++++++++---
+ 4 files changed, 292 insertions(+), 13 deletions(-)
+
+commit ee4a389872d86b619c677888da8f13f1f6c54472
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Mon Oct 20 22:32:30 2014 +1030
+
+    PDFDoc: fix crash when getPage() returns NULL
+
+    Bug 85235
+
+ poppler/PDFDoc.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 0c3f53e34ec287dab2784e1f3411ad06b62dffc7
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Mon Oct 20 22:17:20 2014 +1030
+
+    PDFDOC: Check for EOF when reading raw stream
+
+    Bug 85233
+
+ poppler/PDFDoc.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 88dbd4df0998233939b4a51cedbfc65c58a315f9
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Oct 19 22:47:15 2014 +1030
+
+    pdfdetach: fix crash when getPage() returns null
+
+    Bug 85145
+
+ utils/pdfdetach.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit e0179304cdef615fcf639046410d214fd5b5f276
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Oct 19 21:36:39 2014 +1030
+
+    cairo: fix crash when no group color space
+
+    Bug 85137
+
+ poppler/CairoOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 745f1241bf903969e50f0e1139641e389a9c331f
+Author: Scott West <scott.gregory.west@gmail.com>
+Date:   Tue Oct 7 23:54:52 2014 +0200
+
+    Fix memory leak in Dict.remove.
+
+    The entry was previously just overwritten now it is freed
+
+    Small fixes by Albert oo
+
+    Bug #84607
+
+ poppler/Dict.cc | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+commit b8810703ca76f0bbc8185ab87679cf18eb006d52
+Author: Luigi Scarso <luigi.scarso@gmail.com>
+Date:   Tue Oct 7 22:45:05 2014 +0200
+
+    Make Attribute::getName() work when UTF-16BE is used
+
+    Contains some ideas by me
+    Bug #84722
+
+ goo/GooString.h          |  9 +++++----
+ poppler/StructElement.cc | 17 +++++++++++------
+ poppler/StructElement.h  |  7 +++++--
+ 3 files changed, 21 insertions(+), 12 deletions(-)
+
+commit 96a04336c7a6331727724125686a0d6f42f19f46
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Mon Oct 6 10:21:51 2014 +1030
+
+    cairo: only embed mime data if image decode map is identity
+
+    https://bugs.launchpad.net/ubuntu/+source/cairo/+bug/1317517
+
+ poppler/CairoOutputDev.cc | 19 ++++++++++++++++---
+ poppler/CairoOutputDev.h  |  3 ++-
+ 2 files changed, 18 insertions(+), 4 deletions(-)
+
+commit 18541054bebce3f9d4729629785bf140d67d2da0
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Wed Sep 24 21:20:42 2014 +0930
+
+    cairo: Only embed mime data for gray/rgb/cmyk colorspaces
+
+    Bug 80719
+
+ poppler/CairoOutputDev.cc | 39 +++++++++++++++++++++++++++++++--------
+ poppler/CairoOutputDev.h  |  2 +-
+ 2 files changed, 32 insertions(+), 9 deletions(-)
+
+commit cbf2652c483d7010fc36191c8b209a57eeec93d8
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Thu Jan 26 00:37:17 2012 +1030
+
+    cairo: don't render text when text matrix is not invertable
+
+    Emulates acroread behavior.
+
+    Bug 78042
+
+ poppler/CairoOutputDev.cc | 14 +++++++++-----
+ poppler/CairoOutputDev.h  |  1 +
+ 2 files changed, 10 insertions(+), 5 deletions(-)
+
+commit 4fe17e97a4bd7873caad771c446199b282039697
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Sun Oct 5 11:30:43 2014 +0200
+
+    glib: Build introspection linking to the uninstalled libraries
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=84526
+
+ glib/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit a2477da56a4d1c534175940d7c01a9d3db6c72d4
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Oct 1 22:33:11 2014 +0200
+
+    Fix 303287ebdad0de9fb2655c4d7eab627c0045ea04
+
+    It may happen that j is bigger than macGlyphNames size, so don't
+    try to access it
+
+ fofi/FoFiTrueType.cc | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+commit ce95ecda450361496aedd5d5cd0bf47fd2c66703
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Sep 30 19:50:20 2014 +0200
+
+    Fix assert in 5068.asan.0.6052.pdf
+
+ poppler/Gfx.cc | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 01723aa17e836e818158dbdc56df642a290be300
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Tue Sep 30 18:48:47 2014 +0200
+
+    Map Standard/Expert encoding ligatures to AGLFN names
+
+    for use with substitute fonts that are not compatible with the
+    Standard 14 fonts.
+
+    Bug 80093
+
+ poppler/CairoFontEngine.cc | 12 +++++++++---
+ poppler/GfxFont.cc         | 29 ++++++++++++++++++++++++++++-
+ poppler/GfxFont.h          |  7 ++++++-
+ splash/SplashFTFontFile.cc |  8 ++++++++
+ 4 files changed, 51 insertions(+), 5 deletions(-)
+
+commit 529db4a94607c1ad909764d26f740c601bbe896f
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Mon Sep 29 22:59:15 2014 +0200
+
+    Fix build with --disable-utils
+
+    Since 21b5fd655ce45b90668d1416d21c526ab7eb3ad6, building Poppler
+    fails when configured
+    with '--disable-utils'.
+
+    Bug #84448
+
+ Makefile.am       | 6 +-----
+ utils/Makefile.am | 4 ++++
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit c54f6aceed983a221d88ce5c21becbf8aab2931b
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Mon Sep 29 21:42:46 2014 +0200
+
+    use alt colorspace to get CMYK values for an ICC based CMYK colorspace
+
+    The reason for the pale image is that GfxICCBasedColorSpace::getCMYK()
+    uses the cms transformation to get RGB values and the convert it
+    back to CMYK even for a ICC based CMYK colorspace instead of just
+    returning the CMYK values itself.
+
+    Bug #79019
+
+ poppler/GfxState.cc | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+commit 21b5fd655ce45b90668d1416d21c526ab7eb3ad6
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Sep 14 11:20:23 2014 +0200
+
+    Refactor Makefiles to build a noinst library for parsing args
+
+    Prevents this automake warning about possible forward-incompatibility:
+
+    $ ./autogen.sh
+    ...
+    cpp/tests/Makefile.am:16: warning: source file
+    '$(top_srcdir)/utils/parseargs.cc' is in a subdirectory,
+    cpp/tests/Makefile.am:16: but option 'subdir-objects' is disabled
+    automake: warning: possible forward-incompatibility.
+    automake: At least a source file is in a subdirectory, but the
+    'subdir-objects'
+    automake: automake option hasn't been enabled.  For now, the
+    corresponding output
+    automake: object file(s) will be placed in the top-level directory.
+    However,
+    automake: this behaviour will change in future Automake versions:
+    they will
+    automake: unconditionally cause object files to be placed in the
+    same subdirectory
+    automake: of the corresponding sources.
+    automake: You are advised to start using 'subdir-objects' option
+    throughout your
+    automake: project, to avoid future incompatibilities.
+    cpp/tests/Makefile.am:20: warning: source file
+    '$(top_srcdir)/utils/parseargs.cc' is in a subdirectory,
+    cpp/tests/Makefile.am:20: but option 'subdir-objects' is disabled
+    parallel-tests: installing './test-driver'
+    test/Makefile.am:58: warning: source file '../utils/parseargs.cc'
+    is in a subdirectory,
+    test/Makefile.am:58: but option 'subdir-objects' is disabled
+
+    $ automake --version
+    automake (GNU automake) 1.14.1
+    ...
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=83839
+
+ cpp/tests/Makefile.am |  3 +--
+ test/Makefile.am      |  8 ++++----
+ utils/.gitignore      |  2 ++
+ utils/Makefile.am     | 42 ++++++++++++++++++------------------------
+ 4 files changed, 25 insertions(+), 30 deletions(-)
+
+commit 70a851b0cc58241d1f2f6bc48af2614595326c8f
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sat Sep 6 21:16:04 2014 +0930
+
+    Update .gitignore
+
+ .gitignore | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit d44e7e3560bdc79253df98db05385dce3e8ccbb4
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sat Sep 6 21:53:21 2014 +0930
+
+    Don't use -fPIC on mingw
+
+    it emits a warning for every file stating that -fPIC is ignored
+
+ configure.ac | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+commit 2723371b2e2f7684301ea1c5272ab49851f28c03
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sat Sep 6 21:19:46 2014 +0930
+
+    make autogen.sh work with variables with spaces
+
+    eg ./autogen.sh CXXFLAGS="-O0 -g3"
+
+ autogen.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ebc814a7e31511308bbcd8856d0356f4d7cc74be
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Sep 14 11:45:12 2014 +0200
+
+    Add compile to .gitignore
+
+    Automake automatically creates a wrapper script called 'compile' for
+    compilers which do not understand '-c -o'.
+
+    $ automake --version
+    automake (GNU automake) 1.14.1
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=83840
+
+ .gitignore | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 8ce31485faa26994c52f4d032cc5a8355aba23d1
+Merge: 4589ce1 303287e
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 26 00:40:43 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit 303287ebdad0de9fb2655c4d7eab627c0045ea04
 Author: Thomas Freitag <Thomas.Freitag@alfa.de>
 Date:   Fri Sep 26 00:25:38 2014 +0200
@@ -19,6 +785,24 @@ Date:   Fri Sep 12 19:22:20 2014 +0200
 
  glib/poppler-input-stream.cc | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 4589ce17caf94e7c5fa856906d3a8cc08e999d73
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Fri Sep 12 19:22:20 2014 +0200
+
+    glib: Fix use of uninitialized members in PopplerInputStream
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=82630
+
+ glib/poppler-input-stream.cc | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit fe67324d450c356b7c876cf50da705156112513a
+Merge: e62e18e f74a596
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Aug 21 21:39:52 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
 
 commit f74a5964078224c01bd5642aabc928d185bb0b69
 Author: Albert Astals Cid <aacid@kde.org>
@@ -53,6 +837,80 @@ Date:   Thu Aug 21 19:58:35 2014 +0200
  goo/gfile.cc | 6 +-----
  1 file changed, 1 insertion(+), 5 deletions(-)
 
+commit e62e18e1b318d6fa664d236723de3c06ae43e86b
+Author: Jehan Pagès <jehan@zemarmot.net>
+Date:   Tue Aug 12 21:05:03 2014 +0200
+
+    poppler: use poppler-data pkg-config for both cmake and autotools
+    builds
+
+ CMakeLists.txt | 16 ++++++++++++++++
+ config.h.cmake |  2 +-
+ configure.ac   |  7 ++++++-
+ 3 files changed, 23 insertions(+), 2 deletions(-)
+
+commit 572c60764bbbd2080bfd7a926c646ad20b467aea
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Tue Aug 12 18:12:45 2014 +0200
+
+    Makefile.am cleanups
+
+    Bug #79411
+
+ configure.ac               |  13 +++--
+ cpp/Makefile.am            |  66 +++++++++++++------------
+ cpp/tests/Makefile.am      |  13 ++---
+ fofi/Makefile.am           |   6 +--
+ glib/Makefile.am           |  29 ++++++-----
+ glib/demo/Makefile.am      |  18 +++----
+ glib/reference/Makefile.am |   3 +-
+ goo/Makefile.am            |  38 +++++++--------
+ poppler/Makefile.am        | 118
+ ++++++++++++++++++++++-----------------------
+ qt4/demos/Makefile.am      |  59 +++++++++++------------
+ qt4/src/Makefile.am        |  31 ++++++------
+ qt4/tests/Makefile.am      |  97 +++++++++++++------------------------
+ qt5/demos/Makefile.am      |  59 +++++++++++------------
+ qt5/src/Makefile.am        |  27 ++++++-----
+ qt5/tests/Makefile.am      |  98 ++++++++++++++-----------------------
+ splash/Makefile.am         |  42 ++++++++--------
+ test/Makefile.am           |  68 +++++++++-----------------
+ utils/Makefile.am          |  97 ++++++++++++++++++-------------------
+ 18 files changed, 405 insertions(+), 477 deletions(-)
+
+commit 4a4fe80d85a31b10822c7cd8eb5a0698bf306a52
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Fri Aug 1 07:16:36 2014 +0200
+
+    glib-demo: Replace use of deprecated gtk stock items
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=82384
+
+ glib/demo/annots.c      | 8 ++++----
+ glib/demo/attachments.c | 4 ++--
+ glib/demo/main.c        | 6 +++---
+ glib/demo/page.c        | 6 +++---
+ glib/demo/utils.c       | 4 ++--
+ 5 files changed, 14 insertions(+), 14 deletions(-)
+
+commit ec6bad36cf5e9521f35285a3295976c05a69f76a
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Fri Aug 1 07:51:10 2014 +0200
+
+    glib-demo: Remove use of deprecated gtk_dialog_get_action_area()
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=82385
+
+ glib/demo/main.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+commit b72a534d6c7d8bc026812b68f9d9ac6bf9a2200a
+Merge: f2e4154 ef3f758
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Aug 3 01:06:57 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit ef3f7585fac086de0919aa0bb0ef91a5070ac23e
 Author: Jiri Slaby <jirislaby@gmail.com>
 Date:   Sun Aug 3 01:05:00 2014 +0200
@@ -81,7 +939,29 @@ Date:   Sun Aug 3 01:01:35 2014 +0200
  poppler/SplashOutputDev.cc   | 9 ++++-----
  3 files changed, 6 insertions(+), 7 deletions(-)
 
+commit f2e4154eff52b86e62490a3ccba470824c9cf436
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Sat Jul 26 00:12:37 2014 +0200
+
+    pdfseparate: additonal handling for annotations
+
+    Bug #77549
+
+ poppler/PDFDoc.cc | 46 ++++++++++++++++++++++++++++------------------
+ poppler/PDFDoc.h  |  6 +++---
+ utils/pdfunite.cc |  2 +-
+ 3 files changed, 32 insertions(+), 22 deletions(-)
+
 commit e7825f7cbbe7cc9c324fcb34c2e0dcae75f4172a
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Fri Jul 25 15:45:55 2014 +0200
+
+    glib: Fix a memory leak when getting text layout and attributes
+
+ glib/poppler-page.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit b729bf92ea1522a1eed9579e53e7580215cb9555
 Author: Carlos Garcia Campos <carlosgc@gnome.org>
 Date:   Fri Jul 25 15:45:55 2014 +0200
 
@@ -112,6 +992,28 @@ Date:   Thu Jul 24 19:47:22 2014 +0200
  poppler/Annot.cc | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
+commit f302864ed354b313ec39433f65ca3b107b55789d
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Fri Jul 25 11:25:42 2014 +0200
+
+    glib: Return NULL in poppler_annot_get_contents also for empty strings
+
+ glib/poppler-annot.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 13a5c5f4b61d05f2d18f94ad15e210a47021a576
+Author: Anuj Khare <khareanuj18@gmail.com>
+Date:   Thu Jul 24 19:47:22 2014 +0200
+
+    annots: Fix a crash when adding annot without contents
+
+    Having no content in an annotation results in a crash when generating
+    its appearance, since the contents pointer is dereferenced.
+    For consistency, the same has been done in Annot::initialize.
+
+ poppler/Annot.cc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
 commit 94ea9d8e1631abfbb8cc078100942d46b1356970
 Author: Carlos Garcia Campos <carlosgc@gnome.org>
 Date:   Thu Jul 24 10:46:17 2014 +0200
@@ -126,6 +1028,42 @@ Date:   Thu Jul 24 10:46:17 2014 +0200
  poppler/CairoOutputDev.cc | 64
  +++++++++++++++++++++++------------------------
  1 file changed, 31 insertions(+), 33 deletions(-)
+
+commit 02c127b355bb8a98684a5d0af063c60b8bfd09dd
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Thu Jul 24 10:46:17 2014 +0200
+
+    cairo: Make sure we always push a transparency group in
+    setSoftMaskFromImageMask()
+
+    Because that's what unsetSoftMaskFromImageMask() assumes.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=81624
+
+ poppler/CairoOutputDev.cc | 64
+ +++++++++++++++++++++++------------------------
+ 1 file changed, 31 insertions(+), 33 deletions(-)
+
+commit c841a703c4c1750fd7ac0d04c6c3e7d4af80b8fa
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Jul 21 00:29:28 2014 +0200
+
+    Improve Overprintmode and shadings
+
+    Bug #80998
+
+ poppler/SplashOutputDev.cc |  6 ++++--
+ poppler/SplashOutputDev.h  |  8 +++++++-
+ splash/Splash.cc           | 24 ++++++++++++++++++++++--
+ splash/SplashPattern.h     |  6 +++++-
+ 4 files changed, 38 insertions(+), 6 deletions(-)
+
+commit ce782112746f629a8e7be6f2daf6ece6ab19917d
+Merge: 2c0cb68 26372cf
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jul 20 20:35:13 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
 
 commit 26372cfae029a1124e042855c58bf5b70f281c76
 Author: Ed Porras <ed@moto-research.com>
@@ -179,6 +1117,13 @@ Date:   Thu Jul 17 07:33:10 2014 +0200
  glib/poppler-media.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
+commit 2c0cb689910e8579bf428b3999bcac0cb27b0e51
+Merge: 0b639cd 1161e72
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Jul 12 17:21:07 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit 1161e728de9ca7c9a5fb0e24c4a5e4a79c65a849
 Author: Thomas Freitag <Thomas.Freitag@alfa.de>
 Date:   Sat Jul 12 17:04:42 2014 +0200
@@ -199,6 +1144,13 @@ Date:   Sat Jul 12 08:35:45 2014 +0200
 
  poppler/poppler-config.h.cmake | 7 +++++--
  1 file changed, 5 insertions(+), 2 deletions(-)
+
+commit 0b639cd2ac1071f5b741031a78d8e2bc18d2b7d7
+Merge: bb16c71 a5ad55b
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 11 00:32:46 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
 
 commit a5ad55b7cb9dc4e62754954291e4ecb8e05b5d67
 Author: Albert Astals Cid <aacid@kde.org>
@@ -246,6 +1198,25 @@ Date:   Thu May 29 16:58:55 2014 +0200
  poppler/poppler-config.h.in | 2 ++
  1 file changed, 2 insertions(+)
 
+commit bb16c7162c73b871e26f508823c0ee259b7e5420
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sat Jun 7 12:00:52 2014 +0200
+
+    Move automake version check from autogen.sh to configure.ac
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79797
+
+ autogen.sh   | 18 ------------------
+ configure.ac |  2 +-
+ 2 files changed, 1 insertion(+), 19 deletions(-)
+
+commit 74c72223cf609e7c24594f95cab6f9865ad562ac
+Merge: f8f7b3a 47a947f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 11 00:23:04 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit 47a947f1dc664793a7037888a46a297a46c79d6c
 Author: Hib Eris <hib@hiberis.nl>
 Date:   Thu Jun 19 10:11:21 2014 +0200
@@ -256,6 +1227,13 @@ Date:   Thu Jun 19 10:11:21 2014 +0200
 
  configure.ac | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit f8f7b3a61bc7eb1e569c25a630b5e127b5dcae62
+Merge: 805ff76 aa6205d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jul 9 00:23:22 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
 
 commit aa6205d195c56a77e897bad125bf213aba138422
 Author: Jason Crain <jason@aquaticape.us>
@@ -270,6 +1248,17 @@ Date:   Mon Jul 7 23:52:39 2014 -0500
  CMakeLists.txt | 2 +-
  configure.ac   | 8 ++++----
  2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 805ff76112ebfd57276ea78f1f0891abc61a6c03
+Author: Yaakov Selkowitz <yselkowitz@users.sourceforge.net>
+Date:   Mon Apr 11 16:26:11 2011 -0500
+
+    Do not dist gir_DATA
+
+    See https://bugzilla.gnome.org/show_bug.cgi?id=621611 for rationale.
+
+ glib/Makefile.am | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 commit e5862155b1c549b6774bb4f25c09c45857ff1734
 Author: Hib Eris <hib@hiberis.nl>
@@ -372,6 +1361,13 @@ Date:   Thu Jun 19 19:57:31 2014 +0200
  utils/pdftohtml.cc | 1 +
  2 files changed, 2 insertions(+), 1 deletion(-)
 
+commit 8a5e59c6ea7ccd0ecbdb4b37bf3fe4e74e1c0e8e
+Merge: 1b70533 310fbee
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jun 18 00:37:03 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit 310fbeec692b02d555e3e8dd6c851be11b25e26a
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Wed Jun 18 00:31:48 2014 +0200
@@ -413,6 +1409,156 @@ Date:   Wed Jun 18 00:31:48 2014 +0200
  poppler/Lexer.cc | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
+commit 1b705331019b155f2138d4b9f5a5bd03ec59193d
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 17:07:15 2014 +0200
+
+    [glib] doc: Move poppler_date_parse to utility functions section
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-docs.sgml    | 1 +
+ glib/reference/poppler-sections.txt | 7 ++++++-
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+commit d661553b0a13855aa5a1240e9c04a0e49dafd910
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 16:11:26 2014 +0200
+
+    [glib] doc: Document PopplerFindFlags:POPPLER_FIND_DEFAULT
+
+    Fixes warning:
+      DOC   Building XML
+    ../../glib/poppler.h:157: warning: Value description for
+    PopplerFindFlags::POPPLER_FIND_DEFAULT is missing in source code
+    comment
+    block.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/poppler.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 237a1402ab836d10eb5fdc1aa6ceccabea10a316
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 16:07:14 2014 +0200
+
+    [glib] doc: Use <emphasis> instead of <em>
+
+    Fixes:
+      DOC   Building HTML
+    Element em in namespace '' encountered in para, but no template
+    matches.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/poppler-structure-element.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 66abf3992228be2559542e9d2753f45f06ae7728
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 16:02:01 2014 +0200
+
+    [glib] doc: Add PopplerBackend documentation
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/poppler.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+commit a30ec8e4abe3875aad068c83265b47f9beea33d1
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 15:05:52 2014 +0200
+
+    [glib] doc: Add missing POPPLER_TYPE_POINT
+
+    And while we are here, also move poppler_point_get_type() and
+    poppler_quadrilateral_get_type() to private subsection.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-sections.txt | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit 6eb0537ac5163356c8e8f689d2408fa695e99423
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 14:59:15 2014 +0200
+
+    [glib] doc: Fix typo
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-sections.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 96adcad85d76409cb8ed4266a08ae776b42661e4
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 14:53:42 2014 +0200
+
+    [glib] doc: Add poppler_annot_set_flags() to documentation
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-sections.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit f3519352c70537009cc6bd660c0bd3e727db8b8a
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 14:38:13 2014 +0200
+
+    [glib] doc: Move PopplerFindFlags to PopplerPage section
+
+    And also add the missing POPPLER_TYPE_FIND_FLAGS and
+    poppler_find_flags_get_type.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-sections.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit 45b0d49330d9d089b2480b91e418924a490c82ce
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 14:22:28 2014 +0200
+
+    [glib] doc: Move PopplerPrintFlags to PopplerPage section
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-sections.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit ce357147d17004a2772ca3b32d106da511bba360
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 13:22:51 2014 +0200
+
+    [glib] doc: Move poppler_get_{version, backend} documentation to
+    features section
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/reference/poppler-sections.txt | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+commit 1bfd6b69e7e98d4b3e6e891a46b58c9109b8c14c
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Sun Jun 8 12:57:25 2014 +0200
+
+    [glib] doc: Move PopplerColor documentation to it's own section
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79798
+
+ glib/poppler-page.cc                |  6 ++++++
+ glib/reference/poppler-docs.sgml    |  1 +
+ glib/reference/poppler-sections.txt | 21 +++++++++++++++------
+ 3 files changed, 22 insertions(+), 6 deletions(-)
+
+commit 2dd9b95fd910023a7d9d23f2c2e41dcab91d3c31
+Merge: fed71eb b36d27b
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jun 6 21:43:49 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit b36d27b42417d15866a5729409e39d6f7c2b0289
 Author: Hib Eris <hib@hiberis.nl>
 Date:   Fri Jun 6 21:42:10 2014 +0200
@@ -423,6 +1569,32 @@ Date:   Fri Jun 6 21:42:10 2014 +0200
 
  configure.ac | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit fed71ebd8e43e24eace9dcebe24bd318ff3d04a6
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Thu May 29 13:22:05 2014 +0200
+
+    Change pagenum arguments in PDFDoc::markAnnotations from Guint to int
+
+    Bug #79410
+    Fixes compile warning:
+
+      CXX      PDFDoc.lo
+    PDFDoc.cc: In member function 'GBool PDFDoc::markAnnotations(Object*,
+    XRef*, XRef*, Guint, Guint, Guint)':
+    PDFDoc.cc:1607:40: warning: comparison between signed and unsigned
+    integer expressions [-Wsign-compare]
+                   if (obj2.getRef().num == oldPageNum) {
+                                            ^
+    PDFDoc.cc:1617:47: warning: comparison between signed and unsigned
+    integer expressions [-Wsign-compare]
+                   } else if (obj2.getRef().num == newPageNum) {
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=79410
+
+ poppler/PDFDoc.cc | 4 ++--
+ poppler/PDFDoc.h  | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
 commit f5e702060a84362bfdf75260531920d4ba8b7333
 Author: Pino Toscano <pino@kde.org>
@@ -447,6 +1619,33 @@ Date:   Fri May 23 20:05:41 2014 +0200
  qt5/src/Doxyfile |  2 +-
  6 files changed, 17 insertions(+), 5 deletions(-)
 
+commit 93373cd113d046b65538fe983b46842d689a2112
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 11 18:31:10 2014 +0200
+
+    Qt: Add a new page->annotations() call that let's you specify subtypes
+
+    This way we don't return annotations you may not be interested in
+
+ qt4/src/poppler-annotation-private.h |  4 +--
+ qt4/src/poppler-annotation.cc        | 48
+ ++++++++++++++++++++++++++++++++++--
+ qt4/src/poppler-page.cc              |  7 +++++-
+ qt4/src/poppler-qt4.h                | 14 +++++++++++
+ qt5/src/poppler-annotation-private.h |  4 +--
+ qt5/src/poppler-annotation.cc        | 48
+ ++++++++++++++++++++++++++++++++++--
+ qt5/src/poppler-page.cc              |  7 +++++-
+ qt5/src/poppler-qt5.h                | 15 +++++++++++
+ 8 files changed, 137 insertions(+), 10 deletions(-)
+
+commit d2892cd893e4379914a08e66682ed5c423743a41
+Merge: 0844220 7e9fc61
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed May 7 22:27:41 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit 7e9fc61e287889eefd6b08ef5991d31fed79cafd
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Wed May 7 22:25:59 2014 +0200
@@ -460,6 +1659,13 @@ Date:   Wed May 7 22:25:59 2014 +0200
 
  configure.ac | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 0844220347f984c3d9b04fe53e690ee0e8c74afe
+Merge: 84278d8 0a6c1ff
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed May 7 21:56:07 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
 
 commit 0a6c1ff777aa23c7a5654b313b639e66600883b9
 Author: Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -475,6 +1681,13 @@ Date:   Wed May 7 21:54:46 2014 +0200
  utils/pdfunite.cc |   9 +++-
  3 files changed, 162 insertions(+), 4 deletions(-)
 
+commit 84278d8adbb1f6e9a28588fcb4db30c9ef70adde
+Merge: 7b94b11 5b2cdef
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 4 22:21:25 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
+
 commit 5b2cdef49a8a0a92fd323fbe45841a5098a42ece
 Author: Olly Betts <olly@survex.com>
 Date:   Sun May 4 22:20:30 2014 +0200
@@ -485,6 +1698,13 @@ Date:   Sun May 4 22:20:30 2014 +0200
 
  poppler/GfxFont.cc | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 7b94b119f07713af7b8b9f1ac3ea3f1d35c1e240
+Merge: c859d2b bae836c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 4 16:21:24 2014 +0200
+
+    Merge remote-tracking branch 'origin/poppler-0.26'
 
 commit bae836cd3dd3511ca9cf4745626142334bafd1a6
 Author: Marek Kasik <mkasik@redhat.com>
@@ -502,6 +1722,17 @@ Date:   Sun May 4 16:20:33 2014 +0200
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 commit a748b3a059938e6ae98b51eb82bab7c33a5e23c7
+Author: Carlos Garcia Campos <carlosgc@gnome.org>
+Date:   Wed Apr 30 09:25:31 2014 +0200
+
+    glib: Fix multiple definition of PopplerTextSpan
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=78103
+
+ glib/poppler-structure-element.h | 3 ---
+ 1 file changed, 3 deletions(-)
+
+commit c859d2b891a115c79d04db14463791dfb1c46a20
 Author: Carlos Garcia Campos <carlosgc@gnome.org>
 Date:   Wed Apr 30 09:25:31 2014 +0200
 

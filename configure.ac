@@ -1,12 +1,12 @@
 m4_define([poppler_version_major],[0])
-m4_define([poppler_version_minor],[26])
-m4_define([poppler_version_micro],[5])
+m4_define([poppler_version_minor],[29])
+m4_define([poppler_version_micro],[0])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
 AC_PREREQ(2.59)
 AC_INIT([poppler],[poppler_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=poppler])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([1.7 foreign])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS([config.h poppler/poppler-config.h])
 AC_C_BIGENDIAN
@@ -48,7 +48,7 @@ case "$host_os" in
   ;;
   mingw*)
     os_win32=yes
-    win32_libs="-lgdi32"
+    win32_libs="-lgdi32 -lwinspool -lcomdlg32"
     create_shared_lib="-no-undefined"
     auto_import_flags="-Wl,--enable-auto-import"
 
@@ -105,7 +105,12 @@ if test x$enable_relocatable = xyes; then
     fi
 fi
 
-AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])
+dnl ##### Check for installed poppler-data. Use the same datarootdir as default otherwise.
+PKG_CHECK_EXISTS(poppler-data,
+                 [POPPLER_DATADIR=`$PKG_CONFIG --variable=poppler_datadir poppler-data`
+                  AC_DEFINE_DIR(POPPLER_DATADIR, "{POPPLER_DATADIR}", [Poppler data dir])],
+                 [AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])]
+                 )
 
 dnl ##### Checks for header files.
 AC_PATH_XTRA
@@ -465,6 +470,7 @@ fi
 
 CAIRO_VERSION="1.10.0"
 AC_SUBST(CAIRO_VERSION)
+CAIRO_DEPS="cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION"
 AC_ARG_ENABLE(cairo-output,
               AC_HELP_STRING([--disable-cairo-output],
                              [Don't build the cairo graphics backend.]),
@@ -472,9 +478,9 @@ AC_ARG_ENABLE(cairo-output,
               enable_cairo_output="try")
 use_cairo=""
 if test x$enable_cairo_output = xyes; then
-  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION)
+  PKG_CHECK_MODULES(CAIRO, $CAIRO_DEPS)
 elif test x$enable_cairo_output = xtry; then
-  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION,
+  PKG_CHECK_MODULES(CAIRO, $CAIRO_DEPS,
                     [enable_cairo_output="yes"],
                     [enable_cairo_output="no"
 		     use_cairo="no (requires cairo >= $CAIRO_VERSION)"])
@@ -699,15 +705,19 @@ fi
 AM_CONDITIONAL(BUILD_POPPLER_CPP, test "x$enable_poppler_cpp" = "xyes")
 
 
+GTK_TEST_DEPS='gtk+-3.0 >= 3.8 gdk-pixbuf-2.0'
+if test x$enable_cairo_output = xyes; then
+  GTK_TEST_DEPS="$GTK_TEST_DEPS $CAIRO_DEPS"
+fi
 AC_ARG_ENABLE(gtk-test,
               AC_HELP_STRING([--disable-gtk-test],
 	                     [Don't compile GTK+ test program.]),
               enable_gtk_test=$enableval,
               enable_gtk_test="try")
 if test x$enable_gtk_test = xyes; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-3.0 >= 3.8 gdk-pixbuf-2.0)
+  PKG_CHECK_MODULES(GTK_TEST, $GTK_TEST_DEPS)
 elif test x$enable_gtk_test = xtry; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-3.0 >= 3.8 gdk-pixbuf-2.0,
+  PKG_CHECK_MODULES(GTK_TEST, $GTK_TEST_DEPS,
                     [enable_gtk_test="yes"],
                     [enable_gtk_test="no"])
 fi
@@ -752,6 +762,8 @@ if test x$lcms1 = xyes || test x$lcms2 = xyes; then
     lcms1=yes;
     AC_DEFINE(USE_LCMS1, 1, [Defines if use lcms1])
   fi
+else
+  enable_cms=no
 fi
 
 AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
@@ -812,7 +824,21 @@ case "$enable_compile_warnings" in
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
 		-fno-common $CXXFLAGS" ;;
 esac
-# CXXFLAGS="-fPIC $CXXFLAGS"; we don't have it and i dislike the warnings
+
+case "$host_os" in
+  mingw*)
+    # mingw prints "warning: -fPIC ignored for target (all code is position independent)"
+    # for every file
+    ;;
+  os2*)
+    # os/2 gcc prints "warning: -fPIC ignored for target"
+    # for every file
+    ;;
+  *)
+    CXXFLAGS="-fPIC $CXXFLAGS";
+    ;;
+esac
+
 
 case `$PKG_CONFIG --version` in
   0.?|0.1[0-7])

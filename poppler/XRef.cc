@@ -22,7 +22,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -1568,7 +1568,7 @@ GBool XRef::parseEntry(Goffset offset, XRefEntry *entry)
 void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
 {
   std::vector<Goffset> followedPrev;
-  while (prevXRefOffset && (untilEntryNum == -1 || entries[untilEntryNum].type == xrefEntryNone)) {
+  while (prevXRefOffset && (untilEntryNum == -1 || (untilEntryNum < size && entries[untilEntryNum].type == xrefEntryNone))) {
     bool followed = false;
     for (size_t j = 0; j < followedPrev.size(); j++) {
       if (followedPrev.at(j) == prevXRefOffset) {
@@ -1606,7 +1606,7 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
 
 XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
 {
-  if (entries[i].type == xrefEntryNone) {
+  if (i >= size || entries[i].type == xrefEntryNone) {
 
     if ((!xRefStream) && mainXRefEntriesOffset) {
       if (!parseEntry(mainXRefEntriesOffset + 20*i, &entries[i])) {
