@@ -218,6 +218,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="PopplerAnnot.html#poppler-annot-markup-set-popup-rectangle" title="poppler_annot_markup_set_popup_rectangle ()">poppler_annot_markup_set_popup_rectangle</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="https://developer.gnome.org/glib/unstable/glib-Date-and-Time-Functions.html#GDate"><span class="returnvalue">GDate</span></a> *
 </td>
 <td class="function_name">
@@ -1369,10 +1377,17 @@ poppler_annot_markup_get_popup_rectangle
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-annot-markup-get-date"></a><h3>poppler_annot_markup_get_date ()</h3>
-<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Date-and-Time-Functions.html#GDate"><span class="returnvalue">GDate</span></a> *
-poppler_annot_markup_get_date (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>);</pre>
-<p>Returns the date and time when the annotation was created</p>
+<a name="poppler-annot-markup-set-popup-rectangle"></a><h3>poppler_annot_markup_set_popup_rectangle ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+poppler_annot_markup_set_popup_rectangle
+                               (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>,
+                                <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *poppler_rect</code></em>);</pre>
+<p>Sets the rectangle of the popup window related to <em class="parameter"><code>poppler_annot</code></em>
+.
+This doesn't have any effect if <em class="parameter"><code>poppler_annot</code></em>
+ doesn't have a
+popup associated, use <a class="link" href="PopplerAnnot.html#poppler-annot-markup-set-popup" title="poppler_annot_markup_set_popup ()"><code class="function">poppler_annot_markup_set_popup()</code></a> to associate
+a popup window to a <a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a>.</p>
 <div class="refsect3">
 <a name="id-1.2.8.8.24.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -1381,28 +1396,28 @@ poppler_annot_markup_get_date (<em class="parameter"><code><a class="link" href=
 <col class="parameters_description">
 <col width="200px" class="parameters_annotations">
 </colgroup>
-<tbody><tr>
+<tbody>
+<tr>
 <td class="parameter_name"><p>poppler_annot</p></td>
 <td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a></p></td>
 <td class="parameter_annotations"> </td>
-</tr></tbody>
+</tr>
+<tr>
+<td class="parameter_name"><p>poppler_rect</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> to set</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
 </table></div>
 </div>
-<div class="refsect3">
-<a name="id-1.2.8.8.24.6"></a><h4>Returns</h4>
-<p> a <a href="https://developer.gnome.org/glib/unstable/glib-Date-and-Time-Functions.html#GDate"><span class="type">GDate</span></a> representing the date and time
-when the annotation was created, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
-</div>
+<p class="since">Since 0.33</p>
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-annot-markup-get-external-data"></a><h3>poppler_annot_markup_get_external_data ()</h3>
-<pre class="programlisting"><a class="link" href="PopplerAnnot.html#PopplerAnnotExternalDataType" title="enum PopplerAnnotExternalDataType"><span class="returnvalue">PopplerAnnotExternalDataType</span></a>
-poppler_annot_markup_get_external_data
-                               (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>);</pre>
-<p>Gets the external data type of <em class="parameter"><code>poppler_annot</code></em>
-.</p>
+<a name="poppler-annot-markup-get-date"></a><h3>poppler_annot_markup_get_date ()</h3>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Date-and-Time-Functions.html#GDate"><span class="returnvalue">GDate</span></a> *
+poppler_annot_markup_get_date (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>);</pre>
+<p>Returns the date and time when the annotation was created</p>
 <div class="refsect3">
 <a name="id-1.2.8.8.25.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -1420,17 +1435,18 @@ poppler_annot_markup_get_external_data
 </div>
 <div class="refsect3">
 <a name="id-1.2.8.8.25.6"></a><h4>Returns</h4>
-<p> <a class="link" href="PopplerAnnot.html#PopplerAnnotExternalDataType" title="enum PopplerAnnotExternalDataType"><span class="type">PopplerAnnotExternalDataType</span></a> of <em class="parameter"><code>poppler_annot</code></em>
-.</p>
-<p></p>
+<p> a <a href="https://developer.gnome.org/glib/unstable/glib-Date-and-Time-Functions.html#GDate"><span class="type">GDate</span></a> representing the date and time
+when the annotation was created, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-annot-markup-get-reply-to"></a><h3>poppler_annot_markup_get_reply_to ()</h3>
-<pre class="programlisting"><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkupReplyType" title="enum PopplerAnnotMarkupReplyType"><span class="returnvalue">PopplerAnnotMarkupReplyType</span></a>
-poppler_annot_markup_get_reply_to (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>);</pre>
-<p>Gets the reply type of <em class="parameter"><code>poppler_annot</code></em>
+<a name="poppler-annot-markup-get-external-data"></a><h3>poppler_annot_markup_get_external_data ()</h3>
+<pre class="programlisting"><a class="link" href="PopplerAnnot.html#PopplerAnnotExternalDataType" title="enum PopplerAnnotExternalDataType"><span class="returnvalue">PopplerAnnotExternalDataType</span></a>
+poppler_annot_markup_get_external_data
+                               (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>);</pre>
+<p>Gets the external data type of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
 <a name="id-1.2.8.8.26.5"></a><h4>Parameters</h4>
@@ -1449,6 +1465,35 @@ poppler_annot_markup_get_reply_to (<em class="parameter"><code><a class="link" h
 </div>
 <div class="refsect3">
 <a name="id-1.2.8.8.26.6"></a><h4>Returns</h4>
+<p> <a class="link" href="PopplerAnnot.html#PopplerAnnotExternalDataType" title="enum PopplerAnnotExternalDataType"><span class="type">PopplerAnnotExternalDataType</span></a> of <em class="parameter"><code>poppler_annot</code></em>
+.</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-annot-markup-get-reply-to"></a><h3>poppler_annot_markup_get_reply_to ()</h3>
+<pre class="programlisting"><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkupReplyType" title="enum PopplerAnnotMarkupReplyType"><span class="returnvalue">PopplerAnnotMarkupReplyType</span></a>
+poppler_annot_markup_get_reply_to (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a> *poppler_annot</code></em>);</pre>
+<p>Gets the reply type of <em class="parameter"><code>poppler_annot</code></em>
+.</p>
+<div class="refsect3">
+<a name="id-1.2.8.8.27.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>poppler_annot</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotMarkup" title="PopplerAnnotMarkup"><span class="type">PopplerAnnotMarkup</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.8.8.27.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerAnnot.html#PopplerAnnotMarkupReplyType" title="enum PopplerAnnotMarkupReplyType"><span class="type">PopplerAnnotMarkupReplyType</span></a> of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <p></p>
@@ -1465,7 +1510,7 @@ located on <em class="parameter"><code>rect</code></em>
  when added to a page. See
 <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
-<a name="id-1.2.8.8.27.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.28.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1487,7 +1532,7 @@ located on <em class="parameter"><code>rect</code></em>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.27.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.28.6"></a><h4>Returns</h4>
 <p> A newly created <a class="link" href="PopplerAnnot.html#PopplerAnnotText" title="PopplerAnnotText"><span class="type">PopplerAnnotText</span></a> annotation</p>
 <p></p>
 </div>
@@ -1501,7 +1546,7 @@ poppler_annot_text_get_icon (<em class="parameter"><code><a class="link" href="P
 <p>Gets name of the icon of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.28.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.29.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1516,7 +1561,7 @@ poppler_annot_text_get_icon (<em class="parameter"><code><a class="link" href="P
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.28.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.29.6"></a><h4>Returns</h4>
 <p> a new allocated string containing the icon name</p>
 <p></p>
 </div>
@@ -1575,7 +1620,7 @@ icons are currently supported:</p>
 </tbody>
 </table></div>
 <div class="refsect3">
-<a name="id-1.2.8.8.29.6"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.30.6"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1606,7 +1651,7 @@ poppler_annot_text_get_is_open (<em class="parameter"><code><a class="link" href
 <p>Retrieves the state of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.30.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.31.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1621,7 +1666,7 @@ poppler_annot_text_get_is_open (<em class="parameter"><code><a class="link" href
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.30.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.31.6"></a><h4>Returns</h4>
 <p> the state of <em class="parameter"><code>poppler_annot</code></em>
 . <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if it's open, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> in
 other case.</p>
@@ -1637,7 +1682,7 @@ poppler_annot_text_set_is_open (<em class="parameter"><code><a class="link" href
 <p>Sets whether <em class="parameter"><code>poppler_annot</code></em>
  should initially be displayed open</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.31.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.32.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1668,7 +1713,7 @@ poppler_annot_text_get_state (<em class="parameter"><code><a class="link" href="
 <p>Retrieves the state of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.32.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.33.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1683,7 +1728,7 @@ poppler_annot_text_get_state (<em class="parameter"><code><a class="link" href="
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.32.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.33.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerAnnot.html#PopplerAnnotTextState" title="enum PopplerAnnotTextState"><span class="type">PopplerAnnotTextState</span></a> of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <p></p>
@@ -1698,52 +1743,6 @@ poppler_annot_text_markup_new_highlight
                                 <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>,
                                 <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> *quadrilaterals</code></em>);</pre>
 <p>Creates a new Highlight Text annotation that will be
-located on <em class="parameter"><code>rect</code></em>
- when added to a page. See <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
-<div class="refsect3">
-<a name="id-1.2.8.8.33.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>doc</p></td>
-<td class="parameter_description"><p>a <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>rect</p></td>
-<td class="parameter_description"><p>a <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a></p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>quadrilaterals</p></td>
-<td class="parameter_description"><p> A <a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of
-<a class="link" href="PopplerAnnot.html#PopplerQuadrilateral" title="PopplerQuadrilateral"><span class="type">PopplerQuadrilateral</span></a>s. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerQuadrilateral]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.8.8.33.6"></a><h4>Returns</h4>
-<p> A newly created <a class="link" href="PopplerAnnot.html#PopplerAnnotTextMarkup" title="PopplerAnnotTextMarkup"><span class="type">PopplerAnnotTextMarkup</span></a> annotation. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
-</div>
-<p class="since">Since 0.26</p>
-</div>
-<hr>
-<div class="refsect2">
-<a name="poppler-annot-text-markup-new-squiggly"></a><h3>poppler_annot_text_markup_new_squiggly ()</h3>
-<pre class="programlisting"><a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="returnvalue">PopplerAnnot</span></a> *
-poppler_annot_text_markup_new_squiggly
-                               (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *doc</code></em>,
-                                <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>,
-                                <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> *quadrilaterals</code></em>);</pre>
-<p>Creates a new Squiggly Text annotation that will be
 located on <em class="parameter"><code>rect</code></em>
  when added to a page. See <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
@@ -1783,13 +1782,13 @@ located on <em class="parameter"><code>rect</code></em>
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-annot-text-markup-new-strikeout"></a><h3>poppler_annot_text_markup_new_strikeout ()</h3>
+<a name="poppler-annot-text-markup-new-squiggly"></a><h3>poppler_annot_text_markup_new_squiggly ()</h3>
 <pre class="programlisting"><a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="returnvalue">PopplerAnnot</span></a> *
-poppler_annot_text_markup_new_strikeout
+poppler_annot_text_markup_new_squiggly
                                (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *doc</code></em>,
                                 <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>,
                                 <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> *quadrilaterals</code></em>);</pre>
-<p>Creates a new Strike Out Text annotation that will be
+<p>Creates a new Squiggly Text annotation that will be
 located on <em class="parameter"><code>rect</code></em>
  when added to a page. See <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
@@ -1829,13 +1828,13 @@ located on <em class="parameter"><code>rect</code></em>
 </div>
 <hr>
 <div class="refsect2">
-<a name="poppler-annot-text-markup-new-underline"></a><h3>poppler_annot_text_markup_new_underline ()</h3>
+<a name="poppler-annot-text-markup-new-strikeout"></a><h3>poppler_annot_text_markup_new_strikeout ()</h3>
 <pre class="programlisting"><a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="returnvalue">PopplerAnnot</span></a> *
-poppler_annot_text_markup_new_underline
+poppler_annot_text_markup_new_strikeout
                                (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *doc</code></em>,
                                 <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>,
                                 <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> *quadrilaterals</code></em>);</pre>
-<p>Creates a new Underline Text annotation that will be
+<p>Creates a new Strike Out Text annotation that will be
 located on <em class="parameter"><code>rect</code></em>
  when added to a page. See <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
@@ -1875,6 +1874,52 @@ located on <em class="parameter"><code>rect</code></em>
 </div>
 <hr>
 <div class="refsect2">
+<a name="poppler-annot-text-markup-new-underline"></a><h3>poppler_annot_text_markup_new_underline ()</h3>
+<pre class="programlisting"><a class="link" href="PopplerAnnot.html" title="PopplerAnnot"><span class="returnvalue">PopplerAnnot</span></a> *
+poppler_annot_text_markup_new_underline
+                               (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *doc</code></em>,
+                                <em class="parameter"><code><a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>,
+                                <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> *quadrilaterals</code></em>);</pre>
+<p>Creates a new Underline Text annotation that will be
+located on <em class="parameter"><code>rect</code></em>
+ when added to a page. See <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
+<div class="refsect3">
+<a name="id-1.2.8.8.37.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>doc</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>rect</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerPage.html#PopplerRectangle" title="PopplerRectangle"><span class="type">PopplerRectangle</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>quadrilaterals</p></td>
+<td class="parameter_description"><p> A <a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of
+<a class="link" href="PopplerAnnot.html#PopplerQuadrilateral" title="PopplerQuadrilateral"><span class="type">PopplerQuadrilateral</span></a>s. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerQuadrilateral]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.8.8.37.6"></a><h4>Returns</h4>
+<p> A newly created <a class="link" href="PopplerAnnot.html#PopplerAnnotTextMarkup" title="PopplerAnnotTextMarkup"><span class="type">PopplerAnnotTextMarkup</span></a> annotation. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+<p class="since">Since 0.26</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="poppler-annot-text-markup-set-quadrilaterals"></a><h3>poppler_annot_text_markup_set_quadrilaterals ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_annot_text_markup_set_quadrilaterals
@@ -1883,7 +1928,7 @@ poppler_annot_text_markup_set_quadrilaterals
 <p>Set the regions (Quadrilaterals) to apply the text markup in <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.37.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.38.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1918,7 +1963,7 @@ location on <em class="parameter"><code>page</code></em>
  to a <a class="link" href="PopplerAnnot.html#PopplerAnnotTextMarkup" title="PopplerAnnotTextMarkup"><span class="type">PopplerAnnotTextMarkup</span></a>.  This array must be freed
 when done.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.38.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.39.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1933,7 +1978,7 @@ when done.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.38.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.39.6"></a><h4>Returns</h4>
 <p> A <a href="https://developer.gnome.org/glib/unstable/glib-Arrays.html#GArray"><span class="type">GArray</span></a> of <a class="link" href="PopplerAnnot.html#PopplerQuadrilateral" title="PopplerQuadrilateral"><span class="type">PopplerQuadrilateral</span></a>. </p>
 <p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerQuadrilateral][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -1947,36 +1992,6 @@ poppler_annot_free_text_get_callout_line
                                (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotFreeText" title="PopplerAnnotFreeText"><span class="type">PopplerAnnotFreeText</span></a> *poppler_annot</code></em>);</pre>
 <p>Retrieves a <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a> of four or six numbers specifying a callout
 line attached to the <em class="parameter"><code>poppler_annot</code></em>
-.</p>
-<div class="refsect3">
-<a name="id-1.2.8.8.39.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody><tr>
-<td class="parameter_name"><p>poppler_annot</p></td>
-<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotFreeText" title="PopplerAnnotFreeText"><span class="type">PopplerAnnotFreeText</span></a></p></td>
-<td class="parameter_annotations"> </td>
-</tr></tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.8.8.39.6"></a><h4>Returns</h4>
-<p> a new allocated <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a> if the annot has a callout
-line, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in other case. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when
-done.</p>
-<p></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="poppler-annot-free-text-get-quadding"></a><h3>poppler_annot_free_text_get_quadding ()</h3>
-<pre class="programlisting"><a class="link" href="PopplerAnnot.html#PopplerAnnotFreeTextQuadding" title="enum PopplerAnnotFreeTextQuadding"><span class="returnvalue">PopplerAnnotFreeTextQuadding</span></a>
-poppler_annot_free_text_get_quadding (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotFreeText" title="PopplerAnnotFreeText"><span class="type">PopplerAnnotFreeText</span></a> *poppler_annot</code></em>);</pre>
-<p>Retrieves the justification of the text of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
 <a name="id-1.2.8.8.40.5"></a><h4>Parameters</h4>
@@ -1995,6 +2010,36 @@ poppler_annot_free_text_get_quadding (<em class="parameter"><code><a class="link
 </div>
 <div class="refsect3">
 <a name="id-1.2.8.8.40.6"></a><h4>Returns</h4>
+<p> a new allocated <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a> if the annot has a callout
+line, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in other case. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when
+done.</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-annot-free-text-get-quadding"></a><h3>poppler_annot_free_text_get_quadding ()</h3>
+<pre class="programlisting"><a class="link" href="PopplerAnnot.html#PopplerAnnotFreeTextQuadding" title="enum PopplerAnnotFreeTextQuadding"><span class="returnvalue">PopplerAnnotFreeTextQuadding</span></a>
+poppler_annot_free_text_get_quadding (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotFreeText" title="PopplerAnnotFreeText"><span class="type">PopplerAnnotFreeText</span></a> *poppler_annot</code></em>);</pre>
+<p>Retrieves the justification of the text of <em class="parameter"><code>poppler_annot</code></em>
+.</p>
+<div class="refsect3">
+<a name="id-1.2.8.8.41.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>poppler_annot</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotFreeText" title="PopplerAnnotFreeText"><span class="type">PopplerAnnotFreeText</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.8.8.41.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerAnnot.html#PopplerAnnotFreeTextQuadding" title="enum PopplerAnnotFreeTextQuadding"><span class="type">PopplerAnnotFreeTextQuadding</span></a> of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <p></p>
@@ -2009,37 +2054,6 @@ poppler_annot_file_attachment_get_attachment
 <p>Creates a <a class="link" href="PopplerAttachment.html" title="PopplerAttachment"><span class="type">PopplerAttachment</span></a> for the file of the file attachment annotation <em class="parameter"><code>annot</code></em>
 .
 The <a class="link" href="PopplerAttachment.html" title="PopplerAttachment"><span class="type">PopplerAttachment</span></a> must be unrefed with g_object_unref by the caller.</p>
-<div class="refsect3">
-<a name="id-1.2.8.8.41.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody><tr>
-<td class="parameter_name"><p>poppler_annot</p></td>
-<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotFileAttachment" title="PopplerAnnotFileAttachment"><span class="type">PopplerAnnotFileAttachment</span></a></p></td>
-<td class="parameter_annotations"> </td>
-</tr></tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.8.8.41.6"></a><h4>Returns</h4>
-<p> <em class="parameter"><code>PopplerAttachment</code></em>
-. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
-</div>
-<p class="since">Since 0.14</p>
-</div>
-<hr>
-<div class="refsect2">
-<a name="poppler-annot-file-attachment-get-name"></a><h3>poppler_annot_file_attachment_get_name ()</h3>
-<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-poppler_annot_file_attachment_get_name
-                               (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotFileAttachment" title="PopplerAnnotFileAttachment"><span class="type">PopplerAnnotFileAttachment</span></a> *poppler_annot</code></em>);</pre>
-<p>Retrieves the name of <em class="parameter"><code>poppler_annot</code></em>
-.</p>
 <div class="refsect3">
 <a name="id-1.2.8.8.42.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
@@ -2057,6 +2071,37 @@ poppler_annot_file_attachment_get_name
 </div>
 <div class="refsect3">
 <a name="id-1.2.8.8.42.6"></a><h4>Returns</h4>
+<p> <em class="parameter"><code>PopplerAttachment</code></em>
+. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+<p class="since">Since 0.14</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-annot-file-attachment-get-name"></a><h3>poppler_annot_file_attachment_get_name ()</h3>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+poppler_annot_file_attachment_get_name
+                               (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotFileAttachment" title="PopplerAnnotFileAttachment"><span class="type">PopplerAnnotFileAttachment</span></a> *poppler_annot</code></em>);</pre>
+<p>Retrieves the name of <em class="parameter"><code>poppler_annot</code></em>
+.</p>
+<div class="refsect3">
+<a name="id-1.2.8.8.43.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>poppler_annot</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotFileAttachment" title="PopplerAnnotFileAttachment"><span class="type">PopplerAnnotFileAttachment</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.8.8.43.6"></a><h4>Returns</h4>
 <p> a new allocated string with the name of <em class="parameter"><code>poppler_annot</code></em>
 . It must
 be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
@@ -2072,7 +2117,7 @@ poppler_annot_screen_get_action (<em class="parameter"><code><a class="link" hre
 <p>Retrieves the action (<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a>) that shall be performed when <em class="parameter"><code>poppler_annot</code></em>
  is activated</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.43.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.44.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2087,7 +2132,7 @@ poppler_annot_screen_get_action (<em class="parameter"><code><a class="link" hre
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.43.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.44.6"></a><h4>Returns</h4>
 <p> the action to perform. The returned
 object is owned by <em class="parameter"><code>poppler_annot</code></em>
 and should not be freed. </p>
@@ -2101,37 +2146,6 @@ and should not be freed. </p>
 <pre class="programlisting"><a class="link" href="PopplerMovie.html" title="PopplerMovie"><span class="returnvalue">PopplerMovie</span></a> *
 poppler_annot_movie_get_movie (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a> *poppler_annot</code></em>);</pre>
 <p>Retrieves the movie object (PopplerMovie) stored in the <em class="parameter"><code>poppler_annot</code></em>
-.</p>
-<div class="refsect3">
-<a name="id-1.2.8.8.44.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody><tr>
-<td class="parameter_name"><p>poppler_annot</p></td>
-<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a></p></td>
-<td class="parameter_annotations"> </td>
-</tr></tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.8.8.44.6"></a><h4>Returns</h4>
-<p> the movie object stored in the <em class="parameter"><code>poppler_annot</code></em>
-. The returned
-object is owned by <a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a> and should not be freed. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
-</div>
-<p class="since">Since 0.14</p>
-</div>
-<hr>
-<div class="refsect2">
-<a name="poppler-annot-movie-get-title"></a><h3>poppler_annot_movie_get_title ()</h3>
-<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-poppler_annot_movie_get_title (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a> *poppler_annot</code></em>);</pre>
-<p>Retrieves the movie title of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
 <a name="id-1.2.8.8.45.5"></a><h4>Parameters</h4>
@@ -2150,6 +2164,37 @@ poppler_annot_movie_get_title (<em class="parameter"><code><a class="link" href=
 </div>
 <div class="refsect3">
 <a name="id-1.2.8.8.45.6"></a><h4>Returns</h4>
+<p> the movie object stored in the <em class="parameter"><code>poppler_annot</code></em>
+. The returned
+object is owned by <a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a> and should not be freed. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+<p class="since">Since 0.14</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-annot-movie-get-title"></a><h3>poppler_annot_movie_get_title ()</h3>
+<pre class="programlisting"><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+poppler_annot_movie_get_title (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a> *poppler_annot</code></em>);</pre>
+<p>Retrieves the movie title of <em class="parameter"><code>poppler_annot</code></em>
+.</p>
+<div class="refsect3">
+<a name="id-1.2.8.8.46.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>poppler_annot</p></td>
+<td class="parameter_description"><p>a <a class="link" href="PopplerAnnot.html#PopplerAnnotMovie" title="PopplerAnnotMovie"><span class="type">PopplerAnnotMovie</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.8.8.46.6"></a><h4>Returns</h4>
 <p> the title text of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <p></p>
@@ -2163,7 +2208,7 @@ poppler_annot_movie_get_title (<em class="parameter"><code><a class="link" href=
 poppler_annot_callout_line_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Creates a new empty <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.46.5"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.47.5"></a><h4>Returns</h4>
 <p> a new allocated <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a>, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in other case.
 It must be freed when done.</p>
 <p></p>
@@ -2177,7 +2222,7 @@ poppler_annot_callout_line_copy (<em class="parameter"><code><a class="link" hre
 <p>It does copy <em class="parameter"><code>callout</code></em>
  to a new <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.47.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.48.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2192,7 +2237,7 @@ poppler_annot_callout_line_copy (<em class="parameter"><code><a class="link" hre
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.47.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.48.6"></a><h4>Returns</h4>
 <p> a new allocated <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a> as exact copy of
 <em class="parameter"><code>callout</code></em>
 , <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in other case. It must be freed when done.</p>
@@ -2206,7 +2251,7 @@ poppler_annot_callout_line_copy (<em class="parameter"><code><a class="link" hre
 poppler_annot_callout_line_free (<em class="parameter"><code><a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a> *callout</code></em>);</pre>
 <p>Frees the memory used by <a class="link" href="PopplerAnnot.html#PopplerAnnotCalloutLine" title="PopplerAnnotCalloutLine"><span class="type">PopplerAnnotCalloutLine</span></a>.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.48.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.49.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2232,7 +2277,7 @@ located on <em class="parameter"><code>rect</code></em>
  when added to a page. See
 <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
-<a name="id-1.2.8.8.49.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.50.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2254,7 +2299,7 @@ located on <em class="parameter"><code>rect</code></em>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.49.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.50.6"></a><h4>Returns</h4>
 <p> a newly created <a class="link" href="PopplerAnnot.html#PopplerAnnotCircle" title="PopplerAnnotCircle"><span class="type">PopplerAnnotCircle</span></a> annotation</p>
 <p></p>
 </div>
@@ -2269,7 +2314,7 @@ poppler_annot_circle_get_interior_color
 <p>Retrieves the interior color of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.50.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.51.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2284,7 +2329,7 @@ poppler_annot_circle_get_interior_color
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.50.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.51.6"></a><h4>Returns</h4>
 <p> a new allocated <a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> with the color values of
 <em class="parameter"><code>poppler_annot</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
@@ -2302,7 +2347,7 @@ poppler_annot_circle_set_interior_color
 <p>Sets the interior color of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.51.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.52.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2338,7 +2383,7 @@ located on <em class="parameter"><code>rect</code></em>
  when added to a page. See
 <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
-<a name="id-1.2.8.8.52.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.53.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2370,7 +2415,7 @@ located on <em class="parameter"><code>rect</code></em>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.52.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.53.6"></a><h4>Returns</h4>
 <p> A newly created <a class="link" href="PopplerAnnot.html#PopplerAnnotLine" title="PopplerAnnotLine"><span class="type">PopplerAnnotLine</span></a> annotation</p>
 <p></p>
 </div>
@@ -2386,7 +2431,7 @@ poppler_annot_line_set_vertices (<em class="parameter"><code><a class="link" hre
 <p>Set the coordinate points where the <em class="parameter"><code>poppler_annot</code></em>
  starts and ends.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.53.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.54.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2425,7 +2470,7 @@ located on <em class="parameter"><code>rect</code></em>
  when added to a page. See
 <a class="link" href="PopplerPage.html#poppler-page-add-annot" title="poppler_page_add_annot ()"><code class="function">poppler_page_add_annot()</code></a></p>
 <div class="refsect3">
-<a name="id-1.2.8.8.54.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.55.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2447,7 +2492,7 @@ located on <em class="parameter"><code>rect</code></em>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.54.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.55.6"></a><h4>Returns</h4>
 <p> a newly created <a class="link" href="PopplerAnnot.html#PopplerAnnotSquare" title="PopplerAnnotSquare"><span class="type">PopplerAnnotSquare</span></a> annotation</p>
 <p></p>
 </div>
@@ -2462,7 +2507,7 @@ poppler_annot_square_get_interior_color
 <p>Retrieves the interior color of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.55.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.56.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2477,7 +2522,7 @@ poppler_annot_square_get_interior_color
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.55.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.56.6"></a><h4>Returns</h4>
 <p> a new allocated <a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> with the color values of
 <em class="parameter"><code>poppler_annot</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
@@ -2495,7 +2540,7 @@ poppler_annot_square_set_interior_color
 <p>Sets the interior color of <em class="parameter"><code>poppler_annot</code></em>
 .</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.56.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.57.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2525,7 +2570,7 @@ poppler_annot_square_set_interior_color
 poppler_point_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Creates a new <a class="link" href="PopplerAnnot.html#PopplerPoint" title="PopplerPoint"><span class="type">PopplerPoint</span></a>. It must be freed with <a class="link" href="PopplerAnnot.html#poppler-point-free" title="poppler_point_free ()"><code class="function">poppler_point_free()</code></a> after use.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.57.5"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.58.5"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerAnnot.html#PopplerPoint" title="PopplerPoint"><span class="type">PopplerPoint</span></a></p>
 <p></p>
 </div>
@@ -2540,7 +2585,7 @@ poppler_point_copy (<em class="parameter"><code><a class="link" href="PopplerAnn
 . The copy must be freed with <a class="link" href="PopplerAnnot.html#poppler-point-free" title="poppler_point_free ()"><code class="function">poppler_point_free()</code></a>
 after use.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.58.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.59.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2555,7 +2600,7 @@ after use.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.58.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.59.6"></a><h4>Returns</h4>
 <p> a new allocated copy of <em class="parameter"><code>point</code></em>
 </p>
 <p></p>
@@ -2570,7 +2615,7 @@ poppler_point_free (<em class="parameter"><code><a class="link" href="PopplerAnn
 <p>Frees the memory used by <em class="parameter"><code>point</code></em>
 </p>
 <div class="refsect3">
-<a name="id-1.2.8.8.59.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.60.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2593,7 +2638,7 @@ poppler_point_free (<em class="parameter"><code><a class="link" href="PopplerAnn
 poppler_quadrilateral_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Creates a new <a class="link" href="PopplerAnnot.html#PopplerQuadrilateral" title="PopplerQuadrilateral"><span class="type">PopplerQuadrilateral</span></a>. It must be freed with <a class="link" href="PopplerAnnot.html#poppler-quadrilateral-free" title="poppler_quadrilateral_free ()"><code class="function">poppler_quadrilateral_free()</code></a> after use.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.60.5"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.61.5"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerAnnot.html#PopplerQuadrilateral" title="PopplerQuadrilateral"><span class="type">PopplerQuadrilateral</span></a>.</p>
 <p></p>
 </div>
@@ -2607,7 +2652,7 @@ poppler_quadrilateral_copy (<em class="parameter"><code><a class="link" href="Po
 <p>Creates a copy of <em class="parameter"><code>quad</code></em>
 . The copy must be freed with <a class="link" href="PopplerAnnot.html#poppler-quadrilateral-free" title="poppler_quadrilateral_free ()"><code class="function">poppler_quadrilateral_free()</code></a> after use.</p>
 <div class="refsect3">
-<a name="id-1.2.8.8.61.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.62.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2622,7 +2667,7 @@ poppler_quadrilateral_copy (<em class="parameter"><code><a class="link" href="Po
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.8.61.6"></a><h4>Returns</h4>
+<a name="id-1.2.8.8.62.6"></a><h4>Returns</h4>
 <p> a new allocated copy of <em class="parameter"><code>quad</code></em>
 </p>
 <p></p>
@@ -2637,7 +2682,7 @@ poppler_quadrilateral_free (<em class="parameter"><code><a class="link" href="Po
 <p>Frees the memory used by <em class="parameter"><code>quad</code></em>
 </p>
 <div class="refsect3">
-<a name="id-1.2.8.8.62.5"></a><h4>Parameters</h4>
+<a name="id-1.2.8.8.63.5"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">

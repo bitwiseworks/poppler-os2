@@ -1,3 +1,44 @@
+Release 0.33.0
+        core:
+         * Fix regression in pdftops parameter passing. Bug #89827
+         * Combine base characters and diacritical marks. Bug #87215
+         * Use width from W array for WMode positioning. Bug #89621
+         * Fixed adding annotation of Subtype Popup to pdf page. Bug #89136
+         * CairoOutputDev: Fix memory leak in CairoFreeTypeFont::create
+         * SplashOutputDev: memset on error to have reproducible outputs
+
+        qt4:
+         * Fix PDF Text String -> QString conversion. KDE Bug #344849
+
+        qt5:
+         * Fix PDF Text String -> QString conversion. KDE Bug #344849
+
+        glib:
+         * Add poppler_annot_markup_set_popup_rectangle()
+         * Fix segfault when creating PopplerAction. Bug #90093
+
+        utils:
+         * pdftohtml: Set exit status adecuately. Bug #83609
+
+        build system:
+         * configure: Fix invalid shell comparaison in libtiff test
+
+Release 0.32.0
+        core:
+         * Annotations: Fix rendering of empty BG/BC arrays
+         * Splash: Fix wrong colour shown when GouraudTriangleShFill uses a DeviceN colorspace. Bug #89182
+         * Splash: Fix use of uninitialized variable in Splash::pipeRun
+         * Remove unnecesary check for font validity. Bug #88939
+         * Small optimization in GooString::appendfv(). Bug #89096
+         * Fix crashes in malformed files
+
+        utils:
+         * pdftops: Make colorpsace optimization an option instead of default
+         * pdfseparate: use always an unique instance for PDFDoc for savePageAs
+
+        build system:
+         * cmake: If extra-cmake-modules is around include the Sanitizers module
+
 Release 0.31.0
         core:
          * CairoOutputDev: support embedding JBIG2 image data
@@ -5,10 +46,10 @@ Release 0.31.0
          * Fix crash on broken documents
          * JPEG2000Stream: Inline doGetChar and doLookChar
          * GlobalParams cleaning
-        
+
         utils:
          * pdftops: Add rasterization option. Bug #85934
-        
+
         qt4:
          * Expose whole-words search option
 

@@ -96,7 +96,7 @@ public:
   // Open a PostScript output file, and write the prolog.
   // pages has to be sorted in increasing order
   PSOutputDev(const char *fileName, PDFDoc *docA,
-	      char *psTitle,
+	      char *psTitleA,
 	      const std::vector<int> &pages, PSOutMode modeA,
 	      int paperWidthA = -1, int paperHeightA = -1,
               GBool noCrop = gFalse,
@@ -111,7 +111,7 @@ public:
   // Open a PSOutputDev that will write to a generic stream.
   // pages has to be sorted in increasing order
   PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
-	      char *psTitle,
+	      char *psTitleA,
 	      PDFDoc *docA,
 	      const std::vector<int> &pages, PSOutMode modeA,
 	      int paperWidthA = -1, int paperHeightA = -1,
@@ -319,11 +319,13 @@ public:
   GBool getEmbedCIDPostScript() const { return embedCIDPostScript; }
   GBool getEmbedCIDTrueType() const { return embedCIDTrueType; }
   GBool getFontPassthrough() const { return fontPassthrough; }
+  GBool getOptimizeColorSpace() const { return optimizeColorSpace; }
   void setEmbedType1(GBool b) { embedType1 = b; }
   void setEmbedTrueType(GBool b) { embedTrueType = b; }
   void setEmbedCIDPostScript(GBool b) { embedCIDPostScript = b; }
   void setEmbedCIDTrueType(GBool b) { embedCIDTrueType = b; }
   void setFontPassthrough(GBool b) { fontPassthrough = b; }
+  void setOptimizeColorSpace(GBool b) { optimizeColorSpace = b; }
   void setPreloadImagesForms(GBool b) { preloadImagesForms = b; }
   void setGenerateOPI(GBool b) { generateOPI = b; }
   void setUseASCIIHex(GBool b) { useASCIIHex = b; }
@@ -332,11 +334,12 @@ public:
 private:
 
   void init(PSOutputFunc outputFuncA, void *outputStreamA,
-	    PSFileType fileTypeA, char *pstitle, PDFDoc *doc,
+	    PSFileType fileTypeA, char *psTitleA, PDFDoc *doc,
 	    const std::vector<int> &pages, PSOutMode modeA,
 	    int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
 	    GBool manualCtrlA, int paperWidthA, int paperHeightA,
             GBool noCropA, GBool duplexA);
+  void postInit();
   void setupResources(Dict *resDict);
   void setupFonts(Dict *resDict);
   void setupFont(GfxFont *font, Dict *parentResDict);
@@ -432,6 +435,10 @@ private:
   int imgLLX, imgLLY,		// imageable area, in pts
       imgURX, imgURY;
   GBool noCrop;
+  GBool duplex;
+  std::vector<int> pages;
+  char *psTitle;
+  GBool postInitDone;		// true if postInit() was called
 
   PSOutputFunc outputFunc;
   void *outputStream;
@@ -518,6 +525,8 @@ private:
   GBool embedCIDPostScript;	// embed CID PostScript fonts?
   GBool embedCIDTrueType;	// embed CID TrueType fonts?
   GBool fontPassthrough;	// pass all fonts through as-is?
+  GBool optimizeColorSpace;	// false to keep gray RGB images in their original color space
+				// true to optimize gray images to DeviceGray color space
   GBool preloadImagesForms;	// preload PostScript images and forms into
 				//   memory
   GBool generateOPI;		// generate PostScript OPI comments?

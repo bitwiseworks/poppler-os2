@@ -279,6 +279,7 @@
     <keyword type="function" name="poppler_annot_markup_get_popup_is_open ()" link="PopplerAnnot.html#poppler-annot-markup-get-popup-is-open"/>
     <keyword type="function" name="poppler_annot_markup_set_popup_is_open ()" link="PopplerAnnot.html#poppler-annot-markup-set-popup-is-open" since="0.16"/>
     <keyword type="function" name="poppler_annot_markup_get_popup_rectangle ()" link="PopplerAnnot.html#poppler-annot-markup-get-popup-rectangle" since="0.12"/>
+    <keyword type="function" name="poppler_annot_markup_set_popup_rectangle ()" link="PopplerAnnot.html#poppler-annot-markup-set-popup-rectangle" since="0.33"/>
     <keyword type="function" name="poppler_annot_markup_get_date ()" link="PopplerAnnot.html#poppler-annot-markup-get-date"/>
     <keyword type="function" name="poppler_annot_markup_get_external_data ()" link="PopplerAnnot.html#poppler-annot-markup-get-external-data"/>
     <keyword type="function" name="poppler_annot_markup_get_reply_to ()" link="PopplerAnnot.html#poppler-annot-markup-get-reply-to"/>

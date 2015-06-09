@@ -559,7 +559,7 @@ poppler_annot_screen_class_init (PopplerAnnotScreenClass *klass)
 }
 
 PopplerAnnot *
-_poppler_annot_screen_new (Annot *annot)
+_poppler_annot_screen_new (PopplerDocument *doc, Annot *annot)
 {
   PopplerAnnot *poppler_annot;
   AnnotScreen  *annot_screen;
@@ -569,7 +569,7 @@ _poppler_annot_screen_new (Annot *annot)
   annot_screen = static_cast<AnnotScreen *>(poppler_annot->annot);
   action = annot_screen->getAction();
   if (action)
-    POPPLER_ANNOT_SCREEN (poppler_annot)->action = _poppler_action_new (NULL, action, NULL);
+    POPPLER_ANNOT_SCREEN (poppler_annot)->action = _poppler_action_new (doc, action, NULL);
 
   return poppler_annot;
 }
@@ -1248,6 +1248,37 @@ poppler_annot_markup_get_popup_rectangle (PopplerAnnotMarkup *poppler_annot,
   poppler_rect->y2 = annot_rect->y2;
 
   return TRUE;
+}
+
+/**
+ * poppler_annot_markup_set_popup_rectangle:
+ * @poppler_annot: a #PopplerAnnotMarkup
+ * @poppler_rect: a #PopplerRectangle to set
+ *
+ * Sets the rectangle of the popup window related to @poppler_annot.
+ * This doesn't have any effect if @poppler_annot doesn't have a
+ * popup associated, use poppler_annot_markup_set_popup() to associate
+ * a popup window to a #PopplerAnnotMarkup.
+ *
+ * Since: 0.33
+ */
+void
+poppler_annot_markup_set_popup_rectangle (PopplerAnnotMarkup *poppler_annot,
+                                          PopplerRectangle   *poppler_rect)
+{
+        AnnotMarkup *annot;
+        Annot *annot_popup;
+
+        g_return_if_fail (POPPLER_IS_ANNOT_MARKUP (poppler_annot));
+        g_return_if_fail (poppler_rect != NULL);
+
+        annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT (poppler_annot)->annot);
+        annot_popup = annot->getPopup ();
+        if (!annot_popup)
+                return;
+
+        annot_popup->setRect (poppler_rect->x1, poppler_rect->y1,
+                              poppler_rect->x2, poppler_rect->y2);
 }
 
 /**
