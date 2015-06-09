@@ -72,4 +72,4 @@ libpoppler_cpp_la_LDFLAGS =			\
 	-version-info 2:1:2			\
 	@create_shared_lib@			\
 	@auto_import_flags@			\
-	-os2dllname popplc
+	-shortname popplc

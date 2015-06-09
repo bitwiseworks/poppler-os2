@@ -63,7 +63,7 @@ libpoppler_qt4_la_LDFLAGS =			\
 	-version-info 10:0:6			\
 	@create_shared_lib@			\
 	@auto_import_flags@			\
-	-os2dllname poppq4
+	-shortname poppq4
 
 # This rule lets GNU make create any *.moc from the equivalent *.h
 .h.moc:
