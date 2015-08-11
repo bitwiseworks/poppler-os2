@@ -136,7 +136,8 @@ am__DEPENDENCIES_1 =
 libpoppler_glib_la_DEPENDENCIES =  \
 	$(top_builddir)/poppler/libpoppler.la \
 	$(top_builddir)/poppler/libpoppler-cairo.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__objects_1 = libpoppler_glib_la-poppler-enums.lo
 am_libpoppler_glib_la_OBJECTS = $(am__objects_1) \
 	libpoppler_glib_la-poppler-action.lo \
@@ -556,6 +557,7 @@ libpoppler_glib_la_CPPFLAGS = \
 libpoppler_glib_la_LIBADD = \
 	$(top_builddir)/poppler/libpoppler.la		\
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
+	$(PTHREAD_LIBS)					\
 	$(POPPLER_GLIB_LIBS)				\
 	$(FREETYPE_LIBS)
 

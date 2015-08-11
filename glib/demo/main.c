@@ -170,7 +170,6 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 {
 	GtkDialog *dialog;
 	GtkWidget *content_area;
-	GtkWidget *entry_container;
 	GtkWidget *password_entry;
 	GtkWidget *hbox, *main_vbox, *vbox, *icon;
 	GtkWidget *table;
@@ -196,10 +195,6 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_dialog_set_default_response (dialog, GTK_RESPONSE_OK);
 	gtk_dialog_set_response_sensitive (GTK_DIALOG (dialog),
 					   GTK_RESPONSE_OK, FALSE);
-	gtk_dialog_set_alternative_button_order (dialog,
-						 GTK_RESPONSE_OK,
-						 GTK_RESPONSE_CANCEL,
-						 -1);
 
 	/* Build contents */
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
@@ -209,8 +204,8 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 
 	icon = gtk_image_new_from_icon_name ("dialog-password",
 					 GTK_ICON_SIZE_DIALOG);
-
-	gtk_misc_set_alignment (GTK_MISC (icon), 0.5, 0.0);
+	gtk_widget_set_halign (icon, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign (icon, GTK_ALIGN_START);
 	gtk_box_pack_start (GTK_BOX (hbox), icon, FALSE, FALSE, 0);
 	gtk_widget_show (icon);
 
@@ -219,7 +214,12 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_widget_show (main_vbox);
 
 	label = gtk_label_new (NULL);
+#if GTK_CHECK_VERSION(3, 15, 0)
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+	gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+#else
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
 	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
 	file_name = g_file_get_basename (uri_file);
 	format = g_strdup_printf ("<span size=\"larger\" weight=\"bold\">%s</span>\n\n%s",
@@ -239,23 +239,19 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_widget_show (vbox);
 
 	/* The table that holds the entries */
-	entry_container = gtk_alignment_new (0.0, 0.0, 1.0, 1.0);
-
-	gtk_alignment_set_padding (GTK_ALIGNMENT (entry_container),
-				   0, 0, 0, 0);
-
-	gtk_box_pack_start (GTK_BOX (vbox), entry_container,
-			    FALSE, FALSE, 0);
-	gtk_widget_show (entry_container);
-
 	table = gtk_grid_new ();
 	gtk_grid_set_column_spacing (GTK_GRID (table), 12);
 	gtk_grid_set_row_spacing (GTK_GRID (table), 6);
-	gtk_container_add (GTK_CONTAINER (entry_container), table);
+	gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 0);
 	gtk_widget_show (table);
 
 	label = gtk_label_new_with_mnemonic ("_Password:");
+#if GTK_CHECK_VERSION(3, 15, 0)
+	gtk_label_set_xalign (GTK_LABEL (label), 0.0);
+	gtk_label_set_yalign (GTK_LABEL (label), 0.5);
+#else
 	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+#endif
 
 	password_entry = gtk_entry_new ();
 	gtk_entry_set_visibility (GTK_ENTRY (password_entry), FALSE);
