@@ -22,7 +22,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "35")
+set(POPPLER_MINOR_VERSION "38")
 set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
@@ -49,6 +49,7 @@ else(WIN32)
 endif(WIN32)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
+set(SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "Share directory name")
 
 set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
 if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
@@ -477,7 +478,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else(MSVC)
 add_library(poppler SHARED ${poppler_SRCS})
 endif(MSVC)
-set_target_properties(poppler PROPERTIES VERSION 54.0.0 SOVERSION 54)
+set_target_properties(poppler PROPERTIES VERSION 57.0.0 SOVERSION 57)
 target_link_libraries(poppler ${poppler_LIBS})
 target_link_libraries(poppler LINK_INTERFACE_LIBRARIES "")
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
@@ -736,6 +737,22 @@ endif(LCMS2_FOUND)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message("test data dir" ${TESTDATADIR})
 
+if(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
+  message("Warning: There is no rendering backend enabled")
+endif(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
+
 if(USE_FIXEDPOINT AND USE_FLOAT)
   message("Warning: Single precision and fixed point options should not be enabled at the same time")
 endif(USE_FIXEDPOINT AND USE_FLOAT)
+
+if(NOT ENABLE_LIBJPEG)
+  message("Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained.")
+endif(NOT ENABLE_LIBJPEG)
+
+if(ENABLE_ZLIB)
+  message("Warning: Using zlib is not totally safe")
+endif(ENABLE_ZLIB)
+
+if(NOT WITH_OPENJPEG)
+  message("Warning: Using libopenjpeg is recommended. The internal JPX decoder is unmaintained.")
+endif(NOT WITH_OPENJPEG)

@@ -27,7 +27,7 @@
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Patrick Pfeifer <p2000@mailinator.com>
-// Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2012, 2015 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
@@ -823,8 +823,16 @@ void CairoOutputDev::eoFill(GfxState *state) {
   cairo_set_fill_rule (cairo, CAIRO_FILL_RULE_EVEN_ODD);
   cairo_set_source (cairo, fill_pattern);
   LOG(printf ("fill-eo\n"));
-  cairo_fill (cairo);
 
+  if (mask) {
+    cairo_save (cairo);
+    cairo_clip (cairo);
+    cairo_set_matrix (cairo, &mask_matrix);
+    cairo_mask (cairo, mask);
+    cairo_restore (cairo);
+  } else {
+    cairo_fill (cairo);
+  }
   if (cairo_shape) {
     cairo_set_fill_rule (cairo_shape, CAIRO_FILL_RULE_EVEN_ODD);
     doPath (cairo_shape, state, state->getPath());
@@ -1433,29 +1441,15 @@ static inline int splashFloor(SplashCoord x) {
 static
 cairo_surface_t *cairo_surface_create_similar_clip (cairo_t *cairo, cairo_content_t content)
 {
-  double x1, y1, x2, y2;
-  int width, height;
-  cairo_clip_extents (cairo, &x1, &y1, &x2, &y2);
-  cairo_matrix_t matrix;
-  cairo_get_matrix (cairo, &matrix);
-  //cairo_matrix_transform_point(&matrix, &x1, &y1);
-  //cairo_matrix_transform_point(&matrix, &x2, &y2);*/
-  cairo_user_to_device(cairo, &x1, &y1);
-  cairo_user_to_device(cairo, &x2, &y2);
-  width = splashCeil(x2) - splashFloor(x1);
-  //XXX: negative matrix
-  ////height = splashCeil(y2) - splashFloor(y1);
-  height = splashFloor(y1) - splashCeil(y2);
-  cairo_surface_t *target = cairo_get_target (cairo);
-  cairo_surface_t *result;
+  cairo_pattern_t *pattern;
+  cairo_surface_t *surface = NULL;
 
-  result = cairo_surface_create_similar (target, content, width, height);
-  double x_offset, y_offset;
-    cairo_surface_get_device_offset(target, &x_offset, &y_offset);
-    cairo_surface_set_device_offset(result, x_offset, y_offset);
-
- 
-  return result;
+  cairo_push_group_with_content (cairo, content);
+  pattern = cairo_pop_group (cairo);
+  cairo_pattern_get_surface (pattern, &surface);
+  cairo_surface_reference (surface);
+  cairo_pattern_destroy (pattern);
+  return surface;
 }
 
 

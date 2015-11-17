@@ -1,3 +1,674 @@
+commit c63aa0c153fc114e6457fc89a40a9aa2a5508b9a
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Nov 16 21:44:17 2015 +0100
+
+    Poppler 0.38
+
+ CMakeLists.txt      |  4 ++--
+ NEWS                | 12 ++++++++++++
+ configure.ac        |  2 +-
+ cpp/Doxyfile        |  2 +-
+ poppler/Makefile.am |  2 +-
+ qt4/src/Doxyfile    |  2 +-
+ qt5/src/Doxyfile    |  2 +-
+ 7 files changed, 19 insertions(+), 7 deletions(-)
+
+commit 6ca4afcea790d9118af3cda4961a647485fb14e8
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Nov 16 21:40:20 2015 +0100
+
+    Update copyright years
+
+ utils/pdftocairo.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 0e14049bc5b85f8ae2e1a56bc09480a499343e49
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sat Oct 31 18:32:49 2015 +1030
+
+    pdftocairo: fix fit to page transformation
+
+    Testing with the test case in bug 87161 revealed some bugs.
+
+ utils/pdftocairo.cc | 42 ++++++++++++++++++++----------------------
+ 1 file changed, 20 insertions(+), 22 deletions(-)
+
+commit 3167964d70647d7b04e3ef8f415d5935990ecc9a
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Wed Oct 28 23:13:44 2015 +0100
+
+    Multiply opacity in case of pattern colorspace
+
+    Bug #92592
+
+ poppler/Gfx.cc             |  4 +++-
+ poppler/OutputDev.h        |  4 +++-
+ poppler/SplashOutputDev.cc |  8 ++++++++
+ poppler/SplashOutputDev.h  |  2 ++
+ splash/Splash.cc           | 16 ++++++++++++++--
+ splash/Splash.h            |  2 ++
+ splash/SplashState.cc      | 11 ++++++++++-
+ splash/SplashState.h       |  5 ++++-
+ 8 files changed, 46 insertions(+), 6 deletions(-)
+
+commit c20f68ce434366bbec4077824da97ce843ecdff3
+Author: Marek Kasik <mkasik@redhat.com>
+Date:   Thu Oct 22 16:15:23 2015 +0200
+
+    forms: Fix showing of some non-ASCII characters
+
+    The &uChar is an array with just 1 member not 2.
+    This fixes mapping of some Unicode characters to
+    character codes.
+
+ poppler/Annot.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 64735113b203bb5adaaadc65641ef6c971f82bc6
+Author: Marek Kasik <mkasik@redhat.com>
+Date:   Fri Oct 23 10:15:47 2015 +0200
+
+    forms: Find correct glyph or return 0
+
+    Function CharCodeToUnicode::mapToCharCode() could return
+    wrong character code for given unicode character because
+    of wrongly placed continue statement.
+
+ poppler/CharCodeToUnicode.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit fb906dca8b84d03267099cc3174c50e932a55236
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Thu Oct 15 07:19:16 2015 +1030
+
+    cmake: synchronize warnings with configure
+
+ CMakeLists.txt | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+commit 6329e3999d0a45b4c0cd0a8b675362e694bf1243
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Thu Oct 15 07:11:13 2015 +1030
+
+    configure: warn that the internal DCT/JPX decoders are unmaintained
+
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 67e1463dc65f85aec1f85b5bace9e810bf477e15
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Oct 12 16:49:34 2015 +0200
+
+    Clarify getting a xpdf license does not allow you to use poppler in
+    closed source projects
+
+ README | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit 44e1a2f715d0da8bb2941da296faab7ee144cfc2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Oct 9 23:28:03 2015 +0200
+
+    Poppler 0.37
+
+ CMakeLists.txt         |  4 ++--
+ NEWS                   | 13 +++++++++++++
+ configure.ac           |  2 +-
+ cpp/Doxyfile           |  2 +-
+ gtk-doc.make           | 20 ++++++++++++--------
+ poppler/Makefile.am    |  2 +-
+ qt4/src/CMakeLists.txt |  2 +-
+ qt4/src/Doxyfile       |  2 +-
+ qt4/src/Makefile.am    |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ qt5/src/Makefile.am    |  2 +-
+ 12 files changed, 36 insertions(+), 19 deletions(-)
+
+commit e8cb16bff48dbe2d9efd988ddb09608406d2633b
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sun Sep 27 15:34:12 2015 +0930
+
+    configure: fix openjpeg detection
+
+    - configure was failing when enable_libopenjpeg="auto" and openjpeg
+    not found
+    - fix header check for pre 1.4 versions
+
+    Bug 92135
+
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit a82e338b4f9639aced3201bf7639bbdf1a7974e2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Sep 27 15:41:27 2015 +0200
+
+    Fix memory leak on font reload
+
+ poppler/SplashOutputDev.cc | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+commit 8639b20da3d9be62f47462ad1cdaa5c65d117dfb
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Sun Sep 27 15:37:51 2015 +0200
+
+    Try to use an external font if the internal one is invalid
+
+ poppler/GfxFont.h          | 11 +++++++++++
+ poppler/SplashOutputDev.cc |  8 ++++++++
+ 2 files changed, 19 insertions(+)
+
+commit e3225a0543d1e6fbc269094ca192879816296993
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 01:14:41 2015 +0200
+
+    Fix crash in GfxGouraudTriangleShading for malformed files
+
+ poppler/GfxState.cc | 26 ++++++++++++++++----------
+ 1 file changed, 16 insertions(+), 10 deletions(-)
+
+commit 0a33e3a740a1dbe57023d0a51077689d29d79def
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 01:00:32 2015 +0200
+
+    Fix the fix of the fix for SplashOutputDev::beginTransparencyGroup
+    and malformed files
+
+ poppler/SplashOutputDev.cc | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit b723e4f90c78ac972bf30d7006283042930374d7
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 00:53:10 2015 +0200
+
+    Fix crash in malformed document in SplashOutputDev::drawMaskedImage
+
+    And improved the one i just did for
+    SplashOutputDev::beginTransparencyGroup
+
+ poppler/SplashOutputDev.cc | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+commit fd49b3d4ecdbe04c4f51e6ab77687dc25bbc3f49
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 00:45:55 2015 +0200
+
+    Fix crash on Annot::layoutText for malformed documents
+
+ poppler/Annot.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit a88be71fee8a4fd8e9a5a1d9d955addc0f3076ea
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 00:42:14 2015 +0200
+
+    Fix crash in SplashOutputDev::beginTransparencyGroup in malformed file
+
+ poppler/SplashOutputDev.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 0fa5c17ea409c3fdfe1e3a97ff5e4bae96da1cae
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 00:36:33 2015 +0200
+
+    Fix crash on JBIG2Stream::readHalftoneRegionSeg for malformed
+    documents
+
+ poppler/JBIG2Stream.cc | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+commit 942adfc25e7a00ac3cf032ced2d8949e99099f70
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Sep 25 00:30:58 2015 +0200
+
+    Fix crash on AnnotInk::draw for malformed documents
+
+ poppler/Annot.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 9aa19159bff4db02889cba48b9b31e40247e5314
+Author: Even Rouault <even.rouault@spatialys.com>
+Date:   Fri Sep 11 13:56:05 2015 +0200
+
+    Catalog::cachePageTree(): recover from out of memory condition
+
+ poppler/Catalog.cc | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+commit 8dc9187690de10f1538764972799a39660272d1f
+Author: Even Rouault <even.rouault@spatialys.com>
+Date:   Fri Sep 11 13:30:32 2015 +0200
+
+    Catalog::getNumPages(): validate page count
+
+ poppler/Catalog.cc | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+commit 7028f835a603e12dd73452a39f56ac0b633207b2
+Author: Arseniy Lartsev <arseniy@alumni.chalmers.se>
+Date:   Sun Sep 20 18:32:36 2015 +0200
+
+    PageTransition D is a number not an int
+
+    See bug #92040
+
+ poppler/PageTransition.cc          |  5 +++--
+ poppler/PageTransition.h           |  5 +++--
+ qt4/src/poppler-page-transition.cc |  6 ++++++
+ qt4/src/poppler-page-transition.h  | 14 ++++++++++++--
+ qt5/src/poppler-page-transition.cc |  6 ++++++
+ qt5/src/poppler-page-transition.h  | 14 ++++++++++++--
+ 6 files changed, 42 insertions(+), 8 deletions(-)
+
+commit a98f99e90aac703e648697da5c897c49645eda10
+Author: Kenji Uno <ku@digitaldolphins.jp>
+Date:   Wed Sep 16 22:08:59 2015 +0200
+
+    SplashOuputDev: Protect calls to set/getAA with the proper #if guards
+
+    Bug #92006
+
+ poppler/SplashOutputDev.cc | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+commit 2a48cab5e66a69ed1bf3e792efc109ddcad8d5ee
+Author: Jason Crain <jason@aquaticape.us>
+Date:   Tue Sep 15 14:43:21 2015 -0500
+
+    cairo: Use mask for even-odd fill
+
+    Bug #84527
+
+ poppler/CairoOutputDev.cc | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+commit b14d4b0968f7b0ad783c3fa56ad863d7fda235fe
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Sep 10 00:33:15 2015 +0200
+
+    Post release fixlets for the NEWS file
+
+ NEWS | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+commit de1ece5c929c3f46c04be76b4b72f6371911fd1a
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Sep 10 00:26:02 2015 +0200
+
+    Poppler 0.36
+
+ CMakeLists.txt         |  4 ++--
+ NEWS                   | 36 ++++++++++++++++++++++++++++++++++++
+ configure.ac           |  2 +-
+ cpp/Doxyfile           |  2 +-
+ poppler/Makefile.am    |  2 +-
+ qt4/src/CMakeLists.txt |  2 +-
+ qt4/src/Doxyfile       |  2 +-
+ qt4/src/Makefile.am    |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ qt5/src/Makefile.am    |  2 +-
+ 11 files changed, 47 insertions(+), 11 deletions(-)
+
+commit d490c21fe4a60cff26f34c619d3078dcb575bf44
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Sep 9 23:55:57 2015 +0200
+
+    Update (C)
+
+ poppler/CairoOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit fc69a5e7dab48636946282e5d4b7be77e650023c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Sep 8 17:48:49 2015 +0200
+
+    Qt5: Minor optimizations
+
+    Call reserve on containers
+    Use QStringLiteral/QLatin1String
+
+ qt5/src/poppler-annotation.cc | 612
+ +++++++++++++++++++++---------------------
+ qt5/src/poppler-document.cc   |   3 +-
+ qt5/src/poppler-fontinfo.cc   |   3 +-
+ qt5/src/poppler-form.cc       |   3 +-
+ qt5/src/poppler-optcontent.cc |   2 +
+ qt5/src/poppler-page.cc       |   1 +
+ qt5/src/poppler-private.cc    |  18 +-
+ 7 files changed, 325 insertions(+), 317 deletions(-)
+
+commit 9b4e908d86e78535cced9fb7ccac1f3f0e1fc5c1
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Sep 8 17:48:16 2015 +0200
+
+    Qt4: Minor optimization
+
+    Call reserve on containers upfront
+
+ qt4/src/poppler-annotation.cc | 4 +++-
+ qt4/src/poppler-document.cc   | 3 ++-
+ qt4/src/poppler-fontinfo.cc   | 3 ++-
+ qt4/src/poppler-form.cc       | 3 ++-
+ qt4/src/poppler-optcontent.cc | 2 ++
+ qt4/src/poppler-page.cc       | 1 +
+ 6 files changed, 12 insertions(+), 4 deletions(-)
+
+commit f8182694909c989bd65b7317f9df439c5bfabe95
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Sep 8 17:13:07 2015 +0200
+
+    renderingIntent is always non null
+
+ poppler/GfxState.cc | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
+
+commit 6f69e2e35b8fe7a347367074ce36959d47fd8635
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Sep 8 09:44:30 2015 +0200
+
+    Matrix is 48 bytes, pass it by ref instead of by value
+
+ poppler/TextOutputDev.cc | 4 ++--
+ poppler/TextOutputDev.h  | 6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit c871ae2cd6fbc8a827dfe2c4d5595d7439a4b54e
+Author: Heiko Becker <heirecka@exherbo.org>
+Date:   Sun May 3 16:06:30 2015 +0200
+
+    cmake: Allow configuring SHARE_INSTALL_DIR
+
+    This is helpful on a multiarch layout where the prefix is /usr/${host}
+    but arch-independent files should still be installed to /usr/share.
+
+    Bug 90293
+
+ CMakeLists.txt                                 |  1 +
+ cmake/modules/GObjectIntrospectionMacros.cmake |  2 +-
+ utils/CMakeLists.txt                           | 22
+ +++++++++++-----------
+ 3 files changed, 13 insertions(+), 12 deletions(-)
+
+commit 1e1a2d0600153c98d44f65e83a0555ab5288450b
+Author: Jason Crain <jason@aquaticape.us>
+Date:   Sun Sep 6 22:33:02 2015 +0200
+
+    Fix JBIG2Decode infinite loop and stack overflow
+
+    Creating a JBIG2Decode filter can create a stack overflow or infinite
+    loop.  Fix stack overflow by adding 'recursion' argument to fetch
+    call.  Fix infinite loop by removing the reference lookup loop.
+    Chains of references aren't allowed by the spec anyway.
+
+    Bug #91186
+
+ poppler/Stream.cc | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
+
+commit 3c91ded21c828d3529f9cd00c417601c67c8a741
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Sep 1 23:46:55 2015 +0200
+
+    Revert a42614284c94c6742b2343abd797657fffa80e0e
+
+ poppler/PDFDoc.cc                | 33 ++++++++++++++-------------------
+ poppler/PDFDoc.h                 | 11 +++++------
+ qt4/src/poppler-pdf-converter.cc | 14 +-------------
+ qt4/src/poppler-qt4.h            |  4 +---
+ qt5/src/poppler-pdf-converter.cc | 14 +-------------
+ qt5/src/poppler-qt5.h            |  4 +---
+ utils/pdfunite.cc                |  3 +--
+ 7 files changed, 24 insertions(+), 59 deletions(-)
+
+commit 911d9fc8d85b776418039b4eebb37200a0987554
+Author: Jeremy Echols <jechols@uoregon.edu>
+Date:   Tue Sep 1 00:22:28 2015 +0200
+
+    pdftotext: Add -bbox-layout option
+
+    Adds layout information for blocks and lines in addition to words
+
+    Bug #89941
+
+ utils/pdftotext.1  |   4 ++
+ utils/pdftotext.cc | 115
+ +++++++++++++++++++++++++++++++++++++++++++----------
+ 2 files changed, 99 insertions(+), 20 deletions(-)
+
+commit a42614284c94c6742b2343abd797657fffa80e0e
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Tue Sep 1 00:15:46 2015 +0200
+
+    Add option to strip encryption
+
+    Adds a PDF write mode that forces a complete rewrite that ignores
+    the original
+    encryption parameters of the document and also removes the encryption
+    entry
+    from the trailer dictionary.
+
+ poppler/PDFDoc.cc                | 33 +++++++++++++++++++--------------
+ poppler/PDFDoc.h                 | 11 ++++++-----
+ qt4/src/poppler-pdf-converter.cc | 14 +++++++++++++-
+ qt4/src/poppler-qt4.h            |  4 +++-
+ qt5/src/poppler-pdf-converter.cc | 14 +++++++++++++-
+ qt5/src/poppler-qt5.h            |  4 +++-
+ utils/pdfunite.cc                |  3 ++-
+ 7 files changed, 59 insertions(+), 24 deletions(-)
+
+commit 72c0162258f2630a3bb11b9c1078ec1ec2812788
+Author: Jason Crain <jason@aquaticape.us>
+Date:   Tue Aug 18 01:34:10 2015 -0500
+
+    cairo: fix size of transparency group surface
+
+    Under rotation cairo_surface_create_similar_clip will create a surface
+    with incorect width/height.  Rely on cairo to do the correct
+    calculation.
+
+    Bug #66229
+
+ poppler/CairoOutputDev.cc | 30 ++++++++----------------------
+ 1 file changed, 8 insertions(+), 22 deletions(-)
+
+commit 06f942657ee0798d7bdc5bd180150ea0464833a5
+Author: Arthur Stavisky <vovodroid@gmail.com>
+Date:   Sat Aug 29 15:50:45 2015 +0200
+
+    Fix for xref table creation
+
+    Bug #90790
+
+ utils/pdfunite.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 6ccdd381b483f50f37005fd9b13f79d2f38273ff
+Author: Pino Toscano <pino@kde.org>
+Date:   Sat Aug 29 12:18:44 2015 +0200
+
+    typo fix, "existant" -> "existent"
+
+ NEWS            | 2 +-
+ poppler/Form.cc | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 9d79f06192d176298b4c911a6702ad1cfe099112
+Author: Hib Eris <hib@hiberis.nl>
+Date:   Thu Aug 27 23:10:05 2015 +0200
+
+    Do not hardcode -fPIC in Makefile.am
+
+    The flag -fPIC is already set on CXXFLAGS by configure.
+    For the mingw compiler, you should not use fPIC, see d44e7e35.
+
+    https://bugs.freedesktop.org/show_bug.cgi?id=91466
+
+ qt5/src/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 3e19bec738889ee9140379ac3f871552dbb9bf41
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Thu Aug 27 23:01:21 2015 +0200
+
+    pdfunite: Insert embedded files in result pdf
+
+    Bug #90066
+
+ poppler/PDFDoc.cc |   1 -
+ utils/pdfunite.cc | 156
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 154 insertions(+), 3 deletions(-)
+
+commit 6e469dbe239714b478488af5ff73046e6a46a908
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Sun Aug 16 21:05:38 2015 +0200
+
+    Change default Qt frontend image format
+
+    Change the default image format used by the Qt frontends to XBGR/RGB32
+    which allows efficient blending and pixmap conversion via Qt. Also use
+    the premultiplied conversion for IgnorePaperColor to elide a further
+    copy for pixmap conversion.
+
+ qt4/src/poppler-page.cc | 46
+ +++++++++++++++-------------------------------
+ qt5/src/poppler-page.cc | 46
+ +++++++++++++++-------------------------------
+ 2 files changed, 30 insertions(+), 62 deletions(-)
+
+commit 56fc0bb2f20adfd89835f3132bfef3033fdcd80d
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Sun Aug 16 21:01:52 2015 +0200
+
+    Add premultiplied alpha channel to SplashBitmap
+
+    This extends the convertToXBGR method so that it can either
+     * leave the alpha channel of the bitmap data opaque,
+     * copy the alpha channel into the bitmap data,
+     * transfer the alpha channel into the bitmap data and
+       perform premultiplication on the bitmap data.
+
+ qt4/src/poppler-page.cc |  6 +++++-
+ qt5/src/poppler-page.cc |  6 +++++-
+ splash/SplashBitmap.cc  | 49
+ ++++++++++++++++++++++++++++++++++++++-----------
+ splash/SplashBitmap.h   | 11 +++++++++--
+ 4 files changed, 57 insertions(+), 15 deletions(-)
+
+commit e5511b58e732f921c65e366fb4d221371b95d905
+Author: Hans-Peter Deifel <hpdeifel@gmx.de>
+Date:   Thu Aug 27 22:38:08 2015 +0200
+
+    cpp: Fix utf8/utf16 conversion
+
+    The old code assumed that ustring::size() would return the number of
+    bytes in ustring, but it really returns the number of
+    characters. Since
+    ustring is a basic_string<unsigned short>, these two values differ
+    (by a
+    factor of two).
+
+    This needs to be considered when using iconv, since it operates
+    on byte
+    counts, not character counts.
+
+    Bug #91644
+
+ cpp/poppler-global.cpp | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
+
+commit d06c27584ecf4b7ff2fe492f0133722ac461dfd6
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Thu Aug 27 22:16:03 2015 +0200
+
+    File Saving improvements
+
+    Refinement of the /P annotation test
+
+    Fixes file from comment #8 in bug #87637
+
+ poppler/PDFDoc.cc | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+commit 545a8f7cb0a473706858d2851f968ffadcc78ed0
+Author: Jason Crain <jason@aquaticape.us>
+Date:   Mon Aug 24 01:12:01 2015 +0200
+
+    Fix bounds check in Linearization::getPageFirst
+
+    Make sure Linearization::pageFirst is in the interval [0,
+    getNumPages),
+    otherwise Hints::getPageObjectNum() can have an out of bounds read.
+
+    Bug #91200
+
+ poppler/Linearization.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 3e61c7523416157acadec7fe59429f880a9d0310
+Author: William Bader <williambader@hotmail.com>
+Date:   Wed Aug 19 23:01:41 2015 +0200
+
+    Splash: Fix wrong memory access
+
+    Bug #91686
+
+ splash/Splash.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 431cd5afe7dc931f21f7eadd3e69406612d09a0c
+Author: Jakub Wilk <jwilk@jwilk.net>
+Date:   Mon Aug 17 19:49:51 2015 +0200
+
+    Update Jakub Wilk's email
+
+ fofi/FoFiType1.cc            | 2 +-
+ poppler/CharCodeToUnicode.cc | 2 +-
+ poppler/GlobalParams.cc      | 2 +-
+ poppler/Object.h             | 2 +-
+ poppler/PDFDoc.cc            | 2 +-
+ poppler/UnicodeMap.cc        | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 1745d2166dd7680d72fe4a71c1fc7a0a5379dcca
+Author: Tobias Koenig <tokoe@kdab.com>
+Date:   Fri Aug 14 00:10:53 2015 +0200
+
+    Add basic support for RichMedia annotations to Qt frontends
+
+    Bug #91548
+
+ qt4/src/poppler-annotation.cc | 615
+ ++++++++++++++++++++++++++++++++++++++++-
+ qt4/src/poppler-annotation.h  | 330 +++++++++++++++++++++-
+ qt5/src/poppler-annotation.cc | 616
+ +++++++++++++++++++++++++++++++++++++++++-
+ qt5/src/poppler-annotation.h  | 331 ++++++++++++++++++++++-
+ 4 files changed, 1888 insertions(+), 4 deletions(-)
+
+commit da5760675d75acf1883ac6f757f755222248762f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Aug 14 00:04:15 2015 +0200
+
+    add (C)
+
+ poppler/Annot.cc | 2 +-
+ poppler/Annot.h  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit bc01007d714a58fd0023594b055e0cd5fbad1f7e
+Author: Tobias Koenig <tokoe@kdab.com>
+Date:   Thu Aug 13 23:57:44 2015 +0200
+
+    Patch to support RichMedia annotations in poppler core
+
+ poppler/Annot.cc | 404
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ poppler/Annot.h  | 172 ++++++++++++++++++++++-
+ 2 files changed, 575 insertions(+), 1 deletion(-)
+
 commit 1213501882cf2ec6e3dcb3c078391040c8cb0a57
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Sun Aug 9 18:27:06 2015 +0200

@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Poppler Reference Manual: PopplerDocument</title>
+<title>PopplerDocument: Poppler Reference Manual</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Poppler Reference Manual">
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="poppler-poppler.html" title="poppler">
 <link rel="next" href="PopplerPage.html" title="PopplerPage">
-<meta name="generator" content="GTK-Doc V1.21 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -323,7 +323,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
+<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
 </td>
 <td class="function_name">
 <a class="link" href="PopplerDocument.html#poppler-index-iter-get-action" title="poppler_index_iter_get_action ()">poppler_index_iter_get_action</a> <span class="c_punctuation">()</span>
@@ -752,7 +752,6 @@ domains.</p>
 <div class="refsect3">
 <a name="id-1.2.3.9.2.6"></a><h4>Returns</h4>
 <p> A newly created <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -802,7 +801,6 @@ domains.</p>
 <div class="refsect3">
 <a name="id-1.2.3.9.3.6"></a><h4>Returns</h4>
 <p> A newly created <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -810,13 +808,13 @@ domains.</p>
 <a name="poppler-document-new-from-stream"></a><h3>poppler_document_new_from_stream ()</h3>
 <pre class="programlisting"><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="returnvalue">PopplerDocument</span></a> *
 poppler_document_new_from_stream (<em class="parameter"><code><a href="https://developer.gnome.org/gio/unstable/GInputStream.html"><span class="type">GInputStream</span></a> *stream</code></em>,
-                                  <em class="parameter"><code><span class="type">goffset</span> length</code></em>,
+                                  <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#goffset"><span class="type">goffset</span></a> length</code></em>,
                                   <em class="parameter"><code>const <span class="type">char</span> *password</code></em>,
                                   <em class="parameter"><code><a href="https://developer.gnome.org/gio/unstable/GCancellable.html"><span class="type">GCancellable</span></a> *cancellable</code></em>,
                                   <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>Creates a new <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> reading the PDF contents from <em class="parameter"><code>stream</code></em>
 .
-Note that the given <a href="https://developer.gnome.org/gio/unstable/GInputStream.html"><span class="type">GInputStream</span></a> must be seekable or <code class="literal">G_IO_ERROR_NOT_SUPPORTED</code>
+Note that the given <a href="https://developer.gnome.org/gio/unstable/GInputStream.html"><span class="type">GInputStream</span></a> must be seekable or <a href="https://developer.gnome.org/gio/unstable/gio-GIOError.html#G-IO-ERROR-NOT-SUPPORTED:CAPS"><code class="literal">G_IO_ERROR_NOT_SUPPORTED</code></a>
 will be returned.
 Possible errors include those in the <a class="link" href="poppler-poppler.html#POPPLER-ERROR:CAPS" title="POPPLER_ERROR"><span class="type">POPPLER_ERROR</span></a> and <a href="https://developer.gnome.org/glib/unstable/glib-File-Utilities.html#G-FILE-ERROR:CAPS"><span class="type">G_FILE_ERROR</span></a>
 domains.</p>
@@ -862,7 +860,7 @@ domains.</p>
 <p> a new <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
-<p class="since">Since 0.22</p>
+<p class="since">Since: <a class="link" href="api-index-0-22.html#api-index-0.22">0.22</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -913,7 +911,7 @@ domains.</p>
 <p> a new <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
-<p class="since">Since 0.22</p>
+<p class="since">Since: <a class="link" href="api-index-0-22.html#api-index-0.22">0.22</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -959,7 +957,6 @@ include those in the <a href="https://developer.gnome.org/glib/unstable/glib-Fil
 <div class="refsect3">
 <a name="id-1.2.3.9.6.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if the document was successfully saved</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1006,7 +1003,6 @@ include those in the <a href="https://developer.gnome.org/glib/unstable/glib-Fil
 <div class="refsect3">
 <a name="id-1.2.3.9.7.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if the document was successfully saved</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1056,9 +1052,8 @@ size of 32 bytes.</p>
 <a name="id-1.2.3.9.8.7"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the <em class="parameter"><code>document</code></em>
 contains an id, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1088,9 +1083,8 @@ poppler_document_get_pdf_version_string
 <p> a new allocated string containing the PDF version
 of <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1129,9 +1123,8 @@ poppler_document_get_pdf_version (<em class="parameter"><code><a class="link" hr
 <div class="refsect3">
 <a name="id-1.2.3.9.10.5"></a><h4>Returns</h4>
 <p> the major and minor PDF version numbers</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1159,9 +1152,8 @@ poppler_document_get_title (<em class="parameter"><code><a class="link" href="Po
 <p> a new allocated string containing the title
 of <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1189,9 +1181,8 @@ poppler_document_get_author (<em class="parameter"><code><a class="link" href="P
 <p> a new allocated string containing the author
 of <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1219,9 +1210,8 @@ poppler_document_get_subject (<em class="parameter"><code><a class="link" href="
 <p> a new allocated string containing the subject
 of <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1249,9 +1239,8 @@ poppler_document_get_keywords (<em class="parameter"><code><a class="link" href=
 <p> a new allocated string containing keywords associated
 to <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1281,9 +1270,8 @@ that created the original document from which it was converted.</p>
 <p> a new allocated string containing the creator
 of <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1313,9 +1301,8 @@ that converted it to PDF</p>
 <p> a new allocated string containing the producer
 of <em class="parameter"><code>document</code></em>
 , or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1341,9 +1328,8 @@ poppler_document_get_creation_date (<em class="parameter"><code><a class="link" 
 <div class="refsect3">
 <a name="id-1.2.3.9.17.6"></a><h4>Returns</h4>
 <p> the date the document was created, or -1</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1370,9 +1356,8 @@ poppler_document_get_modification_date
 <div class="refsect3">
 <a name="id-1.2.3.9.18.6"></a><h4>Returns</h4>
 <p> the date the document was most recently modified, or -1</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1398,9 +1383,8 @@ poppler_document_get_page_layout (<em class="parameter"><code><a class="link" hr
 <div class="refsect3">
 <a name="id-1.2.3.9.19.6"></a><h4>Returns</h4>
 <p> a <a class="link" href="PopplerDocument.html#PopplerPageLayout" title="enum PopplerPageLayout"><span class="type">PopplerPageLayout</span></a> that should be used when the document is opened</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1427,9 +1411,8 @@ be initially displayed when opened.</p>
 <div class="refsect3">
 <a name="id-1.2.3.9.20.6"></a><h4>Returns</h4>
 <p> a <a class="link" href="PopplerDocument.html#PopplerPageMode" title="enum PopplerPageMode"><span class="type">PopplerPageMode</span></a> that should be used when document is opened</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1455,9 +1438,8 @@ poppler_document_get_permissions (<em class="parameter"><code><a class="link" hr
 <div class="refsect3">
 <a name="id-1.2.3.9.21.6"></a><h4>Returns</h4>
 <p> a set of falgs from  <a class="link" href="PopplerDocument.html#PopplerPermissions" title="enum PopplerPermissions"><span class="type">PopplerPermissions</span></a> enumeration</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1484,9 +1466,8 @@ poppler_document_get_metadata (<em class="parameter"><code><a class="link" href=
 <a name="id-1.2.3.9.22.6"></a><h4>Returns</h4>
 <p> a new allocated string containing the XML
 metadata, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1515,9 +1496,8 @@ enables efficient incremental access of the PDF file in a network environment.</
 <a name="id-1.2.3.9.23.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>document</code></em>
 is linearized, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwhise</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1543,7 +1523,6 @@ poppler_document_get_n_pages (<em class="parameter"><code><a class="link" href="
 <div class="refsect3">
 <a name="id-1.2.3.9.24.6"></a><h4>Returns</h4>
 <p> Number of pages</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1581,7 +1560,6 @@ caller.</p>
 <a name="id-1.2.3.9.25.6"></a><h4>Returns</h4>
 <p> (transfer full) : The <a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> at <em class="parameter"><code>index</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1622,7 +1600,6 @@ and can be document specific.  Typically, it is a value such as "iii" or "3".</p
 <a name="id-1.2.3.9.26.7"></a><h4>Returns</h4>
 <p> (transfer full) :The <a class="link" href="PopplerPage.html" title="PopplerPage"><span class="type">PopplerPage</span></a> referenced by <em class="parameter"><code>label</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1662,7 +1639,6 @@ poppler_document_find_dest (<em class="parameter"><code><a class="link" href="Po
 <em class="parameter"><code>link_name</code></em>
 is not a destination. Returned value must
 be freed with <a class="link" href="poppler-PopplerAction.html#poppler-dest-free" title="poppler_dest_free ()"><span class="type">poppler_dest_free</span></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1690,9 +1666,8 @@ See also <a class="link" href="PopplerDocument.html#poppler-document-get-attachm
 <div class="refsect3">
 <a name="id-1.2.3.9.28.6"></a><h4>Returns</h4>
 <p> Number of attachments</p>
-<p></p>
 </div>
-<p class="since">Since 0.18</p>
+<p class="since">Since: <a class="link" href="api-index-0-18.html#api-index-0.18">0.18</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1720,7 +1695,6 @@ poppler_document_has_attachments (<em class="parameter"><code><a class="link" hr
 <a name="id-1.2.3.9.29.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if <em class="parameter"><code>document</code></em>
 has attachments.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1800,7 +1774,7 @@ poppler_index_iter_new (<em class="parameter"><code><a class="link" href="Popple
 freed with <a class="link" href="PopplerDocument.html#poppler-index-iter-free" title="poppler_index_iter_free ()"><code class="function">poppler_index_iter_free()</code></a>.</p>
 <p>Certain documents have an index associated with them.  This index can be used
 to help the user navigate the document, and is similar to a table of
-contents.  Each node in the index will contain a <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a> that can be
+contents.  Each node in the index will contain a <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="type">PopplerAction</span></a> that can be
 displayed to the user — typically a <a class="link" href="poppler-PopplerAction.html#POPPLER-ACTION-GOTO-DEST:CAPS"><span class="type">POPPLER_ACTION_GOTO_DEST</span></a> or a
 <a class="link" href="poppler-PopplerAction.html#POPPLER-ACTION-URI:CAPS"><span class="type">POPPLER_ACTION_URI</span></a>.</p>
 <p>Here is a simple example of some code that walks the full index:</p>
@@ -1843,7 +1817,6 @@ walk_index (PopplerIndexIter *iter)
 <div class="refsect3">
 <a name="id-1.2.3.9.32.9"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerDocument.html#PopplerIndexIter" title="PopplerIndexIter"><span class="type">PopplerIndexIter</span></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1872,7 +1845,6 @@ poppler_index_iter_copy (<em class="parameter"><code><a class="link" href="Poppl
 <div class="refsect3">
 <a name="id-1.2.3.9.33.6"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerDocument.html#PopplerIndexIter" title="PopplerIndexIter"><span class="type">PopplerIndexIter</span></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1924,7 +1896,6 @@ See <a class="link" href="PopplerDocument.html#poppler-index-iter-new" title="po
 <div class="refsect3">
 <a name="id-1.2.3.9.35.6"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerDocument.html#PopplerIndexIter" title="PopplerIndexIter"><span class="type">PopplerIndexIter</span></a></p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1954,15 +1925,14 @@ initially.</p>
 <a name="id-1.2.3.9.36.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if the document wants <em class="parameter"><code>iter</code></em>
 to be expanded</p>
-<p></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-index-iter-get-action"></a><h3>poppler_index_iter_get_action ()</h3>
-<pre class="programlisting"><a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
+<pre class="programlisting"><a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
 poppler_index_iter_get_action (<em class="parameter"><code><a class="link" href="PopplerDocument.html#PopplerIndexIter" title="PopplerIndexIter"><span class="type">PopplerIndexIter</span></a> *iter</code></em>);</pre>
-<p>Returns the <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a> associated with <em class="parameter"><code>iter</code></em>
+<p>Returns the <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="type">PopplerAction</span></a> associated with <em class="parameter"><code>iter</code></em>
 .  It must be freed with
 <a class="link" href="poppler-PopplerAction.html#poppler-action-free" title="poppler_action_free ()"><code class="function">poppler_action_free()</code></a>.</p>
 <div class="refsect3">
@@ -1982,8 +1952,7 @@ poppler_index_iter_get_action (<em class="parameter"><code><a class="link" href=
 </div>
 <div class="refsect3">
 <a name="id-1.2.3.9.37.6"></a><h4>Returns</h4>
-<p> a new <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a></p>
-<p></p>
+<p> a new <a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="type">PopplerAction</span></a></p>
 </div>
 </div>
 <hr>
@@ -2013,7 +1982,6 @@ poppler_index_iter_next (<em class="parameter"><code><a class="link" href="Poppl
 <a name="id-1.2.3.9.38.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if <em class="parameter"><code>iter</code></em>
 was set to the next action</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2040,7 +2008,6 @@ poppler_font_info_new (<em class="parameter"><code><a class="link" href="Poppler
 <div class="refsect3">
 <a name="id-1.2.3.9.39.6"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerDocument.html#PopplerFontInfo" title="PopplerFontInfo"><span class="type">PopplerFontInfo</span></a> instance</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2099,7 +2066,6 @@ while (poppler_font_info_scan (font_info, 20, &amp;fonts_iter)) {
 <div class="refsect3">
 <a name="id-1.2.3.9.40.8"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if there are more fonts left to scan</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2134,7 +2100,6 @@ poppler_fonts_iter_copy (<em class="parameter"><code><a class="link" href="Poppl
 <a name="id-1.2.3.9.42.6"></a><h4>Returns</h4>
 <p> a new allocated copy of <em class="parameter"><code>iter</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2184,7 +2149,6 @@ poppler_fonts_iter_get_name (<em class="parameter"><code><a class="link" href="P
 <div class="refsect3">
 <a name="id-1.2.3.9.44.6"></a><h4>Returns</h4>
 <p> the font name</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2212,7 +2176,6 @@ poppler_fonts_iter_get_full_name (<em class="parameter"><code><a class="link" hr
 <div class="refsect3">
 <a name="id-1.2.3.9.45.6"></a><h4>Returns</h4>
 <p> the font full name</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2240,7 +2203,6 @@ poppler_fonts_iter_get_font_type (<em class="parameter"><code><a class="link" hr
 <div class="refsect3">
 <a name="id-1.2.3.9.46.6"></a><h4>Returns</h4>
 <p> the font type</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2270,9 +2232,8 @@ the font is embedded</p>
 <div class="refsect3">
 <a name="id-1.2.3.9.47.6"></a><h4>Returns</h4>
 <p> the name of the substitute font or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if font is embedded</p>
-<p></p>
 </div>
-<p class="since">Since 0.20</p>
+<p class="since">Since: <a class="link" href="api-index-0-20.html#api-index-0.20">0.20</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2300,7 +2261,6 @@ the font is embedded</p>
 <div class="refsect3">
 <a name="id-1.2.3.9.48.6"></a><h4>Returns</h4>
 <p> the filename of the font or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if font is embedded</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2328,9 +2288,8 @@ poppler_fonts_iter_get_encoding (<em class="parameter"><code><a class="link" hre
 <div class="refsect3">
 <a name="id-1.2.3.9.49.6"></a><h4>Returns</h4>
 <p> the font encoding</p>
-<p></p>
 </div>
-<p class="since">Since 0.20</p>
+<p class="since">Since: <a class="link" href="api-index-0-20.html#api-index-0.20">0.20</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2357,7 +2316,6 @@ poppler_fonts_iter_is_embedded (<em class="parameter"><code><a class="link" href
 <div class="refsect3">
 <a name="id-1.2.3.9.50.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if font is emebdded, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2385,7 +2343,6 @@ poppler_fonts_iter_is_subset (<em class="parameter"><code><a class="link" href="
 <div class="refsect3">
 <a name="id-1.2.3.9.51.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if font is a subset, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2414,7 +2371,6 @@ poppler_fonts_iter_next (<em class="parameter"><code><a class="link" href="Poppl
 <a name="id-1.2.3.9.52.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if <em class="parameter"><code>iter</code></em>
 was set to the next font</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2437,7 +2393,7 @@ poppler_layers_iter_new (<em class="parameter"><code><a class="link" href="Poppl
 </tr></tbody>
 </table></div>
 </div>
-<p class="since">Since 0.12</p>
+<p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2466,7 +2422,6 @@ poppler_layers_iter_copy (<em class="parameter"><code><a class="link" href="Popp
 <a name="id-1.2.3.9.54.6"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerDocument.html#PopplerLayersIter" title="PopplerLayersIter"><span class="type">PopplerLayersIter</span></a></p>
 <p>Since 0.12</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -2491,7 +2446,7 @@ poppler_layers_iter_free (<em class="parameter"><code><a class="link" href="Popp
 </tr></tbody>
 </table></div>
 </div>
-<p class="since">Since 0.12</p>
+<p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2519,9 +2474,8 @@ See <a class="link" href="PopplerDocument.html#poppler-layers-iter-new" title="p
 <div class="refsect3">
 <a name="id-1.2.3.9.56.6"></a><h4>Returns</h4>
 <p> a new <a class="link" href="PopplerDocument.html#PopplerLayersIter" title="PopplerLayersIter"><span class="type">PopplerLayersIter</span></a>, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
-<p></p>
 </div>
-<p class="since">Since 0.12</p>
+<p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2552,7 +2506,7 @@ there isn't any layer associated with <em class="parameter"><code>iter</code></e
 . </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
-<p class="since">Since 0.12</p>
+<p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2583,9 +2537,8 @@ poppler_layers_iter_get_title (<em class="parameter"><code><a class="link" href=
 's title or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>iter</code></em>
 doesn't have a title.
 The returned string should be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when no longer needed.</p>
-<p></p>
 </div>
-<p class="since">Since 0.12</p>
+<p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2614,9 +2567,8 @@ poppler_layers_iter_next (<em class="parameter"><code><a class="link" href="Popp
 <a name="id-1.2.3.9.59.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if <em class="parameter"><code>iter</code></em>
 was set to the next action</p>
-<p></p>
 </div>
-<p class="since">Since 0.12</p>
+<p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2662,7 +2614,6 @@ poppler_ps_file_new (<em class="parameter"><code><a class="link" href="PopplerDo
 <div class="refsect3">
 <a name="id-1.2.3.9.60.6"></a><h4>Returns</h4>
 <p> a PopplerPSFile </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -3322,7 +3273,6 @@ bookmarks or thumbnail images). Since 0.18</p>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>
