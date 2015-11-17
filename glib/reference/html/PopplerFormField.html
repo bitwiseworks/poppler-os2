@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Poppler Reference Manual: PoppplerFormField</title>
+<title>PoppplerFormField: Poppler Reference Manual</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Poppler Reference Manual">
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerAttachment.html" title="PopplerAttachment">
 <link rel="next" href="PopplerAnnot.html" title="PopplerAnnot">
-<meta name="generator" content="GTK-Doc V1.21 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -98,7 +98,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
+<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
 </td>
 <td class="function_name">
 <a class="link" href="PopplerFormField.html#poppler-form-field-get-action" title="poppler_form_field_get_action ()">poppler_form_field_get_action</a> <span class="c_punctuation">()</span>
@@ -371,7 +371,6 @@ poppler_form_field_get_field_type (<em class="parameter"><code><a class="link" h
 <a name="id-1.2.7.8.2.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerFormField.html#PopplerFormFieldType" title="enum PopplerFormFieldType"><span class="type">PopplerFormFieldType</span></a> of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -400,7 +399,6 @@ poppler_form_field_get_id (<em class="parameter"><code><a class="link" href="Pop
 <a name="id-1.2.7.8.3.6"></a><h4>Returns</h4>
 <p> the id of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -429,7 +427,6 @@ poppler_form_field_is_read_only (<em class="parameter"><code><a class="link" hre
 <a name="id-1.2.7.8.4.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>field</code></em>
 is read only</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -458,7 +455,6 @@ poppler_form_field_get_font_size (<em class="parameter"><code><a class="link" hr
 <a name="id-1.2.7.8.5.6"></a><h4>Returns</h4>
 <p> the font size of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -486,9 +482,8 @@ poppler_form_field_get_partial_name (<em class="parameter"><code><a class="link"
 <div class="refsect3">
 <a name="id-1.2.7.8.6.6"></a><h4>Returns</h4>
 <p> a new allocated string. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -516,9 +511,8 @@ exporting interactive form field data from the document</p>
 <div class="refsect3">
 <a name="id-1.2.7.8.7.6"></a><h4>Returns</h4>
 <p> a new allocated string. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -546,16 +540,15 @@ the partial field names of the field and all of its ancestors.</p>
 <div class="refsect3">
 <a name="id-1.2.7.8.8.6"></a><h4>Returns</h4>
 <p> a new allocated string. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
-<p></p>
 </div>
-<p class="since">Since 0.16</p>
+<p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-form-field-get-action"></a><h3>poppler_form_field_get_action ()</h3>
-<pre class="programlisting"><a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
+<pre class="programlisting"><a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="returnvalue">PopplerAction</span></a> *
 poppler_form_field_get_action (<em class="parameter"><code><a class="link" href="PopplerFormField.html" title="PoppplerFormField"><span class="type">PopplerFormField</span></a> *field</code></em>);</pre>
-<p>Retrieves the action (<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="union PopplerAction"><span class="type">PopplerAction</span></a>) that shall be
+<p>Retrieves the action (<a class="link" href="poppler-PopplerAction.html#PopplerAction" title="PopplerAction"><span class="type">PopplerAction</span></a>) that shall be
 performed when <em class="parameter"><code>field</code></em>
  is activated, or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
 <div class="refsect3">
@@ -580,7 +573,7 @@ object is owned by <em class="parameter"><code>field</code></em>
 and should not be freed. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
-<p class="since">Since 0.18</p>
+<p class="since">Since: <a class="link" href="api-index-0-18.html#api-index-0.18">0.18</a></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -609,7 +602,6 @@ poppler_form_field_button_get_button_type
 <a name="id-1.2.7.8.10.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerFormField.html#PopplerFormButtonType" title="enum PopplerFormButtonType"><span class="type">PopplerFormButtonType</span></a> of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -639,7 +631,6 @@ poppler_form_field_button_get_state (<em class="parameter"><code><a class="link"
 <a name="id-1.2.7.8.11.6"></a><h4>Returns</h4>
 <p> current state of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -701,7 +692,6 @@ poppler_form_field_choice_get_choice_type
 <a name="id-1.2.7.8.13.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerFormField.html#PopplerFormChoiceType" title="enum PopplerFormChoiceType"><span class="type">PopplerFormChoiceType</span></a> of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -731,7 +721,6 @@ poppler_form_field_choice_can_select_multiple
 <a name="id-1.2.7.8.14.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>field</code></em>
 allows multiple choices to be selected</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -768,7 +757,6 @@ poppler_form_field_choice_do_spell_check
 <a name="id-1.2.7.8.16.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if spell checking should be done for <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -804,7 +792,6 @@ poppler_form_field_choice_get_item (<em class="parameter"><code><a class="link" 
 <div class="refsect3">
 <a name="id-1.2.7.8.17.6"></a><h4>Returns</h4>
 <p> a new allocated string. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -833,7 +820,6 @@ poppler_form_field_choice_get_n_items (<em class="parameter"><code><a class="lin
 <a name="id-1.2.7.8.18.6"></a><h4>Returns</h4>
 <p> the number of items on <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -861,7 +847,6 @@ poppler_form_field_choice_get_text (<em class="parameter"><code><a class="link" 
 <div class="refsect3">
 <a name="id-1.2.7.8.19.6"></a><h4>Returns</h4>
 <p> a new allocated string. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -921,7 +906,6 @@ poppler_form_field_choice_is_editable (<em class="parameter"><code><a class="lin
 <a name="id-1.2.7.8.21.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if <em class="parameter"><code>field</code></em>
 is editable</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -959,7 +943,6 @@ poppler_form_field_choice_is_item_selected
 <a name="id-1.2.7.8.22.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if item at <em class="parameter"><code>index</code></em>
 is currently selected</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1073,7 +1056,6 @@ poppler_form_field_text_get_text_type (<em class="parameter"><code><a class="lin
 <a name="id-1.2.7.8.26.6"></a><h4>Returns</h4>
 <p> <a class="link" href="PopplerFormField.html#PopplerFormTextType" title="enum PopplerFormTextType"><span class="type">PopplerFormTextType</span></a> of <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1101,7 +1083,6 @@ poppler_form_field_text_get_text (<em class="parameter"><code><a class="link" hr
 <div class="refsect3">
 <a name="id-1.2.7.8.27.6"></a><h4>Returns</h4>
 <p> a new allocated string. It must be freed with <a href="https://developer.gnome.org/glib/unstable/glib-Memory-Allocation.html#g-free"><code class="function">g_free()</code></a> when done.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1161,7 +1142,6 @@ poppler_form_field_text_get_max_len (<em class="parameter"><code><a class="link"
 <a name="id-1.2.7.8.29.6"></a><h4>Returns</h4>
 <p> the maximum allowed number of characters in <em class="parameter"><code>field</code></em>
 , or -1 if there is no maximum.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1197,7 +1177,6 @@ poppler_form_field_text_do_spell_check
 <a name="id-1.2.7.8.31.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if spell checking should be done for <em class="parameter"><code>field</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1226,7 +1205,6 @@ poppler_form_field_text_is_password (<em class="parameter"><code><a class="link"
 <a name="id-1.2.7.8.32.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the content of <em class="parameter"><code>field</code></em>
 is a password</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1255,7 +1233,6 @@ poppler_form_field_text_is_rich_text (<em class="parameter"><code><a class="link
 <a name="id-1.2.7.8.33.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the contents of <em class="parameter"><code>field</code></em>
 are rich text</p>
-<p></p>
 </div>
 </div>
 </div>
@@ -1397,7 +1374,6 @@ are rich text</p>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>

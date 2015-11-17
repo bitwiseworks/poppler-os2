@@ -1752,11 +1752,23 @@ void Splash::setBlendFunc(SplashBlendFunc func) {
 }
 
 void Splash::setStrokeAlpha(SplashCoord alpha) {
-  state->strokeAlpha = alpha;
+  state->strokeAlpha = (state->multiplyPatternAlpha) ? alpha *  state->patternStrokeAlpha : alpha;
 }
 
 void Splash::setFillAlpha(SplashCoord alpha) {
-  state->fillAlpha = alpha;
+  state->fillAlpha = (state->multiplyPatternAlpha) ? alpha *  state->patternFillAlpha : alpha;
+}
+
+void Splash::setPatternAlpha(SplashCoord strokeAlpha, SplashCoord fillAlpha) {
+  state->patternStrokeAlpha = strokeAlpha;
+  state->patternFillAlpha = fillAlpha;
+  state->multiplyPatternAlpha = gTrue;
+}
+
+void Splash::clearPatternAlpha() {
+  state->patternStrokeAlpha = 1;
+  state->patternFillAlpha = 1;
+  state->multiplyPatternAlpha = gFalse;
 }
 
 void Splash::setFillOverprint(GBool fop) {
@@ -3208,6 +3220,8 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
 			         ((SplashCoord)y + 0.5 - section[i].yb0) *
 			           section[i].dxdyb,
 			       glyphMode);
+      if (unlikely(xa < 0))
+        xa = 0;
       // make sure narrow images cover at least one pixel
       if (xa == xb) {
 	++xb;

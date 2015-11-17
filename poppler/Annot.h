@@ -23,7 +23,7 @@
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2009-2011, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
+// Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -56,6 +56,7 @@ class PDFRectangle;
 class Movie;
 class LinkAction;
 class Sound;
+class FileSpec;
 
 enum AnnotLineEndingStyle {
   annotLineEndingSquare,        // Square
@@ -526,7 +527,8 @@ public:
     typePrinterMark,    // PrinterMark    22
     typeTrapNet,        // TrapNet        23
     typeWatermark,      // Watermark      24
-    type3D              // 3D             25
+    type3D,             // 3D             25
+    typeRichMedia       // RichMedia      26
   };
 
   /**
@@ -1407,6 +1409,174 @@ private:
 
   Activation *activation;  // 3DA
 };
+
+//------------------------------------------------------------------------
+// AnnotRichMedia
+//------------------------------------------------------------------------
+
+class AnnotRichMedia: public Annot {
+public:
+  class Params {
+  public:
+    Params(Dict *dict);
+    ~Params();
+
+    GooString* getFlashVars() const;
+
+  private:
+    // optional
+    GooString *flashVars; // FlashVars
+  };
+
+  class Instance {
+  public:
+    enum Type {
+      type3D,       // 3D
+      typeFlash,    // Flash
+      typeSound,    // Sound
+      typeVideo     // Video
+    };
+
+    Instance(Dict *dict);
+    ~Instance();
+
+    Type getType() const;
+    Params* getParams() const;
+
+  private:
+    // optional
+    Type type;     // Subtype
+    Params *params; // Params
+  };
+
+  class Configuration {
+  public:
+    enum Type {
+      type3D,       // 3D
+      typeFlash,    // Flash
+      typeSound,    // Sound
+      typeVideo     // Video
+    };
+
+    Configuration(Dict *dict);
+    ~Configuration();
+
+    Type getType() const;
+    GooString* getName() const;
+    int getInstancesCount() const;
+    Instance* getInstance(int index) const;
+
+  private:
+    // optional
+    Type type;            // Subtype
+    GooString *name;      // Name
+    Instance **instances; // Instances
+    int nInstances;
+  };
+
+  class Content;
+
+  class Asset {
+  public:
+    Asset();
+    ~Asset();
+
+    GooString* getName() const;
+    Object* getFileSpec() const;
+
+  private:
+    friend class AnnotRichMedia::Content;
+
+    GooString *name;
+    Object fileSpec;
+  };
+
+  class Content {
+  public:
+    Content(Dict *dict);
+    ~Content();
+
+    int getConfigurationsCount() const;
+    Configuration* getConfiguration(int index) const;
+
+    int getAssetsCount() const;
+    Asset* getAsset(int index) const;
+
+  private:
+    // optional
+    Configuration **configurations; // Configurations
+    int nConfigurations;
+
+    Asset **assets; // Assets
+    int nAssets;
+  };
+
+  class Activation {
+  public:
+    enum Condition {
+      conditionPageOpened,  // PO
+      conditionPageVisible, // PV
+      conditionUserAction   // XA
+    };
+
+    Activation(Dict *dict);
+
+    Condition getCondition() const;
+
+  private:
+    // optional
+    Condition condition;
+  };
+
+  class Deactivation {
+  public:
+    enum Condition {
+      conditionPageClosed,    // PC
+      conditionPageInvisible, // PI
+      conditionUserAction     // XD
+    };
+
+    Deactivation(Dict *dict);
+
+    Condition getCondition() const;
+
+  private:
+    // optional
+    Condition condition;
+  };
+
+  class Settings {
+  public:
+    Settings(Dict *dict);
+    ~Settings();
+
+    Activation* getActivation() const;
+    Deactivation* getDeactivation() const;
+
+  private:
+    // optional
+    Activation *activation;
+    Deactivation *deactivation;
+  };
+
+  AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect);
+  AnnotRichMedia(PDFDoc *docA, Dict *dict, Object *obj);
+  ~AnnotRichMedia();
+
+  Content* getContent() const;
+
+  Settings* getSettings() const;
+
+private:
+  void initialize(PDFDoc *docA, Dict *dict);
+
+  // required
+  Content *content;     // RichMediaContent
+
+  // optional
+  Settings *settings;   // RichMediaSettings
+};
+
 
 //------------------------------------------------------------------------
 // Annots
