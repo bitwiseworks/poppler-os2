@@ -1475,6 +1475,10 @@ PSOutputDev::~PSOutputDev() {
 #endif
     }
 #endif
+#ifdef __OS2__
+    else if (fileType == psStdout)
+      fflush((FILE *)outputStream);
+#endif
   }
   if (paperSizes) {
     deleteGooList(paperSizes, PSOutPaperSize);
