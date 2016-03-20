@@ -81,9 +81,9 @@
 #undef ENABLE_LIBPNG
 #endif
 
-/* Use zlib instead of builtin zlib decoder. */
-#ifndef ENABLE_ZLIB
-#undef ENABLE_ZLIB
+/* Use zlib instead of builtin zlib decoder for uncompressing flate streams. */
+#ifndef ENABLE_ZLIB_UNCOMPRESS
+#undef ENABLE_ZLIB_UNCOMPRESS
 #endif
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
@@ -134,7 +134,7 @@
 //------------------------------------------------------------------------
 
 // copyright notice
-#define popplerCopyright "Copyright 2005-2015 The Poppler Developers - http://poppler.freedesktop.org"
+#define popplerCopyright "Copyright 2005-2016 The Poppler Developers - http://poppler.freedesktop.org"
 #define xpdfCopyright "Copyright 1996-2011 Glyph & Cog, LLC"
 
 //------------------------------------------------------------------------

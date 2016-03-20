@@ -92,8 +92,6 @@ GType poppler_structure_table_scope_get_type (void) G_GNUC_CONST;
 /* enumerations from "poppler.h" */
 GType poppler_error_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_ERROR (poppler_error_get_type ())
-GType poppler_orientation_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ORIENTATION (poppler_orientation_get_type ())
 GType poppler_page_transition_type_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_PAGE_TRANSITION_TYPE (poppler_page_transition_type_get_type ())
 GType poppler_page_transition_alignment_get_type (void) G_GNUC_CONST;

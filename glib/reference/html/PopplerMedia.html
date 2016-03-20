@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>PopplerMedia: Poppler Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="index.html" title="Poppler Reference Manual">
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerLayer.html" title="PopplerLayer">
@@ -34,7 +34,7 @@
 </tr></table></div>
 <div class="refsect1">
 <a name="PopplerMedia.functions"></a><h2>Functions</h2>
-<div class="informaltable"><table width="100%" border="0">
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="functions_return">
 <col class="functions_name">
@@ -91,7 +91,7 @@
 </div>
 <div class="refsect1">
 <a name="PopplerMedia.other"></a><h2>Types and Values</h2>
-<div class="informaltable"><table width="100%" border="0">
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="name">
 <col class="description">
@@ -133,8 +133,8 @@ successful it should return <a href="https://developer.gnome.org/glib/unstable/g
  and return <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>, in which case <a class="link" href="PopplerMedia.html#poppler-media-save-to-callback" title="poppler_media_save_to_callback ()"><code class="function">poppler_media_save_to_callback()</code></a>
 will fail with the same error.</p>
 <div class="refsect3">
-<a name="id-1.2.10.8.2.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
+<a name="id-1.2.9.8.2.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
 <col class="parameters_description">
@@ -167,7 +167,7 @@ bytes to be written. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.10.8.2.6"></a><h4>Returns</h4>
+<a name="id-1.2.9.8.2.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if successful, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> (with <em class="parameter"><code>error</code></em>
 set) if failed.</p>
 </div>
@@ -181,8 +181,8 @@ poppler_media_get_filename (<em class="parameter"><code><a class="link" href="Po
 <p>Returns the media clip filename, in case of non-embedded media. filename might be
 a local relative or absolute path or a URI</p>
 <div class="refsect3">
-<a name="id-1.2.10.8.3.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
+<a name="id-1.2.9.8.3.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
 <col class="parameters_description">
@@ -196,7 +196,7 @@ a local relative or absolute path or a URI</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.10.8.3.6"></a><h4>Returns</h4>
+<a name="id-1.2.9.8.3.6"></a><h4>Returns</h4>
 <p> a filename, return value is owned by <a class="link" href="PopplerMedia.html" title="PopplerMedia"><span class="type">PopplerMedia</span></a> and should not be freed</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-14.html#api-index-0.14">0.14</a></p>
@@ -208,8 +208,8 @@ a local relative or absolute path or a URI</p>
 poppler_media_get_mime_type (<em class="parameter"><code><a class="link" href="PopplerMedia.html" title="PopplerMedia"><span class="type">PopplerMedia</span></a> *poppler_media</code></em>);</pre>
 <p>Returns the media clip mime-type</p>
 <div class="refsect3">
-<a name="id-1.2.10.8.4.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
+<a name="id-1.2.9.8.4.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
 <col class="parameters_description">
@@ -223,7 +223,7 @@ poppler_media_get_mime_type (<em class="parameter"><code><a class="link" href="P
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.10.8.4.6"></a><h4>Returns</h4>
+<a name="id-1.2.9.8.4.6"></a><h4>Returns</h4>
 <p> the mime-type, return value is owned by <a class="link" href="PopplerMedia.html" title="PopplerMedia"><span class="type">PopplerMedia</span></a> and should not be freed</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-14.html#api-index-0.14">0.14</a></p>
@@ -238,8 +238,8 @@ can be saved with <a class="link" href="PopplerMedia.html#poppler-media-save" ti
 If the result is <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>, the media clip filename can be retrieved with
 <a class="link" href="PopplerMedia.html#poppler-media-get-filename" title="poppler_media_get_filename ()"><code class="function">poppler_media_get_filename()</code></a> function.</p>
 <div class="refsect3">
-<a name="id-1.2.10.8.5.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
+<a name="id-1.2.9.8.5.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
 <col class="parameters_description">
@@ -253,7 +253,7 @@ If the result is <a href="https://developer.gnome.org/glib/unstable/glib-Standar
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.10.8.5.6"></a><h4>Returns</h4>
+<a name="id-1.2.9.8.5.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if media clip is embedded, <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> otherwise</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-14.html#api-index-0.14">0.14</a></p>
@@ -273,8 +273,8 @@ If <em class="parameter"><code>error</code></em>
 Possible errors include those in the <a href="https://developer.gnome.org/glib/unstable/glib-File-Utilities.html#G-FILE-ERROR:CAPS"><span class="type">G_FILE_ERROR</span></a> domain
 and whatever the save function generates.</p>
 <div class="refsect3">
-<a name="id-1.2.10.8.6.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
+<a name="id-1.2.9.8.6.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
 <col class="parameters_description">
@@ -300,7 +300,7 @@ and whatever the save function generates.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.10.8.6.6"></a><h4>Returns</h4>
+<a name="id-1.2.9.8.6.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if the file successfully saved</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-14.html#api-index-0.14">0.14</a></p>
@@ -322,8 +322,8 @@ an in-memory buffer or a socket. If <em class="parameter"><code>error</code></em
 returned. Possible errors include those in the <a href="https://developer.gnome.org/glib/unstable/glib-File-Utilities.html#G-FILE-ERROR:CAPS"><span class="type">G_FILE_ERROR</span></a> domain and
 whatever the save function generates.</p>
 <div class="refsect3">
-<a name="id-1.2.10.8.7.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
+<a name="id-1.2.9.8.7.5"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
 <col class="parameters_description">
@@ -354,7 +354,7 @@ whatever the save function generates.</p>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.10.8.7.6"></a><h4>Returns</h4>
+<a name="id-1.2.9.8.7.6"></a><h4>Returns</h4>
 <p> <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>, if the save successfully completed</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-14.html#api-index-0.14">0.14</a></p>

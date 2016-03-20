@@ -157,20 +157,22 @@ am__DEPENDENCIES_1 =
 @BUILD_LIBPNG_TRUE@am__DEPENDENCIES_6 = $(am__DEPENDENCIES_1)
 @BUILD_ZLIB_TRUE@am__DEPENDENCIES_7 = $(am__DEPENDENCIES_1)
 @BUILD_LIBCURL_TRUE@am__DEPENDENCIES_8 = $(am__DEPENDENCIES_1)
-@BUILD_LIBOPENJPEG_TRUE@am__DEPENDENCIES_9 = $(am__DEPENDENCIES_1)
+@BUILD_NSS_TRUE@am__DEPENDENCIES_9 = $(am__DEPENDENCIES_1)
+@BUILD_LIBOPENJPEG_TRUE@am__DEPENDENCIES_10 = $(am__DEPENDENCIES_1)
 libpoppler_la_DEPENDENCIES = $(top_builddir)/goo/libgoo.la \
 	$(top_builddir)/fofi/libfofi.la $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5) $(am__DEPENDENCIES_6) \
 	$(am__DEPENDENCIES_7) $(am__DEPENDENCIES_8) \
-	$(am__DEPENDENCIES_9) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_9) $(am__DEPENDENCIES_10) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__libpoppler_la_SOURCES_DIST = SplashOutputDev.cc DCTStream.h \
-	DCTStream.cc FlateStream.h FlateStream.cc JPXStream.h \
-	JPXStream.cc JPEG2000Stream.h JPEG2000Stream.cc \
-	CurlCachedFile.cc CurlPDFDocBuilder.cc Annot.cc Array.cc \
-	BuiltinFont.cc BuiltinFontTables.cc CachedFile.cc Catalog.cc \
+	DCTStream.cc FlateEncoder.h FlateEncoder.cc FlateStream.h \
+	FlateStream.cc SignatureHandler.cc JPXStream.h JPXStream.cc \
+	JPEG2000Stream.h JPEG2000Stream.cc CurlCachedFile.cc \
+	CurlPDFDocBuilder.cc Annot.cc Array.cc BuiltinFont.cc \
+	BuiltinFontTables.cc CachedFile.cc Catalog.cc \
 	CharCodeToUnicode.cc CMap.cc DateInfo.cc Decrypt.cc Dict.cc \
 	Error.cc FileSpec.cc FontEncodingTables.cc Form.cc FontInfo.cc \
 	Function.cc Gfx.cc GfxFont.cc GfxState.cc GlobalParams.cc \
@@ -180,25 +182,28 @@ am__libpoppler_la_SOURCES_DIST = SplashOutputDev.cc DCTStream.h \
 	OutputDev.cc Page.cc PageTransition.cc Parser.cc PDFDoc.cc \
 	PDFDocEncoding.cc PDFDocFactory.cc PopplerCache.cc \
 	ProfileData.cc PreScanOutputDev.cc PSTokenizer.cc Rendition.cc \
-	StdinCachedFile.cc StdinPDFDocBuilder.cc Stream.cc \
-	StructTreeRoot.cc StructElement.cc strtok_r.cpp UnicodeMap.cc \
-	UnicodeTypeTable.cc UTF.cc ViewerPreferences.cc XRef.cc \
-	PSOutputDev.cc TextOutputDev.cc MarkedContentOutputDev.cc \
-	PageLabelInfo.h PageLabelInfo.cc SecurityHandler.cc Sound.cc \
-	XpdfPluginAPI.cc
+	SignatureInfo.cc StdinCachedFile.cc StdinPDFDocBuilder.cc \
+	Stream.cc StructTreeRoot.cc StructElement.cc strtok_r.cpp \
+	UnicodeMap.cc UnicodeTypeTable.cc UTF.cc ViewerPreferences.cc \
+	XRef.cc PSOutputDev.cc TextOutputDev.cc \
+	MarkedContentOutputDev.cc PageLabelInfo.h PageLabelInfo.cc \
+	SecurityHandler.cc Sound.cc XpdfPluginAPI.cc
 @BUILD_SPLASH_OUTPUT_TRUE@am__objects_1 =  \
 @BUILD_SPLASH_OUTPUT_TRUE@	libpoppler_la-SplashOutputDev.lo
 @BUILD_LIBJPEG_TRUE@am__objects_2 = libpoppler_la-DCTStream.lo
-@BUILD_ZLIB_TRUE@am__objects_3 = libpoppler_la-FlateStream.lo
-@BUILD_LIBOPENJPEG_FALSE@am__objects_4 = libpoppler_la-JPXStream.lo
-@BUILD_LIBOPENJPEG_TRUE@am__objects_4 =  \
+@BUILD_ZLIB_TRUE@am__objects_3 = libpoppler_la-FlateEncoder.lo
+@BUILD_ZLIB_UNCOMPRESS_TRUE@am__objects_4 =  \
+@BUILD_ZLIB_UNCOMPRESS_TRUE@	libpoppler_la-FlateStream.lo
+@BUILD_NSS_TRUE@am__objects_5 = libpoppler_la-SignatureHandler.lo
+@BUILD_LIBOPENJPEG_FALSE@am__objects_6 = libpoppler_la-JPXStream.lo
+@BUILD_LIBOPENJPEG_TRUE@am__objects_6 =  \
 @BUILD_LIBOPENJPEG_TRUE@	libpoppler_la-JPEG2000Stream.lo
-@BUILD_LIBCURL_TRUE@am__objects_5 = libpoppler_la-CurlCachedFile.lo \
+@BUILD_LIBCURL_TRUE@am__objects_7 = libpoppler_la-CurlCachedFile.lo \
 @BUILD_LIBCURL_TRUE@	libpoppler_la-CurlPDFDocBuilder.lo
 am_libpoppler_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	libpoppler_la-Annot.lo libpoppler_la-Array.lo \
-	libpoppler_la-BuiltinFont.lo \
+	$(am__objects_6) $(am__objects_7) libpoppler_la-Annot.lo \
+	libpoppler_la-Array.lo libpoppler_la-BuiltinFont.lo \
 	libpoppler_la-BuiltinFontTables.lo libpoppler_la-CachedFile.lo \
 	libpoppler_la-Catalog.lo libpoppler_la-CharCodeToUnicode.lo \
 	libpoppler_la-CMap.lo libpoppler_la-DateInfo.lo \
@@ -220,6 +225,7 @@ am_libpoppler_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	libpoppler_la-PDFDocFactory.lo libpoppler_la-PopplerCache.lo \
 	libpoppler_la-ProfileData.lo libpoppler_la-PreScanOutputDev.lo \
 	libpoppler_la-PSTokenizer.lo libpoppler_la-Rendition.lo \
+	libpoppler_la-SignatureInfo.lo \
 	libpoppler_la-StdinCachedFile.lo \
 	libpoppler_la-StdinPDFDocBuilder.lo libpoppler_la-Stream.lo \
 	libpoppler_la-StructTreeRoot.lo libpoppler_la-StructElement.lo \
@@ -297,17 +303,18 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__poppler_include_HEADERS_DIST = SplashOutputDev.h CurlCachedFile.h \
-	CurlPDFDocBuilder.h Annot.h Array.h BuiltinFont.h \
-	BuiltinFontTables.h CachedFile.h Catalog.h CharCodeToUnicode.h \
-	CMap.h DateInfo.h Decrypt.h Dict.h Error.h FileSpec.h \
-	FontEncodingTables.h FontInfo.h Form.h Function.h Gfx.h \
-	GfxFont.h GfxState.h GfxState_helpers.h GlobalParams.h Hints.h \
-	JArithmeticDecoder.h JBIG2Stream.h Lexer.h Linearization.h \
-	Link.h LocalPDFDocBuilder.h Movie.h NameToCharCode.h Object.h \
-	OptionalContent.h Outline.h OutputDev.h Page.h \
-	PageTransition.h Parser.h PDFDoc.h PDFDocBuilder.h \
-	PDFDocEncoding.h PDFDocFactory.h PopplerCache.h ProfileData.h \
-	PreScanOutputDev.h PSTokenizer.h Rendition.h StdinCachedFile.h \
+	CurlPDFDocBuilder.h SignatureHandler.h Annot.h Array.h \
+	BuiltinFont.h BuiltinFontTables.h CachedFile.h Catalog.h \
+	CharCodeToUnicode.h CMap.h DateInfo.h Decrypt.h Dict.h Error.h \
+	FileSpec.h FontEncodingTables.h FontInfo.h Form.h Function.h \
+	Gfx.h GfxFont.h GfxState.h GfxState_helpers.h GlobalParams.h \
+	Hints.h JArithmeticDecoder.h JBIG2Stream.h Lexer.h \
+	Linearization.h Link.h LocalPDFDocBuilder.h Movie.h \
+	NameToCharCode.h Object.h OptionalContent.h Outline.h \
+	OutputDev.h Page.h PageTransition.h Parser.h PDFDoc.h \
+	PDFDocBuilder.h PDFDocEncoding.h PDFDocFactory.h \
+	PopplerCache.h ProfileData.h PreScanOutputDev.h PSTokenizer.h \
+	Rendition.h SignatureInfo.h StdinCachedFile.h \
 	StdinPDFDocBuilder.h Stream-CCITT.h Stream.h StructElement.h \
 	StructTreeRoot.h UnicodeMap.h UnicodeMapTables.h \
 	UnicodeTypeTable.h UnicodeCClassTables.h UnicodeCompTables.h \
@@ -427,6 +434,7 @@ LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -436,6 +444,8 @@ MOCQT5 = @MOCQT5@
 MOCQT52 = @MOCQT52@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NSS3_CFLAGS = @NSS3_CFLAGS@
+NSS3_LIBS = @NSS3_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -604,12 +614,28 @@ lib_LTLIBRARIES = libpoppler.la
 @BUILD_LIBOPENJPEG_TRUE@libjpeg2000_includes = \
 @BUILD_LIBOPENJPEG_TRUE@	$(LIBOPENJPEG_CFLAGS)
 
+@BUILD_NSS_TRUE@nss_sources = \
+@BUILD_NSS_TRUE@	SignatureHandler.cc
+
+@BUILD_NSS_TRUE@nss_libs = \
+@BUILD_NSS_TRUE@	$(NSS3_LIBS)
+
+@BUILD_NSS_TRUE@nss_includes = \
+@BUILD_NSS_TRUE@	$(NSS3_CFLAGS)
+
+@BUILD_NSS_TRUE@nss_headers = \
+@BUILD_NSS_TRUE@	SignatureHandler.h
+
 @BUILD_ZLIB_TRUE@zlib_sources = \
-@BUILD_ZLIB_TRUE@	FlateStream.h				\
-@BUILD_ZLIB_TRUE@	FlateStream.cc
+@BUILD_ZLIB_TRUE@	FlateEncoder.h				\
+@BUILD_ZLIB_TRUE@	FlateEncoder.cc
 
 @BUILD_ZLIB_TRUE@zlib_libs = \
 @BUILD_ZLIB_TRUE@	$(ZLIB_LIBS)
+
+@BUILD_ZLIB_UNCOMPRESS_TRUE@zlib_uncompress_sources = \
+@BUILD_ZLIB_UNCOMPRESS_TRUE@	FlateStream.h				\
+@BUILD_ZLIB_UNCOMPRESS_TRUE@	FlateStream.cc
 
 @BUILD_LIBCURL_TRUE@libcurl_libs = \
 @BUILD_LIBCURL_TRUE@	$(LIBCURL_LIBS)
@@ -631,6 +657,7 @@ lib_LTLIBRARIES = libpoppler.la
 @ENABLE_XPDF_HEADERS_TRUE@poppler_include_HEADERS = \
 @ENABLE_XPDF_HEADERS_TRUE@	$(splash_headers)	\
 @ENABLE_XPDF_HEADERS_TRUE@	$(curl_headers)		\
+@ENABLE_XPDF_HEADERS_TRUE@	$(nss_headers) 		\
 @ENABLE_XPDF_HEADERS_TRUE@	Annot.h			\
 @ENABLE_XPDF_HEADERS_TRUE@	Array.h			\
 @ENABLE_XPDF_HEADERS_TRUE@	BuiltinFont.h		\
@@ -678,6 +705,7 @@ lib_LTLIBRARIES = libpoppler.la
 @ENABLE_XPDF_HEADERS_TRUE@	PreScanOutputDev.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	PSTokenizer.h		\
 @ENABLE_XPDF_HEADERS_TRUE@	Rendition.h		\
+@ENABLE_XPDF_HEADERS_TRUE@	SignatureInfo.h		\
 @ENABLE_XPDF_HEADERS_TRUE@	StdinCachedFile.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	StdinPDFDocBuilder.h	\
 @ENABLE_XPDF_HEADERS_TRUE@	Stream-CCITT.h		\
@@ -710,6 +738,8 @@ libpoppler_la_SOURCES = \
 	$(splash_sources)	\
 	$(libjpeg_sources)	\
 	$(zlib_sources)		\
+	$(zlib_uncompress_sources) \
+	$(nss_sources)      \
 	$(libjpeg2000_sources)	\
 	$(curl_sources)		\
 	Annot.cc		\
@@ -757,6 +787,7 @@ libpoppler_la_SOURCES = \
 	PreScanOutputDev.cc \
 	PSTokenizer.cc		\
 	Rendition.cc		\
+	SignatureInfo.cc	\
 	StdinCachedFile.cc	\
 	StdinPDFDocBuilder.cc	\
 	Stream.cc 		\
@@ -785,6 +816,7 @@ libpoppler_la_CPPFLAGS = \
 	$(libjpeg2000_includes)			\
 	$(libpng_includes)			\
 	$(libcurl_includes)			\
+	$(nss_includes)				\
 	$(FREETYPE_CFLAGS)			\
 	$(FONTCONFIG_CFLAGS)			\
 	$(AM_CPPFLAGS)
@@ -799,6 +831,7 @@ libpoppler_la_LIBADD = \
 	$(libpng_libs)				\
 	$(zlib_libs)				\
 	$(libcurl_libs)				\
+	$(nss_libs)                 \
 	$(libjpeg2000_libs)			\
 	$(FREETYPE_LIBS)			\
 	$(FONTCONFIG_LIBS)			\
@@ -806,7 +839,7 @@ libpoppler_la_LIBADD = \
 	$(win32_libs)
 
 libpoppler_la_LDFLAGS = \
-	-version-info 57:0:0			\
+	-version-info 59:0:0			\
 	@create_shared_lib@			\
 	@auto_import_flags@
 
@@ -949,6 +982,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-Dict.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-Error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-FileSpec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-FlateEncoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-FlateStream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-FontEncodingTables.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-FontInfo.Plo@am__quote@
@@ -988,6 +1022,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-ProfileData.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-Rendition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-SecurityHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-SignatureHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-SignatureInfo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-Sound.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-SplashOutputDev.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libpoppler_la-StdinCachedFile.Plo@am__quote@
@@ -1060,12 +1096,26 @@ libpoppler_la-DCTStream.lo: DCTStream.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_la-DCTStream.lo `test -f 'DCTStream.cc' || echo '$(srcdir)/'`DCTStream.cc
 
+libpoppler_la-FlateEncoder.lo: FlateEncoder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_la-FlateEncoder.lo -MD -MP -MF $(DEPDIR)/libpoppler_la-FlateEncoder.Tpo -c -o libpoppler_la-FlateEncoder.lo `test -f 'FlateEncoder.cc' || echo '$(srcdir)/'`FlateEncoder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_la-FlateEncoder.Tpo $(DEPDIR)/libpoppler_la-FlateEncoder.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='FlateEncoder.cc' object='libpoppler_la-FlateEncoder.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_la-FlateEncoder.lo `test -f 'FlateEncoder.cc' || echo '$(srcdir)/'`FlateEncoder.cc
+
 libpoppler_la-FlateStream.lo: FlateStream.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_la-FlateStream.lo -MD -MP -MF $(DEPDIR)/libpoppler_la-FlateStream.Tpo -c -o libpoppler_la-FlateStream.lo `test -f 'FlateStream.cc' || echo '$(srcdir)/'`FlateStream.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_la-FlateStream.Tpo $(DEPDIR)/libpoppler_la-FlateStream.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='FlateStream.cc' object='libpoppler_la-FlateStream.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_la-FlateStream.lo `test -f 'FlateStream.cc' || echo '$(srcdir)/'`FlateStream.cc
+
+libpoppler_la-SignatureHandler.lo: SignatureHandler.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_la-SignatureHandler.lo -MD -MP -MF $(DEPDIR)/libpoppler_la-SignatureHandler.Tpo -c -o libpoppler_la-SignatureHandler.lo `test -f 'SignatureHandler.cc' || echo '$(srcdir)/'`SignatureHandler.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_la-SignatureHandler.Tpo $(DEPDIR)/libpoppler_la-SignatureHandler.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='SignatureHandler.cc' object='libpoppler_la-SignatureHandler.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_la-SignatureHandler.lo `test -f 'SignatureHandler.cc' || echo '$(srcdir)/'`SignatureHandler.cc
 
 libpoppler_la-JPXStream.lo: JPXStream.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_la-JPXStream.lo -MD -MP -MF $(DEPDIR)/libpoppler_la-JPXStream.Tpo -c -o libpoppler_la-JPXStream.lo `test -f 'JPXStream.cc' || echo '$(srcdir)/'`JPXStream.cc
@@ -1409,6 +1459,13 @@ libpoppler_la-Rendition.lo: Rendition.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Rendition.cc' object='libpoppler_la-Rendition.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_la-Rendition.lo `test -f 'Rendition.cc' || echo '$(srcdir)/'`Rendition.cc
+
+libpoppler_la-SignatureInfo.lo: SignatureInfo.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_la-SignatureInfo.lo -MD -MP -MF $(DEPDIR)/libpoppler_la-SignatureInfo.Tpo -c -o libpoppler_la-SignatureInfo.lo `test -f 'SignatureInfo.cc' || echo '$(srcdir)/'`SignatureInfo.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libpoppler_la-SignatureInfo.Tpo $(DEPDIR)/libpoppler_la-SignatureInfo.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='SignatureInfo.cc' object='libpoppler_la-SignatureInfo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libpoppler_la-SignatureInfo.lo `test -f 'SignatureInfo.cc' || echo '$(srcdir)/'`SignatureInfo.cc
 
 libpoppler_la-StdinCachedFile.lo: StdinCachedFile.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpoppler_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libpoppler_la-StdinCachedFile.lo -MD -MP -MF $(DEPDIR)/libpoppler_la-StdinCachedFile.Tpo -c -o libpoppler_la-StdinCachedFile.lo `test -f 'StdinCachedFile.cc' || echo '$(srcdir)/'`StdinCachedFile.cc

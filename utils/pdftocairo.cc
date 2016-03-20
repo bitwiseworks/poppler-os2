@@ -19,12 +19,12 @@
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2010, 2011-2015 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2010, 2011-2016 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010, 2014 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2011, 2015 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -351,6 +351,7 @@ void writePageImage(GooString *filename)
   height = cairo_image_surface_get_height(surface);
   width = cairo_image_surface_get_width(surface);
   stride = cairo_image_surface_get_stride(surface);
+  cairo_surface_flush(surface);
   data = cairo_image_surface_get_data(surface);
 
   if (!writer->init(file, width, height, x_resolution, y_resolution)) {
@@ -725,12 +726,14 @@ static GooString *getImageFileName(GooString *outputFileName, int numDigits, int
     snprintf(buf, sizeof(buf), "-%0*d", numDigits, page);
     imageName->append(buf);
   }
-  if (png)
-    imageName->append(".png");
-  else if (jpeg)
-    imageName->append(".jpg");
-  else if (tiff)
-    imageName->append(".tif");
+  if (outputFileName->cmp("fd://0") != 0) {
+    if (png)
+      imageName->append(".png");
+    else if (jpeg)
+      imageName->append(".jpg");
+    else if (tiff)
+      imageName->append(".tif");
+  }
 
   return imageName;
 }
@@ -832,8 +835,10 @@ int main(int argc, char *argv[]) {
   int num_outputs;
 
   // parse args
-  if (!parseArgs(argDesc, &argc, argv))
+  if (!parseArgs(argDesc, &argc, argv)) {
+    printUsage("pdftocairo", 0, argDesc);
     exit(99);
+  }
 
   if ( resolution != 0.0 &&
        (x_resolution == 150.0 ||
@@ -883,6 +888,9 @@ int main(int argc, char *argv[]) {
     checkInvalidPrintOption(icc.getCString()[0], "-icc");
     checkInvalidPrintOption(singleFile, "-singlefile");
     checkInvalidPrintOption(useCropBox, "-cropbox");
+    checkInvalidPrintOption(scaleTo != 0, "-scale-to");
+    checkInvalidPrintOption(x_scaleTo != 0, "-scale-to-x");
+    checkInvalidPrintOption(y_scaleTo != 0, "-scale-to-y");
   } else {
     checkInvalidImageOption(level2, "-level2");
     checkInvalidImageOption(level3, "-level3");
@@ -934,6 +942,11 @@ int main(int argc, char *argv[]) {
 
   if (eps && (origPageSizes || paperSize[0] || paperWidth > 0 || paperHeight > 0)) {
     fprintf(stderr, "Error: page size options may not be used with eps output.\n");
+    exit(99);
+  }
+
+  if ((paperWidth > 0 && paperHeight <= 0) || (paperWidth <= 0 && paperHeight > 0)) {
+    fprintf(stderr, "Error: both -paperw and -paperh must be specified.\n");
     exit(99);
   }
 
@@ -1150,7 +1163,7 @@ int main(int argc, char *argv[]) {
   if (ownerPW)
     delete ownerPW;
   if (userPW)
-    delete ownerPW;
+    delete userPW;
 
 #if USE_CMS
   cmsCloseProfile(profile);

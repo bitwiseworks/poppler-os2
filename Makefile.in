@@ -345,6 +345,7 @@ LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -354,6 +355,8 @@ MOCQT5 = @MOCQT5@
 MOCQT52 = @MOCQT52@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NSS3_CFLAGS = @NSS3_CFLAGS@
+NSS3_LIBS = @NSS3_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -506,7 +509,7 @@ EXTRA_DIST = README-XPDF poppler.pc.in poppler-uninstalled.pc.in \
 	cmake/modules/FindGObjectIntrospection.cmake \
 	cmake/modules/FindGTK.cmake cmake/modules/FindIconv.cmake \
 	cmake/modules/FindLCMS.cmake cmake/modules/FindLCMS2.cmake \
-	cmake/modules/FindQt4.cmake \
+	cmake/modules/FindNSS3.cmake cmake/modules/FindQt4.cmake \
 	cmake/modules/GObjectIntrospectionMacros.cmake \
 	cmake/modules/MacroBoolTo01.cmake \
 	cmake/modules/MacroEnsureVersion.cmake \
