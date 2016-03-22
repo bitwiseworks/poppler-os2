@@ -2,7 +2,6 @@
 <book xmlns="http://www.devhelp.net/book" title="Poppler Reference Manual" link="index.html" author="" name="poppler" version="2" language="c">
   <chapters>
     <sub name="Poppler" link="ch01.html">
-      <sub name="poppler" link="poppler-poppler.html"/>
       <sub name="PopplerDocument" link="PopplerDocument.html"/>
       <sub name="PopplerPage" link="PopplerPage.html"/>
       <sub name="PopplerAction" link="poppler-PopplerAction.html"/>
@@ -14,6 +13,7 @@
       <sub name="PopplerMovie" link="PopplerMovie.html"/>
       <sub name="PopplerStructureElement" link="PopplerStructureElement.html"/>
       <sub name="PopplerColor" link="poppler-PopplerColor.html"/>
+      <sub name="Error handling" link="poppler-Error-handling.html"/>
       <sub name="PDF Utility functions" link="poppler-PDF-Utility-functions.html"/>
       <sub name="Version and Features Information" link="poppler-Version-and-Features-Information.html"/>
     </sub>
@@ -30,9 +30,6 @@
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
   </chapters>
   <functions>
-    <keyword type="macro" name="POPPLER_ERROR" link="poppler-poppler.html#POPPLER-ERROR:CAPS"/>
-    <keyword type="enum" name="enum PopplerError" link="poppler-poppler.html#PopplerError"/>
-    <keyword type="enum" name="enum PopplerOrientation" link="poppler-poppler.html#PopplerOrientation"/>
     <keyword type="function" name="poppler_document_new_from_file ()" link="PopplerDocument.html#poppler-document-new-from-file"/>
     <keyword type="function" name="poppler_document_new_from_data ()" link="PopplerDocument.html#poppler-document-new-from-data"/>
     <keyword type="function" name="poppler_document_new_from_stream ()" link="PopplerDocument.html#poppler-document-new-from-stream" since="0.22"/>
@@ -459,6 +456,8 @@
     <keyword type="function" name="poppler_color_copy ()" link="poppler-PopplerColor.html#poppler-color-copy"/>
     <keyword type="function" name="poppler_color_free ()" link="poppler-PopplerColor.html#poppler-color-free"/>
     <keyword type="struct" name="PopplerColor" link="poppler-PopplerColor.html#PopplerColor"/>
+    <keyword type="macro" name="POPPLER_ERROR" link="poppler-Error-handling.html#POPPLER-ERROR:CAPS"/>
+    <keyword type="enum" name="enum PopplerError" link="poppler-Error-handling.html#PopplerError"/>
     <keyword type="function" name="poppler_date_parse ()" link="poppler-PDF-Utility-functions.html#poppler-date-parse" since="0.12"/>
     <keyword type="macro" name="POPPLER_MAJOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MAJOR-VERSION:CAPS" since="0.12"/>
     <keyword type="macro" name="POPPLER_MINOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS" since="0.12"/>
@@ -468,15 +467,6 @@
     <keyword type="function" name="poppler_get_backend ()" link="poppler-Version-and-Features-Information.html#poppler-get-backend"/>
     <keyword type="macro" name="POPPLER_HAS_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-HAS-CAIRO:CAPS"/>
     <keyword type="enum" name="enum PopplerBackend" link="poppler-Version-and-Features-Information.html#PopplerBackend"/>
-    <keyword type="constant" name="POPPLER_ERROR_INVALID" link="poppler-poppler.html#POPPLER-ERROR-INVALID:CAPS"/>
-    <keyword type="constant" name="POPPLER_ERROR_ENCRYPTED" link="poppler-poppler.html#POPPLER-ERROR-ENCRYPTED:CAPS"/>
-    <keyword type="constant" name="POPPLER_ERROR_OPEN_FILE" link="poppler-poppler.html#POPPLER-ERROR-OPEN-FILE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ERROR_BAD_CATALOG" link="poppler-poppler.html#POPPLER-ERROR-BAD-CATALOG:CAPS"/>
-    <keyword type="constant" name="POPPLER_ERROR_DAMAGED" link="poppler-poppler.html#POPPLER-ERROR-DAMAGED:CAPS"/>
-    <keyword type="constant" name="POPPLER_ORIENTATION_PORTRAIT" link="poppler-poppler.html#POPPLER-ORIENTATION-PORTRAIT:CAPS"/>
-    <keyword type="constant" name="POPPLER_ORIENTATION_LANDSCAPE" link="poppler-poppler.html#POPPLER-ORIENTATION-LANDSCAPE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ORIENTATION_UPSIDEDOWN" link="poppler-poppler.html#POPPLER-ORIENTATION-UPSIDEDOWN:CAPS"/>
-    <keyword type="constant" name="POPPLER_ORIENTATION_SEASCAPE" link="poppler-poppler.html#POPPLER-ORIENTATION-SEASCAPE:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_UNSET" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-UNSET:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_SINGLE_PAGE" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-SINGLE-PAGE:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_ONE_COLUMN" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-ONE-COLUMN:CAPS"/>
@@ -759,6 +749,11 @@
     <keyword type="constant" name="POPPLER_STRUCTURE_FORM_STATE_ON" link="PopplerStructureElement.html#POPPLER-STRUCTURE-FORM-STATE-ON:CAPS"/>
     <keyword type="constant" name="POPPLER_STRUCTURE_FORM_STATE_OFF" link="PopplerStructureElement.html#POPPLER-STRUCTURE-FORM-STATE-OFF:CAPS"/>
     <keyword type="constant" name="POPPLER_STRUCTURE_FORM_STATE_NEUTRAL" link="PopplerStructureElement.html#POPPLER-STRUCTURE-FORM-STATE-NEUTRAL:CAPS"/>
+    <keyword type="constant" name="POPPLER_ERROR_INVALID" link="poppler-Error-handling.html#POPPLER-ERROR-INVALID:CAPS"/>
+    <keyword type="constant" name="POPPLER_ERROR_ENCRYPTED" link="poppler-Error-handling.html#POPPLER-ERROR-ENCRYPTED:CAPS"/>
+    <keyword type="constant" name="POPPLER_ERROR_OPEN_FILE" link="poppler-Error-handling.html#POPPLER-ERROR-OPEN-FILE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ERROR_BAD_CATALOG" link="poppler-Error-handling.html#POPPLER-ERROR-BAD-CATALOG:CAPS"/>
+    <keyword type="constant" name="POPPLER_ERROR_DAMAGED" link="poppler-Error-handling.html#POPPLER-ERROR-DAMAGED:CAPS"/>
     <keyword type="constant" name="POPPLER_BACKEND_UNKNOWN" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-UNKNOWN:CAPS"/>
     <keyword type="constant" name="POPPLER_BACKEND_SPLASH" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-SPLASH:CAPS"/>
     <keyword type="constant" name="POPPLER_BACKEND_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-CAIRO:CAPS"/>

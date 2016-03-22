@@ -220,6 +220,8 @@ MOCQT5 = @MOCQT5@
 MOCQT52 = @MOCQT52@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NSS3_CFLAGS = @NSS3_CFLAGS@
+NSS3_LIBS = @NSS3_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -380,7 +382,12 @@ CFILE_GLOB = $(top_srcdir)/glib/*.cc
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES = demo
+IGNORE_HFILES = \
+	poppler-private.h		\
+	poppler-input-stream.h		\
+	poppler-cached-file-loader.h	\
+	demo
+
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png

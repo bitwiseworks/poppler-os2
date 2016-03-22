@@ -93,9 +93,18 @@ TrimBox, and ArtBox.
 Prints document-level metadata.  (This is the "Metadata" stream from
 the PDF file's Catalog object.)
 .TP
-+.B \-js
-+Prints all JavaScript in the PDF.
-+.TP
+.B \-js
+Prints all JavaScript in the PDF.
+.TP
+.B \-struct
+Prints the logical document structure of a Tagged-PDF file.
+.TP
+.B \-struct-text
+Print the textual content along with the document structure of a Tagged-PDF
+file.  Note that extracting text this way might be slow for big PDF files.
+(Implies
+.BR \-struct .)
+.TP
 .B \-rawdates
 Prints the raw (undecoded) date strings, directly from the PDF file.
 .TP
@@ -150,3 +159,6 @@ Cog, LLC.
 .BR pdftoppm (1),
 .BR pdftops (1),
 .BR pdftotext (1)
+.BR pdfseparate (1),
+.BR pdfsig (1),
+.BR pdfunite (1)
