@@ -63,10 +63,11 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
   DIR *toSearchIn;
   struct dirent *subFolder;
 
-  GooString * homePath = new GooString(getenv("HOME"));
 #ifdef __OS2__
+  GooString * homePath = new GooString(getenv("MOZILLA_HOME"));
   homePath = homePath->append("/mozilla/firefox/");
 #else
+  GooString * homePath = new GooString(getenv("HOME"));
   homePath = homePath->append("/.mozilla/firefox/");
 #endif
 
@@ -106,7 +107,7 @@ void SignatureHandler::init_nss()
   }
   //Make sure NSS root certificates module is loaded
 #ifdef __OS2__
-  SECMOD_AddNewModule("Root Certs", "nssckbik.dll", 0, 0);
+  SECMOD_AddNewModule("Root Certs", "nssckbi.dll", 0, 0);
 #else
   SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
 #endif
