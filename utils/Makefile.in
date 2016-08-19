@@ -88,10 +88,11 @@ host_triplet = @host@
 @BUILD_NSS_TRUE@@BUILD_UTILS_TRUE@am__append_1 = pdfsig
 @BUILD_SPLASH_OUTPUT_TRUE@@BUILD_UTILS_TRUE@am__append_2 = pdftoppm
 @BUILD_CAIRO_OUTPUT_TRUE@@BUILD_UTILS_TRUE@am__append_3 = pdftocairo
-@BUILD_SPLASH_OUTPUT_TRUE@@BUILD_UTILS_TRUE@am__append_4 = pdftoppm.1
-@BUILD_CAIRO_OUTPUT_TRUE@@BUILD_UTILS_TRUE@am__append_5 = pdftocairo.1
-@BUILD_CAIRO_OUTPUT_TRUE@@USE_CMS_TRUE@am__append_6 = $(LCMS_CFLAGS)
-@BUILD_CAIRO_OUTPUT_TRUE@@USE_CMS_TRUE@am__append_7 = $(LCMS_LIBS)
+@BUILD_NSS_TRUE@@BUILD_UTILS_TRUE@am__append_4 = pdfsig.1
+@BUILD_SPLASH_OUTPUT_TRUE@@BUILD_UTILS_TRUE@am__append_5 = pdftoppm.1
+@BUILD_CAIRO_OUTPUT_TRUE@@BUILD_UTILS_TRUE@am__append_6 = pdftocairo.1
+@BUILD_CAIRO_OUTPUT_TRUE@@USE_CMS_TRUE@am__append_7 = $(LCMS_CFLAGS)
+@BUILD_CAIRO_OUTPUT_TRUE@@USE_CMS_TRUE@am__append_8 = $(LCMS_LIBS)
 subdir = utils
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp $(dist_man1_MANS)
@@ -429,8 +430,8 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PC_REQUIRES = @PC_REQUIRES@
 PC_REQUIRES_PRIVATE = @PC_REQUIRES_PRIVATE@
-PDFTOCAIRO_CFLAGS = @PDFTOCAIRO_CFLAGS@ $(am__append_6)
-PDFTOCAIRO_LIBS = @PDFTOCAIRO_LIBS@ $(am__append_7)
+PDFTOCAIRO_CFLAGS = @PDFTOCAIRO_CFLAGS@ $(am__append_7)
+PDFTOCAIRO_LIBS = @PDFTOCAIRO_LIBS@ $(am__append_8)
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
@@ -543,7 +544,7 @@ LDADD = \
 @BUILD_UTILS_TRUE@dist_man1_MANS = pdfdetach.1 pdffonts.1 pdfimages.1 \
 @BUILD_UTILS_TRUE@	pdfinfo.1 pdftops.1 pdftotext.1 pdftohtml.1 \
 @BUILD_UTILS_TRUE@	pdfseparate.1 pdfunite.1 $(am__append_4) \
-@BUILD_UTILS_TRUE@	$(am__append_5)
+@BUILD_UTILS_TRUE@	$(am__append_5) $(am__append_6)
 pdfdetach_SOURCES = \
 	pdfdetach.cc
 

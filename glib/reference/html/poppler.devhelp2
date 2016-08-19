@@ -27,6 +27,7 @@
     <sub name="Index of new symbols in 0.22" link="api-index-0-22.html"/>
     <sub name="Index of new symbols in 0.26" link="api-index-0-26.html"/>
     <sub name="Index of new symbols in 0.33" link="api-index-0-33.html"/>
+    <sub name="Index of new symbols in 0.46" link="api-index-0-46.html"/>
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
   </chapters>
   <functions>
@@ -40,13 +41,21 @@
     <keyword type="function" name="poppler_document_get_pdf_version_string ()" link="PopplerDocument.html#poppler-document-get-pdf-version-string" since="0.16"/>
     <keyword type="function" name="poppler_document_get_pdf_version ()" link="PopplerDocument.html#poppler-document-get-pdf-version" since="0.16"/>
     <keyword type="function" name="poppler_document_get_title ()" link="PopplerDocument.html#poppler-document-get-title" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_title ()" link="PopplerDocument.html#poppler-document-set-title" since="0.46"/>
     <keyword type="function" name="poppler_document_get_author ()" link="PopplerDocument.html#poppler-document-get-author" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_author ()" link="PopplerDocument.html#poppler-document-set-author" since="0.46"/>
     <keyword type="function" name="poppler_document_get_subject ()" link="PopplerDocument.html#poppler-document-get-subject" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_subject ()" link="PopplerDocument.html#poppler-document-set-subject" since="0.46"/>
     <keyword type="function" name="poppler_document_get_keywords ()" link="PopplerDocument.html#poppler-document-get-keywords" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_keywords ()" link="PopplerDocument.html#poppler-document-set-keywords" since="0.46"/>
     <keyword type="function" name="poppler_document_get_creator ()" link="PopplerDocument.html#poppler-document-get-creator" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_creator ()" link="PopplerDocument.html#poppler-document-set-creator" since="0.46"/>
     <keyword type="function" name="poppler_document_get_producer ()" link="PopplerDocument.html#poppler-document-get-producer" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_producer ()" link="PopplerDocument.html#poppler-document-set-producer" since="0.46"/>
     <keyword type="function" name="poppler_document_get_creation_date ()" link="PopplerDocument.html#poppler-document-get-creation-date" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_creation_date ()" link="PopplerDocument.html#poppler-document-set-creation-date" since="0.46"/>
     <keyword type="function" name="poppler_document_get_modification_date ()" link="PopplerDocument.html#poppler-document-get-modification-date" since="0.16"/>
+    <keyword type="function" name="poppler_document_set_modification_date ()" link="PopplerDocument.html#poppler-document-set-modification-date" since="0.46"/>
     <keyword type="function" name="poppler_document_get_page_layout ()" link="PopplerDocument.html#poppler-document-get-page-layout" since="0.16"/>
     <keyword type="function" name="poppler_document_get_page_mode ()" link="PopplerDocument.html#poppler-document-get-page-mode" since="0.16"/>
     <keyword type="function" name="poppler_document_get_permissions ()" link="PopplerDocument.html#poppler-document-get-permissions" since="0.16"/>
@@ -459,13 +468,13 @@
     <keyword type="macro" name="POPPLER_ERROR" link="poppler-Error-handling.html#POPPLER-ERROR:CAPS"/>
     <keyword type="enum" name="enum PopplerError" link="poppler-Error-handling.html#PopplerError"/>
     <keyword type="function" name="poppler_date_parse ()" link="poppler-PDF-Utility-functions.html#poppler-date-parse" since="0.12"/>
-    <keyword type="macro" name="POPPLER_MAJOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MAJOR-VERSION:CAPS" since="0.12"/>
-    <keyword type="macro" name="POPPLER_MINOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS" since="0.12"/>
-    <keyword type="macro" name="POPPLER_MICRO_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MICRO-VERSION:CAPS" since="0.12"/>
     <keyword type="macro" name="POPPLER_CHECK_VERSION()" link="poppler-Version-and-Features-Information.html#POPPLER-CHECK-VERSION:CAPS" since="0.12"/>
     <keyword type="function" name="poppler_get_version ()" link="poppler-Version-and-Features-Information.html#poppler-get-version"/>
     <keyword type="function" name="poppler_get_backend ()" link="poppler-Version-and-Features-Information.html#poppler-get-backend"/>
     <keyword type="macro" name="POPPLER_HAS_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-HAS-CAIRO:CAPS"/>
+    <keyword type="macro" name="POPPLER_MAJOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MAJOR-VERSION:CAPS" since="0.12"/>
+    <keyword type="macro" name="POPPLER_MINOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS" since="0.12"/>
+    <keyword type="macro" name="POPPLER_MICRO_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MICRO-VERSION:CAPS" since="0.12"/>
     <keyword type="enum" name="enum PopplerBackend" link="poppler-Version-and-Features-Information.html#PopplerBackend"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_UNSET" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-UNSET:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_SINGLE_PAGE" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-SINGLE-PAGE:CAPS"/>
@@ -757,5 +766,53 @@
     <keyword type="constant" name="POPPLER_BACKEND_UNKNOWN" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-UNKNOWN:CAPS"/>
     <keyword type="constant" name="POPPLER_BACKEND_SPLASH" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-SPLASH:CAPS"/>
     <keyword type="constant" name="POPPLER_BACKEND_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-CAIRO:CAPS"/>
+    <keyword type="member" name="PopplerRectangle.x1" link="PopplerPage.html#PopplerRectangle.x1"/>
+    <keyword type="member" name="PopplerRectangle.y1" link="PopplerPage.html#PopplerRectangle.y1"/>
+    <keyword type="member" name="PopplerRectangle.x2" link="PopplerPage.html#PopplerRectangle.x2"/>
+    <keyword type="member" name="PopplerRectangle.y2" link="PopplerPage.html#PopplerRectangle.y2"/>
+    <keyword type="member" name="PopplerPageTransition.type" link="PopplerPage.html#PopplerPageTransition.type"/>
+    <keyword type="member" name="PopplerPageTransition.alignment" link="PopplerPage.html#PopplerPageTransition.alignment"/>
+    <keyword type="member" name="PopplerPageTransition.direction" link="PopplerPage.html#PopplerPageTransition.direction"/>
+    <keyword type="member" name="PopplerPageTransition.duration" link="PopplerPage.html#PopplerPageTransition.duration"/>
+    <keyword type="member" name="PopplerPageTransition.angle" link="PopplerPage.html#PopplerPageTransition.angle"/>
+    <keyword type="member" name="PopplerPageTransition.scale" link="PopplerPage.html#PopplerPageTransition.scale"/>
+    <keyword type="member" name="PopplerPageTransition.rectangular" link="PopplerPage.html#PopplerPageTransition.rectangular"/>
+    <keyword type="member" name="PopplerPageTransition.duration-real" link="PopplerPage.html#PopplerPageTransition.duration-real"/>
+    <keyword type="member" name="PopplerLinkMapping.area" link="PopplerPage.html#PopplerLinkMapping.area"/>
+    <keyword type="member" name="PopplerLinkMapping.action" link="PopplerPage.html#PopplerLinkMapping.action"/>
+    <keyword type="member" name="PopplerImageMapping.area" link="PopplerPage.html#PopplerImageMapping.area"/>
+    <keyword type="member" name="PopplerImageMapping.image-id" link="PopplerPage.html#PopplerImageMapping.image-id"/>
+    <keyword type="member" name="PopplerFormFieldMapping.area" link="PopplerPage.html#PopplerFormFieldMapping.area"/>
+    <keyword type="member" name="PopplerFormFieldMapping.field" link="PopplerPage.html#PopplerFormFieldMapping.field"/>
+    <keyword type="member" name="PopplerAnnotMapping.area" link="PopplerPage.html#PopplerAnnotMapping.area"/>
+    <keyword type="member" name="PopplerAnnotMapping.annot" link="PopplerPage.html#PopplerAnnotMapping.annot"/>
+    <keyword type="member" name="PopplerTextAttributes.font-name" link="PopplerPage.html#PopplerTextAttributes.font-name"/>
+    <keyword type="member" name="PopplerTextAttributes.font-size" link="PopplerPage.html#PopplerTextAttributes.font-size"/>
+    <keyword type="member" name="PopplerTextAttributes.is-underlined" link="PopplerPage.html#PopplerTextAttributes.is-underlined"/>
+    <keyword type="member" name="PopplerTextAttributes.color" link="PopplerPage.html#PopplerTextAttributes.color"/>
+    <keyword type="member" name="PopplerTextAttributes.start-index" link="PopplerPage.html#PopplerTextAttributes.start-index"/>
+    <keyword type="member" name="PopplerTextAttributes.end-index" link="PopplerPage.html#PopplerTextAttributes.end-index"/>
+    <keyword type="member" name="PopplerDest.type" link="poppler-PopplerAction.html#PopplerDest.type"/>
+    <keyword type="member" name="PopplerDest.page-num" link="poppler-PopplerAction.html#PopplerDest.page-num"/>
+    <keyword type="member" name="PopplerDest.left" link="poppler-PopplerAction.html#PopplerDest.left"/>
+    <keyword type="member" name="PopplerDest.bottom" link="poppler-PopplerAction.html#PopplerDest.bottom"/>
+    <keyword type="member" name="PopplerDest.right" link="poppler-PopplerAction.html#PopplerDest.right"/>
+    <keyword type="member" name="PopplerDest.top" link="poppler-PopplerAction.html#PopplerDest.top"/>
+    <keyword type="member" name="PopplerDest.zoom" link="poppler-PopplerAction.html#PopplerDest.zoom"/>
+    <keyword type="member" name="PopplerDest.named-dest" link="poppler-PopplerAction.html#PopplerDest.named-dest"/>
+    <keyword type="member" name="PopplerDest.change-left" link="poppler-PopplerAction.html#PopplerDest.change-left"/>
+    <keyword type="member" name="PopplerDest.change-top" link="poppler-PopplerAction.html#PopplerDest.change-top"/>
+    <keyword type="member" name="PopplerDest.change-zoom" link="poppler-PopplerAction.html#PopplerDest.change-zoom"/>
+    <keyword type="member" name="PopplerActionLayer.action" link="poppler-PopplerAction.html#PopplerActionLayer.action"/>
+    <keyword type="member" name="PopplerActionLayer.layers" link="poppler-PopplerAction.html#PopplerActionLayer.layers"/>
+    <keyword type="member" name="PopplerPoint.x" link="PopplerAnnot.html#PopplerPoint.x"/>
+    <keyword type="member" name="PopplerPoint.y" link="PopplerAnnot.html#PopplerPoint.y"/>
+    <keyword type="member" name="PopplerQuadrilateral.p1" link="PopplerAnnot.html#PopplerQuadrilateral.p1"/>
+    <keyword type="member" name="PopplerQuadrilateral.p2" link="PopplerAnnot.html#PopplerQuadrilateral.p2"/>
+    <keyword type="member" name="PopplerQuadrilateral.p3" link="PopplerAnnot.html#PopplerQuadrilateral.p3"/>
+    <keyword type="member" name="PopplerQuadrilateral.p4" link="PopplerAnnot.html#PopplerQuadrilateral.p4"/>
+    <keyword type="member" name="PopplerColor.red" link="poppler-PopplerColor.html#PopplerColor.red"/>
+    <keyword type="member" name="PopplerColor.green" link="poppler-PopplerColor.html#PopplerColor.green"/>
+    <keyword type="member" name="PopplerColor.blue" link="poppler-PopplerColor.html#PopplerColor.blue"/>
   </functions>
 </book>

@@ -105,7 +105,7 @@ am_libgoo_la_OBJECTS = libgoo_la-gfile.lo libgoo_la-gmempp.lo \
 	libgoo_la-FixedPoint.lo libgoo_la-NetPBMWriter.lo \
 	libgoo_la-PNGWriter.lo libgoo_la-JpegWriter.lo \
 	libgoo_la-TiffWriter.lo libgoo_la-ImgWriter.lo \
-	libgoo_la-gstrtod.lo libgoo_la-grandom.lo
+	libgoo_la-gstrtod.lo libgoo_la-grandom.lo libgoo_la-glibc.lo
 libgoo_la_OBJECTS = $(am_libgoo_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -472,7 +472,8 @@ libgoo_la_SOURCES = \
 	ImgWriter.cc				\
 	gtypes_p.h				\
 	gstrtod.cc				\
-	grandom.cc
+	grandom.cc                              \
+	glibc.cc
 
 @BUILD_LIBJPEG_TRUE@libjpeg_includes = $(LIBJPEG_CFLAGS)
 @BUILD_LIBTIFF_TRUE@libtiff_includes = $(LIBTIFF_CFLAGS)
@@ -485,6 +486,7 @@ libgoo_la_CPPFLAGS = \
 	$(libjpeg2000_includes)                 \
 	$(libpng_includes)
 
+EXTRA_DIST = glibc.h
 all: all-am
 
 .SUFFIXES:
@@ -551,6 +553,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-PNGWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-TiffWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-gfile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-glibc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-gmem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-gmempp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libgoo_la-grandom.Plo@am__quote@
@@ -681,6 +684,13 @@ libgoo_la-grandom.lo: grandom.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='grandom.cc' object='libgoo_la-grandom.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgoo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libgoo_la-grandom.lo `test -f 'grandom.cc' || echo '$(srcdir)/'`grandom.cc
+
+libgoo_la-glibc.lo: glibc.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgoo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libgoo_la-glibc.lo -MD -MP -MF $(DEPDIR)/libgoo_la-glibc.Tpo -c -o libgoo_la-glibc.lo `test -f 'glibc.cc' || echo '$(srcdir)/'`glibc.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libgoo_la-glibc.Tpo $(DEPDIR)/libgoo_la-glibc.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='glibc.cc' object='libgoo_la-glibc.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libgoo_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libgoo_la-glibc.lo `test -f 'glibc.cc' || echo '$(srcdir)/'`glibc.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo
