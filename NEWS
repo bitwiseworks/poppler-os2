@@ -1,4 +1,102 @@
-Release 0.41.0
+Release 0.47.0
+        core:
+         * Fix abort on documents where the docinfo obj is not a dict. Bug #97134
+         * Check for XRefEntry existing before using it. Bug #97005
+         * Fix memory leak on PDFDoc::setDocInfoStringEntry() with empty string
+         * Don't presume that DocInfo is a dictionary in XRef::createDocInfoIfNoneExists()
+
+        build system:
+         * configure: Work with non gnu greps
+
+Release 0.46.0
+        core:
+         * cairo: fix bug in setAntialias()
+         * cairo: Fix tiling patterns with BBox with non-zero x,y
+         * cairo: try finding glyphs in substitute fonts by unicode value. Bug #96994
+         * Added XRef modification flag
+         * Added DocInfo setters & getters
+         * Be less strict when parsing FitH Link destinations. Bug #96661
+
+        utils:
+         * pdftocairo: revert the use of groups for blending into white page
+         * pdftocairo: Use fprintf for printing errors
+         * pdfinfo: Don't print pdf info when printing metadata, javascript, or structure. Bug #96801
+
+        glib:
+         * Added document property setters & simplified getters
+         * make document metatag gobject properties writeable
+
+        cpp:
+         * pass len to GooString constructor in detail::ustring_to_unicode_GooString(). Bug #96426
+         * Added functions to save a document
+         * Added document property setters & getters
+
+        qt4:
+         * Added document property setters & simplified getters
+
+        qt5:
+         * Added document property setters & simplified getters
+
+        build system:
+         * configure: Don't use -fPIC on cygwin
+         * configure: Work with non gnu greps
+
+Release 0.45.0
+        core:
+         * SplashOutputDev: Fix iccTransform + splashModeXBGR8
+         * Fix memory leaks
+         * Fix crash in broken files. Bug #95567. Bug #96027
+         * Emulate some non portable glibc functions when not available
+
+        utils:
+         * pdftohtml: Fix crash in broken files. Bug #95563
+         * pdfinfo: convert dates to local time zone
+         * pdfinfo: add -isodates for printing dates in ISO-8601 format
+         * pdfinfo: Fix memory leaks
+
+        glib:
+         * return date in UTC instead of local time. Bug #94173
+
+        cpp:
+         * switched from detail::convert_date() to core's dateStringToTime()
+
+Release 0.44.0
+        core:
+         * Fix Compile in 32bit linux. Bug #95492
+         * Splash: type 3 chars. restore the current position also in output device. Bug #95344
+         * Splash: Improve rendering of some dotted lines. Bug #84693
+         * Refactor GooString::Set(). Bug #94201
+         * Fix typo in GfxPatchMeshShading::parse
+         * Fix memory leak in PSOutputDev::filterPSLabel
+         * Fix memory leak in SignatureHandler::getDefaultFirefoxCertDB_Linux
+         * Fix potential crash in SplashOutputDev::doUpdateFont
+         * Fix potential crash in TextPage::coalesce
+         * Remove call that does nothing
+
+        utils:
+         * pdftocairo: add -antialias option. Bug #94977
+
+Release 0.43.0
+        core:
+         * Implement sanity check for linearization usage. Bug #92482
+         * Add SymbolMT as an alias for the Symbol font. Bug #93168
+         * Fix some blank files. Bug #94756
+         * cairo: fix fillToStrokePathClip crash and rendering. Bug #62905
+         * cairo: Check if PDF knows the width of 'm' in case of substituted font. Bug #94054
+         * cairo: save mask state and don't extend image mask. bug #94234
+         * SplashOuputDev: Compile with C++11 compilers that don't define isinfinite. Bug #94761
+         * typo fixes
+
+        utils:
+         * pdftocairo: Calculate rotation before scaling. Bug #94655
+
+        qt4:
+         * Fix crash on certain PDF form item activation actions. Bug #94873
+
+        qt5:
+         * Fix crash on certain PDF form item activation actions. Bug #94873
+
+Release 0.42.0
         core:
          * Add the support for version 5 + revision 6 documents. Bug #85368
          * Add initial support for Signature handling

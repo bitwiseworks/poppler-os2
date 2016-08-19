@@ -74,6 +74,8 @@ PDF version
 .RS
 metadata (only if requested)
 .RE
+.PP
+The options \-listenc, \-meta, \-js, \-struct, and \-struct-text only print the requested information. The 'Info' dictionary and related data listed above is not printed. At most one of these five options may be used.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -104,6 +106,9 @@ Print the textual content along with the document structure of a Tagged-PDF
 file.  Note that extracting text this way might be slow for big PDF files.
 (Implies
 .BR \-struct .)
+.TP
+.B \-isodates
+Prints dates in ISO-8601 format (including the time zone).
 .TP
 .B \-rawdates
 Prints the raw (undecoded) date strings, directly from the PDF file.

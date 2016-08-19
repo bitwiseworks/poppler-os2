@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerStructureElement.html" title="PopplerStructureElement">
 <link rel="next" href="poppler-Error-handling.html" title="Error handling">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -95,7 +95,7 @@
 poppler_color_new (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Creates a new <a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a></p>
 <div class="refsect3">
-<a name="id-1.2.12.7.2.5"></a><h4>Returns</h4>
+<a name="poppler-color-new.returns"></a><h4>Returns</h4>
 <p> a new <a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a>, use <a class="link" href="poppler-PopplerColor.html#poppler-color-free" title="poppler_color_free ()"><code class="function">poppler_color_free()</code></a> to free it</p>
 </div>
 </div>
@@ -107,7 +107,7 @@ poppler_color_copy (<em class="parameter"><code><a class="link" href="poppler-Po
 <p>Creates a copy of <em class="parameter"><code>color</code></em>
 </p>
 <div class="refsect3">
-<a name="id-1.2.12.7.3.5"></a><h4>Parameters</h4>
+<a name="poppler-color-copy.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -122,7 +122,7 @@ poppler_color_copy (<em class="parameter"><code><a class="link" href="poppler-Po
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.12.7.3.6"></a><h4>Returns</h4>
+<a name="poppler-color-copy.returns"></a><h4>Returns</h4>
 <p> a new allocated copy of <em class="parameter"><code>color</code></em>
 </p>
 </div>
@@ -134,7 +134,7 @@ poppler_color_copy (<em class="parameter"><code><a class="link" href="poppler-Po
 poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> *color</code></em>);</pre>
 <p>Frees the given <a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a></p>
 <div class="refsect3">
-<a name="id-1.2.12.7.4.5"></a><h4>Parameters</h4>
+<a name="poppler-color-free.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -163,7 +163,7 @@ poppler_color_free (<em class="parameter"><code><a class="link" href="poppler-Po
 <p>A <a class="link" href="poppler-PopplerColor.html#PopplerColor" title="PopplerColor"><span class="type">PopplerColor</span></a> describes a RGB color. Color components
 are values between 0 and 65535</p>
 <div class="refsect3">
-<a name="id-1.2.12.8.2.5"></a><h4>Members</h4>
+<a name="PopplerColor.members"></a><h4>Members</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -172,17 +172,17 @@ are values between 0 and 65535</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="struct_member_name"><p><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint16"><span class="type">guint16</span></a> <em class="structfield"><code><a name="PopplerColor.red"></a>red</code></em>;</p></td>
+<td class="struct_member_name"><p><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="type">guint16</span></a> <em class="structfield"><code><a name="PopplerColor.red"></a>red</code></em>;</p></td>
 <td class="struct_member_description"><p>the red componment of color</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 <tr>
-<td class="struct_member_name"><p><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint16"><span class="type">guint16</span></a> <em class="structfield"><code><a name="PopplerColor.green"></a>green</code></em>;</p></td>
+<td class="struct_member_name"><p><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="type">guint16</span></a> <em class="structfield"><code><a name="PopplerColor.green"></a>green</code></em>;</p></td>
 <td class="struct_member_description"><p>the green component of color</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 <tr>
-<td class="struct_member_name"><p><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#guint16"><span class="type">guint16</span></a> <em class="structfield"><code><a name="PopplerColor.blue"></a>blue</code></em>;</p></td>
+<td class="struct_member_name"><p><a href="/usr/share/gtk-doc/html/glibglib-Basic-Types.html#guint16"><span class="type">guint16</span></a> <em class="structfield"><code><a name="PopplerColor.blue"></a>blue</code></em>;</p></td>
 <td class="struct_member_description"><p>the blue component of color</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
@@ -193,6 +193,6 @@ are values between 0 and 65535</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>
