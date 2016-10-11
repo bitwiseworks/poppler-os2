@@ -23,7 +23,8 @@ bin_PROGRAMS =					\
 	pdftotext				\
 	pdftohtml				\
 	pdfseparate				\
-	pdfunite
+	pdfunite				\
+	text2pdf
 
 if BUILD_NSS
 bin_PROGRAMS += pdfsig
@@ -138,6 +139,9 @@ pdftocairo_LDADD =					\
 pdftocairo_CPPFLAGS =				\
 	$(AM_CPPFLAGS)				\
 	$(PDFTOCAIRO_CFLAGS)
+
+text2pdf_SOURCES =				\
+	text2pdf.c
 
 noinst_LTLIBRARIES = libparseargs.la
 
