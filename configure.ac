@@ -1,5 +1,5 @@
 m4_define([poppler_version_major],[0])
-m4_define([poppler_version_minor],[47])
+m4_define([poppler_version_minor],[49])
 m4_define([poppler_version_micro],[0])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
@@ -262,7 +262,7 @@ fi
 
 dnl Test for NSS
 AC_ARG_ENABLE(libnss,
-        AC_HELP_STRING([--disable-nss],
+        AC_HELP_STRING([--disable-libnss],
                        [Do not build against libnss3.]),
               enable_libnss=$enableval,
               enable_libnss="try")
@@ -639,7 +639,7 @@ if test x$enable_cairo_output = xyes; then
   POPPLER_GLIB_DISABLE_DEPRECATED=""
   POPPLER_GLIB_DISABLE_SINGLE_INCLUDES=""
 
-  GLIB_REQUIRED=2.18
+  GLIB_REQUIRED=2.41
   AC_SUBST(GLIB_REQUIRED)
   AC_ARG_ENABLE(poppler-glib,
 	        AC_HELP_STRING([--disable-poppler-glib],
