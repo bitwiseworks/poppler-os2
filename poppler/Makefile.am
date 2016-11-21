@@ -1,6 +1,10 @@
 CFLAGS+=$(PTHREAD_CFLAGS)
 CXXFLAGS+=$(PTHREAD_CFLAGS)
 
+VENDOR ?=community
+BUILD_INFO=\#\#1\#\# $(shell date +'%d %b %Y %H:%M:%S')     $(shell uname -n)
+BUILDLEVEL_INFO=@\#$(VENDOR):$(POPPLER_VERSION)\#@$(BUILD_INFO)::::$(POPPLER_MICRO_VERSION)::
+
 AM_CPPFLAGS =					\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/goo
@@ -328,6 +332,7 @@ libpoppler_la_LIBADD =				\
 
 libpoppler_la_LDFLAGS =				\
 	-version-info 65:0:0			\
+	-buildlevel '$(BUILDLEVEL_INFO)'	\
 	@create_shared_lib@			\
 	@auto_import_flags@
 

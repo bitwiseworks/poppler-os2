@@ -1,5 +1,9 @@
 SUBDIRS = . tests
 
+VENDOR ?=community
+BUILD_INFO=\#\#1\#\# $(shell date +'%d %b %Y %H:%M:%S')     $(shell uname -n)
+BUILDLEVEL_INFO=@\#$(VENDOR):$(POPPLER_VERSION)\#@$(BUILD_INFO)::::$(POPPLER_MICRO_VERSION)::
+
 lib_LTLIBRARIES = libpoppler-cpp.la
 
 libpoppler_cpp_includedir = $(includedir)/poppler/cpp
@@ -72,4 +76,5 @@ libpoppler_cpp_la_LDFLAGS =			\
 	-version-info 3:0:3			\
 	@create_shared_lib@			\
 	@auto_import_flags@			\
-	-shortname popplc
+	-shortname popplc			\
+	-buildlevel '$(BUILDLEVEL_INFO)'
