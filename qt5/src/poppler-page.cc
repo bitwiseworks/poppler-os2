@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2016, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -16,6 +16,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Arseniy Lartsev <arseniy@alumni.chalmers.se>
+ * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +60,7 @@
 #include "poppler-page-transition-private.h"
 #include "poppler-page-private.h"
 #include "poppler-link-extractor-private.h"
+#include "poppler-link-private.h"
 #include "poppler-annotation-private.h"
 #include "poppler-form.h"
 #include "poppler-media.h"
@@ -209,6 +211,14 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       popplerLink = new LinkRendition( linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : NULL, lrn->getOperation(), UnicodeParsedString( lrn->getScript() ), reference );
     }
     break;
+
+    case actionOCGState:
+    {
+      ::LinkOCGState *plocg = (::LinkOCGState *)a;
+
+      LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate( linkArea, plocg );
+      popplerLink = new LinkOCGState( locgp );
+    }
 
     case actionUnknown:
     break;
@@ -755,6 +765,12 @@ QList<FormField*> Page::formFields() const
       case formChoice:
       {
         ff = new FormFieldChoice(m_page->parentDoc, p, static_cast<FormWidgetChoice*>(fm));
+      }
+      break;
+
+      case formSignature:
+      {
+        ff = new FormFieldSignature(m_page->parentDoc, p, static_cast<FormWidgetSignature*>(fm));
       }
       break;
 
