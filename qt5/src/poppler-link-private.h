@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2009, Pino Toscano <pino@kde.org>
+/* poppler-link-private.h: qt interface to poppler
+ * Copyright (C) 2016, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,41 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef POPPLER_VERSION_H
-#define POPPLER_VERSION_H
+#ifndef _POPPLER_LINK_PRIVATE_H_
+#define _POPPLER_LINK_PRIVATE_H_
 
-#include "poppler-global.h"
+class LinkOCGState;
 
-#define POPPLER_VERSION "0.51.0"
-#define POPPLER_VERSION_MAJOR 0
-#define POPPLER_VERSION_MINOR 51
-#define POPPLER_VERSION_MICRO 0
+namespace Poppler {
 
-namespace poppler
+class LinkPrivate
 {
+public:
+    LinkPrivate( const QRectF &area )
+        : linkArea( area )
+    {
+    }
 
-POPPLER_CPP_EXPORT std::string version_string();
-POPPLER_CPP_EXPORT unsigned int version_major();
-POPPLER_CPP_EXPORT unsigned int version_minor();
-POPPLER_CPP_EXPORT unsigned int version_micro();
+    virtual ~LinkPrivate()
+    {
+    }
+
+    QRectF linkArea;
+};
+
+
+
+class LinkOCGStatePrivate : public LinkPrivate
+{
+public:
+    LinkOCGStatePrivate( const QRectF &area, ::LinkOCGState *plocg )
+        : LinkPrivate( area )
+        , popplerLinkOCGState( plocg )
+    {
+    }
+
+    ::LinkOCGState *popplerLinkOCGState;
+};
 
 }
 
