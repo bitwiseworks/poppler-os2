@@ -107,6 +107,168 @@ poppler_action_layer_action_get_type (void)
   return g_define_type_id__volatile;
 }
 
+/* enumerations from "poppler-annot.h" */
+#include "poppler-annot.h"
+GType
+poppler_annot_type_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_ANNOT_UNKNOWN, "POPPLER_ANNOT_UNKNOWN", "unknown" },
+      { POPPLER_ANNOT_TEXT, "POPPLER_ANNOT_TEXT", "text" },
+      { POPPLER_ANNOT_LINK, "POPPLER_ANNOT_LINK", "link" },
+      { POPPLER_ANNOT_FREE_TEXT, "POPPLER_ANNOT_FREE_TEXT", "free-text" },
+      { POPPLER_ANNOT_LINE, "POPPLER_ANNOT_LINE", "line" },
+      { POPPLER_ANNOT_SQUARE, "POPPLER_ANNOT_SQUARE", "square" },
+      { POPPLER_ANNOT_CIRCLE, "POPPLER_ANNOT_CIRCLE", "circle" },
+      { POPPLER_ANNOT_POLYGON, "POPPLER_ANNOT_POLYGON", "polygon" },
+      { POPPLER_ANNOT_POLY_LINE, "POPPLER_ANNOT_POLY_LINE", "poly-line" },
+      { POPPLER_ANNOT_HIGHLIGHT, "POPPLER_ANNOT_HIGHLIGHT", "highlight" },
+      { POPPLER_ANNOT_UNDERLINE, "POPPLER_ANNOT_UNDERLINE", "underline" },
+      { POPPLER_ANNOT_SQUIGGLY, "POPPLER_ANNOT_SQUIGGLY", "squiggly" },
+      { POPPLER_ANNOT_STRIKE_OUT, "POPPLER_ANNOT_STRIKE_OUT", "strike-out" },
+      { POPPLER_ANNOT_STAMP, "POPPLER_ANNOT_STAMP", "stamp" },
+      { POPPLER_ANNOT_CARET, "POPPLER_ANNOT_CARET", "caret" },
+      { POPPLER_ANNOT_INK, "POPPLER_ANNOT_INK", "ink" },
+      { POPPLER_ANNOT_POPUP, "POPPLER_ANNOT_POPUP", "popup" },
+      { POPPLER_ANNOT_FILE_ATTACHMENT, "POPPLER_ANNOT_FILE_ATTACHMENT", "file-attachment" },
+      { POPPLER_ANNOT_SOUND, "POPPLER_ANNOT_SOUND", "sound" },
+      { POPPLER_ANNOT_MOVIE, "POPPLER_ANNOT_MOVIE", "movie" },
+      { POPPLER_ANNOT_WIDGET, "POPPLER_ANNOT_WIDGET", "widget" },
+      { POPPLER_ANNOT_SCREEN, "POPPLER_ANNOT_SCREEN", "screen" },
+      { POPPLER_ANNOT_PRINTER_MARK, "POPPLER_ANNOT_PRINTER_MARK", "printer-mark" },
+      { POPPLER_ANNOT_TRAP_NET, "POPPLER_ANNOT_TRAP_NET", "trap-net" },
+      { POPPLER_ANNOT_WATERMARK, "POPPLER_ANNOT_WATERMARK", "watermark" },
+      { POPPLER_ANNOT_3D, "POPPLER_ANNOT_3D", "3d" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerAnnotType"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_annot_flag_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GFlagsValue values[] = {
+      { POPPLER_ANNOT_FLAG_UNKNOWN, "POPPLER_ANNOT_FLAG_UNKNOWN", "unknown" },
+      { POPPLER_ANNOT_FLAG_INVISIBLE, "POPPLER_ANNOT_FLAG_INVISIBLE", "invisible" },
+      { POPPLER_ANNOT_FLAG_HIDDEN, "POPPLER_ANNOT_FLAG_HIDDEN", "hidden" },
+      { POPPLER_ANNOT_FLAG_PRINT, "POPPLER_ANNOT_FLAG_PRINT", "print" },
+      { POPPLER_ANNOT_FLAG_NO_ZOOM, "POPPLER_ANNOT_FLAG_NO_ZOOM", "no-zoom" },
+      { POPPLER_ANNOT_FLAG_NO_ROTATE, "POPPLER_ANNOT_FLAG_NO_ROTATE", "no-rotate" },
+      { POPPLER_ANNOT_FLAG_NO_VIEW, "POPPLER_ANNOT_FLAG_NO_VIEW", "no-view" },
+      { POPPLER_ANNOT_FLAG_READ_ONLY, "POPPLER_ANNOT_FLAG_READ_ONLY", "read-only" },
+      { POPPLER_ANNOT_FLAG_LOCKED, "POPPLER_ANNOT_FLAG_LOCKED", "locked" },
+      { POPPLER_ANNOT_FLAG_TOGGLE_NO_VIEW, "POPPLER_ANNOT_FLAG_TOGGLE_NO_VIEW", "toggle-no-view" },
+      { POPPLER_ANNOT_FLAG_LOCKED_CONTENTS, "POPPLER_ANNOT_FLAG_LOCKED_CONTENTS", "locked-contents" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_flags_register_static (g_intern_static_string ("PopplerAnnotFlag"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_annot_markup_reply_type_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_ANNOT_MARKUP_REPLY_TYPE_R, "POPPLER_ANNOT_MARKUP_REPLY_TYPE_R", "r" },
+      { POPPLER_ANNOT_MARKUP_REPLY_TYPE_GROUP, "POPPLER_ANNOT_MARKUP_REPLY_TYPE_GROUP", "group" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerAnnotMarkupReplyType"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_annot_external_data_type_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_3D, "POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_3D", "3d" },
+      { POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_UNKNOWN, "POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_UNKNOWN", "unknown" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerAnnotExternalDataType"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_annot_text_state_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_ANNOT_TEXT_STATE_MARKED, "POPPLER_ANNOT_TEXT_STATE_MARKED", "marked" },
+      { POPPLER_ANNOT_TEXT_STATE_UNMARKED, "POPPLER_ANNOT_TEXT_STATE_UNMARKED", "unmarked" },
+      { POPPLER_ANNOT_TEXT_STATE_ACCEPTED, "POPPLER_ANNOT_TEXT_STATE_ACCEPTED", "accepted" },
+      { POPPLER_ANNOT_TEXT_STATE_REJECTED, "POPPLER_ANNOT_TEXT_STATE_REJECTED", "rejected" },
+      { POPPLER_ANNOT_TEXT_STATE_CANCELLED, "POPPLER_ANNOT_TEXT_STATE_CANCELLED", "cancelled" },
+      { POPPLER_ANNOT_TEXT_STATE_COMPLETED, "POPPLER_ANNOT_TEXT_STATE_COMPLETED", "completed" },
+      { POPPLER_ANNOT_TEXT_STATE_NONE, "POPPLER_ANNOT_TEXT_STATE_NONE", "none" },
+      { POPPLER_ANNOT_TEXT_STATE_UNKNOWN, "POPPLER_ANNOT_TEXT_STATE_UNKNOWN", "unknown" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerAnnotTextState"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
+GType
+poppler_annot_free_text_quadding_get_type (void)
+{
+  static volatile gsize g_define_type_id__volatile = 0;
+ 
+  if (g_once_init_enter (&g_define_type_id__volatile)) {
+    static const GEnumValue values[] = {
+      { POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED, "POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED", "left-justified" },
+      { POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED, "POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED", "centered" },
+      { POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED, "POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED", "right-justified" },
+      { 0, NULL, NULL }
+    };
+    GType g_define_type_id = 
+       g_enum_register_static (g_intern_static_string ("PopplerAnnotFreeTextQuadding"), values);
+      
+    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
+  }
+    
+  return g_define_type_id__volatile;
+}
+
 /* enumerations from "poppler-document.h" */
 #include "poppler-document.h"
 GType
@@ -329,161 +491,23 @@ poppler_form_choice_type_get_type (void)
   return g_define_type_id__volatile;
 }
 
-/* enumerations from "poppler-annot.h" */
-#include "poppler-annot.h"
+/* enumerations from "poppler-movie.h" */
+#include "poppler-movie.h"
 GType
-poppler_annot_type_get_type (void)
+poppler_movie_play_mode_get_type (void)
 {
   static volatile gsize g_define_type_id__volatile = 0;
  
   if (g_once_init_enter (&g_define_type_id__volatile)) {
     static const GEnumValue values[] = {
-      { POPPLER_ANNOT_UNKNOWN, "POPPLER_ANNOT_UNKNOWN", "unknown" },
-      { POPPLER_ANNOT_TEXT, "POPPLER_ANNOT_TEXT", "text" },
-      { POPPLER_ANNOT_LINK, "POPPLER_ANNOT_LINK", "link" },
-      { POPPLER_ANNOT_FREE_TEXT, "POPPLER_ANNOT_FREE_TEXT", "free-text" },
-      { POPPLER_ANNOT_LINE, "POPPLER_ANNOT_LINE", "line" },
-      { POPPLER_ANNOT_SQUARE, "POPPLER_ANNOT_SQUARE", "square" },
-      { POPPLER_ANNOT_CIRCLE, "POPPLER_ANNOT_CIRCLE", "circle" },
-      { POPPLER_ANNOT_POLYGON, "POPPLER_ANNOT_POLYGON", "polygon" },
-      { POPPLER_ANNOT_POLY_LINE, "POPPLER_ANNOT_POLY_LINE", "poly-line" },
-      { POPPLER_ANNOT_HIGHLIGHT, "POPPLER_ANNOT_HIGHLIGHT", "highlight" },
-      { POPPLER_ANNOT_UNDERLINE, "POPPLER_ANNOT_UNDERLINE", "underline" },
-      { POPPLER_ANNOT_SQUIGGLY, "POPPLER_ANNOT_SQUIGGLY", "squiggly" },
-      { POPPLER_ANNOT_STRIKE_OUT, "POPPLER_ANNOT_STRIKE_OUT", "strike-out" },
-      { POPPLER_ANNOT_STAMP, "POPPLER_ANNOT_STAMP", "stamp" },
-      { POPPLER_ANNOT_CARET, "POPPLER_ANNOT_CARET", "caret" },
-      { POPPLER_ANNOT_INK, "POPPLER_ANNOT_INK", "ink" },
-      { POPPLER_ANNOT_POPUP, "POPPLER_ANNOT_POPUP", "popup" },
-      { POPPLER_ANNOT_FILE_ATTACHMENT, "POPPLER_ANNOT_FILE_ATTACHMENT", "file-attachment" },
-      { POPPLER_ANNOT_SOUND, "POPPLER_ANNOT_SOUND", "sound" },
-      { POPPLER_ANNOT_MOVIE, "POPPLER_ANNOT_MOVIE", "movie" },
-      { POPPLER_ANNOT_WIDGET, "POPPLER_ANNOT_WIDGET", "widget" },
-      { POPPLER_ANNOT_SCREEN, "POPPLER_ANNOT_SCREEN", "screen" },
-      { POPPLER_ANNOT_PRINTER_MARK, "POPPLER_ANNOT_PRINTER_MARK", "printer-mark" },
-      { POPPLER_ANNOT_TRAP_NET, "POPPLER_ANNOT_TRAP_NET", "trap-net" },
-      { POPPLER_ANNOT_WATERMARK, "POPPLER_ANNOT_WATERMARK", "watermark" },
-      { POPPLER_ANNOT_3D, "POPPLER_ANNOT_3D", "3d" },
+      { POPPLER_MOVIE_PLAY_MODE_ONCE, "POPPLER_MOVIE_PLAY_MODE_ONCE", "once" },
+      { POPPLER_MOVIE_PLAY_MODE_OPEN, "POPPLER_MOVIE_PLAY_MODE_OPEN", "open" },
+      { POPPLER_MOVIE_PLAY_MODE_REPEAT, "POPPLER_MOVIE_PLAY_MODE_REPEAT", "repeat" },
+      { POPPLER_MOVIE_PLAY_MODE_PALINDROME, "POPPLER_MOVIE_PLAY_MODE_PALINDROME", "palindrome" },
       { 0, NULL, NULL }
     };
     GType g_define_type_id = 
-       g_enum_register_static (g_intern_static_string ("PopplerAnnotType"), values);
-      
-    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-  }
-    
-  return g_define_type_id__volatile;
-}
-
-GType
-poppler_annot_flag_get_type (void)
-{
-  static volatile gsize g_define_type_id__volatile = 0;
- 
-  if (g_once_init_enter (&g_define_type_id__volatile)) {
-    static const GFlagsValue values[] = {
-      { POPPLER_ANNOT_FLAG_UNKNOWN, "POPPLER_ANNOT_FLAG_UNKNOWN", "unknown" },
-      { POPPLER_ANNOT_FLAG_INVISIBLE, "POPPLER_ANNOT_FLAG_INVISIBLE", "invisible" },
-      { POPPLER_ANNOT_FLAG_HIDDEN, "POPPLER_ANNOT_FLAG_HIDDEN", "hidden" },
-      { POPPLER_ANNOT_FLAG_PRINT, "POPPLER_ANNOT_FLAG_PRINT", "print" },
-      { POPPLER_ANNOT_FLAG_NO_ZOOM, "POPPLER_ANNOT_FLAG_NO_ZOOM", "no-zoom" },
-      { POPPLER_ANNOT_FLAG_NO_ROTATE, "POPPLER_ANNOT_FLAG_NO_ROTATE", "no-rotate" },
-      { POPPLER_ANNOT_FLAG_NO_VIEW, "POPPLER_ANNOT_FLAG_NO_VIEW", "no-view" },
-      { POPPLER_ANNOT_FLAG_READ_ONLY, "POPPLER_ANNOT_FLAG_READ_ONLY", "read-only" },
-      { POPPLER_ANNOT_FLAG_LOCKED, "POPPLER_ANNOT_FLAG_LOCKED", "locked" },
-      { POPPLER_ANNOT_FLAG_TOGGLE_NO_VIEW, "POPPLER_ANNOT_FLAG_TOGGLE_NO_VIEW", "toggle-no-view" },
-      { POPPLER_ANNOT_FLAG_LOCKED_CONTENTS, "POPPLER_ANNOT_FLAG_LOCKED_CONTENTS", "locked-contents" },
-      { 0, NULL, NULL }
-    };
-    GType g_define_type_id = 
-       g_flags_register_static (g_intern_static_string ("PopplerAnnotFlag"), values);
-      
-    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-  }
-    
-  return g_define_type_id__volatile;
-}
-
-GType
-poppler_annot_markup_reply_type_get_type (void)
-{
-  static volatile gsize g_define_type_id__volatile = 0;
- 
-  if (g_once_init_enter (&g_define_type_id__volatile)) {
-    static const GEnumValue values[] = {
-      { POPPLER_ANNOT_MARKUP_REPLY_TYPE_R, "POPPLER_ANNOT_MARKUP_REPLY_TYPE_R", "r" },
-      { POPPLER_ANNOT_MARKUP_REPLY_TYPE_GROUP, "POPPLER_ANNOT_MARKUP_REPLY_TYPE_GROUP", "group" },
-      { 0, NULL, NULL }
-    };
-    GType g_define_type_id = 
-       g_enum_register_static (g_intern_static_string ("PopplerAnnotMarkupReplyType"), values);
-      
-    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-  }
-    
-  return g_define_type_id__volatile;
-}
-
-GType
-poppler_annot_external_data_type_get_type (void)
-{
-  static volatile gsize g_define_type_id__volatile = 0;
- 
-  if (g_once_init_enter (&g_define_type_id__volatile)) {
-    static const GEnumValue values[] = {
-      { POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_3D, "POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_3D", "3d" },
-      { POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_UNKNOWN, "POPPLER_ANNOT_EXTERNAL_DATA_MARKUP_UNKNOWN", "unknown" },
-      { 0, NULL, NULL }
-    };
-    GType g_define_type_id = 
-       g_enum_register_static (g_intern_static_string ("PopplerAnnotExternalDataType"), values);
-      
-    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-  }
-    
-  return g_define_type_id__volatile;
-}
-
-GType
-poppler_annot_text_state_get_type (void)
-{
-  static volatile gsize g_define_type_id__volatile = 0;
- 
-  if (g_once_init_enter (&g_define_type_id__volatile)) {
-    static const GEnumValue values[] = {
-      { POPPLER_ANNOT_TEXT_STATE_MARKED, "POPPLER_ANNOT_TEXT_STATE_MARKED", "marked" },
-      { POPPLER_ANNOT_TEXT_STATE_UNMARKED, "POPPLER_ANNOT_TEXT_STATE_UNMARKED", "unmarked" },
-      { POPPLER_ANNOT_TEXT_STATE_ACCEPTED, "POPPLER_ANNOT_TEXT_STATE_ACCEPTED", "accepted" },
-      { POPPLER_ANNOT_TEXT_STATE_REJECTED, "POPPLER_ANNOT_TEXT_STATE_REJECTED", "rejected" },
-      { POPPLER_ANNOT_TEXT_STATE_CANCELLED, "POPPLER_ANNOT_TEXT_STATE_CANCELLED", "cancelled" },
-      { POPPLER_ANNOT_TEXT_STATE_COMPLETED, "POPPLER_ANNOT_TEXT_STATE_COMPLETED", "completed" },
-      { POPPLER_ANNOT_TEXT_STATE_NONE, "POPPLER_ANNOT_TEXT_STATE_NONE", "none" },
-      { POPPLER_ANNOT_TEXT_STATE_UNKNOWN, "POPPLER_ANNOT_TEXT_STATE_UNKNOWN", "unknown" },
-      { 0, NULL, NULL }
-    };
-    GType g_define_type_id = 
-       g_enum_register_static (g_intern_static_string ("PopplerAnnotTextState"), values);
-      
-    g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
-  }
-    
-  return g_define_type_id__volatile;
-}
-
-GType
-poppler_annot_free_text_quadding_get_type (void)
-{
-  static volatile gsize g_define_type_id__volatile = 0;
- 
-  if (g_once_init_enter (&g_define_type_id__volatile)) {
-    static const GEnumValue values[] = {
-      { POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED, "POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED", "left-justified" },
-      { POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED, "POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED", "centered" },
-      { POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED, "POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED", "right-justified" },
-      { 0, NULL, NULL }
-    };
-    GType g_define_type_id = 
-       g_enum_register_static (g_intern_static_string ("PopplerAnnotFreeTextQuadding"), values);
+       g_enum_register_static (g_intern_static_string ("PopplerMoviePlayMode"), values);
       
     g_once_init_leave (&g_define_type_id__volatile, g_define_type_id);
   }

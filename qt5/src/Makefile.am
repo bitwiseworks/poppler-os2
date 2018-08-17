@@ -51,6 +51,7 @@ libpoppler_qt5_la_CPPFLAGS =			\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/poppler			\
 	$(POPPLER_QT5_CFLAGS)			\
+	$(NSS3_CFLAGS)                          \
 	$(LCMS_CFLAGS)
 
 libpoppler_qt5_la_CXXFLAGS =			\
@@ -61,7 +62,7 @@ libpoppler_qt5_la_LIBADD =			\
 	$(POPPLER_QT5_LIBS)
 
 libpoppler_qt5_la_LDFLAGS =			\
-	-version-info 10:0:9			\
+	-version-info 11:0:10			\
 	@create_shared_lib@			\
 	@auto_import_flags@
 

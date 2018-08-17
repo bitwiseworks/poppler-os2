@@ -372,7 +372,9 @@
     <keyword type="function" name="poppler_movie_get_filename ()" link="PopplerMovie.html#poppler-movie-get-filename" since="0.14"/>
     <keyword type="function" name="poppler_movie_need_poster ()" link="PopplerMovie.html#poppler-movie-need-poster" since="0.14"/>
     <keyword type="function" name="poppler_movie_show_controls ()" link="PopplerMovie.html#poppler-movie-show-controls" since="0.14"/>
+    <keyword type="function" name="poppler_movie_get_play_mode ()" link="PopplerMovie.html#poppler-movie-get-play-mode" since="0.54"/>
     <keyword type="struct" name="PopplerMovie" link="PopplerMovie.html#PopplerMovie-struct"/>
+    <keyword type="enum" name="enum PopplerMoviePlayMode" link="PopplerMovie.html#PopplerMoviePlayMode" since="0.54"/>
     <keyword type="function" name="poppler_structure_element_iter_new ()" link="PopplerStructureElement.html#poppler-structure-element-iter-new" since="0.26"/>
     <keyword type="function" name="poppler_structure_element_iter_next ()" link="PopplerStructureElement.html#poppler-structure-element-iter-next" since="0.26"/>
     <keyword type="function" name="poppler_structure_element_iter_copy ()" link="PopplerStructureElement.html#poppler-structure-element-iter-copy" since="0.26"/>
@@ -639,6 +641,10 @@
     <keyword type="constant" name="POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED" link="PopplerAnnot.html#POPPLER-ANNOT-FREE-TEXT-QUADDING-LEFT-JUSTIFIED:CAPS"/>
     <keyword type="constant" name="POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED" link="PopplerAnnot.html#POPPLER-ANNOT-FREE-TEXT-QUADDING-CENTERED:CAPS"/>
     <keyword type="constant" name="POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED" link="PopplerAnnot.html#POPPLER-ANNOT-FREE-TEXT-QUADDING-RIGHT-JUSTIFIED:CAPS"/>
+    <keyword type="constant" name="POPPLER_MOVIE_PLAY_MODE_ONCE" link="PopplerMovie.html#POPPLER-MOVIE-PLAY-MODE-ONCE:CAPS"/>
+    <keyword type="constant" name="POPPLER_MOVIE_PLAY_MODE_OPEN" link="PopplerMovie.html#POPPLER-MOVIE-PLAY-MODE-OPEN:CAPS"/>
+    <keyword type="constant" name="POPPLER_MOVIE_PLAY_MODE_REPEAT" link="PopplerMovie.html#POPPLER-MOVIE-PLAY-MODE-REPEAT:CAPS"/>
+    <keyword type="constant" name="POPPLER_MOVIE_PLAY_MODE_PALINDROME" link="PopplerMovie.html#POPPLER-MOVIE-PLAY-MODE-PALINDROME:CAPS"/>
     <keyword type="constant" name="POPPLER_STRUCTURE_ELEMENT_CONTENT" link="PopplerStructureElement.html#POPPLER-STRUCTURE-ELEMENT-CONTENT:CAPS"/>
     <keyword type="constant" name="POPPLER_STRUCTURE_ELEMENT_OBJECT_REFERENCE" link="PopplerStructureElement.html#POPPLER-STRUCTURE-ELEMENT-OBJECT-REFERENCE:CAPS"/>
     <keyword type="constant" name="POPPLER_STRUCTURE_ELEMENT_DOCUMENT" link="PopplerStructureElement.html#POPPLER-STRUCTURE-ELEMENT-DOCUMENT:CAPS"/>

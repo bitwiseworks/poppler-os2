@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@
 
 #include "poppler-document-private.h"
 #include "poppler-embedded-file-private.h"
+#include "poppler-page-private.h"
 #include "poppler-private.h"
 #include "poppler-toc-private.h"
 
@@ -84,10 +86,8 @@ document_private::document_private(byte_array *file_data,
     , raw_doc_data_length(0)
     , is_locked(false)
 {
-    Object obj;
-    obj.initNull();
     file_data->swap(doc_data);
-    MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), &obj);
+    MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object(objNull));
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
@@ -102,9 +102,7 @@ document_private::document_private(const char *file_data, int file_data_length,
     , raw_doc_data_length(file_data_length)
     , is_locked(false)
 {
-    Object obj;
-    obj.initNull();
-    MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, &obj);
+    MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, Object(objNull));
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
@@ -313,9 +311,8 @@ std::vector<std::string> document::info_keys() const
         return std::vector<std::string>();
     }
 
-    Object info;
-    if (!d->doc->getDocInfo(&info)->isDict()) {
-        info.free();
+    Object info = d->doc->getDocInfo();
+    if (!info.isDict()) {
         return std::vector<std::string>();
     }
 
@@ -325,7 +322,6 @@ std::vector<std::string> document::info_keys() const
         keys[i] = std::string(info_dict->getKey(i));
     }
 
-    info.free();
     return keys;
 }
 
@@ -341,7 +337,7 @@ ustring document::info_key(const std::string &key) const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_value(d->doc->getDocInfoStringEntry(key.c_str()));
+    std::unique_ptr<GooString> goo_value(d->doc->getDocInfoStringEntry(key.c_str()));
     if (!goo_value.get()) {
         return ustring();
     }
@@ -386,7 +382,7 @@ time_type document::info_date(const std::string &key) const
         return time_type(-1);
     }
 
-    std::auto_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
+    std::unique_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
     if (!goo_date.get()) {
         return time_type(-1);
     }
@@ -432,7 +428,7 @@ ustring document::get_title() const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_title(d->doc->getDocInfoTitle());
+    std::unique_ptr<GooString> goo_title(d->doc->getDocInfoTitle());
     if (!goo_title.get()) {
         return ustring();
     }
@@ -476,7 +472,7 @@ ustring document::get_author() const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_author(d->doc->getDocInfoAuthor());
+    std::unique_ptr<GooString> goo_author(d->doc->getDocInfoAuthor());
     if (!goo_author.get()) {
         return ustring();
     }
@@ -520,7 +516,7 @@ ustring document::get_subject() const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_subject(d->doc->getDocInfoSubject());
+    std::unique_ptr<GooString> goo_subject(d->doc->getDocInfoSubject());
     if (!goo_subject.get()) {
         return ustring();
     }
@@ -564,7 +560,7 @@ ustring document::get_keywords() const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_keywords(d->doc->getDocInfoKeywords());
+    std::unique_ptr<GooString> goo_keywords(d->doc->getDocInfoKeywords());
     if (!goo_keywords.get()) {
         return ustring();
     }
@@ -608,7 +604,7 @@ ustring document::get_creator() const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_creator(d->doc->getDocInfoCreator());
+    std::unique_ptr<GooString> goo_creator(d->doc->getDocInfoCreator());
     if (!goo_creator.get()) {
         return ustring();
     }
@@ -652,7 +648,7 @@ ustring document::get_producer() const
         return ustring();
     }
 
-    std::auto_ptr<GooString> goo_producer(d->doc->getDocInfoProducer());
+    std::unique_ptr<GooString> goo_producer(d->doc->getDocInfoProducer());
     if (!goo_producer.get()) {
         return ustring();
     }
@@ -696,7 +692,7 @@ time_type document::get_creation_date() const
         return time_type(-1);
     }
 
-    std::auto_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
+    std::unique_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
     if (!goo_creation_date.get()) {
         return time_type(-1);
     }
@@ -741,7 +737,7 @@ time_type document::get_modification_date() const
         return time_type(-1);
     }
 
-    std::auto_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
+    std::unique_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
     if (!goo_modification_date.get()) {
         return time_type(-1);
     }
@@ -840,7 +836,7 @@ bool document::has_permission(permission_enum which) const
  */
 ustring document::metadata() const
 {
-    std::auto_ptr<GooString> md(d->doc->getCatalog()->readMetadata());
+    std::unique_ptr<GooString> md(d->doc->getCatalog()->readMetadata());
     if (md.get()) {
         return detail::unicode_GooString_to_ustring(md.get());
     }
@@ -896,7 +892,7 @@ int document::pages() const
  */
 page* document::create_page(const ustring &label) const
 {
-    std::auto_ptr<GooString> goolabel(detail::ustring_to_unicode_GooString(label));
+    std::unique_ptr<GooString> goolabel(detail::ustring_to_unicode_GooString(label));
     int index = 0;
 
     if (!d->doc->getCatalog()->labelToIndex(goolabel.get(), &index)) {
@@ -915,7 +911,17 @@ page* document::create_page(const ustring &label) const
  */
 page* document::create_page(int index) const
 {
-    return index >= 0 && index < d->doc->getNumPages() ? new page(d, index) : 0;
+    if (index >= 0 && index < d->doc->getNumPages()) {
+        page *p = new page(d, index);
+        if (p->d->page) {
+            return p;
+        } else {
+            delete p;
+            return nullptr;
+        }
+    } else {
+        return nullptr;
+    }
 }
 
 /**
