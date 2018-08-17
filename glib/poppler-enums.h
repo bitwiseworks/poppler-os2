@@ -19,6 +19,20 @@ GType poppler_action_movie_operation_get_type (void) G_GNUC_CONST;
 GType poppler_action_layer_action_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_ACTION_LAYER_ACTION (poppler_action_layer_action_get_type ())
 
+/* enumerations from "poppler-annot.h" */
+GType poppler_annot_type_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_ANNOT_TYPE (poppler_annot_type_get_type ())
+GType poppler_annot_flag_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_ANNOT_FLAG (poppler_annot_flag_get_type ())
+GType poppler_annot_markup_reply_type_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_ANNOT_MARKUP_REPLY_TYPE (poppler_annot_markup_reply_type_get_type ())
+GType poppler_annot_external_data_type_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_ANNOT_EXTERNAL_DATA_TYPE (poppler_annot_external_data_type_get_type ())
+GType poppler_annot_text_state_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_ANNOT_TEXT_STATE (poppler_annot_text_state_get_type ())
+GType poppler_annot_free_text_quadding_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_ANNOT_FREE_TEXT_QUADDING (poppler_annot_free_text_quadding_get_type ())
+
 /* enumerations from "poppler-document.h" */
 GType poppler_page_layout_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_PAGE_LAYOUT (poppler_page_layout_get_type ())
@@ -41,19 +55,9 @@ GType poppler_form_text_type_get_type (void) G_GNUC_CONST;
 GType poppler_form_choice_type_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_FORM_CHOICE_TYPE (poppler_form_choice_type_get_type ())
 
-/* enumerations from "poppler-annot.h" */
-GType poppler_annot_type_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ANNOT_TYPE (poppler_annot_type_get_type ())
-GType poppler_annot_flag_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ANNOT_FLAG (poppler_annot_flag_get_type ())
-GType poppler_annot_markup_reply_type_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ANNOT_MARKUP_REPLY_TYPE (poppler_annot_markup_reply_type_get_type ())
-GType poppler_annot_external_data_type_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ANNOT_EXTERNAL_DATA_TYPE (poppler_annot_external_data_type_get_type ())
-GType poppler_annot_text_state_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ANNOT_TEXT_STATE (poppler_annot_text_state_get_type ())
-GType poppler_annot_free_text_quadding_get_type (void) G_GNUC_CONST;
-#define POPPLER_TYPE_ANNOT_FREE_TEXT_QUADDING (poppler_annot_free_text_quadding_get_type ())
+/* enumerations from "poppler-movie.h" */
+GType poppler_movie_play_mode_get_type (void) G_GNUC_CONST;
+#define POPPLER_TYPE_MOVIE_PLAY_MODE (poppler_movie_play_mode_get_type ())
 
 /* enumerations from "poppler-structure-element.h" */
 GType poppler_structure_element_kind_get_type (void) G_GNUC_CONST;

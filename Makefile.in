@@ -517,7 +517,8 @@ EXTRA_DIST = README-XPDF poppler.pc.in poppler-uninstalled.pc.in \
 	cmake/modules/MacroPushRequiredVars.cmake \
 	cmake/modules/PopplerDefaults.cmake \
 	cmake/modules/PopplerMacros.cmake \
-	cmake/modules/FindLIBOPENJPEG.cmake config.h.cmake \
+	cmake/modules/FindLIBOPENJPEG.cmake \
+	cmake/modules/FindLIBOPENJPEG2.cmake config.h.cmake \
 	poppler-cairo.pc.cmake poppler/poppler-config.h.cmake \
 	poppler-cpp.pc.cmake poppler-glib.pc.cmake \
 	poppler-qt4.pc.cmake poppler-qt5.pc.cmake \

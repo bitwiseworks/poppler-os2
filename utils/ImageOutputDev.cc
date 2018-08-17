@@ -20,9 +20,10 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
-// Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -245,7 +246,9 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
     printf("%5.0f ", yppi);
 
   Goffset embedSize = -1;
-  if (!inlineImg)
+  if (inlineImg)
+    embedSize = getInlineImageLength(str, width, height, colorMap);
+  else
     embedSize = str->getBaseStream()->getLength();
 
   long long imageSize = 0;
@@ -288,6 +291,63 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
     printf("   - \n");
 
   ++imgNum;
+
+  if (inlineImg) {
+    // For inline images we need to advance the stream position to the end of the image
+    // as Gfx needs to continue reading content after the image data.
+    ImageFormat format;
+    if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
+      format = imgMonochrome;
+    } else if (colorMap->getColorSpace()->getMode() == csDeviceGray ||
+               colorMap->getColorSpace()->getMode() == csCalGray) {
+      format = imgGray;
+    } else if ((colorMap->getColorSpace()->getMode() == csDeviceRGB ||
+		colorMap->getColorSpace()->getMode() == csCalRGB ||
+		(colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 3)) &&
+	       colorMap->getBits() > 8) {
+      format = imgRGB48;
+    } else {
+      format = imgRGB;
+    }
+    writeImageFile(NULL, format, "", str, width, height, colorMap);
+  }
+}
+
+long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height,
+                                          GfxImageColorMap *colorMap) {
+  long len;
+
+  if (colorMap) {
+    ImageStream *imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
+                                          colorMap->getBits());
+    imgStr->reset();
+    for (int y = 0; y < height; y++)
+      imgStr->getLine();
+
+    imgStr->close();
+    delete imgStr;
+  } else {
+    str->reset();
+    for (int y = 0; y < height; y++) {
+      int size = (width + 7)/8;
+      for (int x = 0; x < size; x++)
+        str->getChar();
+    }
+  }
+
+  EmbedStream *embedStr = (EmbedStream *) (str->getBaseStream());
+  embedStr->rewind();
+  if (str->getKind() == strDCT || str->getKind() == strCCITTFax)
+    str = str->getNextStream();
+  len = 0;
+  str->reset();
+  while (str->getChar() != EOF)
+    len++;
+
+  embedStr->restore();
+
+
+  return len;
 }
 
 void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
@@ -316,7 +376,7 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
 
 void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext,
                                     Stream *str, int width, int height, GfxImageColorMap *colorMap) {
-  FILE *f;
+  FILE *f = nullptr; /* squelch bogus compiler warning */
   ImageStream *imgStr = NULL;
   unsigned char *row;
   unsigned char *rowp;
@@ -324,19 +384,21 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   GfxRGB rgb;
   GfxCMYK cmyk;
   GfxGray gray;
-  Guchar zero = 0;
+  Guchar zero[gfxColorMaxComps];
   int invert_bits;
 
-  setFilename(ext);
-  ++imgNum;
-  if (!(f = fopen(fileName, "wb"))) {
-    error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
-    return;
-  }
+  if (writer) {
+    setFilename(ext);
+    ++imgNum;
+    if (!(f = fopen(fileName, "wb"))) {
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
+      return;
+    }
 
-  if (!writer->init(f, width, height, 72, 72)) {
-    error(errIO, -1, "Error writing '{0:s}'", fileName);
-    return;
+    if (!writer->init(f, width, height, 72, 72)) {
+      error(errIO, -1, "Error writing '{0:s}'", fileName);
+      return;
+    }
   }
 
   if (format != imgMonochrome) {
@@ -349,7 +411,11 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
     str->reset();
   }
 
-  row = (unsigned char *) gmallocn(width, sizeof(unsigned int));
+  int pixelSize = sizeof(unsigned int);
+  if (format == imgRGB48)
+    pixelSize = 2*sizeof(unsigned int);
+
+  row = (unsigned char *) gmallocn(width, pixelSize);
 
   // PDF masks use 0 = draw current color, 1 = leave unchanged.
   // We invert this to provide the standard interpretation of alpha
@@ -357,7 +423,8 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   // the mask we leave the data unchanged.
   invert_bits = 0xff;
   if (colorMap) {
-    colorMap->getGray(&zero, &gray);
+    memset(zero, 0, sizeof(zero));
+    colorMap->getGray(zero, &gray);
     if (colToByte(gray) == 0)
       invert_bits = 0x00;
   }
@@ -381,8 +448,30 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
           *rowp++ = 0;
         }
       }
-      writer->writeRow(&row);
+      if (writer)
+	writer->writeRow(&row);
       break;
+
+    case imgRGB48: {
+      p = imgStr->getLine();
+      Gushort *rowp16 = (Gushort*)row;
+      for (int x = 0; x < width; ++x) {
+	if (p) {
+	  colorMap->getRGB(p, &rgb);
+	  *rowp16++ = colToShort(rgb.r);
+	  *rowp16++ = colToShort(rgb.g);
+	  *rowp16++ = colToShort(rgb.b);
+	  p += colorMap->getNumPixelComps();
+	} else {
+	  *rowp16++ = 0;
+	    *rowp16++ = 0;
+	    *rowp16++ = 0;
+	}
+      }
+      if (writer)
+	writer->writeRow(&row);
+      break;
+    }
 
     case imgCMYK:
       p = imgStr->getLine();
@@ -402,7 +491,8 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
           *rowp++ = 0;
         }
       }
-      writer->writeRow(&row);
+      if (writer)
+	writer->writeRow(&row);
       break;
 
     case imgGray:
@@ -417,14 +507,16 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
           *rowp++ = 0;
         }
       }
-      writer->writeRow(&row);
+      if (writer)
+	writer->writeRow(&row);
       break;
 
     case imgMonochrome:
       int size = (width + 7)/8;
       for (int x = 0; x < size; x++)
         row[x] = str->getChar() ^ invert_bits;
-      writer->writeRow(&row);
+      if (writer)
+	writer->writeRow(&row);
       break;
     }
   }
@@ -435,22 +527,30 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
     delete imgStr;
   }
   str->close();
-  writer->close();
-  fclose(f);
+  if (writer) {
+    writer->close();
+    fclose(f);
+  }
 }
 
 void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap, GBool inlineImg) {
   ImageFormat format;
+  EmbedStream *embedStr;
 
-  if (dumpJPEG && str->getKind() == strDCT &&
-      (colorMap->getNumPixelComps() == 1 ||
-       colorMap->getNumPixelComps() == 3) &&
-      !inlineImg) {
+  if (dumpJPEG && str->getKind() == strDCT) {
+    if (inlineImg) {
+      embedStr = (EmbedStream *) (str->getBaseStream());
+      getInlineImageLength(str, width, height, colorMap); // record the strean
+      embedStr->rewind();
+    }
 
     // dump JPEG file
     writeRawImage(str, "jpg");
+
+    if (inlineImg)
+      embedStr->restore();
 
   } else if (dumpJP2 && str->getKind() == strJPX && !inlineImg) {
     // dump JPEG2000 file
@@ -480,7 +580,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     // dump JBIG2 embedded file
     writeRawImage(str, "jb2e");
 
-  } else if (dumpCCITT && str->getKind() == strCCITTFax && !inlineImg) {
+  } else if (dumpCCITT && str->getKind() == strCCITTFax) {
     // write CCITT parameters
     CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
     FILE *f;
@@ -512,14 +612,22 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 
     fclose(f);
 
+    if (inlineImg) {
+      embedStr = (EmbedStream *) (str->getBaseStream());
+      getInlineImageLength(str, width, height, colorMap); // record the strean
+      embedStr->rewind();
+    }
+
     // dump CCITT file
     writeRawImage(str, "ccitt");
+
+    if (inlineImg)
+      embedStr->restore();
 
   } else if (outputPNG && !(outputTiff && colorMap &&
                             (colorMap->getColorSpace()->getMode() == csDeviceCMYK ||
                              (colorMap->getColorSpace()->getMode() == csICCBased &&
                               colorMap->getNumPixelComps() == 4)))) {
-
     // output in PNG format
 
 #if ENABLE_LIBPNG
@@ -532,6 +640,12 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
                colorMap->getColorSpace()->getMode() == csCalGray) {
       writer = new PNGWriter(PNGWriter::GRAY);
       format = imgGray;
+    } else if ((colorMap->getColorSpace()->getMode() == csDeviceRGB ||
+		colorMap->getColorSpace()->getMode() == csCalRGB ||
+		(colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 3)) &&
+	       colorMap->getBits() > 8) {
+      writer = new PNGWriter(PNGWriter::RGB48);
+      format = imgRGB48;
     } else {
       writer = new PNGWriter(PNGWriter::RGB);
       format = imgRGB;
@@ -557,6 +671,12 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
                (colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 4)) {
       writer = new TiffWriter(TiffWriter::CMYK);
       format = imgCMYK;
+    } else if ((colorMap->getColorSpace()->getMode() == csDeviceRGB ||
+		colorMap->getColorSpace()->getMode() == csCalRGB ||
+		(colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 3)) &&
+	       colorMap->getBits() > 8) {
+      writer = new TiffWriter(TiffWriter::RGB48);
+      format = imgRGB48;
     } else {
       writer = new TiffWriter(TiffWriter::RGB);
       format = imgRGB;

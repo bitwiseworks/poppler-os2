@@ -161,11 +161,14 @@ pdfseparate_OBJECTS = $(am_pdfseparate_OBJECTS)
 pdfseparate_LDADD = $(LDADD)
 pdfseparate_DEPENDENCIES = libparseargs.la \
 	$(top_builddir)/poppler/libpoppler.la
-am_pdfsig_OBJECTS = pdfsig.$(OBJEXT)
+am_pdfsig_OBJECTS = pdfsig-pdfsig.$(OBJEXT)
 pdfsig_OBJECTS = $(am_pdfsig_OBJECTS)
 pdfsig_LDADD = $(LDADD)
 pdfsig_DEPENDENCIES = libparseargs.la \
 	$(top_builddir)/poppler/libpoppler.la
+pdfsig_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(pdfsig_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_pdftocairo_OBJECTS = pdftocairo-pdftocairo.$(OBJEXT) \
 	pdftocairo-pdftocairo-win32.$(OBJEXT)
 pdftocairo_OBJECTS = $(am_pdftocairo_OBJECTS)
@@ -615,6 +618,7 @@ pdftocairo_SOURCES = \
 	pdftocairo-win32.cc			\
 	pdftocairo-win32.h
 
+@BUILD_NSS_TRUE@pdfsig_CXXFLAGS = $(NSS3_CFLAGS)
 pdftocairo_LDADD = \
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
 	$(LDADD)					\
@@ -753,7 +757,7 @@ pdfseparate$(EXEEXT): $(pdfseparate_OBJECTS) $(pdfseparate_DEPENDENCIES) $(EXTRA
 
 pdfsig$(EXEEXT): $(pdfsig_OBJECTS) $(pdfsig_DEPENDENCIES) $(EXTRA_pdfsig_DEPENDENCIES) 
 	@rm -f pdfsig$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(pdfsig_OBJECTS) $(pdfsig_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(pdfsig_LINK) $(pdfsig_OBJECTS) $(pdfsig_LDADD) $(LIBS)
 
 pdftocairo$(EXEEXT): $(pdftocairo_OBJECTS) $(pdftocairo_DEPENDENCIES) $(EXTRA_pdftocairo_DEPENDENCIES) 
 	@rm -f pdftocairo$(EXEEXT)
@@ -793,7 +797,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdfimages.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdfinfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdfseparate.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdfsig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdfsig-pdfsig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdftocairo-pdftocairo-win32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdftocairo-pdftocairo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdftohtml-HtmlFonts.Po@am__quote@
@@ -826,6 +830,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
+
+pdfsig-pdfsig.o: pdfsig.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pdfsig_CXXFLAGS) $(CXXFLAGS) -MT pdfsig-pdfsig.o -MD -MP -MF $(DEPDIR)/pdfsig-pdfsig.Tpo -c -o pdfsig-pdfsig.o `test -f 'pdfsig.cc' || echo '$(srcdir)/'`pdfsig.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pdfsig-pdfsig.Tpo $(DEPDIR)/pdfsig-pdfsig.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='pdfsig.cc' object='pdfsig-pdfsig.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pdfsig_CXXFLAGS) $(CXXFLAGS) -c -o pdfsig-pdfsig.o `test -f 'pdfsig.cc' || echo '$(srcdir)/'`pdfsig.cc
+
+pdfsig-pdfsig.obj: pdfsig.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pdfsig_CXXFLAGS) $(CXXFLAGS) -MT pdfsig-pdfsig.obj -MD -MP -MF $(DEPDIR)/pdfsig-pdfsig.Tpo -c -o pdfsig-pdfsig.obj `if test -f 'pdfsig.cc'; then $(CYGPATH_W) 'pdfsig.cc'; else $(CYGPATH_W) '$(srcdir)/pdfsig.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/pdfsig-pdfsig.Tpo $(DEPDIR)/pdfsig-pdfsig.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='pdfsig.cc' object='pdfsig-pdfsig.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pdfsig_CXXFLAGS) $(CXXFLAGS) -c -o pdfsig-pdfsig.obj `if test -f 'pdfsig.cc'; then $(CYGPATH_W) 'pdfsig.cc'; else $(CYGPATH_W) '$(srcdir)/pdfsig.cc'; fi`
 
 pdftocairo-pdftocairo.o: pdftocairo.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(pdftocairo_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT pdftocairo-pdftocairo.o -MD -MP -MF $(DEPDIR)/pdftocairo-pdftocairo.Tpo -c -o pdftocairo-pdftocairo.o `test -f 'pdftocairo.cc' || echo '$(srcdir)/'`pdftocairo.cc

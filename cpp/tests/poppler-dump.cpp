@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -300,16 +302,24 @@ static void print_embedded_files(poppler::document *doc)
 
 static void print_page(poppler::page *p)
 {
-    std::cout << std::setw(out_width) << "Rect" << ": " << p->page_rect() << std::endl;
-    std::cout << std::setw(out_width) << "Label" << ": " << p->label() << std::endl;
-    std::cout << std::setw(out_width) << "Duration" << ": " << p->duration() << std::endl;
-    std::cout << std::setw(out_width) << "Orientation" << ": " << out_page_orientation(p->orientation()) << std::endl;
+    if (p) {
+        std::cout << std::setw(out_width) << "Rect" << ": " << p->page_rect() << std::endl;
+        std::cout << std::setw(out_width) << "Label" << ": " << p->label() << std::endl;
+        std::cout << std::setw(out_width) << "Duration" << ": " << p->duration() << std::endl;
+        std::cout << std::setw(out_width) << "Orientation" << ": " << out_page_orientation(p->orientation()) << std::endl;
+    } else {
+        std::cout << std::setw(out_width) << "Broken Page. Could not be parsed" << std::endl;
+    }
     std::cout << std::endl;
 }
 
 static void print_page_text(poppler::page *p)
 {
-    std::cout << p->text(p->page_rect(), show_text_layout) << std::endl;
+    if (p) {
+        std::cout << p->text(poppler::rectf(), show_text_layout) << std::endl;
+    } else {
+        std::cout << std::setw(out_width) << "Broken Page. Could not be parsed" << std::endl;
+    }
     std::cout << std::endl;
 }
 
@@ -333,7 +343,7 @@ int main(int argc, char *argv[])
 
     std::string file_name(argv[1]);
 
-    std::auto_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
+    std::unique_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
     if (!doc.get()) {
         error("loading error");
     }
@@ -363,7 +373,7 @@ int main(int argc, char *argv[])
         print_metadata(doc.get());
     }
     if (show_toc) {
-        std::auto_ptr<poppler::toc> doctoc(doc->create_toc());
+        std::unique_ptr<poppler::toc> doctoc(doc->create_toc());
         print_toc(doctoc.get());
     }
     if (show_fonts) {
@@ -376,7 +386,7 @@ int main(int argc, char *argv[])
         const int pages = doc->pages();
         for (int i = 0; i < pages; ++i) {
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
-            std::auto_ptr<poppler::page> p(doc->create_page(i));
+            std::unique_ptr<poppler::page> p(doc->create_page(i));
             print_page(p.get());
         }
     }
@@ -384,7 +394,7 @@ int main(int argc, char *argv[])
         const int pages = doc->pages();
         for (int i = 0; i < pages; ++i) {
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
-            std::auto_ptr<poppler::page> p(doc->create_page(i));
+            std::unique_ptr<poppler::page> p(doc->create_page(i));
             print_page_text(p.get());
         }
     }

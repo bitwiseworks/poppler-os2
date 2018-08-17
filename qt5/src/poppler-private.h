@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -10,6 +10,7 @@
  * Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
  * Copyright (C) 2014 Aki Koskinen <freedesktop@akikoskinen.info>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -92,7 +93,7 @@ namespace Poppler {
 #ifdef _WIN32
 		doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword);
 #else
-		GooString *fileName = new GooString(QFile::encodeName(filePath));
+		GooString *fileName = new GooString(QFile::encodeName(filePath).constData());
 		doc = new PDFDoc(fileName, ownerPassword, userPassword);
 #endif
 
@@ -102,10 +103,8 @@ namespace Poppler {
 	
 	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword)
 	    {
-		Object obj;
 		fileContents = data;
-		obj.initNull();
-		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), &obj);
+		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), Object(objNull));
 		init();
 		doc = new PDFDoc(str, ownerPassword, userPassword);
 		delete ownerPassword;

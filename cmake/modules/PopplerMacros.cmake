@@ -99,12 +99,16 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
+   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override" )
+   endif()
+
   # set the default compile warnings
   set(DEFAULT_COMPILE_WARNINGS_NO)
   set(DEFAULT_COMPILE_WARNINGS_YES "-Wall -Wcast-align -fno-exceptions -fno-check-new -fno-common")
   set(DEFAULT_COMPILE_WARNINGS_KDE "-Wno-long-long -Wundef -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -Wcast-align -Wconversion -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
 
-  set(CMAKE_CXX_FLAGS                "-Wnon-virtual-dtor -Woverloaded-virtual ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS                "-Wnon-virtual-dtor -Woverloaded-virtual -D_DEFAULT_SOURCE ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O2 -DNDEBUG")
   set(CMAKE_CXX_FLAGS_DEBUG          "-g -O2 -fno-reorder-blocks -fno-schedule-insns -fno-inline")
