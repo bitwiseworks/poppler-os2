@@ -26,7 +26,14 @@ AC_PROG_CC_STDC
 #fi
 AC_PROG_CXX
 AC_PROG_INSTALL
+case "$host_os" in
+  os2*)
+CXXFLAGS="$CXXFLAGS -std=gnu++11 -D_DEFAULT_SOURCE"
+  ;;
+  *)
 CXXFLAGS="$CXXFLAGS -std=c++11 -D_DEFAULT_SOURCE"
+  ;;
+esac
 
 dnl ##### Check for pkgconfig
 PKG_PROG_PKG_CONFIG
