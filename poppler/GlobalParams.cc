@@ -49,6 +49,7 @@
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS
 #include <os2.h>
+#define GLOBAL_PARAMS_CC		// Tell GooMutex this is us
 #endif
 
 #ifdef USE_GCC_PRAGMAS
@@ -133,6 +134,12 @@ extern XpdfPluginVecTable xpdfPluginVecTable;
 //------------------------------------------------------------------------
 
 GlobalParams *globalParams = NULL;
+
+#if MULTITHREADED
+#if __OS2__
+GooMutex theOS2Mutex;
+#endif
+#endif
 
 //------------------------------------------------------------------------
 // PSFontParam16
@@ -632,6 +639,11 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   gInitMutex(&mutex);
   gInitMutex(&unicodeMapCacheMutex);
   gInitMutex(&cMapCacheMutex);
+
+#ifdef __OS2__
+  gInitMutex(&theOS2Mutex);
+#endif
+
 #endif
 
   initBuiltinFontTables();
@@ -904,6 +916,12 @@ GlobalParams::~GlobalParams() {
   gDestroyMutex(&mutex);
   gDestroyMutex(&unicodeMapCacheMutex);
   gDestroyMutex(&cMapCacheMutex);
+
+#ifdef __OS2__
+  gDestroyMutex(&theOS2Mutex);
+  theOS2Mutex = 0;
+#endif
+
 #endif
 }
 

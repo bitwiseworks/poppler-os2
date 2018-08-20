@@ -54,18 +54,64 @@ typedef CRITICAL_SECTION GooMutex;
 #define gLockMutex(m) EnterCriticalSection(m)
 #define gUnlockMutex(m) LeaveCriticalSection(m)
 
-/* #elif defined(__OS2__) I don't think we still need that
+#elif defined(__OS2__)
 
-#define INCL_DOS
-#include <os2.h>
-
-typedef HMTX GooMutex;
-
-#define gInitMutex(m) DosCreateMutexSem(NULL,m,0,FALSE)
-#define gDestroyMutex(m) DosCloseMutexSem(*m)
-#define gLockMutex(m) DosRequestMutexSem(*m,SEM_INDEFINITE_WAIT)
-#define gUnlockMutex(m) DosReleaseMutexSem(*m)
+/* OS/2 multi-threaded uses pthreads but differs from Linux support
+   in that it uses a single mutex for all protected objects
+   rather than a unique mutex for each object
+   except when invoked for GlobalParams.cc
 */
+
+#include <pthread.h>
+
+typedef pthread_mutex_t GooMutex2;
+
+#ifdef GLOBAL_PARAMS_CC
+
+typedef pthread_mutex_t GooMutex;
+
+// Keep in sync with Linux style mutexes
+
+inline void gInitMutex(GooMutex *m) {
+  pthread_mutexattr_t mutexattr;
+  pthread_mutexattr_init(&mutexattr);
+  pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(m, &mutexattr);
+  pthread_mutexattr_destroy(&mutexattr);
+}
+
+#define gDestroyMutex(m) pthread_mutex_destroy(m)
+
+#define gLockMutex(m) pthread_mutex_lock(m)
+#define gUnlockMutex(m) pthread_mutex_unlock(m)
+
+#else
+
+/* Use single mutex everywhere other than GlobalParams.cc.
+   This avoids OS/2 running out of semaphores when documents
+   require a large number of class instances.
+   All classes other than those defined in GlobalParams.cc will
+   use the same mutex (theOS2Mutex).
+   GooMutex is typedef'ed as a pointer so macro users will pass
+   a pointer to a pointer.
+   The macros dereference this pointer and pass a pointer to apthread_mutex
+   to the pthreads functions.
+*/
+
+class MutexLocker;
+typedef pthread_mutex_t *GooMutex;
+
+inline void gInitMutex(GooMutex *m) {
+  extern GooMutex2 theOS2Mutex;
+  *(m) = &theOS2Mutex;
+}
+#define gDestroyMutex(m)                // Do nothing
+
+#define gLockMutex(m) pthread_mutex_lock(*(m))
+#define gUnlockMutex(m) pthread_mutex_unlock(*(m))
+
+#endif // __OS2__
+
 #else // assume pthreads
 
 #include <pthread.h>
