@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -18,19 +18,25 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2017 Bernd Kuhls <berndkuhls@hotmail.com>
+// Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
+// Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 //
 //========================================================================
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <set>
 #include <limits>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
@@ -49,17 +55,18 @@
 #include "PDFDocEncoding.h"
 #include "Annot.h"
 #include "Link.h"
+#include "Lexer.h"
 
 //return a newly allocated char* containing an UTF16BE string of size length
-char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
+char* pdfDocEncodingToUTF16 (const GooString* orig, int* length)
 {
   //double size, a unicode char takes 2 char, add 2 for the unicode marker
   *length = 2+2*orig->getLength();
   char *result = new char[(*length)];
-  char *cstring = orig->getCString();
+  const char *cstring = orig->c_str();
   //unicode marker
-  result[0] = 0xfe;
-  result[1] = 0xff;
+  result[0] = '\xfe';
+  result[1] = '\xff';
   //convert to utf16
   for(int i=2,j=0; i<(*length); i+=2,j++) {
     Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)cstring[j])]&0xffff;
@@ -90,7 +97,7 @@ FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormF
   obj = aobj->copy();
   type = formUndef;
   field = fieldA;
-  widget = NULL;
+  widget = nullptr;
 }
 
 FormWidget::~FormWidget()
@@ -99,22 +106,20 @@ FormWidget::~FormWidget()
     widget->decRefCnt();
 }
 
-#ifdef DEBUG_FORMS
 void FormWidget::print(int indent) {
   printf ("%*s+ (%d %d): [widget]\n", indent, "", ref.num, ref.gen);
 }
-#endif
 
 void FormWidget::createWidgetAnnotation() {
   if (widget)
     return;
 
-  Object obj1(ref.num, ref.gen);
+  Object obj1(ref);
   widget = new AnnotWidget(doc, &obj, &obj1, field);
 }
 
-GBool FormWidget::inRect(double x, double y) const {
-  return widget ? widget->inRect(x, y) : gFalse;
+bool FormWidget::inRect(double x, double y) const {
+  return widget ? widget->inRect(x, y) : false;
 }
 
 void FormWidget::getRect(double *x1, double *y1, double *x2, double *y2) const {
@@ -122,13 +127,14 @@ void FormWidget::getRect(double *x1, double *y1, double *x2, double *y2) const {
     widget->getRect(x1, y1, x2, y2);
 }
 
-double FormWidget::getFontSize() const {
-  return widget ? widget->getFontSize() : 0.;
-}
-
 bool FormWidget::isReadOnly() const
 {
   return field->isReadOnly();
+}
+
+void FormWidget::setReadOnly(bool value)
+{
+  field->setReadOnly(value);
 }
 
 int FormWidget::encodeID (unsigned pageNum, unsigned fieldNum)
@@ -142,7 +148,7 @@ void FormWidget::decodeID (unsigned id, unsigned* pageNum, unsigned* fieldNum)
   *fieldNum = (id << 4*sizeof(unsigned)) >> 4*sizeof(unsigned);
 }
 
-GooString *FormWidget::getPartialName() const {
+const GooString *FormWidget::getPartialName() const {
   return field->getPartialName();
 }
 
@@ -151,11 +157,11 @@ void FormWidget::setPartialName(const GooString &name)
   field->setPartialName(name);
 }
 
-GooString *FormWidget::getAlternateUiName() const {
+const GooString *FormWidget::getAlternateUiName() const {
   return field->getAlternateUiName();
 }
 
-GooString *FormWidget::getMappingName() const {
+const GooString *FormWidget::getMappingName() const {
   return field->getMappingName();
 }
 
@@ -164,28 +170,28 @@ GooString *FormWidget::getFullyQualifiedName() {
 }
 
 LinkAction *FormWidget::getActivationAction() {
-  return widget ? widget->getAction() : NULL;
+  return widget ? widget->getAction() : nullptr;
 }
 
 LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType type) {
-  return widget ? widget->getFormAdditionalAction(type) : NULL;
+  return widget ? widget->getFormAdditionalAction(type) : nullptr;
 }
 
 FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
 	FormWidget(docA, aobj, num, ref, p)
 {
   type = formButton;
-  onStr = NULL;
+  onStr = nullptr;
 
-  // Find the name of the ON state in the AP dictionnary
-  // The reference say the Off state, if it existe, _must_ be stored in the AP dict under the name /Off
+  // Find the name of the ON state in the AP dictionary
+  // The reference say the Off state, if it exists, _must_ be stored in the AP dict under the name /Off
   // The "on" state may be stored under any other name
   Object obj1 = obj.dictLookup("AP");
   if (obj1.isDict()) {
     Object obj2 = obj1.dictLookup("N");
     if (obj2.isDict()) {
       for (int i = 0; i < obj2.dictGetLength(); i++) {
-        char *key = obj2.dictGetKey(i);
+        const char *key = obj2.dictGetKey(i);
         if (strcmp (key, "Off") != 0) {
           onStr = new GooString (key);
           break;
@@ -195,13 +201,13 @@ FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Re
   }
 }
 
-char *FormWidgetButton::getOnStr() {
+const char *FormWidgetButton::getOnStr() const {
   if (onStr)
-    return onStr->getCString();
+    return onStr->c_str();
 
   // 12.7.4.2.3 Check Boxes
   //  Yes should be used as the name for the on state
-  return parent()->getButtonType() == formButtonCheck ? (char *)"Yes" : NULL;
+  return parent()->getButtonType() == formButtonCheck ? "Yes" : nullptr;
 }
 
 FormWidgetButton::~FormWidgetButton ()
@@ -225,23 +231,23 @@ void FormWidgetButton::updateWidgetAppearance()
   // The appearance stream must NOT be regenerated for this widget type
 }
 
-void FormWidgetButton::setState (GBool astate)
+void FormWidgetButton::setState (bool astate)
 {
   //pushButtons don't have state
   if (parent()->getButtonType() == formButtonPush)
     return;
 
   // Silently return if can't set ON state
-  if (astate && !onStr)
+  if (astate && !getOnStr())
     return;
 
-  parent()->setState(astate ? onStr->getCString() : (char *)"Off");
+  parent()->setState(astate ? getOnStr() : (char *)"Off");
   // Parent will call setAppearanceState()
 }
 
-GBool FormWidgetButton::getState ()
+bool FormWidgetButton::getState () const
 {
-  return onStr ? parent()->getState(onStr->getCString()) : gFalse;
+  return getOnStr() ? parent()->getState( getOnStr() ) : false;
 }
 
 FormFieldButton *FormWidgetButton::parent() const
@@ -256,14 +262,9 @@ FormWidgetText::FormWidgetText (PDFDoc *docA, Object *aobj, unsigned num, Ref re
   type = formText;
 }
 
-GooString* FormWidgetText::getContent ()
+const GooString* FormWidgetText::getContent () const
 {
   return parent()->getContent();
-}
-
-GooString* FormWidgetText::getContentCopy ()
-{
-  return parent()->getContentCopy();
 }
 
 void FormWidgetText::updateWidgetAppearance()
@@ -312,7 +313,17 @@ int FormWidgetText::getMaxLen () const
   return parent()->getMaxLen ();
 }
 
-void FormWidgetText::setContent(GooString* new_content)
+double FormWidgetText::getTextFontSize()
+{
+  return parent()->getTextFontSize();
+}
+
+void FormWidgetText::setTextFontSize(int fontSize)
+{
+  parent()->setTextFontSize(fontSize);
+}
+
+void FormWidgetText::setContent(const GooString* new_content)
 {
   parent()->setContentCopy(new_content);
 }
@@ -332,7 +343,7 @@ FormWidgetChoice::~FormWidgetChoice()
 {
 }
 
-bool FormWidgetChoice::_checkRange (int i)
+bool FormWidgetChoice::_checkRange (int i) const
 {
   if (i < 0 || i >= parent()->getNumChoices()) {
     error(errInternal, -1, "FormWidgetChoice::_checkRange i out of range : {0:d}", i);
@@ -358,11 +369,11 @@ void FormWidgetChoice::deselectAll ()
   parent()->deselectAll();
 }
 
-GooString* FormWidgetChoice::getEditChoice ()
+const GooString* FormWidgetChoice::getEditChoice () const
 {
   if (!hasEdit()) {
     error(errInternal, -1, "FormFieldChoice::getEditChoice called on a non-editable choice\n");
-    return NULL;
+    return nullptr;
   }
   return parent()->getEditChoice();
 }
@@ -373,13 +384,13 @@ void FormWidgetChoice::updateWidgetAppearance()
     widget->updateAppearanceStream();
 }
 
-bool FormWidgetChoice::isSelected (int i)
+bool FormWidgetChoice::isSelected (int i) const
 {
   if (!_checkRange(i)) return false;
   return parent()->isSelected(i);
 }
 
-void FormWidgetChoice::setEditChoice (GooString* new_content)
+void FormWidgetChoice::setEditChoice (const GooString* new_content)
 {
   if (!hasEdit()) {
     error(errInternal, -1, "FormFieldChoice::setEditChoice : trying to edit an non-editable choice\n");
@@ -389,12 +400,12 @@ void FormWidgetChoice::setEditChoice (GooString* new_content)
   parent()->setEditChoice(new_content);
 }
 
-int FormWidgetChoice::getNumChoices() 
+int FormWidgetChoice::getNumChoices() const
 { 
   return parent()->getNumChoices();
 }
 
-GooString* FormWidgetChoice::getChoice(int i) 
+const GooString* FormWidgetChoice::getChoice(int i) const
 { 
   return parent()->getChoice(i);
 }
@@ -438,6 +449,11 @@ FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned nu
 	FormWidget(docA, aobj, num, ref, p)
 {
   type = formSignature;
+}
+
+const GooString *FormWidgetSignature::getSignature() const
+{
+    return static_cast<FormFieldSignature*>(field)->getSignature();
 }
 
 SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
@@ -594,54 +610,51 @@ void FormWidgetSignature::updateWidgetAppearance()
 // FormField
 //========================================================================
 
-FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
+FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
 {
   doc = docA;
   xref = doc->getXRef();
-  obj = aobj->copy();
+  obj = std::move(aobj);
   Dict* dict = obj.getDict();
-  ref.num = ref.gen = 0;
+  ref = aref;
   type = ty;
   parent = parentA;
   numChildren = 0;
-  children = NULL;
+  children = nullptr;
   terminal = false;
-  widgets = NULL;
+  widgets = nullptr;
   readOnly = false;
-  defaultAppearance = NULL;
-  fullyQualifiedName = NULL;
+  defaultAppearance = nullptr;
+  fullyQualifiedName = nullptr;
   quadding = quaddingLeftJustified;
-  hasQuadding = gFalse;
-
-  ref = aref;
+  hasQuadding = false;
 
   //childs
   Object obj1 = dict->lookup("Kids");
   if (obj1.isArray()) {
     // Load children
     for (int i = 0 ; i < obj1.arrayGetLength(); i++) {
-      Object childRef = obj1.arrayGetNF(i);
-      if (!childRef.isRef()) {
+      Ref childRef;
+      Object childObj = obj1.getArray()->get(i, &childRef);
+      if (childRef == Ref::INVALID()) {
         error (errSyntaxError, -1, "Invalid form field renference");
         continue;
       }
-      Object childObj = obj1.arrayGet(i);
       if (!childObj.isDict()) {
         error (errSyntaxError, -1, "Form field child is not a dictionary");
         continue;
       }
 
-      const Ref ref = childRef.getRef();
-      if (usedParents->find(ref.num) == usedParents->end()) {
+      if (usedParents->find(childRef.num) == usedParents->end()) {
         // Field child: it could be a form field or a widget or composed dict
-        Object obj2 = childObj.dictLookupNF("Parent");
+        const Object &objParent = childObj.dictLookupNF("Parent");
 	Object obj3 = childObj.dictLookup("Parent");
-        if (obj2.isRef() || obj3.isDict()) {
+        if (objParent.isRef() || obj3.isDict()) {
           // Child is a form field or composed dict
           // We create the field, if it's composed
           // it will create the widget as a child
           std::set<int> usedParentsAux = *usedParents;
-          usedParentsAux.insert(ref.num);
+          usedParentsAux.insert(childRef.num);
 
           if (terminal) {
             error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
@@ -650,16 +663,16 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *par
 
           numChildren++;
           children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
-          children[numChildren - 1] = Form::createFieldFromDict(&childObj, doc, ref, this, &usedParentsAux);
+          children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, childRef, this, &usedParentsAux);
         } else {
-	  obj2 = childObj.dictLookup("Subtype");
+	  Object obj2 = childObj.dictLookup("Subtype");
 	  if (obj2.isName("Widget")) {
 	    // Child is a widget annotation
 	    if (!terminal && numChildren > 0) {
 	      error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
 	      continue;
 	    }
-	    _createWidget(&childObj, ref);
+	    _createWidget(&childObj, childRef);
 	  }
 	}
       }
@@ -694,28 +707,28 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *par
   obj1 = Form::fieldLookup(dict, "Q");
   if (obj1.isInt()) {
     quadding = static_cast<VariableTextQuadding>(obj1.getInt());
-    hasQuadding = gTrue;
+    hasQuadding = true;
   }
 
   obj1 = dict->lookup("T");
   if (obj1.isString()) {
     partialName = obj1.getString()->copy();
   } else {
-    partialName = NULL;
+    partialName = nullptr;
   }
 
   obj1 = dict->lookup("TU");
   if (obj1.isString()) {
     alternateUiName = obj1.getString()->copy();
   } else {
-    alternateUiName = NULL;
+    alternateUiName = nullptr;
   }
 
   obj1 = dict->lookup("TM");
   if(obj1.isString()) {
     mappingName = obj1.getString()->copy();
   } else {
-    mappingName = NULL;
+    mappingName = nullptr;
   }
 }
 
@@ -749,7 +762,6 @@ FormField::~FormField()
   delete fullyQualifiedName;
 }
 
-#ifdef DEBUG_FORMS
 void FormField::print(int indent)
 {
   printf ("%*s- (%d %d): [container] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
@@ -767,7 +779,6 @@ void FormField::printTree(int indent)
       children[i]->printTree(indent + 4);
   }
 }
-#endif
 
 void FormField::fillChildrenSiblingsID()
 {
@@ -817,8 +828,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 {
   if (terminal) {
     for(int i=0; i<numChildren; i++) {
-      if (widgets[i]->getRef().num == aref.num 
-          && widgets[i]->getRef().gen == aref.gen)
+      if (widgets[i]->getRef() == aref)
         return widgets[i];
     }
   } else {
@@ -827,15 +837,15 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
       if(result) return result;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 GooString* FormField::getFullyQualifiedName() {
   Object obj1;
   Object parent;
-  GooString *parent_name;
+  const GooString *parent_name;
   GooString *full_name;
-  GBool unicode_encoded = gFalse;
+  bool unicode_encoded = false;
 
   if (fullyQualifiedName)
     return fullyQualifiedName;
@@ -851,7 +861,7 @@ GooString* FormField::getFullyQualifiedName() {
       if (unicode_encoded) {
         full_name->insert(0, "\0.", 2); // 2-byte unicode period
         if (parent_name->hasUnicodeMarker()) {
-          full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+          full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
         } else {
           int tmp_length;
           char* tmp_str = pdfDocEncodingToUTF16(parent_name, &tmp_length);
@@ -861,9 +871,9 @@ GooString* FormField::getFullyQualifiedName() {
       } else {
         full_name->insert(0, '.'); // 1-byte ascii period
         if (parent_name->hasUnicodeMarker()) {          
-          unicode_encoded = gTrue;
+          unicode_encoded = true;
           full_name = convertToUtf16(full_name);
-          full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+          full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
         } else {
           full_name->insert(0, parent_name);
         }
@@ -875,7 +885,7 @@ GooString* FormField::getFullyQualifiedName() {
   if (partialName) {
     if (unicode_encoded) {
       if (partialName->hasUnicodeMarker()) {
-        full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+        full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
       } else {
         int tmp_length;
         char* tmp_str = pdfDocEncodingToUTF16(partialName, &tmp_length);
@@ -884,9 +894,9 @@ GooString* FormField::getFullyQualifiedName() {
       }
     } else {
       if (partialName->hasUnicodeMarker()) {
-          unicode_encoded = gTrue;        
+          unicode_encoded = true;        
           full_name = convertToUtf16(full_name);
-          full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+          full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
       } else {
         full_name->append(partialName);
       }
@@ -906,8 +916,7 @@ GooString* FormField::getFullyQualifiedName() {
   }
   
   if (unicode_encoded) {
-    full_name->insert(0, 0xff);
-    full_name->insert(0, 0xfe);
+    full_name->prependUnicodeMarker();
   }
 
   fullyQualifiedName = full_name;
@@ -926,16 +935,42 @@ void FormField::updateChildrenAppearance()
   }
 }
 
+void FormField::setReadOnly (bool value)
+{
+  if (value == readOnly) {
+    return;
+  }
+
+  readOnly = value;
+
+  Dict* dict = obj.getDict();
+
+  const Object obj1 = Form::fieldLookup(dict, "Ff");
+  int flags = 0;
+  if (obj1.isInt()) {
+    flags = obj1.getInt();
+  }
+  if (value) {
+    flags |= 1;
+  } else {
+    flags &= ~1;
+  }
+
+  dict->set("Ff", Object(flags));
+  xref->setModifiedObject(&obj, ref);
+  updateChildrenAppearance();
+}
+
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, aobj, ref, parent, usedParents, formButton)
+FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), ref, parent, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
   active_child = -1;
   noAllOff = false;
-  siblings = NULL;
+  siblings = nullptr;
   numSiblings = 0;
   appearanceState.setToNull();
 
@@ -957,15 +992,17 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref& ref, For
     } 
   }
 
-  if (btype != formButtonPush) {
+  bool isChildRadiobutton = btype == formButtonRadio && terminal && parent && parent->getType() == formButton;
+  // Ignore "V" for child radiobuttons, so FormFieldButton::getState() does not use it and instead uses the
+  // "V" of the parent, which is the real value indicating the active field in the radio group. Issue #159
+  if (btype != formButtonPush && !isChildRadiobutton) {
     // Even though V is inheritable we are interested in the value of this
     // field, if not present it's probably because it's a button in a set.
     appearanceState = dict->lookup("V");
   }
 }
 
-#ifdef DEBUG_FORMS
-static char *_getButtonType(FormButtonType type)
+static const char *_getButtonType(FormButtonType type)
 {
   switch (type) {
   case formButtonPush:
@@ -985,7 +1022,6 @@ void FormFieldButton::print(int indent)
   printf ("%*s- (%d %d): [%s] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           _getButtonType(btype), terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 void FormFieldButton::setNumSiblings (int num)
 { 
@@ -998,7 +1034,7 @@ void FormFieldButton::fillChildrenSiblingsID()
   if (!terminal) {
     for(int i=0; i<numChildren; i++) {
       FormFieldButton *child = dynamic_cast<FormFieldButton*>(children[i]);
-      if (child != NULL) {
+      if (child != nullptr) {
         // Fill the siblings of this node childs
         child->setNumSiblings(numChildren-1);
         for(int j=0, counter=0; j<numChildren; j++) {
@@ -1017,28 +1053,28 @@ void FormFieldButton::fillChildrenSiblingsID()
   }
 }
 
-GBool FormFieldButton::setState(char *state)
+bool FormFieldButton::setState(const char *state)
 {
   // A check button could behave as a radio button
   // when it's in a set of more than 1 buttons
   if (btype != formButtonRadio && btype != formButtonCheck)
-    return gFalse;
+    return false;
 
   if (terminal && parent && parent->getType() == formButton && appearanceState.isNull()) {
     // It's button in a set, set state on parent
     if (static_cast<FormFieldButton*>(parent)->setState(state)) {
-      return gTrue;
+      return true;
     }
-    return gFalse;
+    return false;
   }
 
-  GBool isOn = strcmp(state, "Off") != 0;
+  bool isOn = strcmp(state, "Off") != 0;
 
   if (!isOn && noAllOff)
-    return gFalse; // Don't allow to set all radio to off
+    return false; // Don't allow to set all radio to off
 
-  char *current = getAppearanceState();
-  GBool currentFound = gFalse, newFound = gFalse;
+  const char *current = getAppearanceState();
+  bool currentFound = false, newFound = false;
 
   for (int i = 0; i < numChildren; i++) {
     FormWidgetButton *widget;
@@ -1054,17 +1090,17 @@ GBool FormFieldButton::setState(char *state)
     if (!widget->getOnStr())
       continue;
 
-    char *onStr = widget->getOnStr();
+    const char *onStr = widget->getOnStr();
     if (current && strcmp(current, onStr) == 0) {
       widget->setAppearanceState("Off");
       if (!isOn)
         break;
-      currentFound = gTrue;
+      currentFound = true;
     }
 
     if (isOn && strcmp(state, onStr) == 0) {
       widget->setAppearanceState(state);
-      newFound = gTrue;
+      newFound = true;
     }
 
     if (currentFound && newFound)
@@ -1073,17 +1109,17 @@ GBool FormFieldButton::setState(char *state)
 
   updateState(state);
 
-  return gTrue;
+  return true;
 }
 
-GBool FormFieldButton::getState(char *state) {
+bool FormFieldButton::getState(const char *state) const {
   if (appearanceState.isName(state))
-    return gTrue;
+    return true;
 
-  return (parent && parent->getType() == formButton) ? static_cast<FormFieldButton*>(parent)->getState(state) : gFalse;
+  return (parent && parent->getType() == formButton) ? static_cast<FormFieldButton*>(parent)->getState(state) : false;
 }
 
-void FormFieldButton::updateState(char *state) {
+void FormFieldButton::updateState(const char *state) {
   appearanceState = Object(objName, state);
   obj.getDict()->set("V", appearanceState.copy());
   xref->setModifiedObject(&obj, ref);
@@ -1098,12 +1134,12 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, aobj, ref, parent, usedParents, formText)
+FormFieldText::FormFieldText(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), ref, parent, usedParents, formText)
 {
   Dict* dict = obj.getDict();
   Object obj1;
-  content = NULL;
+  content = nullptr;
   multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
   maxLen = 0;
 
@@ -1146,32 +1182,23 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref& ref, FormFie
   }
 }
 
-#ifdef DEBUG_FORMS
 void FormFieldText::print(int indent)
 {
   printf ("%*s- (%d %d): [text] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
-GooString* FormFieldText::getContentCopy ()
-{
-  if (!content) return NULL;
-  return new GooString(content);
-}
-
-void FormFieldText::setContentCopy (GooString* new_content)
+void FormFieldText::setContentCopy (const GooString* new_content)
 {
   delete content;
-  content = NULL;
+  content = nullptr;
 
   if (new_content) {
     content = new_content->copy();
 
     //append the unicode marker <FE FF> if needed
     if (!content->hasUnicodeMarker()) {
-      content->insert(0, 0xff);
-      content->insert(0, 0xfe);
+      content->prependUnicodeMarker();
     }
   }
 
@@ -1185,16 +1212,106 @@ FormFieldText::~FormFieldText()
   delete content;
 }
 
+double FormFieldText::getTextFontSize()
+{
+  std::vector<GooString*>* daToks = new std::vector<GooString*>();
+  int idx = parseDA(daToks);
+  double fontSize = -1;
+  if (idx >= 0) {
+    char* p = nullptr;
+    fontSize = strtod((*daToks)[idx]->c_str(), &p);
+    if (!p || *p)
+      fontSize = -1;
+  }
+  for (auto entry : *daToks) {
+    delete entry;
+  }
+  delete daToks;
+  return fontSize;
+}
+
+void FormFieldText::setTextFontSize(int fontSize)
+{
+  if (fontSize > 0 && obj.isDict()) {
+    std::vector<GooString*>* daToks = new std::vector<GooString*>();
+    int idx = parseDA(daToks);
+    if (idx == -1) {
+      error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
+      for (auto entry : *daToks) {
+        delete entry;
+      }
+      delete daToks;
+      return;
+    }
+    if (defaultAppearance)
+      delete defaultAppearance;
+    defaultAppearance = new GooString;
+    for (std::size_t i = 0; i < daToks->size(); ++i) {
+      if (i > 0)
+        defaultAppearance->append(' ');
+      if (i == (std::size_t)idx) {
+        defaultAppearance->appendf("{0:d}", fontSize);
+      } else {
+        defaultAppearance->append((*daToks)[i]);
+      }
+    }
+    for (auto entry : *daToks) {
+      delete entry;
+    }
+    delete daToks;
+    obj.dictSet("DA", Object(defaultAppearance->copy()));
+    xref->setModifiedObject(&obj, ref);
+    updateChildrenAppearance();
+  }
+}
+
+int FormFieldText::tokenizeDA(const GooString* da, std::vector<GooString*>* daToks, const char* searchTok)
+{
+  int idx = -1;
+  if(da && daToks) {
+    int i = 0;
+    int j = 0;
+    while (i < da->getLength()) {
+      while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
+        ++i;
+      }
+      if (i < da->getLength()) {
+        for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
+        }
+        GooString* tok = new GooString(da, i, j - i);
+        if (searchTok && !tok->cmp(searchTok))
+          idx = daToks->size();
+	daToks->push_back(tok);
+        i = j;
+      }
+    }
+  }
+  return idx;
+}
+
+int FormFieldText::parseDA(std::vector<GooString*>* daToks)
+{
+  int idx = -1;
+  if (obj.isDict()) {
+    Object objDA(obj.dictLookup("DA"));
+    if (objDA.isString()) {
+      const GooString* da = objDA.getString();
+      idx = tokenizeDA(da, daToks, "Tf") - 1;
+    }
+  }
+  return idx;
+}
+
 
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, aobj, ref, parent, usedParents, formChoice)
+FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), ref, parent, usedParents, formChoice)
 {
   numChoices = 0;
-  choices = NULL;
-  editedChoice = NULL;
+  choices = nullptr;
+  editedChoice = nullptr;
   topIdx = 0;
 
   Dict* dict = obj.getDict();
@@ -1272,16 +1389,16 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
     // seems to expect the exportVal instead of the optionName and so we do too.
     obj1 = Form::fieldLookup(dict, "V");
     if (obj1.isString()) {
-      GBool optionFound = gFalse;
+      bool optionFound = false;
 
       for (int i = 0; i < numChoices; i++) {
         if (choices[i].exportVal) {
           if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
-            optionFound = gTrue;
+            optionFound = true;
           }
         } else if (choices[i].optionName) {
           if (choices[i].optionName->cmp(obj1.getString()) == 0) {
-            optionFound = gTrue;
+            optionFound = true;
           }
         }
 
@@ -1299,15 +1416,15 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
       for (int i = 0; i < numChoices; i++) {
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
           Object obj2 = obj1.arrayGet(j);
-          GBool matches = gFalse;
+          bool matches = false;
 
           if (choices[i].exportVal) {
             if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
-              matches = gTrue;
+              matches = true;
             }
           } else if (choices[i].optionName) {
             if (choices[i].optionName->cmp(obj2.getString()) == 0) {
-              matches = gTrue;
+              matches = true;
             }
           }
 
@@ -1331,16 +1448,14 @@ FormFieldChoice::~FormFieldChoice()
   delete editedChoice;
 }
 
-#ifdef DEBUG_FORMS
 void FormFieldChoice::print(int indent)
 {
   printf ("%*s- (%d %d): [choice] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 void FormFieldChoice::updateSelection() {
-  Object objV, obj1;
+  Object objV;
   Object objI(objNull);
 
   if (edit && editedChoice) {
@@ -1408,7 +1523,7 @@ void FormFieldChoice::unselectAll ()
 
 void FormFieldChoice::deselectAll () {
   delete editedChoice;
-  editedChoice = NULL;
+  editedChoice = nullptr;
 
   unselectAll();
   updateSelection();
@@ -1417,7 +1532,7 @@ void FormFieldChoice::deselectAll () {
 void FormFieldChoice::toggle (int i)
 {
   delete editedChoice;
-  editedChoice = NULL;
+  editedChoice = nullptr;
 
   choices[i].selected = !choices[i].selected;
   updateSelection();
@@ -1426,7 +1541,7 @@ void FormFieldChoice::toggle (int i)
 void FormFieldChoice::select (int i)
 {
   delete editedChoice;
-  editedChoice = NULL;
+  editedChoice = nullptr;
 
   if (!multiselect)
     unselectAll();
@@ -1435,10 +1550,10 @@ void FormFieldChoice::select (int i)
   updateSelection();
 }
 
-void FormFieldChoice::setEditChoice (GooString* new_content)
+void FormFieldChoice::setEditChoice (const GooString* new_content)
 {
   delete editedChoice;
-  editedChoice = NULL;
+  editedChoice = nullptr;
 
   unselectAll();
 
@@ -1447,14 +1562,13 @@ void FormFieldChoice::setEditChoice (GooString* new_content)
 
     //append the unicode marker <FE FF> if needed
     if (!editedChoice->hasUnicodeMarker()) {
-      editedChoice->insert(0, 0xff);
-      editedChoice->insert(0, 0xfe);
+      editedChoice->prependUnicodeMarker();
     }
   }
   updateSelection();
 }
 
-GooString* FormFieldChoice::getEditChoice ()
+const GooString* FormFieldChoice::getEditChoice () const
 {
   return editedChoice;
 }
@@ -1469,7 +1583,7 @@ int FormFieldChoice::getNumSelected ()
   return cnt;
 }
 
-GooString *FormFieldChoice::getSelectedChoice() {
+const GooString *FormFieldChoice::getSelectedChoice() const {
   if (edit && editedChoice)
     return editedChoice;
 
@@ -1478,18 +1592,18 @@ GooString *FormFieldChoice::getSelectedChoice() {
       return choices[i].optionName;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, dict, ref, parent, usedParents, formSignature),
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(dict), ref, parent, usedParents, formSignature),
     signature_type(adbe_pkcs7_detached),
     signature(nullptr), signature_info(nullptr)
 {
-  signature = NULL;
+  signature = nullptr;
 
   signature_info = new SignatureInfo();
   parseInfo();
@@ -1519,10 +1633,20 @@ void FormFieldSignature::parseInfo()
 
   byte_range = sig_dict.dictLookup("ByteRange");
 
+  const Object location_obj = sig_dict.dictLookup("Location");
+  if (location_obj.isString()) {
+    signature_info->setLocation(location_obj.getString()->c_str());
+  }
+
+  const Object reason_obj = sig_dict.dictLookup("Reason");
+  if (reason_obj.isString()) {
+    signature_info->setReason(reason_obj.getString()->c_str());
+  }
+
   // retrieve SigningTime
   Object time_of_signing = sig_dict.dictLookup("M");
   if (time_of_signing.isString()) {
-    GooString *time_str = time_of_signing.getString();
+    const GooString *time_str = time_of_signing.getString();
     signature_info->setSigningTime(dateStringToTime(time_str)); // Put this information directly in SignatureInfo object
   }
 
@@ -1585,7 +1709,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  if (signature == NULL) {
+  if (signature == nullptr) {
     error(errSyntaxError, 0, "Invalid or missing Signature string");
     return signature_info;
   }
@@ -1601,11 +1725,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  NSSCMSVerificationStatus sig_val_state;
-  SECErrorCodes cert_val_state;
   const int signature_len = signature->getLength();
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
-  memcpy(signatureuchar, signature->getCString(), signature_len);
+  memcpy(signatureuchar, signature->c_str(), signature_len);
   SignatureHandler signature_handler(signatureuchar, signature_len);
 
   Goffset fileLength = doc->getBaseStream()->getLength();
@@ -1630,8 +1752,8 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     hashSignedDataBlock(&signature_handler, len);
   }
 
-  sig_val_state = signature_handler.validateSignature();
-  signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
+  const SignatureValidationStatus sig_val_state = signature_handler.validateSignature();
+  signature_info->setSignatureValStatus(sig_val_state);
   signature_info->setSignerName(signature_handler.getSignerName());
   signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
   signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
@@ -1641,24 +1763,23 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     signature_info->setSigningTime(signature_handler.getSigningTime());
   }
 
-  if (sig_val_state != NSSCMSVS_GoodSignature || !doVerifyCert) {
+  if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
     return signature_info;
   }
 
-  cert_val_state = signature_handler.validateCertificate(validationTime);
-  signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
+  const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime);
+  signature_info->setCertificateValStatus(cert_val_state);
+  signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 
 #endif
   return signature_info;
 }
 
-#ifdef DEBUG_FORMS
 void FormFieldSignature::print(int indent)
 {
   printf ("%*s- (%d %d): [signature] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 //------------------------------------------------------------------------
 // Form
@@ -1674,10 +1795,10 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
   
   size = 0;
   numFields = 0;
-  rootFields = NULL;
+  rootFields = nullptr;
   quadding = quaddingLeftJustified;
-  defaultAppearance = NULL;
-  defaultResources = NULL;
+  defaultAppearance = nullptr;
+  defaultResources = nullptr;
 
   obj1 = acroForm->dictLookup("NeedAppearances");
   needAppearances = (obj1.isBool() && obj1.getBool());
@@ -1695,7 +1816,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     // At a minimum, this dictionary shall contain a Font entry
     obj1 = resDict.dictLookup("Font");
     if (obj1.isDict())
-      defaultResources = new GfxResources(xref, resDict.getDict(), NULL);
+      defaultResources = new GfxResources(xref, resDict.getDict(), nullptr);
   }
   if (!defaultResources) {
     resDict.setToNull();
@@ -1706,7 +1827,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     Array *array = obj1.getArray();
     for(int i=0; i<array->getLength(); i++) {
       Object obj2 = array->get(i);
-      Object oref = array->getNF(i);
+      const Object &oref = array->getNF(i);
       if (!oref.isRef()) {
         error(errSyntaxWarning, -1, "Direct object in rootFields");
         continue;
@@ -1723,7 +1844,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
       }
 
       std::set<int> usedParents;
-      rootFields[numFields++] = createFieldFromDict (&obj2, doc, oref.getRef(), NULL, &usedParents);
+      rootFields[numFields++] = createFieldFromDict (std::move(obj2), doc, oref.getRef(), nullptr, &usedParents);
 
     }
   } else {
@@ -1735,7 +1856,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     Array *array = obj1.getArray();
     calculateOrder.reserve(array->getLength());
     for(int i=0; i<array->getLength(); i++) {
-      Object oref = array->getNF(i);
+      const Object &oref = array->getNF(i);
       if (!oref.isRef()) {
         error(errSyntaxWarning, -1, "Direct object in CO");
         continue;
@@ -1744,10 +1865,8 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     }
   }
 
-#ifdef DEBUG_FORMS
-  for (int i = 0; i < numFields; i++)
-    rootFields[i]->printTree();
-#endif
+//   for (int i = 0; i < numFields; i++)
+//     rootFields[i]->printTree();
 }
 
 Form::~Form() {
@@ -1766,7 +1885,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
   if (!obj.isNull()) {
     return obj;
   }
-  Object parent = dict->lookupNF("Parent");
+  const Object &parent = dict->lookupNF("Parent");
   if (parent.isRef()) {
     const Ref ref = parent.getRef();
     if (usedParents->find(ref.num) == usedParents->end()) {
@@ -1788,21 +1907,21 @@ Object Form::fieldLookup(Dict *field, const char *key) {
   return ::fieldLookup(field, key, &usedParents);
 }
 
-FormField *Form::createFieldFromDict (Object* obj, PDFDoc *docA, const Ref& pref, FormField *parent, std::set<int> *usedParents)
+FormField *Form::createFieldFromDict (Object &&obj, PDFDoc *docA, const Ref pref, FormField *parent, std::set<int> *usedParents)
 {
     FormField *field;
 
-    Object obj2 = Form::fieldLookup(obj->getDict (), "FT");
+    const Object obj2 = Form::fieldLookup(obj.getDict (), "FT");
     if (obj2.isName("Btn")) {
-      field = new FormFieldButton(docA, obj, pref, parent, usedParents);
+      field = new FormFieldButton(docA, std::move(obj), pref, parent, usedParents);
     } else if (obj2.isName("Tx")) {
-      field = new FormFieldText(docA, obj, pref, parent, usedParents);
+      field = new FormFieldText(docA, std::move(obj), pref, parent, usedParents);
     } else if (obj2.isName("Ch")) {
-      field = new FormFieldChoice(docA, obj, pref, parent, usedParents);
+      field = new FormFieldChoice(docA, std::move(obj), pref, parent, usedParents);
     } else if (obj2.isName("Sig")) {
-      field = new FormFieldSignature(docA, obj, pref, parent, usedParents);
+      field = new FormFieldSignature(docA, std::move(obj), pref, parent, usedParents);
     } else { //we don't have an FT entry => non-terminal field
-      field = new FormField(docA, obj, pref, parent, usedParents);
+      field = new FormField(docA, std::move(obj), pref, parent, usedParents);
     }
 
     return field;
@@ -1826,7 +1945,7 @@ FormWidget* Form::findWidgetByRef (Ref aref)
     FormWidget *result = rootFields[i]->findWidgetByRef(aref);
     if(result) return result;
   }
-  return NULL;
+  return nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -1836,7 +1955,7 @@ FormWidget* Form::findWidgetByRef (Ref aref)
 FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
 {
   numWidgets = 0;
-  widgets = NULL;
+  widgets = nullptr;
 
   if (annots && annots->getNumAnnots() > 0 && form) {
     size = annots->getNumAnnots();

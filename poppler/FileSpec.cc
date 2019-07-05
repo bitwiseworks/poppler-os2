@@ -7,8 +7,11 @@
 //
 // Copyright (C) 2008-2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2012, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -26,20 +29,22 @@
 #include <config.h>
 
 #include "FileSpec.h"
+#include "XRef.h"
+#include "goo/gfile.h"
 
-EmbFile::EmbFile(Object *efStream)
+EmbFile::EmbFile(Object &&efStream)
 {
   m_size = -1;
-  m_createDate = NULL;
-  m_modDate = NULL;
-  m_checksum = NULL;
-  m_mimetype = NULL;
+  m_createDate = nullptr;
+  m_modDate = nullptr;
+  m_checksum = nullptr;
+  m_mimetype = nullptr;
 
-  m_objStr = efStream->copy();
+  m_objStr = std::move(efStream);
 
-  if (efStream->isStream()) {
+  if (m_objStr.isStream()) {
     // dataDict corresponds to Table 3.41 in the PDF1.6 spec.
-    Dict *dataDict = efStream->streamGetDict();
+    Dict *dataDict = m_objStr.streamGetDict();
 
     // subtype is normally the mimetype
     Object subtypeName = dataDict->lookup("Subtype");
@@ -77,40 +82,43 @@ EmbFile::~EmbFile()
   delete m_mimetype;
 }
 
-GBool EmbFile::save(const char *path) {
+bool EmbFile::save(const char *path) {
   FILE *f;
-  GBool ret;
+  bool ret;
 
-  if (!(f = fopen(path, "wb"))) {
-    return gFalse;
+  if (!(f = openFile(path, "wb"))) {
+    return false;
   }
   ret = save2(f);
   fclose(f);
   return ret;
 }
 
-GBool EmbFile::save2(FILE *f) {
+bool EmbFile::save2(FILE *f) {
   int c;
+
+  if (unlikely(!m_objStr.isStream()))
+    return false;
 
   m_objStr.streamReset();
   while ((c = m_objStr.streamGetChar()) != EOF) {
     fputc(c, f);
   }
-  return gTrue;
+  return true;
 }
 
-FileSpec::FileSpec(Object *fileSpecA)
+FileSpec::FileSpec(const Object *fileSpecA)
 {
-  ok = gTrue;
-  fileName = NULL;
-  platformFileName = NULL;
-  embFile = NULL;
-  desc = NULL;
+  ok = true;
+  fileName = nullptr;
+  platformFileName = nullptr;
+  embFile = nullptr;
+  desc = nullptr;
   fileSpec = fileSpecA->copy();
 
   Object obj1 = getFileSpecName(fileSpecA);
   if (!obj1.isString()) {
-    ok = gFalse;
+    ok = false;
     error(errSyntaxError, -1, "Invalid FileSpec");
     return;
   }
@@ -120,19 +128,20 @@ FileSpec::FileSpec(Object *fileSpecA)
   if (fileSpec.isDict()) {
     obj1 = fileSpec.dictLookup("EF");
     if (obj1.isDict()) {
-      fileStream = obj1.dictLookupNF("F");
+      fileStream = obj1.dictLookupNF("F").copy();
       if (!fileStream.isRef()) {
-        ok = gFalse;
+        ok = false;
         fileStream.setToNull();
         error(errSyntaxError, -1, "Invalid FileSpec: Embedded file stream is not an indirect reference");
         return;
       }
     }
-  }
 
-  obj1 = fileSpec.dictLookup("Desc");
-  if (obj1.isString())
-    desc = obj1.getString()->copy();
+    obj1 = fileSpec.dictLookup("Desc");
+    if (obj1.isString()) {
+      desc = obj1.getString()->copy();
+    }
+  }
 }
 
 FileSpec::~FileSpec()
@@ -146,17 +155,42 @@ FileSpec::~FileSpec()
 EmbFile *FileSpec::getEmbeddedFile()
 {
   if(!ok)
-    return NULL;
+    return nullptr;
 
   if (embFile)
     return embFile;
 
-  Object obj1;
   XRef *xref = fileSpec.getDict()->getXRef();
-  obj1 = fileStream.fetch(xref);
-  embFile = new EmbFile(&obj1);
+  embFile = new EmbFile(fileStream.fetch(xref));
 
   return embFile;
+}
+
+Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName)
+{
+  Object paramsDict = Object(new Dict(xref));
+  paramsDict.dictSet("Size", Object(file->size()));
+
+  // No Subtype in the embedded file stream dictionary for now
+  Object streamDict = Object(new Dict(xref));
+  streamDict.dictSet("Length", Object(file->size()));
+  streamDict.dictSet("Params", std::move(paramsDict));
+
+  FileStream *fStream = new FileStream(file, 0, false, file->size(), std::move(streamDict));
+  fStream->setNeedsEncryptionOnSave(true);
+  Stream *stream = fStream;
+  Object streamObj = Object(stream);
+  const Ref streamRef = xref->addIndirectObject(&streamObj);
+
+  Dict *efDict = new Dict(xref);
+  efDict->set("F", Object(streamRef));
+
+  Dict *fsDict = new Dict(xref);
+  fsDict->set("Type", Object(objName, "Filespec"));
+  fsDict->set("UF", Object(new GooString(fileName)));
+  fsDict->set("EF", Object(efDict));
+
+  return Object(fsDict);
 }
 
 GooString *FileSpec::getFileNameForPlatform()
@@ -171,7 +205,7 @@ GooString *FileSpec::getFileNameForPlatform()
   return platformFileName;
 }
 
-Object getFileSpecName (Object *fileSpec)
+Object getFileSpecName (const Object *fileSpec)
 {
   if (fileSpec->isString()) {
     return fileSpec->copy();
@@ -202,7 +236,7 @@ Object getFileSpecName (Object *fileSpec)
   return Object();
 }
 
-Object getFileSpecNameForPlatform (Object *fileSpec)
+Object getFileSpecNameForPlatform (const Object *fileSpec)
 {
   if (fileSpec->isString()) {
     return fileSpec->copy();
@@ -234,7 +268,7 @@ Object getFileSpecNameForPlatform (Object *fileSpec)
   // system-dependent path manipulation
 #ifdef _WIN32
   int i, j;
-  GooString *name = fileName.getString();
+  GooString *name = fileName.getString()->copy();
   // "//...."             --> "\...."
   // "/x/...."            --> "x:\...."
   // "/server/share/...." --> "\\server\share\...."
@@ -274,6 +308,7 @@ Object getFileSpecNameForPlatform (Object *fileSpec)
       name->del(i);
     }
   }
+  fileName = Object(name);
 #endif /* _WIN32 */
 
   return fileName;

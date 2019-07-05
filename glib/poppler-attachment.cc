@@ -18,10 +18,13 @@
 
 #include "config.h"
 #include <errno.h>
-#include <glib/gstdio.h>
+
+#include <goo/gfile.h>
 
 #include "poppler.h"
 #include "poppler-private.h"
+
+#include <new>
 
 /**
  * SECTION:poppler-attachment
@@ -32,15 +35,13 @@
 /* FIXME: We need to add gettext support sometime */
 #define _(x) (x)
 
-typedef struct _PopplerAttachmentPrivate PopplerAttachmentPrivate;
-struct _PopplerAttachmentPrivate
+struct PopplerAttachmentPrivate
 {
-  Object obj_stream;
+  Object obj_stream{};
 };
 
 #define POPPLER_ATTACHMENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), POPPLER_TYPE_ATTACHMENT, PopplerAttachmentPrivate))
 
-static void poppler_attachment_dispose (GObject *obj);
 static void poppler_attachment_finalize (GObject *obj);
 
 G_DEFINE_TYPE (PopplerAttachment, poppler_attachment, G_TYPE_OBJECT)
@@ -48,25 +49,17 @@ G_DEFINE_TYPE (PopplerAttachment, poppler_attachment, G_TYPE_OBJECT)
 static void
 poppler_attachment_init (PopplerAttachment *attachment)
 {
+  void *place;
+
+  place = g_type_instance_get_private ((GTypeInstance*)attachment, POPPLER_TYPE_ATTACHMENT);
+  new (place) PopplerAttachmentPrivate();
 }
 
 static void
 poppler_attachment_class_init (PopplerAttachmentClass *klass)
 {
-  G_OBJECT_CLASS (klass)->dispose = poppler_attachment_dispose;
   G_OBJECT_CLASS (klass)->finalize = poppler_attachment_finalize;
   g_type_class_add_private (klass, sizeof (PopplerAttachmentPrivate));
-}
-
-static void
-poppler_attachment_dispose (GObject *obj)
-{
-  PopplerAttachmentPrivate *priv;
-
-  priv = POPPLER_ATTACHMENT_GET_PRIVATE (obj);
-  priv->obj_stream = Object();
-
-  G_OBJECT_CLASS (poppler_attachment_parent_class)->dispose (obj);
 }
 
 static void
@@ -78,16 +71,18 @@ poppler_attachment_finalize (GObject *obj)
 
   if (attachment->name)
     g_free (attachment->name);
-  attachment->name = NULL;
+  attachment->name = nullptr;
 
   if (attachment->description)
     g_free (attachment->description);
-  attachment->description = NULL;
+  attachment->description = nullptr;
   
   if (attachment->checksum)
     g_string_free (attachment->checksum, TRUE);
-  attachment->checksum = NULL;
-  
+  attachment->checksum = nullptr;
+
+  POPPLER_ATTACHMENT_GET_PRIVATE (obj)->~PopplerAttachmentPrivate ();
+
   G_OBJECT_CLASS (poppler_attachment_parent_class)->finalize (obj);
 }
 
@@ -100,9 +95,9 @@ _poppler_attachment_new (FileSpec *emb_file)
   PopplerAttachmentPrivate *priv;
   EmbFile *embFile;
 
-  g_assert (emb_file != NULL);
+  g_assert (emb_file != nullptr);
 
-  attachment = (PopplerAttachment *) g_object_new (POPPLER_TYPE_ATTACHMENT, NULL);
+  attachment = (PopplerAttachment *) g_object_new (POPPLER_TYPE_ATTACHMENT, nullptr);
   priv = POPPLER_ATTACHMENT_GET_PRIVATE (attachment);
 
   if (emb_file->getFileName ())
@@ -111,17 +106,33 @@ _poppler_attachment_new (FileSpec *emb_file)
     attachment->description = _poppler_goo_string_to_utf8 (emb_file->getDescription ());
 
   embFile = emb_file->getEmbeddedFile();
-  attachment->size = embFile->size ();
+  if (embFile != nullptr && embFile->streamObject()->isStream())
+    {
+      attachment->size = embFile->size ();
 
-  if (embFile->createDate ())
-    _poppler_convert_pdf_date_to_gtime (embFile->createDate (), (time_t *)&attachment->ctime);
-  if (embFile->modDate ())
-    _poppler_convert_pdf_date_to_gtime (embFile->modDate (), (time_t *)&attachment->mtime);
+      if (embFile->createDate ())
+        {
+          time_t aux;
+          _poppler_convert_pdf_date_to_gtime (embFile->createDate (), &aux);
+          attachment->ctime = (GTime)aux; // FIXME This will overflow on dates from after 2038
+        }
+      if (embFile->modDate ())
+        {
+          time_t aux;
+          _poppler_convert_pdf_date_to_gtime (embFile->modDate (), &aux);
+          attachment->mtime = (GTime)aux; // FIXME This will overflow on dates from after 2038
+        }
 
-  if (embFile->checksum () && embFile->checksum ()->getLength () > 0)
-    attachment->checksum = g_string_new_len (embFile->checksum ()->getCString (),
-                                             embFile->checksum ()->getLength ());
-  priv->obj_stream = embFile->streamObject()->copy();
+      if (embFile->checksum () && embFile->checksum ()->getLength () > 0)
+        attachment->checksum = g_string_new_len (embFile->checksum ()->c_str (),
+                                                 embFile->checksum ()->getLength ());
+      priv->obj_stream = embFile->streamObject()->copy();
+    }
+  else
+    {
+      g_warning ("Missing stream object for embedded file");
+      g_clear_object (&attachment);
+    }
 
   return attachment;
 }
@@ -171,9 +182,9 @@ poppler_attachment_save (PopplerAttachment  *attachment,
   
   g_return_val_if_fail (POPPLER_IS_ATTACHMENT (attachment), FALSE);
 
-  f = g_fopen (filename, "wb");
+  f = openFile (filename, "wb");
 
-  if (f == NULL)
+  if (f == nullptr)
     {
       gchar *display_name = g_filename_display_name (filename);
       g_set_error (error,

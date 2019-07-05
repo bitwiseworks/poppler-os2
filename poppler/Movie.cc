@@ -6,7 +6,7 @@
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Pino Toscano <pino@kde.org> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2010, 2017
+// Albert Astals Cid <aacid@kde.org> (c) 2010, 2017-2019
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@
 
 MovieActivationParameters::MovieActivationParameters() {
   // default values
-  floatingWindow = gFalse;
+  floatingWindow = false;
   xPosition = 0.5;
   yPosition = 0.5;
   rate = 1.0;
   volume = 100;
-  showControls = gFalse;
-  synchronousPlay = gFalse;
+  showControls = false;
+  synchronousPlay = false;
   repeatMode = repeatModeOnce;
   start.units = 0;
   duration.units = 0;
@@ -46,7 +46,7 @@ MovieActivationParameters::MovieActivationParameters() {
 MovieActivationParameters::~MovieActivationParameters() {
 }
 
-void MovieActivationParameters::parseMovieActivation(Object* aDict) {
+void MovieActivationParameters::parseMovieActivation(const Object* aDict) {
   Object obj1 = aDict->dictLookup("Start");
   if (obj1.isNull()) {
     if (obj1.isInt()) {
@@ -125,7 +125,7 @@ void MovieActivationParameters::parseMovieActivation(Object* aDict) {
 
   obj1 = aDict->dictLookup("Mode");
   if (obj1.isName()) {
-    char* name = obj1.getName();
+    const char* name = obj1.getName();
     if (!strcmp(name, "Once")) {
       repeatMode = repeatModeOnce;
     } else if (!strcmp(name, "Open")) {
@@ -141,7 +141,7 @@ void MovieActivationParameters::parseMovieActivation(Object* aDict) {
   if (obj1.isArray()) {
     // the presence of that entry implies that the movie is to be played
     // in a floating window
-    floatingWindow = gTrue;
+    floatingWindow = true;
 
     Array* scale = obj1.getArray();
     if (scale->getLength() >= 2) {
@@ -172,12 +172,12 @@ void MovieActivationParameters::parseMovieActivation(Object* aDict) {
   }
 }
 
-void Movie::parseMovie (Object *movieDict) {
-  fileName = NULL;
+void Movie::parseMovie (const Object *movieDict) {
+  fileName = nullptr;
   rotationAngle = 0;
   width = -1;
   height = -1;
-  showPoster = gFalse;
+  showPoster = false;
 
   Object obj1 = movieDict->dictLookup("F");
   Object obj2 = getFileSpecNameForPlatform(&obj1);
@@ -185,7 +185,7 @@ void Movie::parseMovie (Object *movieDict) {
     fileName = obj2.getString()->copy();
   } else {
     error (errSyntaxError, -1, "Invalid Movie");
-    ok = gFalse;
+    ok = false;
     return;
   }
 
@@ -213,10 +213,10 @@ void Movie::parseMovie (Object *movieDict) {
   //
   // movie poster
   //
-  poster = movieDict->dictLookupNF("Poster");
+  poster = movieDict->dictLookupNF("Poster").copy();
   if (!poster.isNull()) {
     if (poster.isRef() || poster.isStream()) {
-      showPoster = gTrue;
+      showPoster = true;
     } else if (poster.isBool()) {
       showPoster = poster.getBool();
       poster.setToNull();
@@ -230,24 +230,24 @@ Movie::~Movie() {
   delete fileName;
 }
 
-Movie::Movie(Object *movieDict) {
-  ok = gTrue;
+Movie::Movie(const Object *movieDict) {
+  ok = true;
 
   if (movieDict->isDict())
     parseMovie(movieDict);
   else
-    ok = gFalse;
+    ok = false;
 }
 
-Movie::Movie(Object *movieDict, Object *aDict) {
-  ok = gTrue;
+Movie::Movie(const Object *movieDict, const Object *aDict) {
+  ok = true;
 
   if (movieDict->isDict()) {
     parseMovie(movieDict);
     if (aDict->isDict())
       MA.parseMovieActivation(aDict);
   } else {
-    ok = gFalse;
+    ok = false;
   }
 }
 
@@ -274,6 +274,6 @@ void Movie::getFloatingWindowSize(int *widthA, int *heightA)
   *heightA = int(height * double(MA.znum) / MA.zdenum);
 }
 
-Movie* Movie::copy() {
+Movie* Movie::copy() const {
   return new Movie(*this);
 }
