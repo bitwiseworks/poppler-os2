@@ -1,5 +1,9 @@
 lib_LTLIBRARIES = libpoppler-qt5.la
 
+VENDOR ?=community
+BUILD_INFO=\#\#1\#\# $(shell date +'%d %b %Y %H:%M:%S')     $(shell uname -n)
+BUILDLEVEL_INFO=@\#$(VENDOR):$(POPPLER_VERSION)\#@$(BUILD_INFO)::::$(POPPLER_MICRO_VERSION)::
+
 poppler_includedir = $(includedir)/poppler/qt5
 poppler_include_HEADERS =			\
 	poppler-qt5.h				\
@@ -64,7 +68,9 @@ libpoppler_qt5_la_LIBADD =			\
 libpoppler_qt5_la_LDFLAGS =			\
 	-version-info 11:0:10			\
 	@create_shared_lib@			\
-	@auto_import_flags@
+	@auto_import_flags@			\
+	-shortname poppq5			\
+	-buildlevel '$(BUILDLEVEL_INFO)'
 
 # This rule lets GNU make create any *.moc from the equivalent *.h
 .h.moc:
