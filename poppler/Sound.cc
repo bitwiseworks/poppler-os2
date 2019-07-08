@@ -1,6 +1,6 @@
 /* Sound.cc - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2009, 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2009, 2017, 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,17 @@ Sound *Sound::parseSound(Object *obj)
 {
   // let's try to see if this Object is a Sound, according to the PDF specs
   // (section 9.2)
-  Stream *str = NULL;
+  Stream *str = nullptr;
   // the Object must be a Stream
   if (obj->isStream()) {
     str = obj->getStream();
   } else {
-    return NULL;
+    return nullptr;
   }
   // the Stream must have a Dict
   Dict *dict = str->getDict();
-  if (dict == NULL)
-    return NULL;
+  if (dict == nullptr)
+    return nullptr;
   // the Dict must have the 'R' key of type num
   Object tmp = dict->lookup("R");
   if (tmp.isNum()) {
@@ -47,11 +47,11 @@ Sound *Sound::parseSound(Object *obj)
   }
 }
 
-Sound::Sound(Object *obj, bool readAttrs)
+Sound::Sound(const Object *obj, bool readAttrs)
 {
   streamObj = obj->copy();
 
-  fileName = NULL;
+  fileName = nullptr;
   samplingRate = 0.0;
   channels = 1;
   bitsPerSample = 8;
@@ -116,7 +116,7 @@ Stream *Sound::getStream()
   return streamObj.getStream();
 }
 
-Sound *Sound::copy()
+Sound *Sound::copy() const
 {
   Sound *newsound = new Sound(&streamObj, false);
 

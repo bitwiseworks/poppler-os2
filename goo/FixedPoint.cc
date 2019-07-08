@@ -8,13 +8,23 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #include <config.h>
 
-#if USE_FIXEDPOINT
-
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
+#ifdef USE_FIXEDPOINT
 
 #include "FixedPoint.h"
 
@@ -107,19 +117,19 @@ int FixedPoint::div(int x, int y) {
   }
 }
 
-GBool FixedPoint::divCheck(FixedPoint x, FixedPoint y, FixedPoint *result) {
+bool FixedPoint::divCheck(FixedPoint x, FixedPoint y, FixedPoint *result) {
   FixPtInt64 z;
 
   z = ((FixPtInt64)x.val << fixptShift) / y.val;
   if ((z == 0 && x != 0) ||
       z >= ((FixPtInt64)1 << 31) || z < -((FixPtInt64)1 << 31)) {
-    return gFalse;
+    return false;
   }
   result->val = z;
-  return gTrue;
+  return true;
 }
 
-GBool FixedPoint::checkDet(FixedPoint m11, FixedPoint m12,
+bool FixedPoint::checkDet(FixedPoint m11, FixedPoint m12,
                           FixedPoint m21, FixedPoint m22,
                           FixedPoint epsilon) {
   FixPtInt64 det, e;

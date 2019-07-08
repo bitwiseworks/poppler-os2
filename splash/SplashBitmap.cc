@@ -11,18 +11,21 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 2010, 2012, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 2010, 2012, 2015, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Ilmari Heikkinen <ilmari.heikkinen@gmail.com>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
-// Copyright (C) 2010, 2015 William Bader <williambader@hotmail.com>
+// Copyright (C) 2010, 2015, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Anthony Wesley <awesley@smartnetworks.com.au>
-// Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2015, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2016 Kenji Uno <ku@digitaldolphins.jp>
+// Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
+// Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -31,14 +34,11 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "SplashErrorCodes.h"
 #include "SplashBitmap.h"
@@ -47,15 +47,14 @@
 #include "goo/PNGWriter.h"
 #include "goo/TiffWriter.h"
 #include "goo/ImgWriter.h"
-#include "goo/GooList.h"
 
 //------------------------------------------------------------------------
 // SplashBitmap
 //------------------------------------------------------------------------
 
 SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
-			   SplashColorMode modeA, GBool alphaA,
-			   GBool topDown, GooList *separationListA) {
+			   SplashColorMode modeA, bool alphaA,
+			   bool topDown, std::vector<GfxSeparationColorSpace*> *separationListA) {
   width = widthA;
   height = heightA;
   mode = modeA;
@@ -90,7 +89,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
       rowSize = -1;
     }
     break;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   case splashModeCMYK8:
     if (width > 0 && width <= INT_MAX / 4) {
       rowSize = width * 4;
@@ -112,30 +111,30 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
     rowSize -= rowSize % rowPad;
   }
   data = (SplashColorPtr)gmallocn_checkoverflow(rowSize, height);
-  if (data != NULL) {
+  if (data != nullptr) {
     if (!topDown) {
       data += (height - 1) * rowSize;
       rowSize = -rowSize;
     }
     if (alphaA) {
-      alpha = (Guchar *)gmallocn(width, height);
+      alpha = (unsigned char *)gmallocn(width, height);
     } else {
-      alpha = NULL;
+      alpha = nullptr;
     }
   } else {
-    alpha = NULL;
+    alpha = nullptr;
   }
-  separationList = new GooList();
-  if (separationListA != NULL)
-    for (int i = 0; i < separationListA->getLength(); i++)
-      separationList->append(((GfxSeparationColorSpace *) separationListA->get(i))->copy());
+  separationList = new std::vector<GfxSeparationColorSpace*>();
+  if (separationListA != nullptr)
+    for (std::size_t i = 0; i < separationListA->size(); i++)
+      separationList->push_back((GfxSeparationColorSpace*)( (*separationListA)[i])->copy());
 }
 
 SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
   SplashBitmap *result = new SplashBitmap(src->getWidth(), src->getHeight(), src->getRowPad(), 
-    src->getMode(), src->getAlphaPtr() != NULL, src->getRowSize() >= 0, src->getSeparationList());
-  Guchar *dataSource = src->getDataPtr();
-  Guchar *dataDest = result->getDataPtr();
+    src->getMode(), src->getAlphaPtr() != nullptr, src->getRowSize() >= 0, src->getSeparationList());
+  unsigned char *dataSource = src->getDataPtr();
+  unsigned char *dataDest = result->getDataPtr();
   int amount = src->getRowSize();
   if (amount < 0) {
     dataSource = dataSource + (src->getHeight() - 1) * amount;
@@ -145,7 +144,7 @@ SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
     amount *= src->getHeight();
   }
   memcpy(dataDest, dataSource, amount);
-  if (src->getAlphaPtr() != NULL) {
+  if (src->getAlphaPtr() != nullptr) {
     memcpy(result->getAlphaPtr(), src->getAlphaPtr(), src->getWidth() * src->getHeight());
   }
   return result;
@@ -160,7 +159,10 @@ SplashBitmap::~SplashBitmap() {
     }
   }
   gfree(alpha);
-  deleteGooList(separationList, GfxSeparationColorSpace);
+  for (auto entry : *separationList) {
+    delete entry;
+  }
+  delete separationList;
 }
 
 
@@ -168,7 +170,7 @@ SplashError SplashBitmap::writePNMFile(char *fileName) {
   FILE *f;
   SplashError e;
 
-  if (!(f = fopen(fileName, "wb"))) {
+  if (!(f = openFile(fileName, "wb"))) {
     return splashErrOpenFile;
   }
 
@@ -247,7 +249,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     }
     break;
 
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   case splashModeCMYK8:
   case splashModeDeviceN8:
     // PNM doesn't support CMYK
@@ -265,7 +267,7 @@ SplashError SplashBitmap::writeAlphaPGMFile(char *fileName) {
   if (!alpha) {
     return splashErrModeMismatch;
   }
-  if (!(f = fopen(fileName, "wb"))) {
+  if (!(f = openFile(fileName, "wb"))) {
     return splashErrOpenFile;
   }
   fprintf(f, "P5\n%d %d\n255\n", width, height);
@@ -308,7 +310,7 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
     pixel[1] = p[1];
     pixel[2] = p[0];
     break;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   case splashModeCMYK8:
     p = &data[y * rowSize + 4 * x];
     pixel[0] = p[0];
@@ -325,7 +327,7 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
   }
 }
 
-Guchar SplashBitmap::getAlpha(int x, int y) {
+unsigned char SplashBitmap::getAlpha(int x, int y) {
   return alpha[y * width + x];
 }
 
@@ -333,15 +335,15 @@ SplashColorPtr SplashBitmap::takeData() {
   SplashColorPtr data2;
 
   data2 = data;
-  data = NULL;
+  data = nullptr;
   return data2;
 }
 
-SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, WriteImgParams* params) {
+SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, const char *fileName, int hDPI, int vDPI, WriteImgParams* params) {
   FILE *f;
   SplashError e;
 
-  if (!(f = fopen(fileName, "wb"))) {
+  if (!(f = openFile(fileName, "wb"))) {
     return splashErrOpenFile;
   }
 
@@ -356,6 +358,7 @@ void SplashBitmap::setJpegParams(ImgWriter *writer, WriteImgParams* params)
 #ifdef ENABLE_LIBJPEG
   if (params) {
     static_cast<JpegWriter*>(writer)->setProgressive(params->jpegProgressive);
+    static_cast<JpegWriter*>(writer)->setOptimize(params->jpegOptimize);
     if (params->jpegQuality >= 0)
       static_cast<JpegWriter*>(writer)->setQuality(params->jpegQuality);
   }
@@ -376,7 +379,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     #endif
 
     #ifdef ENABLE_LIBJPEG
-    #if SPLASH_CMYK
+    #ifdef SPLASH_CMYK
     case splashFormatJpegCMYK:
       writer = new JpegWriter(JpegWriter::CMYK);
       setJpegParams(writer, params);
@@ -403,7 +406,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
       case splashModeBGR8:
         writer = new TiffWriter(TiffWriter::RGB);
         break;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       case splashModeCMYK8:
       case splashModeDeviceN8:
         writer = new TiffWriter(TiffWriter::CMYK);
@@ -414,7 +417,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
         writer = new TiffWriter();
       }
       if (writer && params) {
-        ((TiffWriter *)writer)->setCompressionString(params->tiffCompression.getCString());
+        ((TiffWriter *)writer)->setCompressionString(params->tiffCompression.c_str());
       }
       break;
     #endif
@@ -443,14 +446,14 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
     m = byteToDbl(col[1]);
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
-#if SPLASH_CMYK
-    if (separationList->getLength() > 0) {
-      for (int i = 0; i < separationList->getLength(); i++) {
+#ifdef SPLASH_CMYK
+    if (separationList->size() > 0) {
+      for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
           GfxCMYK cmyk;
           GfxColor input;
           input.c[0] = byteToCol(col[i+4]);
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)((*separationList)[i]);
           sepCS->getCMYK(&input, &cmyk);
           col[0] = colToByte(cmyk.c);
           col[1] = colToByte(cmyk.m);
@@ -489,14 +492,14 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
     m = byteToDbl(col[1]);
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
-#if SPLASH_CMYK
-    if (separationList->getLength() > 0) {
-      for (int i = 0; i < separationList->getLength(); i++) {
+#ifdef SPLASH_CMYK
+    if (separationList->size() > 0) {
+      for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
           GfxCMYK cmyk;
           GfxColor input;
           input.c[0] = byteToCol(col[i+4]);
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)((*separationList)[i]);
           sepCS->getCMYK(&input, &cmyk);
           col[0] = colToByte(cmyk.c);
           col[1] = colToByte(cmyk.m);
@@ -540,22 +543,22 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
   }
 }
 
-static inline Guchar div255(int x) {
-  return (Guchar)((x + (x >> 8) + 0x80) >> 8);
+static inline unsigned char div255(int x) {
+  return (unsigned char)((x + (x >> 8) + 0x80) >> 8);
 }
 
-GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
+bool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
   if (mode == splashModeXBGR8) {
     if (conversionMode != conversionOpaque) {
       // Copy the alpha channel into the fourth component so that XBGR becomes ABGR.
       const SplashColorPtr dbegin = data;
       const SplashColorPtr dend = data + rowSize * height;
 
-      Guchar *const abegin = alpha;
-      Guchar *const aend = alpha + width * height;
+      unsigned char *const abegin = alpha;
+      unsigned char *const aend = alpha + width * height;
 
       SplashColorPtr d = dbegin;
-      Guchar *a = abegin;
+      unsigned char *a = abegin;
 
       if (conversionMode == conversionAlphaPremultiplied) {
           for (; d < dend && a < aend; d += 4, a += 1) {
@@ -571,12 +574,12 @@ GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
       }
     }
 
-    return gTrue;
+    return true;
   }
   
   int newrowSize = width * 4;
   SplashColorPtr newdata = (SplashColorPtr)gmallocn_checkoverflow(newrowSize, height);
-  if (newdata != NULL) {
+  if (newdata != nullptr) {
     for (int y = 0; y < height; y++) {
       unsigned char *row = newdata + y * newrowSize;
       getXBGRLine(y, row, conversionMode);
@@ -590,27 +593,27 @@ GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
     rowSize = newrowSize;
     mode = splashModeXBGR8;
   }
-  return newdata != NULL;
+  return newdata != nullptr;
 }
 
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
 void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
   SplashColor col;
 
   for (int x = 0; x < width; x++) {
     getPixel(x, yl, col);
-    if (separationList->getLength() > 0) {
+    if (separationList->size() > 0) {
       double c, m, y, k;
       c = byteToDbl(col[0]);
       m = byteToDbl(col[1]);
       y = byteToDbl(col[2]);
       k = byteToDbl(col[3]);
-      for (int i = 0; i < separationList->getLength(); i++) {
+      for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
           GfxCMYK cmyk;
           GfxColor input;
           input.c[0] = byteToCol(col[i+4]);
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)((*separationList)[i]);
           sepCS->getCMYK(&input, &cmyk);
           col[0] = colToByte(cmyk.c);
           col[1] = colToByte(cmyk.m);
@@ -637,7 +640,7 @@ void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
 
 SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI, SplashColorMode imageWriterFormat) {
   if (mode != splashModeRGB8 && mode != splashModeMono8 && mode != splashModeMono1 && mode != splashModeXBGR8 && mode != splashModeBGR8
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       && mode != splashModeCMYK8 && mode != splashModeDeviceN8
 #endif
      ) {
@@ -650,7 +653,7 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
   }
 
   switch (mode) {
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
     case splashModeCMYK8:
       if (writer->supportCMYK()) {
         SplashColorPtr row;

@@ -1,10 +1,14 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2017 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+ * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+ * Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +33,7 @@
 #include <Object.h>
 #include <Link.h>
 #include <SignatureInfo.h>
+#include <CertificateInfo.h>
 
 #include "poppler-form.h"
 #include "poppler-page-private.h"
@@ -73,8 +78,8 @@ FormField::FormField(FormFieldData &dd)
   double left, top, right, bottom;
   m_formData->fm->getRect(&left, &bottom, &right, &top);
   // build a normalized transform matrix for this page at 100% scale
-  GfxState gfxState( 72.0, 72.0, m_formData->page->getCropBox(), rotation, gTrue );
-  double * gfxCTM = gfxState.getCTM();
+  GfxState gfxState( 72.0, 72.0, m_formData->page->getCropBox(), rotation, true );
+  const double * gfxCTM = gfxState.getCTM();
   double MTX[6];
   double pageWidth = m_formData->page->getCropWidth();
   double pageHeight = m_formData->page->getCropHeight();
@@ -96,7 +101,7 @@ FormField::FormField(FormFieldData &dd)
 FormField::~FormField()
 {
   delete m_formData;
-  m_formData = 0;
+  m_formData = nullptr;
 }
 
 QRectF FormField::rect() const
@@ -112,9 +117,9 @@ int FormField::id() const
 QString FormField::name() const
 {
   QString name;
-  if (GooString *goo = m_formData->fm->getPartialName())
+  if (const GooString *goo = m_formData->fm->getPartialName())
   {
-    name = QString::fromLatin1(goo->getCString());
+    name = QString::fromLatin1(goo->c_str());
   }
   return name;
 }
@@ -139,9 +144,9 @@ QString FormField::fullyQualifiedName() const
 QString FormField::uiName() const
 {
   QString name;
-  if (GooString *goo = m_formData->fm->getAlternateUiName())
+  if (const GooString *goo = m_formData->fm->getAlternateUiName())
   {
-    name = QString::fromLatin1(goo->getCString());
+    name = QString::fromLatin1(goo->c_str());
   }
   return name;
 }
@@ -151,14 +156,30 @@ bool FormField::isReadOnly() const
   return m_formData->fm->isReadOnly();
 }
 
+void FormField::setReadOnly(bool value)
+{
+  m_formData->fm->setReadOnly(value);
+}
+
 bool FormField::isVisible() const
 {
   return !(m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagHidden);
 }
 
+void FormField::setVisible(bool value)
+{
+  unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+  if (value) {
+    flags &= ~Annot::flagHidden;
+  } else {
+    flags |= Annot::flagHidden;
+  }
+  m_formData->fm->getWidgetAnnotation()->setFlags(flags);
+}
+
 Link* FormField::activationAction() const
 {
-  Link* action = 0;
+  Link* action = nullptr;
   if (::LinkAction *act = m_formData->fm->getActivationAction())
   {
     action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
@@ -178,7 +199,7 @@ Link *FormField::additionalAction(AdditionalActionType type) const
 
   }
 
-  Link* action = 0;
+  Link* action = nullptr;
   if (::LinkAction *act = m_formData->fm->getAdditionalAction(actionType))
   {
     action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
@@ -186,6 +207,23 @@ Link *FormField::additionalAction(AdditionalActionType type) const
   return action;
 }
 
+Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
+{
+  ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
+  if (!w)
+  {
+    return nullptr;
+  }
+
+  const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
+
+  Link* action = nullptr;
+  if (::LinkAction *act = w->getAdditionalAction(actionType))
+  {
+    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+  }
+  return action;
+}
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w)
   : FormField(*new FormFieldData(doc, p, w))
@@ -255,7 +293,7 @@ bool FormFieldButton::state() const
 void FormFieldButton::setState( bool state )
 {
   FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
-  fwb->setState((GBool)state);
+  fwb->setState((bool)state);
 }
 
 QList<int> FormFieldButton::siblings() const
@@ -306,7 +344,7 @@ FormFieldText::TextType FormFieldText::textType() const
 
 QString FormFieldText::text() const
 {
-  GooString *goo = static_cast<FormWidgetText*>(m_formData->fm)->getContent();
+  const GooString *goo = static_cast<FormWidgetText*>(m_formData->fm)->getContent();
   return UnicodeParsedString(goo);
 }
 
@@ -348,6 +386,17 @@ bool FormFieldText::canBeSpellChecked() const
   return !fwt->noSpellCheck();
 }
 
+double FormFieldText::getFontSize() const
+{
+  FormWidgetText* fwt = static_cast<FormWidgetText*>(m_formData->fm);
+  return fwt->getTextFontSize();
+}
+
+void FormFieldText::setFontSize(int fontSize)
+{
+  FormWidgetText* fwt = static_cast<FormWidgetText*>(m_formData->fm);
+  fwt->setTextFontSize(fontSize);
+}
 
 FormFieldChoice::FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w)
   : FormField(*new FormFieldData(doc, p, w))
@@ -448,14 +497,199 @@ bool FormFieldChoice::canBeSpellChecked() const
   return !fwc->noSpellCheck();
 }
 
+class CertificateInfoPrivate
+{
+public:
+  struct EntityInfo
+  {
+    QString common_name;
+    QString email_address;
+    QString org_name;
+    QString distinguished_name;
+  };
 
-struct SignatureValidationInfoPrivate {
+  EntityInfo issuer_info;
+  EntityInfo subject_info;
+  QByteArray certificate_der;
+  QByteArray serial_number;
+  QByteArray public_key;
+  QDateTime validity_start;
+  QDateTime validity_end;
+  int public_key_type;
+  int public_key_strength;
+  int ku_extensions;
+  int version;
+  bool is_self_signed;
+  bool is_null;
+};
+
+CertificateInfo::CertificateInfo(CertificateInfoPrivate* priv)
+  : d_ptr( priv )
+{
+}
+
+CertificateInfo::CertificateInfo(const CertificateInfo &other)
+ : d_ptr( other.d_ptr )
+{
+}
+
+CertificateInfo::~CertificateInfo() = default;
+
+CertificateInfo &CertificateInfo::operator=(const CertificateInfo &other)
+{
+  if ( this != &other )
+    d_ptr = other.d_ptr;
+
+  return *this;
+}
+
+bool CertificateInfo::isNull() const
+{
+  Q_D(const CertificateInfo);
+  return d->is_null;
+}
+
+int CertificateInfo::version() const
+{
+  Q_D(const CertificateInfo);
+  return d->version;
+}
+
+QByteArray CertificateInfo::serialNumber() const
+{
+  Q_D(const CertificateInfo);
+  return d->serial_number;
+}
+
+QString CertificateInfo::issuerInfo(EntityInfoKey key) const
+{
+  Q_D(const CertificateInfo);
+  switch (key)
+  {
+    case CommonName:
+      return d->issuer_info.common_name;
+    case DistinguishedName:
+      return d->issuer_info.distinguished_name;
+    case EmailAddress:
+      return d->issuer_info.email_address;
+    case Organization:
+      return d->issuer_info.org_name;
+    default:
+      return QString();
+  }
+}
+
+QString CertificateInfo::subjectInfo(EntityInfoKey key) const
+{
+  Q_D(const CertificateInfo);
+  switch (key)
+  {
+    case CommonName:
+      return d->subject_info.common_name;
+    case DistinguishedName:
+      return d->subject_info.distinguished_name;
+    case EmailAddress:
+      return d->subject_info.email_address;
+    case Organization:
+      return d->subject_info.org_name;
+    default:
+      return QString();
+  }
+}
+
+QDateTime CertificateInfo::validityStart() const
+{
+  Q_D(const CertificateInfo);
+  return d->validity_start;
+}
+
+QDateTime CertificateInfo::validityEnd() const
+{
+  Q_D(const CertificateInfo);
+  return d->validity_end;
+}
+
+CertificateInfo::KeyUsageExtensions CertificateInfo::keyUsageExtensions() const
+{
+  Q_D(const CertificateInfo);
+
+  KeyUsageExtensions kuExtensions = KuNone;
+  if (d->ku_extensions & KU_DIGITAL_SIGNATURE)
+    kuExtensions |= KuDigitalSignature;
+  if (d->ku_extensions & KU_NON_REPUDIATION)
+    kuExtensions |= KuNonRepudiation;
+  if (d->ku_extensions & KU_KEY_ENCIPHERMENT)
+    kuExtensions |= KuKeyEncipherment;
+  if (d->ku_extensions & KU_DATA_ENCIPHERMENT)
+    kuExtensions |= KuDataEncipherment;
+  if (d->ku_extensions & KU_KEY_AGREEMENT)
+    kuExtensions |= KuKeyAgreement;
+  if (d->ku_extensions & KU_KEY_CERT_SIGN)
+    kuExtensions |= KuKeyCertSign;
+  if (d->ku_extensions & KU_CRL_SIGN)
+    kuExtensions |= KuClrSign;
+  if (d->ku_extensions & KU_ENCIPHER_ONLY)
+    kuExtensions |= KuEncipherOnly;
+
+  return kuExtensions;
+}
+
+QByteArray CertificateInfo::publicKey() const
+{
+  Q_D(const CertificateInfo);
+  return d->public_key;
+}
+
+CertificateInfo::PublicKeyType CertificateInfo::publicKeyType() const
+{
+  Q_D(const CertificateInfo);
+  switch (d->public_key_type)
+  {
+    case RSAKEY:
+      return RsaKey;
+    case DSAKEY:
+      return DsaKey;
+    case ECKEY:
+      return EcKey;
+    default:
+      return OtherKey;
+  }
+}
+
+int CertificateInfo::publicKeyStrength() const
+{
+  Q_D(const CertificateInfo);
+  return d->public_key_strength;
+}
+
+bool CertificateInfo::isSelfSigned() const
+{
+  Q_D(const CertificateInfo);
+  return d->is_self_signed;
+}
+
+QByteArray CertificateInfo::certificateData() const
+{
+  Q_D(const CertificateInfo);
+  return d->certificate_der;
+}
+
+class SignatureValidationInfoPrivate {
+public:
+	SignatureValidationInfoPrivate(CertificateInfo &&ci)
+		: cert_info(ci)
+	{
+	}
+
 	SignatureValidationInfo::SignatureStatus signature_status;
 	SignatureValidationInfo::CertificateStatus certificate_status;
+	CertificateInfo cert_info;
 
 	QByteArray signature;
 	QString signer_name;
 	QString signer_subject_dn;
+	QString location;
+	QString reason;
 	int hash_algorithm;
 	time_t signing_time;
 	QList<qint64> range_bounds;
@@ -501,11 +735,23 @@ QString SignatureValidationInfo::signerSubjectDN() const
   return d->signer_subject_dn;
 }
 
-SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
+QString SignatureValidationInfo::location() const
 {
   Q_D(const SignatureValidationInfo);
+  return d->location;
+}
 
+QString SignatureValidationInfo::reason() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->reason;
+}
+
+SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
+{
 #ifdef ENABLE_NSS3
+  Q_D(const SignatureValidationInfo);
+
   switch (d->hash_algorithm)
   {
     case HASH_AlgMD2:
@@ -566,6 +812,12 @@ bool SignatureValidationInfo::signsTotalDocument() const
   return false;
 }
 
+CertificateInfo SignatureValidationInfo::certificateInfo() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->cert_info;
+}
+
 SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValidationInfo &other)
 {
   if ( this != &other )
@@ -617,7 +869,47 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   FormWidgetSignature* fws = static_cast<FormWidgetSignature*>(m_formData->fm);
   const time_t validationTimeT = validationTime.isValid() ? validationTime.toTime_t() : -1;
   SignatureInfo* si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
-  SignatureValidationInfoPrivate* priv = new SignatureValidationInfoPrivate;
+
+  // get certificate info
+  const X509CertificateInfo *ci = si->getCertificateInfo();
+  CertificateInfoPrivate* certPriv = new CertificateInfoPrivate;
+  certPriv->is_null = true;
+  if (ci)
+  {
+    certPriv->version = ci->getVersion();
+    certPriv->ku_extensions = ci->getKeyUsageExtensions();
+
+    const GooString &certSerial = ci->getSerialNumber();
+    certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
+
+    const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
+    certPriv->issuer_info.common_name = issuerInfo.commonName.c_str();
+    certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName.c_str();
+    certPriv->issuer_info.email_address = issuerInfo.email.c_str();
+    certPriv->issuer_info.org_name = issuerInfo.organization.c_str();
+
+    const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
+    certPriv->subject_info.common_name = subjectInfo.commonName.c_str();
+    certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName.c_str();
+    certPriv->subject_info.email_address = subjectInfo.email.c_str();
+    certPriv->subject_info.org_name = subjectInfo.organization.c_str();
+
+    X509CertificateInfo::Validity certValidity = ci->getValidity();
+    certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
+    certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
+
+    const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
+    certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
+    certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
+    certPriv->public_key_strength = pkInfo.publicKeyStrength;
+
+    const GooString &certDer = ci->getCertificateDER();
+    certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
+
+    certPriv->is_null = false;
+  }
+
+  SignatureValidationInfoPrivate* priv = new SignatureValidationInfoPrivate(CertificateInfo(certPriv));
   switch (si->getSignatureValStatus()) {
     case SIGNATURE_VALID:
       priv->signature_status = SignatureValidationInfo::SignatureValid;
@@ -669,6 +961,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   priv->signer_name = si->getSignerName();
   priv->signer_subject_dn = si->getSubjectDN();
   priv->hash_algorithm = si->getHashAlgorithm();
+  priv->location = si->getLocation();
+  priv->reason = si->getReason();
 
   priv->signing_time = si->getSigningTime();
   const std::vector<Goffset> ranges = fws->getSignedRangeBounds();
@@ -682,7 +976,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   GooString* checkedSignature = fws->getCheckedSignature(&priv->docLength);
   if (priv->range_bounds.size() == 4 && checkedSignature)
   {
-    priv->signature = QByteArray::fromHex(checkedSignature->getCString());
+    priv->signature = QByteArray::fromHex(checkedSignature->c_str());
   }
   delete checkedSignature;
 

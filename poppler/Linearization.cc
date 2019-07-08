@@ -7,6 +7,7 @@
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright 2015 Jason Crain <jason@aquaticape.us>
 // Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 
@@ -23,9 +24,9 @@ Linearization::Linearization (BaseStream *str)
   Parser *parser;
 
   str->reset();
-  parser = new Parser(NULL,
-      new Lexer(NULL, str->makeSubStream(str->getStart(), gFalse, 0, Object(objNull))),
-      gFalse);
+  parser = new Parser(nullptr,
+      str->makeSubStream(str->getStart(), false, 0, Object(objNull)),
+      false);
   Object obj1 = parser->getObj();
   Object obj2 = parser->getObj();
   Object obj3 = parser->getObj();
@@ -43,12 +44,12 @@ Linearization:: ~Linearization()
 {
 }
 
-Guint Linearization::getLength()
+unsigned int Linearization::getLength()
 {
   if (!linDict.isDict()) return 0;
 
   int length;
-  if (linDict.getDict()->lookupInt("L", NULL, &length) &&
+  if (linDict.getDict()->lookupInt("L", nullptr, &length) &&
       length > 0) {
     return length;
   } else {
@@ -57,7 +58,7 @@ Guint Linearization::getLength()
   }
 }
 
-Guint Linearization::getHintsOffset()
+unsigned int Linearization::getHintsOffset()
 {
   int hintsOffset;
 
@@ -76,7 +77,7 @@ Guint Linearization::getHintsOffset()
   return hintsOffset;
 }
 
-Guint Linearization::getHintsLength()
+unsigned int Linearization::getHintsLength()
 {
   int hintsLength;
 
@@ -95,7 +96,7 @@ Guint Linearization::getHintsLength()
   return hintsLength;
 }
 
-Guint Linearization::getHintsOffset2()
+unsigned int Linearization::getHintsOffset2()
 {
   int hintsOffset2 = 0; // default to 0
 
@@ -115,7 +116,7 @@ Guint Linearization::getHintsOffset2()
   return hintsOffset2;
 }
 
-Guint Linearization::getHintsLength2()
+unsigned int Linearization::getHintsLength2()
 {
   int hintsLength2 = 0; // default to 0
 
@@ -139,7 +140,7 @@ int Linearization::getObjectNumberFirst()
 {
   int objectNumberFirst = 0;
   if (linDict.isDict() &&
-      linDict.getDict()->lookupInt("O", NULL, &objectNumberFirst) &&
+      linDict.getDict()->lookupInt("O", nullptr, &objectNumberFirst) &&
       objectNumberFirst > 0) {
     return objectNumberFirst;
   } else {
@@ -148,11 +149,11 @@ int Linearization::getObjectNumberFirst()
   }
 }
 
-Guint Linearization::getEndFirst()
+unsigned int Linearization::getEndFirst()
 {
   int pageEndFirst = 0;
   if (linDict.isDict() &&
-      linDict.getDict()->lookupInt("E", NULL, &pageEndFirst) &&
+      linDict.getDict()->lookupInt("E", nullptr, &pageEndFirst) &&
       pageEndFirst > 0) {
     return pageEndFirst;
   } else {
@@ -165,7 +166,7 @@ int Linearization::getNumPages()
 {
   int numPages = 0;
   if (linDict.isDict() &&
-      linDict.getDict()->lookupInt("N", NULL, &numPages) &&
+      linDict.getDict()->lookupInt("N", nullptr, &numPages) &&
       numPages > 0) {
     return numPages;
   } else {
@@ -174,11 +175,11 @@ int Linearization::getNumPages()
   }
 }
 
-Guint Linearization::getMainXRefEntriesOffset()
+unsigned int Linearization::getMainXRefEntriesOffset()
 {
   int mainXRefEntriesOffset = 0;
   if (linDict.isDict() &&
-      linDict.getDict()->lookupInt("T", NULL, &mainXRefEntriesOffset) &&
+      linDict.getDict()->lookupInt("T", nullptr, &mainXRefEntriesOffset) &&
       mainXRefEntriesOffset > 0) {
     return mainXRefEntriesOffset;
   } else {
@@ -192,7 +193,7 @@ int Linearization::getPageFirst()
   int pageFirst = 0; // Optional, defaults to 0.
 
   if (linDict.isDict()) {
-    linDict.getDict()->lookupInt("P", NULL, &pageFirst);
+    linDict.getDict()->lookupInt("P", nullptr, &pageFirst);
   }
 
   if ((pageFirst < 0) || (pageFirst >= getNumPages())) {

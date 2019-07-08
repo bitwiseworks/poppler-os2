@@ -8,20 +8,30 @@
 //
 //========================================================================
 
+
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #ifndef FIXEDPOINT_H
 #define FIXEDPOINT_H
 
 #include "poppler-config.h"
 
-#if USE_FIXEDPOINT
-
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
+#ifdef USE_FIXEDPOINT
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "gtypes.h"
 
 #define fixptShift 16
 #define fixptMaskL ((1 << fixptShift) - 1)
@@ -143,11 +153,11 @@ public:
 
   // Compute *result = x/y; return false if there is an underflow or
   // overflow.
-  static GBool divCheck(FixedPoint x, FixedPoint y, FixedPoint *result);
+  static bool divCheck(FixedPoint x, FixedPoint y, FixedPoint *result);
 
   // Compute abs(m11*m22 - m12*m21) >= epsilon, handling the case
   // where the multiplications overflow.
-  static GBool checkDet(FixedPoint m11, FixedPoint m12,
+  static bool checkDet(FixedPoint m11, FixedPoint m12,
                        FixedPoint m21, FixedPoint m22,
                        FixedPoint epsilon);
 

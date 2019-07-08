@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2012, 2015, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
@@ -25,18 +25,11 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "GooString.h"
 #include "PDFDoc.h"
 #include "Decrypt.h"
 #include "Error.h"
 #include "GlobalParams.h"
-#ifdef ENABLE_PLUGINS
-#  include "XpdfPluginAPI.h"
-#endif
 #include "SecurityHandler.h"
 
 #include <limits.h>
@@ -47,29 +40,17 @@
 
 SecurityHandler *SecurityHandler::make(PDFDoc *docA, Object *encryptDictA) {
   SecurityHandler *secHdlr;
-#ifdef ENABLE_PLUGINS
-  XpdfSecurityHandler *xsh;
-#endif
 
   Object filterObj = encryptDictA->dictLookup("Filter");
   if (filterObj.isName("Standard")) {
     secHdlr = new StandardSecurityHandler(docA, encryptDictA);
   } else if (filterObj.isName()) {
-#ifdef ENABLE_PLUGINS
-    if ((xsh = globalParams->getSecurityHandler(filterObj.getName()))) {
-      secHdlr = new ExternalSecurityHandler(docA, encryptDictA, xsh);
-    } else {
-#endif
-      error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler",
-	    filterObj.getName());
-      secHdlr = NULL;
-#ifdef ENABLE_PLUGINS
-    }
-#endif
+    error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler", filterObj.getName());
+    secHdlr = nullptr;
   } else {
     error(errSyntaxError, -1,
 	  "Missing or invalid 'Filter' entry in encryption dictionary");
-    secHdlr = NULL;
+    secHdlr = nullptr;
   }
   return secHdlr;
 }
@@ -81,16 +62,16 @@ SecurityHandler::SecurityHandler(PDFDoc *docA) {
 SecurityHandler::~SecurityHandler() {
 }
 
-GBool SecurityHandler::checkEncryption(GooString *ownerPassword,
-				       GooString *userPassword) {
+bool SecurityHandler::checkEncryption(const GooString *ownerPassword,
+				       const GooString *userPassword) {
   void *authData;
-  GBool ok;
+  bool ok;
   int i;
 
   if (ownerPassword || userPassword) {
     authData = makeAuthData(ownerPassword, userPassword);
   } else {
-    authData = NULL;
+    authData = nullptr;
   }
   ok = authorize(authData);
   if (authData) {
@@ -137,6 +118,9 @@ public:
     }
   }
 
+  StandardAuthData(const StandardAuthData &) = delete;
+  StandardAuthData& operator=(const StandardAuthData &) = delete;
+
   GooString *ownerPassword;
   GooString *userPassword;
 };
@@ -145,12 +129,12 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 						 Object *encryptDictA):
   SecurityHandler(docA)
 {
-  ok = gFalse;
-  fileID = NULL;
-  ownerKey = NULL;
-  userKey = NULL;
-  ownerEnc = NULL;
-  userEnc = NULL;
+  ok = false;
+  fileID = nullptr;
+  ownerKey = nullptr;
+  userKey = nullptr;
+  ownerEnc = nullptr;
+  userEnc = nullptr;
   fileKeyLength = 0;
 
   Object versionObj = encryptDictA->dictLookup("V");
@@ -193,7 +177,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
       } else {
 	fileKeyLength = lengthObj.getInt() / 8;
       }
-      encryptMetadata = gTrue;
+      encryptMetadata = true;
       //~ this currently only handles a subset of crypt filter functionality
       //~ (in particular, it ignores the EFF entry in encryptDictA, and
       //~ doesn't handle the case where StmF, StrF, and EFF are not all the
@@ -267,7 +251,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	if (fileKeyLength > 16 || fileKeyLength < 0) {
 	  fileKeyLength = 16;
 	}
-	ok = gTrue;
+	ok = true;
       } else if (encVersion == 5 && (encRevision == 5 || encRevision == 6)) {
 	fileID = new GooString(); // unused for V=R=5
 	if (ownerEncObj.isString() && userEncObj.isString()) {
@@ -276,7 +260,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	  if (fileKeyLength > 32 || fileKeyLength < 0) {
 	    fileKeyLength = 32;
 	  }
-	  ok = gTrue;
+	  ok = true;
 	} else {
 	  error(errSyntaxError, -1, "Weird encryption owner/user info");
 	}
@@ -311,123 +295,49 @@ StandardSecurityHandler::~StandardSecurityHandler() {
   }
 }
 
-GBool StandardSecurityHandler::isUnencrypted() {
+bool StandardSecurityHandler::isUnencrypted() {
+  if (!ok) {
+    return true;
+  }
   return encVersion == -1 && encRevision == -1;
 }
 
-void *StandardSecurityHandler::makeAuthData(GooString *ownerPassword,
-					    GooString *userPassword) {
+void *StandardSecurityHandler::makeAuthData(const GooString *ownerPassword,
+					    const GooString *userPassword) {
   return new StandardAuthData(ownerPassword ? ownerPassword->copy()
-			                    : (GooString *)NULL,
+			                    : nullptr,
 			      userPassword ? userPassword->copy()
-			                   : (GooString *)NULL);
+			                   : nullptr);
 }
 
 void *StandardSecurityHandler::getAuthData() {
-  return NULL;
+  return nullptr;
 }
 
 void StandardSecurityHandler::freeAuthData(void *authData) {
   delete (StandardAuthData *)authData;
 }
 
-GBool StandardSecurityHandler::authorize(void *authData) {
+bool StandardSecurityHandler::authorize(void *authData) {
   GooString *ownerPassword, *userPassword;
 
   if (!ok) {
-    return gFalse;
+    return false;
   }
   if (authData) {
     ownerPassword = ((StandardAuthData *)authData)->ownerPassword;
     userPassword = ((StandardAuthData *)authData)->userPassword;
   } else {
-    ownerPassword = NULL;
-    userPassword = NULL;
+    ownerPassword = nullptr;
+    userPassword = nullptr;
   }
   if (!Decrypt::makeFileKey(encVersion, encRevision, fileKeyLength,
 			    ownerKey, userKey, ownerEnc, userEnc,
 			    permFlags, fileID,
 			    ownerPassword, userPassword, fileKey,
 			    encryptMetadata, &ownerPasswordOk)) {
-    return gFalse;
+    return false;
   }
-  return gTrue;
+  return true;
 }
 
-#ifdef ENABLE_PLUGINS
-
-//------------------------------------------------------------------------
-// ExternalSecurityHandler
-//------------------------------------------------------------------------
-
-ExternalSecurityHandler::ExternalSecurityHandler(PDFDoc *docA,
-						 Object *encryptDictA,
-						 XpdfSecurityHandler *xshA):
-  SecurityHandler(docA)
-{
-  encryptDictA->copy(&encryptDict);
-  xsh = xshA;
-  encAlgorithm = cryptRC4; //~ this should be obtained via getKey
-  ok = gFalse;
-
-  if (!(*xsh->newDoc)(xsh->handlerData, (XpdfDoc)docA,
-		      (XpdfObject)encryptDictA, &docData)) {
-    return;
-  }
-
-  ok = gTrue;
-}
-
-ExternalSecurityHandler::~ExternalSecurityHandler() {
-  (*xsh->freeDoc)(xsh->handlerData, docData);
-}
-
-void *ExternalSecurityHandler::makeAuthData(GooString *ownerPassword,
-					    GooString *userPassword) {
-  char *opw, *upw;
-  void *authData;
-
-  opw = ownerPassword ? ownerPassword->getCString() : (char *)NULL;
-  upw = userPassword ? userPassword->getCString() : (char *)NULL;
-  if (!(*xsh->makeAuthData)(xsh->handlerData, docData, opw, upw, &authData)) {
-    return NULL;
-  }
-  return authData;
-}
-
-void *ExternalSecurityHandler::getAuthData() {
-  void *authData;
-
-  if (!(*xsh->getAuthData)(xsh->handlerData, docData, &authData)) {
-    return NULL;
-  }
-  return authData;
-}
-
-void ExternalSecurityHandler::freeAuthData(void *authData) {
-  (*xsh->freeAuthData)(xsh->handlerData, docData, authData);
-}
-
-GBool ExternalSecurityHandler::authorize(void *authData) {
-  char *key;
-  int length;
-
-  if (!ok) {
-    return gFalse;
-  }
-  permFlags = (*xsh->authorize)(xsh->handlerData, docData, authData);
-  if (!(permFlags & xpdfPermissionOpen)) {
-    return gFalse;
-  }
-  if (!(*xsh->getKey)(xsh->handlerData, docData, &key, &length, &encVersion, &encRevision)) {
-    return gFalse;
-  }
-  if ((fileKeyLength = length) > 16) {
-    fileKeyLength = 16;
-  }
-  memcpy(fileKey, key, fileKeyLength);
-  (*xsh->freeKey)(xsh->handlerData, docData, key, length);
-  return gTrue;
-}
-
-#endif // ENABLE_PLUGINS

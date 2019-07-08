@@ -1,10 +1,13 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2016, 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, 2017, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  * Copyright (C) 2017, Tobias C. Berner <tcberner@freebsd.org>
+ * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
+ * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+ * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +34,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QSharedPointer>
 #include "poppler-export.h"
+#include "poppler-annotation.h"
 
 class Page;
 class FormWidget;
@@ -110,9 +114,21 @@ namespace Poppler {
 	bool isReadOnly() const;
 
 	/**
+	  Set whether this form field is read-only.
+	  \since 0.64
+	 */
+	void setReadOnly(bool value);
+
+	/**
 	  Whether this form field is visible.
 	 */
 	bool isVisible() const;
+
+	/**
+	  Set whether this form field is visible.
+	  \since 0.64
+	 */
+	void setVisible(bool value);
 
 	/**
 	  The activation action of this form field.
@@ -139,6 +155,13 @@ namespace Poppler {
 	  * \since 0.53
 	 */
 	Link* additionalAction(AdditionalActionType type) const;
+
+	/**
+	  * Returns a given widget annotation additional action
+	  *
+	  * \since 0.65
+	 */
+	Link* additionalAction(Annotation::AdditionalActionType type) const;
 
     protected:
 	/// \cond PRIVATE
@@ -277,6 +300,16 @@ namespace Poppler {
 	 */
 	bool canBeSpellChecked() const;
 
+	/**
+	  The font size of the text in the form field
+	 */
+	double getFontSize() const;
+
+	/**
+	  Set the font size of the text in the form field (currently only as integer)
+	 */
+	void setFontSize(int fontSize);
+
     private:
 	Q_DISABLE_COPY(FormFieldText)
     };
@@ -372,6 +405,132 @@ namespace Poppler {
     };
 
     /**
+      A helper class to store x509 certificate information.
+
+      \since 0.73
+     */
+    class CertificateInfoPrivate;
+    class POPPLER_QT5_EXPORT CertificateInfo {
+    public:
+
+        /**
+          The algorithm of public key.
+         */
+        enum PublicKeyType
+        {
+            RsaKey,
+            DsaKey,
+            EcKey,
+            OtherKey
+        };
+
+        /**
+          Certificate key usage extensions.
+         */
+        enum KeyUsageExtension
+        {
+            KuDigitalSignature = 0x80,
+            KuNonRepudiation   = 0x40,
+            KuKeyEncipherment  = 0x20,
+            KuDataEncipherment = 0x10,
+            KuKeyAgreement     = 0x08,
+            KuKeyCertSign      = 0x04,
+            KuClrSign          = 0x02,
+            KuEncipherOnly     = 0x01,
+            KuNone             = 0x00
+        };
+        Q_DECLARE_FLAGS(KeyUsageExtensions, KeyUsageExtension)
+
+        /**
+          Predefined keys for elements in an entity's distinguished name.
+         */
+        enum EntityInfoKey
+        {
+          CommonName,
+          DistinguishedName,
+          EmailAddress,
+          Organization,
+        };
+
+        CertificateInfo(CertificateInfoPrivate *priv);
+        ~CertificateInfo();
+
+        /**
+          Returns true if certificate has no contents; otherwise returns false
+         */
+        bool isNull() const;
+
+        /**
+          The certificate version string.
+         */
+        int version() const;
+
+        /**
+          The certificate serial number.
+         */
+        QByteArray serialNumber() const;
+
+        /**
+          Information about the issuer.
+         */
+        QString issuerInfo(EntityInfoKey key) const;
+
+        /**
+          Information about the subject
+         */
+        QString subjectInfo(EntityInfoKey key) const;
+
+        /**
+          The date-time when certificate becomes valid.
+         */
+        QDateTime validityStart() const;
+
+        /**
+          The date-time when certificate expires.
+         */
+        QDateTime validityEnd() const;
+
+        /**
+          The uses allowed for the certificate.
+         */
+        KeyUsageExtensions keyUsageExtensions() const;
+
+        /**
+          The public key value.
+         */
+        QByteArray publicKey() const;
+
+        /**
+          The public key type.
+         */
+        PublicKeyType publicKeyType() const;
+
+        /**
+          The strength of public key in bits.
+         */
+        int publicKeyStrength() const;
+
+        /**
+          Returns true if certificate is self-signed otherwise returns false.
+         */
+        bool isSelfSigned() const;
+
+        /**
+          The DER encoded certificate.
+         */
+        QByteArray certificateData() const;
+
+        CertificateInfo(const CertificateInfo &other);
+        CertificateInfo &operator=(const CertificateInfo &other);
+
+    private:
+        Q_DECLARE_PRIVATE(CertificateInfo)
+
+        QSharedPointer<CertificateInfoPrivate> d_ptr;
+    };
+    Q_DECLARE_OPERATORS_FOR_FLAGS(CertificateInfo::KeyUsageExtensions)
+
+    /**
       A signature validation info helper class.
 
       \since 0.51
@@ -381,7 +540,7 @@ namespace Poppler {
     public:
 
 	/**
-	   The verfication result of the signature.
+	   The verification result of the signature.
 	*/
 	enum SignatureStatus {
 	    SignatureValid,          ///< The signature is cryptographically valid.
@@ -449,7 +608,19 @@ namespace Poppler {
 	QString signerSubjectDN() const;
 
 	/**
-	  The the hash algorithm used for the signature.
+	  Get signing location.
+	  \since 0.68
+	*/
+	QString location() const;
+
+	/**
+	  Get signing reason.
+	  \since 0.68
+	*/
+	QString reason() const;
+
+	/**
+	  The hash algorithm used for the signature.
 	  \since 0.58
 	 */
 	HashAlgorithm hashAlgorithm() const;
@@ -473,10 +644,16 @@ namespace Poppler {
 
 	/**
 	  Checks whether the signature authenticates the total document
-          except for the signature itself.
-          \since 0.58
+	  except for the signature itself.
+	  \since 0.58
 	 */
         bool signsTotalDocument() const;
+
+	/**
+	  The signer certificate info.
+	  \since 0.73
+	*/
+	CertificateInfo certificateInfo() const;
 
 	SignatureValidationInfo(const SignatureValidationInfo &other);
 	SignatureValidationInfo &operator=(const SignatureValidationInfo &other);

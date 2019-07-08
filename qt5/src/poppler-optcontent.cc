@@ -3,8 +3,11 @@
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, 2014, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2015-2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2015-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +44,7 @@ namespace Poppler
   {
     itemsInGroup.reserve(rbarray->getLength());
     for (int i = 0; i < rbarray->getLength(); ++i) {
-      Object ref = rbarray->getNF( i );
+      const Object &ref = rbarray->getNF( i );
       if ( ! ref.isRef() ) {
 	qDebug() << "expected ref, but got:" << ref.getType();
       }
@@ -77,7 +80,7 @@ namespace Poppler
   OptContentItem::OptContentItem( OptionalContentGroup *group )
   {
     m_group = group;
-    m_parent = 0;
+    m_parent = nullptr;
     m_name = UnicodeParsedString( group->getName() );
     if ( group->getState() == OptionalContentGroup::On ) {
       m_state = OptContentItem::On;
@@ -90,16 +93,16 @@ namespace Poppler
 
   OptContentItem::OptContentItem( const QString &label )
   {
-    m_parent = 0;
+    m_parent = nullptr;
     m_name = label;
-    m_group = 0;
+    m_group = nullptr;
     m_state = OptContentItem::HeadingOnly;
     m_stateBackup = m_state;
     m_enabled = true;
   }
 
   OptContentItem::OptContentItem() :
-    m_parent( 0 ), m_enabled(true)
+    m_parent( nullptr ), m_enabled(true)
   {
   }
 
@@ -164,15 +167,14 @@ namespace Poppler
     : q(qq)
   {
     m_rootNode = new OptContentItem();
-    GooList *ocgs = optContent->getOCGs();
+    const auto &ocgs = optContent->getOCGs();
 
-    for (int i = 0; i < ocgs->getLength(); ++i) {
-      OptionalContentGroup *ocg = static_cast<OptionalContentGroup*>(ocgs->get(i));
-      OptContentItem *node = new OptContentItem( ocg );
-      m_optContentItems.insert( QString::number(ocg->getRef().num), node);
+    for (const auto& ocg : ocgs) {
+      OptContentItem *node = new OptContentItem( ocg.second.get() );
+      m_optContentItems.insert( QString::number( ocg.first.num ), node );
     }
 
-    if ( optContent->getOrderArray() == 0 ) {
+    if ( optContent->getOrderArray() == nullptr ) {
       // no Order array, so drop them all at the top level
       QMapIterator<QString, OptContentItem*> i(m_optContentItems);
       while ( i.hasNext() ) {
@@ -200,9 +202,9 @@ namespace Poppler
     for (int i = 0; i < orderArray->getLength(); ++i) {
       Object orderItem = orderArray->get(i);
       if ( orderItem.isDict() ) {
-	Object item = orderArray->getNF(i);
+	const Object &item = orderArray->getNF(i);
 	if (item.isRef() ) {
-          OptContentItem *ocItem = m_optContentItems.value(QString::number(item.getRefNum()), 0);
+          OptContentItem *ocItem = m_optContentItems.value(QString::number(item.getRefNum()));
 	  if (ocItem) {
 	    addChild( parentNode, ocItem );
 	    lastItem = ocItem;
@@ -213,7 +215,7 @@ namespace Poppler
       } else if ( (orderItem.isArray()) && (orderItem.arrayGetLength() > 0) ) {
 	parseOrderArray(lastItem, orderItem.getArray());
       } else if ( orderItem.isString() ) {
-	GooString *label = orderItem.getString();
+	const GooString *label = orderItem.getString();
 	OptContentItem *header = new OptContentItem ( UnicodeParsedString ( label ) );
 	m_headerOptContentItems.append( header );
 	addChild( parentNode, header );
@@ -397,13 +399,13 @@ namespace Poppler
 
     QSet<OptContentItem *> changedItems;
 
-    GooList *statesList = popplerLinkOCGState->getStateList();
-    for (int i = 0; i < statesList->getLength(); ++i) {
-        ::LinkOCGState::StateList *stateList = (::LinkOCGState::StateList*)statesList->get(i);
+    const std::vector<::LinkOCGState::StateList*> *statesList = popplerLinkOCGState->getStateList();
+    for (std::size_t i = 0; i < statesList->size(); ++i) {
+        ::LinkOCGState::StateList *stateList = (*statesList)[i];
 
-        GooList *refsList = stateList->list;
-        for (int j = 0; j < refsList->getLength(); ++j) {
-            Ref *ref = (Ref *)refsList->get(j);
+        std::vector<Ref*> *refsList = stateList->list;
+        for (std::size_t j = 0; j < refsList->size(); ++j) {
+            Ref *ref = (*refsList)[j];
             OptContentItem *item = d->itemFromRef(QString::number(ref->num));
 
             if (stateList->st == ::LinkOCGState::On) {
@@ -441,7 +443,7 @@ namespace Poppler
 
   OptContentItem* OptContentModelPrivate::itemFromRef( const QString &ref ) const
   {
-    return m_optContentItems.value(ref, 0);
+    return m_optContentItems.value(ref);
   }
 
   OptContentItem* OptContentModelPrivate::nodeFromIndex(const QModelIndex &index, bool canBeNull) const
@@ -449,9 +451,8 @@ namespace Poppler
     if (index.isValid()) {
       return static_cast<OptContentItem *>(index.internalPointer());
     } else {
-      return canBeNull ? 0 : m_rootNode;
+      return canBeNull ? nullptr : m_rootNode;
     }
   }
 }
 
-#include "poppler-optcontent.moc"

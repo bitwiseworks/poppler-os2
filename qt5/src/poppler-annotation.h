@@ -1,5 +1,5 @@
 /* poppler-annotation.h: qt interface to poppler
- * Copyright (C) 2006-2008, 2012, 2013 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2008, 2012, 2013, 2018 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
@@ -7,6 +7,7 @@
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
+ * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -356,7 +357,7 @@ class POPPLER_QT5_EXPORT Annotation
         QRectF geometry() const; // no default
         void setGeometry( const QRectF &geom );
 
-        // window contens/override properties
+        // window contents/override properties
         QString title() const;   // '' text in the titlebar (overrides author)
         void setTitle( const QString &title );
         QString summary() const; // '' short description (displayed if not empty)
@@ -484,6 +485,10 @@ class POPPLER_QT5_EXPORT TextAnnotation : public Annotation
 
     QFont textFont() const;
     void setTextFont( const QFont &font );
+    /// \since 0.69
+    QColor textColor() const;
+    /// \since 0.69
+    void setTextColor( const QColor &color );
 
     int inplaceAlign() const;
     void setInplaceAlign( int align );
@@ -604,7 +609,7 @@ class POPPLER_QT5_EXPORT GeomAnnotation : public Annotation
 /**
  * \short Text highlight annotation.
  *
- * The higlight annotation represents some areas of text being "highlighted".
+ * The highlight annotation represents some areas of text being "highlighted".
  */
 class POPPLER_QT5_EXPORT HighlightAnnotation : public Annotation
 {
@@ -765,6 +770,7 @@ class POPPLER_QT5_EXPORT LinkAnnotation : public Annotation
     void setLinkHighlightMode( HighlightMode mode );
 
     QPointF linkRegionPoint( int id ) const;
+    // TODO Next ABI break, remove ref from point
     void setLinkRegionPoint( int id, const QPointF &point );
 
   private:
