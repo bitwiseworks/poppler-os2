@@ -3,6 +3,7 @@
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,8 +107,8 @@ GooString* detail::ustring_to_unicode_GooString(const ustring &str)
     const size_t len = str.size() * 2 + 2;
     const ustring::value_type *me = str.data();
     byte_array ba(len);
-    ba[0] = 0xfe;
-    ba[1] = 0xff;
+    ba[0] = (char)0xfe;
+    ba[1] = (char)0xff;
     for (size_t i = 0; i < str.size(); ++i, ++me) {
         ba[i * 2 + 2] = ((*me >> 8) & 0xff);
         ba[i * 2 + 3] = (*me & 0xff);
