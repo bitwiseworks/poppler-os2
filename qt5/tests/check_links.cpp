@@ -13,12 +13,12 @@ private slots:
     void checkDests_xr02();
 };
 
-bool isDestinationValid_pageNumber( const Poppler::LinkDestination *dest, const Poppler::Document *doc )
+static bool isDestinationValid_pageNumber( const Poppler::LinkDestination *dest, const Poppler::Document *doc )
 {
     return dest->pageNumber() > 0 && dest->pageNumber() <= doc->numPages();
 }
 
-bool isDestinationValid_name( const Poppler::LinkDestination *dest )
+static bool isDestinationValid_name( const Poppler::LinkDestination *dest )
 {
     return !dest->destinationName().isEmpty();
 }
@@ -93,6 +93,6 @@ void TestLinks::checkDests_xr02()
     delete doc;
 }
 
-QTEST_MAIN(TestLinks)
+QTEST_GUILESS_MAIN(TestLinks)
 
 #include "check_links.moc"

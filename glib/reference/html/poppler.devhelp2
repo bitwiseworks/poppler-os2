@@ -4,7 +4,7 @@
     <sub name="Poppler" link="ch01.html">
       <sub name="PopplerDocument" link="PopplerDocument.html"/>
       <sub name="PopplerPage" link="PopplerPage.html"/>
-      <sub name="PopplerAction" link="poppler-PopplerAction.html"/>
+      <sub name="PopplerAction" link="PopplerAction.html"/>
       <sub name="PopplerAttachment" link="PopplerAttachment.html"/>
       <sub name="PoppplerFormField" link="PopplerFormField.html"/>
       <sub name="PopplerAnnot" link="PopplerAnnot.html"/>
@@ -12,10 +12,10 @@
       <sub name="PopplerMedia" link="PopplerMedia.html"/>
       <sub name="PopplerMovie" link="PopplerMovie.html"/>
       <sub name="PopplerStructureElement" link="PopplerStructureElement.html"/>
-      <sub name="PopplerColor" link="poppler-PopplerColor.html"/>
+      <sub name="PopplerColor" link="PopplerColor.html"/>
       <sub name="Error handling" link="poppler-Error-handling.html"/>
       <sub name="PDF Utility functions" link="poppler-PDF-Utility-functions.html"/>
-      <sub name="Version and Features Information" link="poppler-Version-and-Features-Information.html"/>
+      <sub name="poppler-features" link="poppler-poppler-features.html"/>
     </sub>
     <sub name="Index of all symbols" link="api-index-full.html"/>
     <sub name="Index of deprecated symbols" link="api-index-deprecated.html"/>
@@ -102,14 +102,14 @@
     <keyword type="function" name="poppler_ps_file_set_paper_size ()" link="PopplerDocument.html#poppler-ps-file-set-paper-size"/>
     <keyword type="function" name="poppler_ps_file_set_duplex ()" link="PopplerDocument.html#poppler-ps-file-set-duplex"/>
     <keyword type="struct" name="PopplerDocument" link="PopplerDocument.html#PopplerDocument-struct"/>
-    <keyword type="struct" name="PopplerIndexIter" link="PopplerDocument.html#PopplerIndexIter"/>
-    <keyword type="struct" name="PopplerFontsIter" link="PopplerDocument.html#PopplerFontsIter"/>
-    <keyword type="struct" name="PopplerLayersIter" link="PopplerDocument.html#PopplerLayersIter"/>
+    <keyword type="struct" name="PopplerIndexIter" link="PopplerDocument.html#PopplerIndexIter-struct"/>
+    <keyword type="struct" name="PopplerFontsIter" link="PopplerDocument.html#PopplerFontsIter-struct"/>
+    <keyword type="struct" name="PopplerLayersIter" link="PopplerDocument.html#PopplerLayersIter-struct"/>
     <keyword type="enum" name="enum PopplerPageLayout" link="PopplerDocument.html#PopplerPageLayout"/>
     <keyword type="enum" name="enum PopplerPageMode" link="PopplerDocument.html#PopplerPageMode"/>
-    <keyword type="struct" name="PopplerFontInfo" link="PopplerDocument.html#PopplerFontInfo"/>
+    <keyword type="struct" name="PopplerFontInfo" link="PopplerDocument.html#PopplerFontInfo-struct"/>
     <keyword type="enum" name="enum PopplerFontType" link="PopplerDocument.html#PopplerFontType"/>
-    <keyword type="struct" name="PopplerPSFile" link="PopplerDocument.html#PopplerPSFile"/>
+    <keyword type="struct" name="PopplerPSFile" link="PopplerDocument.html#PopplerPSFile-struct"/>
     <keyword type="enum" name="enum PopplerViewerPreferences" link="PopplerDocument.html#PopplerViewerPreferences"/>
     <keyword type="enum" name="enum PopplerPermissions" link="PopplerDocument.html#PopplerPermissions"/>
     <keyword type="property" name="The “author” property" link="PopplerDocument.html#PopplerDocument--author"/>
@@ -188,41 +188,41 @@
     <keyword type="function" name="poppler_text_attributes_copy ()" link="PopplerPage.html#poppler-text-attributes-copy" since="0.18"/>
     <keyword type="function" name="poppler_text_attributes_free ()" link="PopplerPage.html#poppler-text-attributes-free" since="0.18"/>
     <keyword type="struct" name="PopplerPage" link="PopplerPage.html#PopplerPage-struct"/>
-    <keyword type="struct" name="PopplerRectangle" link="PopplerPage.html#PopplerRectangle"/>
-    <keyword type="struct" name="PopplerPageTransition" link="PopplerPage.html#PopplerPageTransition"/>
-    <keyword type="struct" name="PopplerLinkMapping" link="PopplerPage.html#PopplerLinkMapping"/>
-    <keyword type="struct" name="PopplerImageMapping" link="PopplerPage.html#PopplerImageMapping"/>
-    <keyword type="struct" name="PopplerFormFieldMapping" link="PopplerPage.html#PopplerFormFieldMapping"/>
-    <keyword type="struct" name="PopplerAnnotMapping" link="PopplerPage.html#PopplerAnnotMapping"/>
+    <keyword type="struct" name="PopplerRectangle" link="PopplerPage.html#PopplerRectangle-struct"/>
+    <keyword type="struct" name="PopplerPageTransition" link="PopplerPage.html#PopplerPageTransition-struct"/>
+    <keyword type="struct" name="PopplerLinkMapping" link="PopplerPage.html#PopplerLinkMapping-struct"/>
+    <keyword type="struct" name="PopplerImageMapping" link="PopplerPage.html#PopplerImageMapping-struct"/>
+    <keyword type="struct" name="PopplerFormFieldMapping" link="PopplerPage.html#PopplerFormFieldMapping-struct"/>
+    <keyword type="struct" name="PopplerAnnotMapping" link="PopplerPage.html#PopplerAnnotMapping-struct"/>
     <keyword type="enum" name="enum PopplerPageTransitionType" link="PopplerPage.html#PopplerPageTransitionType"/>
     <keyword type="enum" name="enum PopplerPageTransitionAlignment" link="PopplerPage.html#PopplerPageTransitionAlignment"/>
     <keyword type="enum" name="enum PopplerPageTransitionDirection" link="PopplerPage.html#PopplerPageTransitionDirection"/>
     <keyword type="enum" name="enum PopplerSelectionStyle" link="PopplerPage.html#PopplerSelectionStyle"/>
-    <keyword type="struct" name="PopplerTextAttributes" link="PopplerPage.html#PopplerTextAttributes" since="0.18"/>
+    <keyword type="struct" name="PopplerTextAttributes" link="PopplerPage.html#PopplerTextAttributes-struct"/>
     <keyword type="enum" name="enum PopplerPrintFlags" link="PopplerPage.html#PopplerPrintFlags" since="0.16"/>
     <keyword type="enum" name="enum PopplerFindFlags" link="PopplerPage.html#PopplerFindFlags" since="0.22"/>
     <keyword type="property" name="The “label” property" link="PopplerPage.html#PopplerPage--label"/>
-    <keyword type="function" name="poppler_action_copy ()" link="poppler-PopplerAction.html#poppler-action-copy"/>
-    <keyword type="function" name="poppler_action_free ()" link="poppler-PopplerAction.html#poppler-action-free"/>
-    <keyword type="function" name="poppler_dest_copy ()" link="poppler-PopplerAction.html#poppler-dest-copy"/>
-    <keyword type="function" name="poppler_dest_free ()" link="poppler-PopplerAction.html#poppler-dest-free"/>
-    <keyword type="union" name="PopplerAction" link="poppler-PopplerAction.html#PopplerAction"/>
-    <keyword type="struct" name="PopplerDest" link="poppler-PopplerAction.html#PopplerDest"/>
-    <keyword type="struct" name="struct PopplerActionAny" link="poppler-PopplerAction.html#PopplerActionAny"/>
-    <keyword type="struct" name="struct PopplerActionGotoDest" link="poppler-PopplerAction.html#PopplerActionGotoDest"/>
-    <keyword type="struct" name="struct PopplerActionGotoRemote" link="poppler-PopplerAction.html#PopplerActionGotoRemote"/>
-    <keyword type="struct" name="struct PopplerActionLaunch" link="poppler-PopplerAction.html#PopplerActionLaunch"/>
-    <keyword type="struct" name="struct PopplerActionUri" link="poppler-PopplerAction.html#PopplerActionUri"/>
-    <keyword type="struct" name="struct PopplerActionNamed" link="poppler-PopplerAction.html#PopplerActionNamed"/>
-    <keyword type="struct" name="struct PopplerActionMovie" link="poppler-PopplerAction.html#PopplerActionMovie"/>
-    <keyword type="struct" name="struct PopplerActionRendition" link="poppler-PopplerAction.html#PopplerActionRendition"/>
-    <keyword type="struct" name="struct PopplerActionOCGState" link="poppler-PopplerAction.html#PopplerActionOCGState"/>
-    <keyword type="struct" name="struct PopplerActionJavascript" link="poppler-PopplerAction.html#PopplerActionJavascript"/>
-    <keyword type="enum" name="enum PopplerActionType" link="poppler-PopplerAction.html#PopplerActionType"/>
-    <keyword type="enum" name="enum PopplerDestType" link="poppler-PopplerAction.html#PopplerDestType"/>
-    <keyword type="enum" name="enum PopplerActionMovieOperation" link="poppler-PopplerAction.html#PopplerActionMovieOperation" since="0.14"/>
-    <keyword type="struct" name="PopplerActionLayer" link="poppler-PopplerAction.html#PopplerActionLayer"/>
-    <keyword type="enum" name="enum PopplerActionLayerAction" link="poppler-PopplerAction.html#PopplerActionLayerAction" since="0.14"/>
+    <keyword type="function" name="poppler_action_copy ()" link="PopplerAction.html#poppler-action-copy"/>
+    <keyword type="function" name="poppler_action_free ()" link="PopplerAction.html#poppler-action-free"/>
+    <keyword type="function" name="poppler_dest_copy ()" link="PopplerAction.html#poppler-dest-copy"/>
+    <keyword type="function" name="poppler_dest_free ()" link="PopplerAction.html#poppler-dest-free"/>
+    <keyword type="union" name="PopplerAction" link="PopplerAction.html#PopplerAction-union"/>
+    <keyword type="struct" name="PopplerDest" link="PopplerAction.html#PopplerDest-struct"/>
+    <keyword type="struct" name="struct PopplerActionAny" link="PopplerAction.html#PopplerActionAny"/>
+    <keyword type="struct" name="struct PopplerActionGotoDest" link="PopplerAction.html#PopplerActionGotoDest"/>
+    <keyword type="struct" name="struct PopplerActionGotoRemote" link="PopplerAction.html#PopplerActionGotoRemote"/>
+    <keyword type="struct" name="struct PopplerActionLaunch" link="PopplerAction.html#PopplerActionLaunch"/>
+    <keyword type="struct" name="struct PopplerActionUri" link="PopplerAction.html#PopplerActionUri"/>
+    <keyword type="struct" name="struct PopplerActionNamed" link="PopplerAction.html#PopplerActionNamed"/>
+    <keyword type="struct" name="struct PopplerActionMovie" link="PopplerAction.html#PopplerActionMovie"/>
+    <keyword type="struct" name="struct PopplerActionRendition" link="PopplerAction.html#PopplerActionRendition"/>
+    <keyword type="struct" name="struct PopplerActionOCGState" link="PopplerAction.html#PopplerActionOCGState"/>
+    <keyword type="struct" name="struct PopplerActionJavascript" link="PopplerAction.html#PopplerActionJavascript"/>
+    <keyword type="enum" name="enum PopplerActionType" link="PopplerAction.html#PopplerActionType"/>
+    <keyword type="enum" name="enum PopplerDestType" link="PopplerAction.html#PopplerDestType"/>
+    <keyword type="enum" name="enum PopplerActionMovieOperation" link="PopplerAction.html#PopplerActionMovieOperation" since="0.14"/>
+    <keyword type="struct" name="PopplerActionLayer" link="PopplerAction.html#PopplerActionLayer"/>
+    <keyword type="enum" name="enum PopplerActionLayerAction" link="PopplerAction.html#PopplerActionLayerAction" since="0.14"/>
     <keyword type="function" name="PopplerAttachmentSaveFunc ()" link="PopplerAttachment.html#PopplerAttachmentSaveFunc"/>
     <keyword type="function" name="poppler_attachment_save ()" link="PopplerAttachment.html#poppler-attachment-save"/>
     <keyword type="function" name="poppler_attachment_save_to_callback ()" link="PopplerAttachment.html#poppler-attachment-save-to-callback"/>
@@ -327,25 +327,25 @@
     <keyword type="function" name="poppler_quadrilateral_copy ()" link="PopplerAnnot.html#poppler-quadrilateral-copy" since="0.26"/>
     <keyword type="function" name="poppler_quadrilateral_free ()" link="PopplerAnnot.html#poppler-quadrilateral-free" since="0.26"/>
     <keyword type="struct" name="PopplerAnnot" link="PopplerAnnot.html#PopplerAnnot-struct"/>
-    <keyword type="struct" name="PopplerAnnotMarkup" link="PopplerAnnot.html#PopplerAnnotMarkup"/>
-    <keyword type="struct" name="PopplerAnnotCircle" link="PopplerAnnot.html#PopplerAnnotCircle"/>
-    <keyword type="struct" name="PopplerAnnotText" link="PopplerAnnot.html#PopplerAnnotText"/>
-    <keyword type="struct" name="PopplerAnnotTextMarkup" link="PopplerAnnot.html#PopplerAnnotTextMarkup"/>
-    <keyword type="struct" name="PopplerAnnotFreeText" link="PopplerAnnot.html#PopplerAnnotFreeText"/>
-    <keyword type="struct" name="PopplerAnnotFileAttachment" link="PopplerAnnot.html#PopplerAnnotFileAttachment"/>
-    <keyword type="struct" name="PopplerAnnotLine" link="PopplerAnnot.html#PopplerAnnotLine"/>
-    <keyword type="struct" name="PopplerAnnotMovie" link="PopplerAnnot.html#PopplerAnnotMovie"/>
-    <keyword type="struct" name="PopplerAnnotScreen" link="PopplerAnnot.html#PopplerAnnotScreen"/>
+    <keyword type="struct" name="PopplerAnnotMarkup" link="PopplerAnnot.html#PopplerAnnotMarkup-struct"/>
+    <keyword type="struct" name="PopplerAnnotCircle" link="PopplerAnnot.html#PopplerAnnotCircle-struct"/>
+    <keyword type="struct" name="PopplerAnnotText" link="PopplerAnnot.html#PopplerAnnotText-struct"/>
+    <keyword type="struct" name="PopplerAnnotTextMarkup" link="PopplerAnnot.html#PopplerAnnotTextMarkup-struct"/>
+    <keyword type="struct" name="PopplerAnnotFreeText" link="PopplerAnnot.html#PopplerAnnotFreeText-struct"/>
+    <keyword type="struct" name="PopplerAnnotFileAttachment" link="PopplerAnnot.html#PopplerAnnotFileAttachment-struct"/>
+    <keyword type="struct" name="PopplerAnnotLine" link="PopplerAnnot.html#PopplerAnnotLine-struct"/>
+    <keyword type="struct" name="PopplerAnnotMovie" link="PopplerAnnot.html#PopplerAnnotMovie-struct"/>
+    <keyword type="struct" name="PopplerAnnotScreen" link="PopplerAnnot.html#PopplerAnnotScreen-struct"/>
     <keyword type="enum" name="enum PopplerAnnotType" link="PopplerAnnot.html#PopplerAnnotType"/>
     <keyword type="enum" name="enum PopplerAnnotFlag" link="PopplerAnnot.html#PopplerAnnotFlag"/>
     <keyword type="enum" name="enum PopplerAnnotExternalDataType" link="PopplerAnnot.html#PopplerAnnotExternalDataType"/>
     <keyword type="enum" name="enum PopplerAnnotMarkupReplyType" link="PopplerAnnot.html#PopplerAnnotMarkupReplyType"/>
     <keyword type="enum" name="enum PopplerAnnotTextState" link="PopplerAnnot.html#PopplerAnnotTextState"/>
-    <keyword type="struct" name="PopplerAnnotCalloutLine" link="PopplerAnnot.html#PopplerAnnotCalloutLine"/>
+    <keyword type="struct" name="PopplerAnnotCalloutLine" link="PopplerAnnot.html#PopplerAnnotCalloutLine-struct"/>
     <keyword type="enum" name="enum PopplerAnnotFreeTextQuadding" link="PopplerAnnot.html#PopplerAnnotFreeTextQuadding"/>
-    <keyword type="struct" name="PopplerAnnotSquare" link="PopplerAnnot.html#PopplerAnnotSquare"/>
-    <keyword type="struct" name="PopplerPoint" link="PopplerAnnot.html#PopplerPoint"/>
-    <keyword type="struct" name="PopplerQuadrilateral" link="PopplerAnnot.html#PopplerQuadrilateral" since="0.26"/>
+    <keyword type="struct" name="PopplerAnnotSquare" link="PopplerAnnot.html#PopplerAnnotSquare-struct"/>
+    <keyword type="struct" name="PopplerPoint" link="PopplerAnnot.html#PopplerPoint-struct"/>
+    <keyword type="struct" name="PopplerQuadrilateral" link="PopplerAnnot.html#PopplerQuadrilateral-struct"/>
     <keyword type="macro" name="POPPLER_ANNOT_TEXT_ICON_NOTE" link="PopplerAnnot.html#POPPLER-ANNOT-TEXT-ICON-NOTE:CAPS"/>
     <keyword type="macro" name="POPPLER_ANNOT_TEXT_ICON_COMMENT" link="PopplerAnnot.html#POPPLER-ANNOT-TEXT-ICON-COMMENT:CAPS"/>
     <keyword type="macro" name="POPPLER_ANNOT_TEXT_ICON_KEY" link="PopplerAnnot.html#POPPLER-ANNOT-TEXT-ICON-KEY:CAPS"/>
@@ -462,22 +462,17 @@
     <keyword type="enum" name="enum PopplerStructureTableScope" link="PopplerStructureElement.html#PopplerStructureTableScope"/>
     <keyword type="enum" name="enum PopplerStructureFormRole" link="PopplerStructureElement.html#PopplerStructureFormRole"/>
     <keyword type="enum" name="enum PopplerStructureFormState" link="PopplerStructureElement.html#PopplerStructureFormState"/>
-    <keyword type="struct" name="PopplerTextSpan" link="PopplerStructureElement.html#PopplerTextSpan"/>
-    <keyword type="function" name="poppler_color_new ()" link="poppler-PopplerColor.html#poppler-color-new"/>
-    <keyword type="function" name="poppler_color_copy ()" link="poppler-PopplerColor.html#poppler-color-copy"/>
-    <keyword type="function" name="poppler_color_free ()" link="poppler-PopplerColor.html#poppler-color-free"/>
-    <keyword type="struct" name="PopplerColor" link="poppler-PopplerColor.html#PopplerColor"/>
+    <keyword type="struct" name="PopplerTextSpan" link="PopplerStructureElement.html#PopplerTextSpan-struct"/>
+    <keyword type="function" name="poppler_color_new ()" link="PopplerColor.html#poppler-color-new"/>
+    <keyword type="function" name="poppler_color_copy ()" link="PopplerColor.html#poppler-color-copy"/>
+    <keyword type="function" name="poppler_color_free ()" link="PopplerColor.html#poppler-color-free"/>
+    <keyword type="struct" name="PopplerColor" link="PopplerColor.html#PopplerColor-struct"/>
     <keyword type="macro" name="POPPLER_ERROR" link="poppler-Error-handling.html#POPPLER-ERROR:CAPS"/>
     <keyword type="enum" name="enum PopplerError" link="poppler-Error-handling.html#PopplerError"/>
     <keyword type="function" name="poppler_date_parse ()" link="poppler-PDF-Utility-functions.html#poppler-date-parse" since="0.12"/>
-    <keyword type="macro" name="POPPLER_CHECK_VERSION()" link="poppler-Version-and-Features-Information.html#POPPLER-CHECK-VERSION:CAPS" since="0.12"/>
-    <keyword type="function" name="poppler_get_version ()" link="poppler-Version-and-Features-Information.html#poppler-get-version"/>
-    <keyword type="function" name="poppler_get_backend ()" link="poppler-Version-and-Features-Information.html#poppler-get-backend"/>
-    <keyword type="macro" name="POPPLER_HAS_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-HAS-CAIRO:CAPS"/>
-    <keyword type="macro" name="POPPLER_MAJOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MAJOR-VERSION:CAPS" since="0.12"/>
-    <keyword type="macro" name="POPPLER_MINOR_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MINOR-VERSION:CAPS" since="0.12"/>
-    <keyword type="macro" name="POPPLER_MICRO_VERSION" link="poppler-Version-and-Features-Information.html#POPPLER-MICRO-VERSION:CAPS" since="0.12"/>
-    <keyword type="enum" name="enum PopplerBackend" link="poppler-Version-and-Features-Information.html#PopplerBackend"/>
+    <keyword type="function" name="poppler_get_version ()" link="poppler-poppler-features.html#poppler-get-version"/>
+    <keyword type="function" name="poppler_get_backend ()" link="poppler-poppler-features.html#poppler-get-backend"/>
+    <keyword type="enum" name="enum PopplerBackend" link="poppler-poppler-features.html#PopplerBackend"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_UNSET" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-UNSET:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_SINGLE_PAGE" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-SINGLE-PAGE:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_LAYOUT_ONE_COLUMN" link="PopplerDocument.html#POPPLER-PAGE-LAYOUT-ONE-COLUMN:CAPS"/>
@@ -548,34 +543,34 @@
     <keyword type="constant" name="POPPLER_FIND_CASE_SENSITIVE" link="PopplerPage.html#POPPLER-FIND-CASE-SENSITIVE:CAPS"/>
     <keyword type="constant" name="POPPLER_FIND_BACKWARDS" link="PopplerPage.html#POPPLER-FIND-BACKWARDS:CAPS"/>
     <keyword type="constant" name="POPPLER_FIND_WHOLE_WORDS_ONLY" link="PopplerPage.html#POPPLER-FIND-WHOLE-WORDS-ONLY:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_UNKNOWN" link="poppler-PopplerAction.html#POPPLER-ACTION-UNKNOWN:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_NONE" link="poppler-PopplerAction.html#POPPLER-ACTION-NONE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_GOTO_DEST" link="poppler-PopplerAction.html#POPPLER-ACTION-GOTO-DEST:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_GOTO_REMOTE" link="poppler-PopplerAction.html#POPPLER-ACTION-GOTO-REMOTE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_LAUNCH" link="poppler-PopplerAction.html#POPPLER-ACTION-LAUNCH:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_URI" link="poppler-PopplerAction.html#POPPLER-ACTION-URI:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_NAMED" link="poppler-PopplerAction.html#POPPLER-ACTION-NAMED:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_MOVIE" link="poppler-PopplerAction.html#POPPLER-ACTION-MOVIE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_RENDITION" link="poppler-PopplerAction.html#POPPLER-ACTION-RENDITION:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_OCG_STATE" link="poppler-PopplerAction.html#POPPLER-ACTION-OCG-STATE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_JAVASCRIPT" link="poppler-PopplerAction.html#POPPLER-ACTION-JAVASCRIPT:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_UNKNOWN" link="poppler-PopplerAction.html#POPPLER-DEST-UNKNOWN:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_XYZ" link="poppler-PopplerAction.html#POPPLER-DEST-XYZ:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FIT" link="poppler-PopplerAction.html#POPPLER-DEST-FIT:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FITH" link="poppler-PopplerAction.html#POPPLER-DEST-FITH:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FITV" link="poppler-PopplerAction.html#POPPLER-DEST-FITV:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FITR" link="poppler-PopplerAction.html#POPPLER-DEST-FITR:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FITB" link="poppler-PopplerAction.html#POPPLER-DEST-FITB:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FITBH" link="poppler-PopplerAction.html#POPPLER-DEST-FITBH:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_FITBV" link="poppler-PopplerAction.html#POPPLER-DEST-FITBV:CAPS"/>
-    <keyword type="constant" name="POPPLER_DEST_NAMED" link="poppler-PopplerAction.html#POPPLER-DEST-NAMED:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_MOVIE_PLAY" link="poppler-PopplerAction.html#POPPLER-ACTION-MOVIE-PLAY:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_MOVIE_PAUSE" link="poppler-PopplerAction.html#POPPLER-ACTION-MOVIE-PAUSE:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_MOVIE_RESUME" link="poppler-PopplerAction.html#POPPLER-ACTION-MOVIE-RESUME:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_MOVIE_STOP" link="poppler-PopplerAction.html#POPPLER-ACTION-MOVIE-STOP:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_LAYER_ON" link="poppler-PopplerAction.html#POPPLER-ACTION-LAYER-ON:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_LAYER_OFF" link="poppler-PopplerAction.html#POPPLER-ACTION-LAYER-OFF:CAPS"/>
-    <keyword type="constant" name="POPPLER_ACTION_LAYER_TOGGLE" link="poppler-PopplerAction.html#POPPLER-ACTION-LAYER-TOGGLE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_UNKNOWN" link="PopplerAction.html#POPPLER-ACTION-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_NONE" link="PopplerAction.html#POPPLER-ACTION-NONE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_GOTO_DEST" link="PopplerAction.html#POPPLER-ACTION-GOTO-DEST:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_GOTO_REMOTE" link="PopplerAction.html#POPPLER-ACTION-GOTO-REMOTE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_LAUNCH" link="PopplerAction.html#POPPLER-ACTION-LAUNCH:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_URI" link="PopplerAction.html#POPPLER-ACTION-URI:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_NAMED" link="PopplerAction.html#POPPLER-ACTION-NAMED:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_MOVIE" link="PopplerAction.html#POPPLER-ACTION-MOVIE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_RENDITION" link="PopplerAction.html#POPPLER-ACTION-RENDITION:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_OCG_STATE" link="PopplerAction.html#POPPLER-ACTION-OCG-STATE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_JAVASCRIPT" link="PopplerAction.html#POPPLER-ACTION-JAVASCRIPT:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_UNKNOWN" link="PopplerAction.html#POPPLER-DEST-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_XYZ" link="PopplerAction.html#POPPLER-DEST-XYZ:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FIT" link="PopplerAction.html#POPPLER-DEST-FIT:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FITH" link="PopplerAction.html#POPPLER-DEST-FITH:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FITV" link="PopplerAction.html#POPPLER-DEST-FITV:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FITR" link="PopplerAction.html#POPPLER-DEST-FITR:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FITB" link="PopplerAction.html#POPPLER-DEST-FITB:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FITBH" link="PopplerAction.html#POPPLER-DEST-FITBH:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_FITBV" link="PopplerAction.html#POPPLER-DEST-FITBV:CAPS"/>
+    <keyword type="constant" name="POPPLER_DEST_NAMED" link="PopplerAction.html#POPPLER-DEST-NAMED:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_MOVIE_PLAY" link="PopplerAction.html#POPPLER-ACTION-MOVIE-PLAY:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_MOVIE_PAUSE" link="PopplerAction.html#POPPLER-ACTION-MOVIE-PAUSE:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_MOVIE_RESUME" link="PopplerAction.html#POPPLER-ACTION-MOVIE-RESUME:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_MOVIE_STOP" link="PopplerAction.html#POPPLER-ACTION-MOVIE-STOP:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_LAYER_ON" link="PopplerAction.html#POPPLER-ACTION-LAYER-ON:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_LAYER_OFF" link="PopplerAction.html#POPPLER-ACTION-LAYER-OFF:CAPS"/>
+    <keyword type="constant" name="POPPLER_ACTION_LAYER_TOGGLE" link="PopplerAction.html#POPPLER-ACTION-LAYER-TOGGLE:CAPS"/>
     <keyword type="constant" name="POPPLER_FORM_FIELD_UNKNOWN" link="PopplerFormField.html#POPPLER-FORM-FIELD-UNKNOWN:CAPS"/>
     <keyword type="constant" name="POPPLER_FORM_FIELD_BUTTON" link="PopplerFormField.html#POPPLER-FORM-FIELD-BUTTON:CAPS"/>
     <keyword type="constant" name="POPPLER_FORM_FIELD_TEXT" link="PopplerFormField.html#POPPLER-FORM-FIELD-TEXT:CAPS"/>
@@ -769,56 +764,56 @@
     <keyword type="constant" name="POPPLER_ERROR_OPEN_FILE" link="poppler-Error-handling.html#POPPLER-ERROR-OPEN-FILE:CAPS"/>
     <keyword type="constant" name="POPPLER_ERROR_BAD_CATALOG" link="poppler-Error-handling.html#POPPLER-ERROR-BAD-CATALOG:CAPS"/>
     <keyword type="constant" name="POPPLER_ERROR_DAMAGED" link="poppler-Error-handling.html#POPPLER-ERROR-DAMAGED:CAPS"/>
-    <keyword type="constant" name="POPPLER_BACKEND_UNKNOWN" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-UNKNOWN:CAPS"/>
-    <keyword type="constant" name="POPPLER_BACKEND_SPLASH" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-SPLASH:CAPS"/>
-    <keyword type="constant" name="POPPLER_BACKEND_CAIRO" link="poppler-Version-and-Features-Information.html#POPPLER-BACKEND-CAIRO:CAPS"/>
-    <keyword type="member" name="PopplerRectangle.x1" link="PopplerPage.html#PopplerRectangle.x1"/>
-    <keyword type="member" name="PopplerRectangle.y1" link="PopplerPage.html#PopplerRectangle.y1"/>
-    <keyword type="member" name="PopplerRectangle.x2" link="PopplerPage.html#PopplerRectangle.x2"/>
-    <keyword type="member" name="PopplerRectangle.y2" link="PopplerPage.html#PopplerRectangle.y2"/>
-    <keyword type="member" name="PopplerPageTransition.type" link="PopplerPage.html#PopplerPageTransition.type"/>
-    <keyword type="member" name="PopplerPageTransition.alignment" link="PopplerPage.html#PopplerPageTransition.alignment"/>
-    <keyword type="member" name="PopplerPageTransition.direction" link="PopplerPage.html#PopplerPageTransition.direction"/>
-    <keyword type="member" name="PopplerPageTransition.duration" link="PopplerPage.html#PopplerPageTransition.duration"/>
-    <keyword type="member" name="PopplerPageTransition.angle" link="PopplerPage.html#PopplerPageTransition.angle"/>
-    <keyword type="member" name="PopplerPageTransition.scale" link="PopplerPage.html#PopplerPageTransition.scale"/>
-    <keyword type="member" name="PopplerPageTransition.rectangular" link="PopplerPage.html#PopplerPageTransition.rectangular"/>
-    <keyword type="member" name="PopplerPageTransition.duration-real" link="PopplerPage.html#PopplerPageTransition.duration-real"/>
-    <keyword type="member" name="PopplerLinkMapping.area" link="PopplerPage.html#PopplerLinkMapping.area"/>
-    <keyword type="member" name="PopplerLinkMapping.action" link="PopplerPage.html#PopplerLinkMapping.action"/>
-    <keyword type="member" name="PopplerImageMapping.area" link="PopplerPage.html#PopplerImageMapping.area"/>
-    <keyword type="member" name="PopplerImageMapping.image-id" link="PopplerPage.html#PopplerImageMapping.image-id"/>
-    <keyword type="member" name="PopplerFormFieldMapping.area" link="PopplerPage.html#PopplerFormFieldMapping.area"/>
-    <keyword type="member" name="PopplerFormFieldMapping.field" link="PopplerPage.html#PopplerFormFieldMapping.field"/>
-    <keyword type="member" name="PopplerAnnotMapping.area" link="PopplerPage.html#PopplerAnnotMapping.area"/>
-    <keyword type="member" name="PopplerAnnotMapping.annot" link="PopplerPage.html#PopplerAnnotMapping.annot"/>
-    <keyword type="member" name="PopplerTextAttributes.font-name" link="PopplerPage.html#PopplerTextAttributes.font-name"/>
-    <keyword type="member" name="PopplerTextAttributes.font-size" link="PopplerPage.html#PopplerTextAttributes.font-size"/>
-    <keyword type="member" name="PopplerTextAttributes.is-underlined" link="PopplerPage.html#PopplerTextAttributes.is-underlined"/>
-    <keyword type="member" name="PopplerTextAttributes.color" link="PopplerPage.html#PopplerTextAttributes.color"/>
-    <keyword type="member" name="PopplerTextAttributes.start-index" link="PopplerPage.html#PopplerTextAttributes.start-index"/>
-    <keyword type="member" name="PopplerTextAttributes.end-index" link="PopplerPage.html#PopplerTextAttributes.end-index"/>
-    <keyword type="member" name="PopplerDest.type" link="poppler-PopplerAction.html#PopplerDest.type"/>
-    <keyword type="member" name="PopplerDest.page-num" link="poppler-PopplerAction.html#PopplerDest.page-num"/>
-    <keyword type="member" name="PopplerDest.left" link="poppler-PopplerAction.html#PopplerDest.left"/>
-    <keyword type="member" name="PopplerDest.bottom" link="poppler-PopplerAction.html#PopplerDest.bottom"/>
-    <keyword type="member" name="PopplerDest.right" link="poppler-PopplerAction.html#PopplerDest.right"/>
-    <keyword type="member" name="PopplerDest.top" link="poppler-PopplerAction.html#PopplerDest.top"/>
-    <keyword type="member" name="PopplerDest.zoom" link="poppler-PopplerAction.html#PopplerDest.zoom"/>
-    <keyword type="member" name="PopplerDest.named-dest" link="poppler-PopplerAction.html#PopplerDest.named-dest"/>
-    <keyword type="member" name="PopplerDest.change-left" link="poppler-PopplerAction.html#PopplerDest.change-left"/>
-    <keyword type="member" name="PopplerDest.change-top" link="poppler-PopplerAction.html#PopplerDest.change-top"/>
-    <keyword type="member" name="PopplerDest.change-zoom" link="poppler-PopplerAction.html#PopplerDest.change-zoom"/>
-    <keyword type="member" name="PopplerActionLayer.action" link="poppler-PopplerAction.html#PopplerActionLayer.action"/>
-    <keyword type="member" name="PopplerActionLayer.layers" link="poppler-PopplerAction.html#PopplerActionLayer.layers"/>
-    <keyword type="member" name="PopplerPoint.x" link="PopplerAnnot.html#PopplerPoint.x"/>
-    <keyword type="member" name="PopplerPoint.y" link="PopplerAnnot.html#PopplerPoint.y"/>
-    <keyword type="member" name="PopplerQuadrilateral.p1" link="PopplerAnnot.html#PopplerQuadrilateral.p1"/>
-    <keyword type="member" name="PopplerQuadrilateral.p2" link="PopplerAnnot.html#PopplerQuadrilateral.p2"/>
-    <keyword type="member" name="PopplerQuadrilateral.p3" link="PopplerAnnot.html#PopplerQuadrilateral.p3"/>
-    <keyword type="member" name="PopplerQuadrilateral.p4" link="PopplerAnnot.html#PopplerQuadrilateral.p4"/>
-    <keyword type="member" name="PopplerColor.red" link="poppler-PopplerColor.html#PopplerColor.red"/>
-    <keyword type="member" name="PopplerColor.green" link="poppler-PopplerColor.html#PopplerColor.green"/>
-    <keyword type="member" name="PopplerColor.blue" link="poppler-PopplerColor.html#PopplerColor.blue"/>
+    <keyword type="constant" name="POPPLER_BACKEND_UNKNOWN" link="poppler-poppler-features.html#POPPLER-BACKEND-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="POPPLER_BACKEND_SPLASH" link="poppler-poppler-features.html#POPPLER-BACKEND-SPLASH:CAPS"/>
+    <keyword type="constant" name="POPPLER_BACKEND_CAIRO" link="poppler-poppler-features.html#POPPLER-BACKEND-CAIRO:CAPS"/>
+    <keyword type="member" name="PopplerRectangle-struct.x1" link="PopplerPage.html#PopplerRectangle-struct.x1"/>
+    <keyword type="member" name="PopplerRectangle-struct.y1" link="PopplerPage.html#PopplerRectangle-struct.y1"/>
+    <keyword type="member" name="PopplerRectangle-struct.x2" link="PopplerPage.html#PopplerRectangle-struct.x2"/>
+    <keyword type="member" name="PopplerRectangle-struct.y2" link="PopplerPage.html#PopplerRectangle-struct.y2"/>
+    <keyword type="member" name="PopplerPageTransition-struct.type" link="PopplerPage.html#PopplerPageTransition-struct.type"/>
+    <keyword type="member" name="PopplerPageTransition-struct.alignment" link="PopplerPage.html#PopplerPageTransition-struct.alignment"/>
+    <keyword type="member" name="PopplerPageTransition-struct.direction" link="PopplerPage.html#PopplerPageTransition-struct.direction"/>
+    <keyword type="member" name="PopplerPageTransition-struct.duration" link="PopplerPage.html#PopplerPageTransition-struct.duration"/>
+    <keyword type="member" name="PopplerPageTransition-struct.angle" link="PopplerPage.html#PopplerPageTransition-struct.angle"/>
+    <keyword type="member" name="PopplerPageTransition-struct.scale" link="PopplerPage.html#PopplerPageTransition-struct.scale"/>
+    <keyword type="member" name="PopplerPageTransition-struct.rectangular" link="PopplerPage.html#PopplerPageTransition-struct.rectangular"/>
+    <keyword type="member" name="PopplerPageTransition-struct.duration-real" link="PopplerPage.html#PopplerPageTransition-struct.duration-real"/>
+    <keyword type="member" name="PopplerLinkMapping-struct.area" link="PopplerPage.html#PopplerLinkMapping-struct.area"/>
+    <keyword type="member" name="PopplerLinkMapping-struct.action" link="PopplerPage.html#PopplerLinkMapping-struct.action"/>
+    <keyword type="member" name="PopplerImageMapping-struct.area" link="PopplerPage.html#PopplerImageMapping-struct.area"/>
+    <keyword type="member" name="PopplerImageMapping-struct.image-id" link="PopplerPage.html#PopplerImageMapping-struct.image-id"/>
+    <keyword type="member" name="PopplerFormFieldMapping-struct.area" link="PopplerPage.html#PopplerFormFieldMapping-struct.area"/>
+    <keyword type="member" name="PopplerFormFieldMapping-struct.field" link="PopplerPage.html#PopplerFormFieldMapping-struct.field"/>
+    <keyword type="member" name="PopplerAnnotMapping-struct.area" link="PopplerPage.html#PopplerAnnotMapping-struct.area"/>
+    <keyword type="member" name="PopplerAnnotMapping-struct.annot" link="PopplerPage.html#PopplerAnnotMapping-struct.annot"/>
+    <keyword type="member" name="PopplerTextAttributes-struct.font-name" link="PopplerPage.html#PopplerTextAttributes-struct.font-name"/>
+    <keyword type="member" name="PopplerTextAttributes-struct.font-size" link="PopplerPage.html#PopplerTextAttributes-struct.font-size"/>
+    <keyword type="member" name="PopplerTextAttributes-struct.is-underlined" link="PopplerPage.html#PopplerTextAttributes-struct.is-underlined"/>
+    <keyword type="member" name="PopplerTextAttributes-struct.color" link="PopplerPage.html#PopplerTextAttributes-struct.color"/>
+    <keyword type="member" name="PopplerTextAttributes-struct.start-index" link="PopplerPage.html#PopplerTextAttributes-struct.start-index"/>
+    <keyword type="member" name="PopplerTextAttributes-struct.end-index" link="PopplerPage.html#PopplerTextAttributes-struct.end-index"/>
+    <keyword type="member" name="PopplerDest-struct.type" link="PopplerAction.html#PopplerDest-struct.type"/>
+    <keyword type="member" name="PopplerDest-struct.page-num" link="PopplerAction.html#PopplerDest-struct.page-num"/>
+    <keyword type="member" name="PopplerDest-struct.left" link="PopplerAction.html#PopplerDest-struct.left"/>
+    <keyword type="member" name="PopplerDest-struct.bottom" link="PopplerAction.html#PopplerDest-struct.bottom"/>
+    <keyword type="member" name="PopplerDest-struct.right" link="PopplerAction.html#PopplerDest-struct.right"/>
+    <keyword type="member" name="PopplerDest-struct.top" link="PopplerAction.html#PopplerDest-struct.top"/>
+    <keyword type="member" name="PopplerDest-struct.zoom" link="PopplerAction.html#PopplerDest-struct.zoom"/>
+    <keyword type="member" name="PopplerDest-struct.named-dest" link="PopplerAction.html#PopplerDest-struct.named-dest"/>
+    <keyword type="member" name="PopplerDest-struct.change-left" link="PopplerAction.html#PopplerDest-struct.change-left"/>
+    <keyword type="member" name="PopplerDest-struct.change-top" link="PopplerAction.html#PopplerDest-struct.change-top"/>
+    <keyword type="member" name="PopplerDest-struct.change-zoom" link="PopplerAction.html#PopplerDest-struct.change-zoom"/>
+    <keyword type="member" name="PopplerActionLayer.action" link="PopplerAction.html#PopplerActionLayer.action"/>
+    <keyword type="member" name="PopplerActionLayer.layers" link="PopplerAction.html#PopplerActionLayer.layers"/>
+    <keyword type="member" name="PopplerPoint-struct.x" link="PopplerAnnot.html#PopplerPoint-struct.x"/>
+    <keyword type="member" name="PopplerPoint-struct.y" link="PopplerAnnot.html#PopplerPoint-struct.y"/>
+    <keyword type="member" name="PopplerQuadrilateral-struct.p1" link="PopplerAnnot.html#PopplerQuadrilateral-struct.p1"/>
+    <keyword type="member" name="PopplerQuadrilateral-struct.p2" link="PopplerAnnot.html#PopplerQuadrilateral-struct.p2"/>
+    <keyword type="member" name="PopplerQuadrilateral-struct.p3" link="PopplerAnnot.html#PopplerQuadrilateral-struct.p3"/>
+    <keyword type="member" name="PopplerQuadrilateral-struct.p4" link="PopplerAnnot.html#PopplerQuadrilateral-struct.p4"/>
+    <keyword type="member" name="PopplerColor-struct.red" link="PopplerColor.html#PopplerColor-struct.red"/>
+    <keyword type="member" name="PopplerColor-struct.green" link="PopplerColor.html#PopplerColor-struct.green"/>
+    <keyword type="member" name="PopplerColor-struct.blue" link="PopplerColor.html#PopplerColor-struct.blue"/>
   </functions>
 </book>
