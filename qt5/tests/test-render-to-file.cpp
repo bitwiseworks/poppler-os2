@@ -1,7 +1,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QFile>
-#include <QtGui/QGuiApplication>
-#include <QtGui/QImage>
+#include <QGuiApplication>
+#include <QImage>
 
 #include <poppler-qt5.h>
 
