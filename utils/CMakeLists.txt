@@ -146,3 +146,13 @@ add_executable(pdfunite ${pdfunite_SOURCES})
 target_link_libraries(pdfunite ${common_libs})
 install(TARGETS pdfunite DESTINATION bin)
 install(FILES pdfunite.1 DESTINATION ${SHARE_INSTALL_DIR}/man/man1)
+
+if (OS2)
+# text2pdf
+set(text2pdf_SOURCES ${common_srcs}
+  text2pdf.c
+)
+add_executable(text2pdf ${text2pdf_SOURCES})
+target_link_libraries(text2pdf ${common_libs})
+install(TARGETS text2pdf DESTINATION bin)
+endif()
