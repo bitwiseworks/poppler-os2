@@ -25,6 +25,13 @@ set(poppler_cpp_SRCS
 add_library(poppler-cpp SHARED ${poppler_cpp_SRCS})
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.3.0 SOVERSION 0)
 target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
+if(OS2)
+    set_target_properties(poppler-cpp PROPERTIES
+        OS2_DEF_VENDOR "$ENV{VENDOR}"
+        OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+        OS2_DEF_VERSION "${POPPLER_VERSION}"
+        OUTPUT_NAME popplc)
+endif()
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES

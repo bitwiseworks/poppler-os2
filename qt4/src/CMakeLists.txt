@@ -35,6 +35,13 @@ target_link_libraries(poppler-qt4 poppler ${QT4_QTCORE_LIBRARY} ${QT4_QTGUI_LIBR
 if(MSVC)
 target_link_libraries(poppler-qt4 poppler ${poppler_LIBS})
 endif()
+if(OS2)
+    set_target_properties(poppler-qt4 PROPERTIES
+        OS2_DEF_VENDOR "$ENV{VENDOR}"
+        OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+        OS2_DEF_VERSION "${POPPLER_VERSION}"
+        OUTPUT_NAME poppq4)
+endif()
 install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES
