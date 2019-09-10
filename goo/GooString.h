@@ -22,6 +22,7 @@
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,7 +36,6 @@
 #pragma interface
 #endif
 
-#include <limits.h> // for LLONG_MAX and ULLONG_MAX
 #include <stdarg.h>
 #include <stdlib.h> // for NULL
 #include "gtypes.h"
@@ -187,24 +187,12 @@ private:
   char *s;
 
   void resize(int newLength);
-#ifdef LLONG_MAX
   static void formatInt(long long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
 			char **p, int *len, GBool upperCase = gFalse);
-#else
-  static void formatInt(long x, char *buf, int bufSize,
-			GBool zeroFill, int width, int base,
-			char **p, int *len, GBool upperCase = gFalse);
-#endif
-#ifdef ULLONG_MAX
   static void formatUInt(unsigned long long x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
 			 char **p, int *len, GBool upperCase = gFalse);
-#else
-  static void formatUInt(Gulong x, char *buf, int bufSize,
-			 GBool zeroFill, int width, int base,
-			 char **p, int *len, GBool upperCase = gFalse);
-#endif
   static void formatDouble(double x, char *buf, int bufSize, int prec,
 			   GBool trim, char **p, int *len);
   static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,

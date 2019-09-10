@@ -24,6 +24,7 @@
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -111,14 +112,9 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
   const bool isSlightHinting = m_fontHinting == SlightHinting;
 
   m_fontEngine = new SplashFontEngine(
-#if HAVE_T1LIB_H
-  globalParams->getEnableT1lib(),
-#endif
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   globalParams->getEnableFreeType(),
   isHintingEnabled,
   isSlightHinting,
-#endif
   m_painter->testRenderHint(QPainter::TextAntialiasing));
 #endif
 }
@@ -142,12 +138,26 @@ void ArthurOutputDev::endPage() {
 
 void ArthurOutputDev::saveState(GfxState *state)
 {
+  m_currentPenStack.push(m_currentPen);
+  m_currentBrushStack.push(m_currentBrush);
+  m_rawFontStack.push(m_rawFont);
+  m_codeToGIDStack.push(m_codeToGID);
+
   m_painter->save();
 }
 
 void ArthurOutputDev::restoreState(GfxState *state)
 {
   m_painter->restore();
+
+  m_codeToGID = m_codeToGIDStack.top();
+  m_codeToGIDStack.pop();
+  m_rawFont = m_rawFontStack.top();
+  m_rawFontStack.pop();
+  m_currentBrush = m_currentBrushStack.top();
+  m_currentBrushStack.pop();
+  m_currentPen = m_currentPenStack.top();
+  m_currentPenStack.pop();
 }
 
 void ArthurOutputDev::updateAll(GfxState *state)
@@ -301,14 +311,14 @@ void ArthurOutputDev::updateStrokeOpacity(GfxState *state)
 
 void ArthurOutputDev::updateFont(GfxState *state)
 {
-  GfxFont *font = state->getFont();
-  if (!font)
+  GfxFont *gfxFont = state->getFont();
+  if (!gfxFont)
   {
     return;
   }
 
   // is the font in the cache?
-  ArthurFontID fontID = {*font->getID(), state->getFontSize()};
+  ArthurFontID fontID = {*gfxFont->getID(), state->getFontSize()};
   auto cacheEntry = m_rawFontCache.find(fontID);
 
   if (cacheEntry!=m_rawFontCache.end()) {
@@ -321,17 +331,20 @@ void ArthurOutputDev::updateFont(GfxState *state)
     // New font: load it into the cache
     float fontSize = state->getFontSize();
 
-    GfxFontLoc* fontLoc = font->locateFont(xref, nullptr);
+    std::unique_ptr<GfxFontLoc> fontLoc(gfxFont->locateFont(xref, nullptr));
 
     if (fontLoc) {
       // load the font from respective location
       switch (fontLoc->locType) {
       case gfxFontLocEmbedded: {// if there is an embedded font, read it to memory
         int fontDataLen;
-        const char* fontData = font->readEmbFontFile(xref, &fontDataLen);
+        const char* fontData = gfxFont->readEmbFontFile(xref, &fontDataLen);
 
         m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize);
         m_rawFontCache.insert(std::make_pair(fontID,std::unique_ptr<QRawFont>(m_rawFont)));
+
+        // Free the font data, it was copied in the QByteArray constructor
+        free((char*)fontData);
         break;
       }
       case gfxFontLocExternal:{ // font is in an external font file
@@ -367,12 +380,9 @@ void ArthurOutputDev::updateFont(GfxState *state)
   // *****************************************************************************
 
 #ifdef HAVE_SPLASH
-  GfxFont *gfxFont;
-  GfxFontLoc *fontLoc;
   GfxFontType fontType;
-  SplashOutFontFileID *id;
   SplashFontFile *fontFile;
-  SplashFontSrc *fontsrc = NULL;
+  SplashFontSrc *fontsrc = nullptr;
   FoFiTrueType *ff;
   Object refObj, strObj;
   GooString *fileName;
@@ -386,29 +396,26 @@ void ArthurOutputDev::updateFont(GfxState *state)
   SplashFTFontFile* ftFontFile;
 
   m_needFontUpdate = false;
-  fileName = NULL;
-  tmpBuf = NULL;
-  fontLoc = NULL;
+  fileName = nullptr;
+  tmpBuf = nullptr;
 
-  if (!(gfxFont = state->getFont())) {
-    goto err1;
-  }
   fontType = gfxFont->getType();
   if (fontType == fontType3) {
-    goto err1;
+    return;
   }
 
   // Default: no codeToGID table
   m_codeToGID = nullptr;
 
   // check the font file cache
-  id = new SplashOutFontFileID(gfxFont->getID());
+  SplashOutFontFileID *id = new SplashOutFontFileID(gfxFont->getID());
   if ((fontFile = m_fontEngine->getFontFile(id))) {
     delete id;
 
   } else {
 
-    if (!(fontLoc = gfxFont->locateFont(xref, NULL))) {
+    std::unique_ptr<GfxFontLoc> fontLoc(gfxFont->locateFont(xref, nullptr));
+    if (!fontLoc) {
       error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
 	    gfxFont->getName() ? gfxFont->getName()->getCString()
 	                       : "(unnamed)");
@@ -480,7 +487,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 	n = 256;
 	delete ff;
       } else {
-	codeToGID = NULL;
+	codeToGID = nullptr;
 	n = 0;
       }
       if (!(fontFile = m_fontEngine->loadTrueTypeFont(
@@ -511,7 +518,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 	memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(),
 	       n * sizeof(int));
       } else {
-	codeToGID = NULL;
+	codeToGID = nullptr;
 	n = 0;
       }      
       if (!(fontFile = m_fontEngine->loadOpenTypeCFFFont(
@@ -526,7 +533,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       break;
     case fontCIDType2:
     case fontCIDType2OT:
-      codeToGID = NULL;
+      codeToGID = nullptr;
       n = 0;
       if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
 	n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
@@ -571,18 +578,12 @@ void ArthurOutputDev::updateFont(GfxState *state)
   // font in the Splash font cache.  Otherwise we'd load it again and again.
   m_fontEngine->getFont(fontFile, mat, matrix);
 
-  delete fontLoc;
   if (fontsrc && !fontsrc->isFile)
       fontsrc->unref();
   return;
 
  err2:
   delete id;
-  delete fontLoc;
- err1:
-  if (fontsrc && !fontsrc->isFile)
-      fontsrc->unref();
-  return;
 #endif
 }
 
@@ -758,7 +759,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   row_stride = (width + 3) & ~3;
   buffer = (unsigned char *) malloc (height * row_stride);
-  if (buffer == NULL) {
+  if (buffer == nullptr) {
     error(-1, "Unable to allocate memory for image.");
     return;
   }
@@ -783,10 +784,10 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   image = cairo_image_surface_create_for_data (buffer, CAIRO_FORMAT_A8,
 					  width, height, row_stride);
-  if (image == NULL)
+  if (image == nullptr)
     return;
   pattern = cairo_pattern_create_for_surface (image);
-  if (pattern == NULL)
+  if (pattern == nullptr)
     return;
 
   ctm = state->getCTM();

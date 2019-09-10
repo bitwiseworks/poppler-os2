@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2014 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -21,8 +21,6 @@
 //========================================================================
 
 #include <config.h>
-
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 
 #ifdef USE_GCC_PRAGMAS
 #pragma implementation
@@ -149,5 +147,3 @@ SplashFont *SplashFTFontFile::makeFont(SplashCoord *mat,
 int *SplashFTFontFile::getCodeToGID() {
   return codeToGID;
 }
-
-#endif // HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
