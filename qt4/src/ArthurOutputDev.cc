@@ -22,6 +22,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -112,14 +113,9 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
   const bool isSlightHinting = m_fontHinting == SlightHinting;
 
   m_fontEngine = new SplashFontEngine(
-#if HAVE_T1LIB_H
-  globalParams->getEnableT1lib(),
-#endif
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   globalParams->getEnableFreeType(),
   isHintingEnabled,
   isSlightHinting,
-#endif
   m_painter->testRenderHint(QPainter::TextAntialiasing));
 #endif
 }

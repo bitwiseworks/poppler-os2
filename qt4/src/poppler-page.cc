@@ -16,6 +16,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Arseniy Lartsev <arseniy@alumni.chalmers.se>
+ * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -305,7 +306,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 #if defined(HAVE_SPLASH)
       SplashColor bgColor;
       GBool overprintPreview = gFalse;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
       if (overprintPreview)
       {
@@ -338,7 +339,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       }
 
       SplashColorMode colorMode = splashModeXBGR8;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       if (overprintPreview) colorMode = splashModeDeviceN8;
 #endif
  

@@ -10,11 +10,19 @@ include(MacroOptionalFindPackage)
 find_package(PkgConfig)
 include(MacroEnsureVersion)
 include(MacroBoolTo01)
-find_package(Threads)
+if (WIN32)
+  message("-- Using win32 threads")
+else()
+  set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+  set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+  find_package(Threads)
+endif()
 include(TestBigEndian)
 test_big_endian(WORDS_BIGENDIAN)
 include(CheckFileOffsetBits)
 CHECK_FILE_OFFSET_BITS()
+
+include(GNUInstallDirs)
 
 find_package (ECM 1.6.0 QUIET NO_MODULE)
 if (ECM_FOUND)
@@ -22,8 +30,8 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "60")
-set(POPPLER_MICRO_VERSION "1")
+set(POPPLER_MINOR_VERSION "61")
+set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 set (CMAKE_CXX_STANDARD 11)
@@ -58,9 +66,6 @@ else()
   set(ENABLE_RELOCATABLE OFF)
 endif()
 option(EXTRA_WARN "Enable extra compile warnings" OFF)
-
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
-set(SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "Share directory name")
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -100,8 +105,11 @@ else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
 endif()
 
+if(CMAKE_USE_PTHREADS_INIT OR WIN32)
+  set(MULTITHREADED ON)
+endif()
+
 # Enable these unconditionally.
-set(MULTITHREADED ON)
 set(OPI_SUPPORT ON)
 set(TEXTOUT_WORD_LIST ON)
 
@@ -187,9 +195,6 @@ if(ENABLE_CPP)
 endif()
 if(ENABLE_ZLIB)
   find_package(ZLIB)
-  if(ZLIB_FOUND)
-    set(HAVE_LIBZ ${ZLIB_FOUND})
-  endif()
   set(ENABLE_ZLIB ${ZLIB_FOUND})
 endif()
 if(ENABLE_ZLIB_UNCOMPRESS AND NOT ENABLE_ZLIB)
@@ -264,7 +269,6 @@ if(ENABLE_LIBCURL)
   endif()
 endif()
 
-add_definitions(-DHAVE_CONFIG_H=1)
 if(MINGW)
   # Use mingw's ansi stdio extensions
   add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
@@ -288,10 +292,6 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
   ${FREETYPE_INCLUDE_DIRS}
 )
-set(HAVE_FREETYPE_H ON)
-if(CMAKE_USE_PTHREADS_INIT)
-  set(HAVE_PTHREAD ON)
-endif()
 
 if(ENABLE_ZLIB)
   include_directories(${ZLIB_INCLUDE_DIR})
@@ -372,6 +372,7 @@ set(poppler_SRCS
   goo/gstrtod.cc
   goo/grandom.cc
   goo/glibc.cc
+  goo/glibc_strtok_r.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc
@@ -426,7 +427,6 @@ set(poppler_SRCS
   poppler/Stream.cc
   poppler/StructTreeRoot.cc
   poppler/StructElement.cc
-  poppler/strtok_r.cpp
   poppler/UnicodeMap.cc
   poppler/UnicodeTypeTable.cc
   poppler/UTF.cc
@@ -461,9 +461,6 @@ if(ENABLE_SPLASH)
     splash/SplashPattern.cc
     splash/SplashScreen.cc
     splash/SplashState.cc
-    splash/SplashT1Font.cc
-    splash/SplashT1FontEngine.cc
-    splash/SplashT1FontFile.cc
     splash/SplashXPath.cc
     splash/SplashXPathScanner.cc
   )
@@ -539,9 +536,6 @@ endif()
 if(TIFF_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${TIFF_LIBRARIES})
 endif()
-if(HAVE_PTHREAD)
-  set(poppler_LIBS ${poppler_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-endif()
 
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -550,9 +544,16 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 71.0.0 SOVERSION 71)
+set_target_properties(poppler PROPERTIES VERSION 72.0.0 SOVERSION 72)
+if(MINGW)
+    get_target_property(POPPLER_SOVERSION poppler SOVERSION)
+    set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
 target_link_libraries(poppler LINK_PRIVATE ${poppler_LIBS})
-install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+if(CMAKE_USE_PTHREADS_INIT)
+   target_link_libraries(poppler LINK_PRIVATE Threads::Threads)
+endif()
+install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(ENABLE_XPDF_HEADERS)
   install(FILES
@@ -572,7 +573,6 @@ if(ENABLE_XPDF_HEADERS)
     poppler/FontEncodingTables.h
     poppler/FontInfo.h
     poppler/Form.h
-    poppler/Function.cc
     poppler/Function.h
     poppler/Gfx.h
     poppler/GfxFont.h
@@ -711,9 +711,6 @@ if(ENABLE_XPDF_HEADERS)
       splash/SplashPattern.h
       splash/SplashScreen.h
       splash/SplashState.h
-      splash/SplashT1Font.h
-      splash/SplashT1FontEngine.h
-      splash/SplashT1FontFile.h
       splash/SplashTypes.h
       splash/SplashXPath.h
       splash/SplashXPathScanner.h
@@ -752,24 +749,24 @@ else()
   set(PC_REQUIRES_PRIVATE "")
 endif()
 
-poppler_create_install_pkgconfig(poppler.pc lib${LIB_SUFFIX}/pkgconfig)
+poppler_create_install_pkgconfig(poppler.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 if(ENABLE_SPLASH)
-  poppler_create_install_pkgconfig(poppler-splash.pc lib${LIB_SUFFIX}/pkgconfig)
+  poppler_create_install_pkgconfig(poppler-splash.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(ENABLE_QT4)
-  poppler_create_install_pkgconfig(poppler-qt4.pc lib${LIB_SUFFIX}/pkgconfig)
+  poppler_create_install_pkgconfig(poppler-qt4.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(ENABLE_QT5)
-  poppler_create_install_pkgconfig(poppler-qt5.pc lib${LIB_SUFFIX}/pkgconfig)
+  poppler_create_install_pkgconfig(poppler-qt5.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(ENABLE_GLIB)
-  poppler_create_install_pkgconfig(poppler-glib.pc lib${LIB_SUFFIX}/pkgconfig)
+  poppler_create_install_pkgconfig(poppler-glib.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(CAIRO_FOUND)
-  poppler_create_install_pkgconfig(poppler-cairo.pc lib${LIB_SUFFIX}/pkgconfig)
+  poppler_create_install_pkgconfig(poppler-cairo.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(ENABLE_CPP)
-  poppler_create_install_pkgconfig(poppler-cpp.pc lib${LIB_SUFFIX}/pkgconfig)
+  poppler_create_install_pkgconfig(poppler-cpp.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 
 
