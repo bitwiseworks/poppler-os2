@@ -1,3 +1,50 @@
+commit f09a9923bb65755e183694c5f1be6af4a50e96e6
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Oct 5 19:15:44 2017 +0200
+
+    Poppler 0.60.1
+
+ CMakeLists.txt   | 2 +-
+ NEWS             | 7 +++++++
+ cpp/Doxyfile     | 2 +-
+ qt4/src/Doxyfile | 2 +-
+ qt5/src/Doxyfile | 2 +-
+ 5 files changed, 11 insertions(+), 4 deletions(-)
+
+commit e816c7a47caa0c3f5261d467333f8c2eb6a2ad51
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Oct 5 18:51:49 2017 +0200
+
+    FindLIBOPENJPEG.cmake: Add CheckCXXSourceCompiles
+
+    Since we use check_cxx_source_compiles
+
+ cmake/modules/FindLIBOPENJPEG.cmake | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit f538b74a38acb53b877e000a64647ce8043133ac
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Oct 3 00:04:17 2017 +0200
+
+    qt5: ArthurOutputDev: Add missing 'return' in error paths
+
+ qt5/src/ArthurOutputDev.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit c2ba8fd8cf51af48a9e789d29e9fd5512d1688e3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Oct 2 23:46:49 2017 +0200
+
+    Poppler 0.60.0
+
+ CMakeLists.txt         |  4 ++--
+ NEWS                   | 28 ++++++++++++++++++++++++++++
+ cpp/Doxyfile           |  2 +-
+ qt4/src/Doxyfile       |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ 6 files changed, 34 insertions(+), 6 deletions(-)
+
 commit 9432e0bfc4c4f2e16b7c152aa8b04d6d19ed4898
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Mon Oct 2 23:29:21 2017 +0200
