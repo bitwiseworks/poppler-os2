@@ -264,19 +264,10 @@ elseif(ENABLE_CMS STREQUAL "lcms2")
   set(USE_CMS ${LCMS2_FOUND})
 endif()
 
-# as we need to remove /@unixroot/usr/include we have to use a trick here
-if(OS2)
-  set(OS2_INCLUDE_DIRS "")
-endif()
-
 if(ENABLE_LIBCURL)
   find_package(CURL)
   if(CURL_FOUND)
-if(OS2)
-    list(APPEND OS2_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
-else()
     include_directories(${CURL_INCLUDE_DIR})
-endif()
     set(POPPLER_HAS_CURL_SUPPORT ON)
   else()
     set(ENABLE_LIBCURL OFF)
@@ -289,11 +280,7 @@ if(MINGW)
 endif()
 if(FONTCONFIG_FOUND)
   add_definitions(${FONTCONFIG_DEFINITIONS})
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${FONTCONFIG_INCLUDE_DIR})
-else()
   include_directories(${FONTCONFIG_INCLUDE_DIR})
-endif()
 endif()
 if(WITH_FONTCONFIGURATION_WIN32)
   if(MINGW)
@@ -301,17 +288,6 @@ if(WITH_FONTCONFIGURATION_WIN32)
     add_definitions(-D_WIN32_IE=0x0500)
   endif()
 endif()
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/fofi
-    ${CMAKE_CURRENT_SOURCE_DIR}/goo
-    ${CMAKE_CURRENT_SOURCE_DIR}/poppler
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}/poppler
-    ${FREETYPE_INCLUDE_DIRS}
-  )
-else()
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/fofi
@@ -321,14 +297,9 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
   ${FREETYPE_INCLUDE_DIRS}
 )
-endif()
 
 if(ENABLE_ZLIB)
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR})
-else()
   include_directories(${ZLIB_INCLUDE_DIR})
-endif()
 endif()
 
 if (NSS3_FOUND)
@@ -336,58 +307,27 @@ if (NSS3_FOUND)
   set(ENABLE_NSS3 ON)
 endif()
 if(JPEG_FOUND)
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${JPEG_INCLUDE_DIR})
-else()
   include_directories(${JPEG_INCLUDE_DIR})
 endif()
-endif()
 if(PNG_FOUND)
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${PNG_INCLUDE_DIR})
-else()
   include_directories(${PNG_INCLUDE_DIR})
-endif()
   set(ENABLE_LIBPNG ON)
 endif()
 if(TIFF_FOUND)
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${TIFF_INCLUDE_DIR})
-else()
   include_directories(${TIFF_INCLUDE_DIR})
-endif()
   set(ENABLE_LIBTIFF ON)
 endif()
 if(LIBOPENJPEG_FOUND)
   include_directories(${LIBOPENJPEG_INCLUDE_DIR})
 endif()
 if(LIBOPENJPEG2_FOUND)
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${LIBOPENJPEG2_INCLUDE_DIRS})
-else()
   include_directories(${LIBOPENJPEG2_INCLUDE_DIRS})
-endif()
 endif()
 if(LCMS_FOUND)
   include_directories(${LCMS_INCLUDE_DIR})
 endif()
 if(LCMS2_FOUND)
-if(OS2)
-  list(APPEND OS2_INCLUDE_DIRS ${LCMS2_INCLUDE_DIR})
-else()
   include_directories(${LCMS2_INCLUDE_DIR})
-endif()
-endif()
-
-if(OS2)
-  string(TOUPPER $ENV{UNIXROOT}/usr/include OS2_INCLUDE_UNIXROOT)
-  foreach(OS2_INCLUDE_DIR ${OS2_INCLUDE_DIRS})
-    string(TOUPPER ${OS2_INCLUDE_DIR} OS2_INCLUDE_DIR_UPPER)
-    message("dir: ${OS2_INCLUDE_DIR_UPPER}")
-    if(NOT ${OS2_INCLUDE_DIR_UPPER} STREQUAL ${OS2_INCLUDE_UNIXROOT})
-      include_directories(${OS2_INCLUDE_DIR})
-    endif()
-  endforeach()
 endif()
 
 # Recent versions of poppler-data install a .pc file.
@@ -621,7 +561,7 @@ if(OS2)
     OS2_DEF_VENDOR "$ENV{VENDOR}"
     OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
     OS2_DEF_VERSION "${POPPLER_VERSION}"
-    OUTPUT_NAME popple)
+    TARGET_SHORT popple)
 endif()
 
 if(CMAKE_USE_PTHREADS_INIT)
