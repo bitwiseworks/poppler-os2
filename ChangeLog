@@ -1,3 +1,75 @@
+commit faeb48920d64a776911a259bcf1bb6231ac1d24c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Nov 12 19:14:32 2017 +0100
+
+    0.61.1
+
+ CMakeLists.txt   |  2 +-
+ NEWS             | 11 +++++++++++
+ cpp/Doxyfile     |  2 +-
+ qt4/src/Doxyfile |  2 +-
+ qt5/src/Doxyfile |  2 +-
+ 5 files changed, 15 insertions(+), 4 deletions(-)
+
+commit 155597a09b2c7fcbd0eea2b5a2021a5b65476e4c
+Author: Jeroen Ooms <jeroenooms@gmail.com>
+Date:   Sat Nov 4 05:33:09 2017 -0700
+
+    Fix for corrupted image files on Windows
+
+    Bug #102494
+
+ cpp/poppler-image.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit c45efa2d7e0db8a4ace0e8c6955b3fa48dc6d070
+Author: Adam Sampson <ats@offog.org>
+Date:   Sun Nov 5 11:45:00 2017 +0000
+
+    Fix incorrect paths in .pc files.
+
+    The change in 67c3878ef10449b241c37d1022e2518029860335 used the
+    CMAKE_INSTALL_x variables instead of CMAKE_INSTALL_FULL_x; the former
+    contain things like "include" instead of full paths, so the resulting
+    .pc files break packages that depend on poppler. Use the latter.
+
+    Also fix a missing @ in the qt5 file.
+
+    Bug #103578
+
+ poppler-cairo.pc.cmake  | 4 ++--
+ poppler-cpp.pc.cmake    | 4 ++--
+ poppler-glib.pc.cmake   | 4 ++--
+ poppler-qt4.pc.cmake    | 4 ++--
+ poppler-qt5.pc.cmake    | 4 ++--
+ poppler-splash.pc.cmake | 4 ++--
+ poppler.pc.cmake        | 4 ++--
+ 7 files changed, 14 insertions(+), 14 deletions(-)
+
+commit 7ccedf2b082e4d46257fb247e1f6e1197d66eead
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Wed Nov 8 21:07:45 2017 +1030
+
+    cairo: don't overflow y * stride when accessing image data
+
+ poppler/CairoOutputDev.cc | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+commit 6ae4293fce77290f4fbdc643c999809d5924bf2c
+Author: Roland Hieber <r.hieber@pengutronix.de>
+Date:   Wed Nov 8 08:22:01 2017 +0100
+
+    CMake: add the custom buildtests target only once
+
+    Make BUILDTESTS_ADDED a global property, so the `buildtests` target
+    gets added only once. As far as I understood, this seems to fulfil
+    the requirements of CMP0002.
+
+    Bug #103003
+
+ cmake/modules/PopplerMacros.cmake | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
 commit aaa9c5308766a88d0512b87051d7c7082f152a9f
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Fri Nov 3 11:25:02 2017 +0100
