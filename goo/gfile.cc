@@ -267,9 +267,10 @@ FILE *openFile(const char *path, const char *mode) {
   }
 #else
   // First try to atomically open the file with CLOEXEC
+#ifndef __OS2__
   const std::string modeStr = mode + "e"s;
-#ifdef __OS2__
-  modeStr += "b"s;
+#else
+  std::string modeStr = mode + "eb"s;
 #endif
   FILE *file = fopen(path, modeStr.c_str());
   if (file != nullptr)

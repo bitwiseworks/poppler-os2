@@ -54,6 +54,8 @@
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS
 #include <os2.h>
+#define __USE_GNU  //for strndup
+#define __USE_EMX  //for _splitpath
 #endif
 
 #include <string.h>

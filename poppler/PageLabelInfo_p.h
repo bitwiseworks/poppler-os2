@@ -30,7 +30,7 @@
 #include "Error.h"
 
 static std::pair<int,bool> fromDecimal(const char *const begin, const char *const end, const bool unicode) {
-#ifdef HAVE_CODECVT
+#if defined(HAVE_CODECVT) && !defined(__OS2__)
   if (unicode) {
     std::wstring_convert<std::codecvt_utf16<wchar_t>> converter;
     const auto str = converter.from_bytes(begin, end);
