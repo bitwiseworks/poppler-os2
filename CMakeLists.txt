@@ -41,7 +41,11 @@ set(POPPLER_MICRO_VERSION "1")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 set (CMAKE_CXX_STANDARD 14)
+if (OS2)
+set (CMAKE_CXX_EXTENSIONS ON)
+else()
 set (CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 # command line switches
 option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
@@ -497,6 +501,15 @@ if(MINGW AND BUILD_SHARED_LIBS)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
 target_link_libraries(poppler LINK_PRIVATE ${poppler_LIBS})
+
+if(OS2)
+  set_target_properties(poppler PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}"
+    TARGET_SHORT popple)
+endif()
+
 if(CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(poppler LINK_PRIVATE Threads::Threads)
 endif()

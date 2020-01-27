@@ -31,6 +31,15 @@ if(MINGW AND BUILD_SHARED_LIBS)
     set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
 target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
+
+if(OS2)
+    set_target_properties(poppler-cpp PROPERTIES
+        OS2_DEF_VENDOR "$ENV{VENDOR}"
+        OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+        OS2_DEF_VERSION "${POPPLER_VERSION}"
+        TARGET_SHORT popplc)
+endif()
+
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES

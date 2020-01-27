@@ -48,6 +48,15 @@ target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIE
 if(MSVC)
 target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
 endif()
+
+if(OS2)
+    set_target_properties(poppler-qt5 PROPERTIES
+        OS2_DEF_VENDOR "$ENV{VENDOR}"
+        OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+        OS2_DEF_VERSION "${POPPLER_VERSION}"
+        TARGET_SHORT poppq5)
+endif()
+
 install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
