@@ -26,6 +26,8 @@
 #  define POPPLER_PUBLIC __declspec(dllexport)
 #elif defined(__GNUC__)
 #  define POPPLER_PUBLIC __attribute__((visibility("default"))) extern
+#elif defined(__OS2__)
+#  define POPPLER_PUBLIC __declspec(dllexport)
 #else
 #  define POPPLER_PUBLIC
 #endif

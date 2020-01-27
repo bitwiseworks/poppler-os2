@@ -25,6 +25,9 @@
 #if defined(_WIN32)
 #  define LIB_EXPORT __declspec(dllexport)
 #  define LIB_IMPORT __declspec(dllimport)
+#elif defined(__OS2__)
+#  define LIB_EXPORT __declspec(dllexport)
+#  define LIB_IMPORT
 #else
 #  define LIB_EXPORT
 #  define LIB_IMPORT
