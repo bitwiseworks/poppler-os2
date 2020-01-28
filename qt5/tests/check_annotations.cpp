@@ -31,7 +31,11 @@ void TestAnnotations::checkQColorPrecision() {
     GooString* serialized = GooString::format("{0:.5f}", normalized);
     double deserialized = gatof( serialized->c_str() );
     delete serialized;
+#ifdef __OS2__
+    uint16_t denormalized = round(deserialized * std::numeric_limits<uint16_t>::max());
+#else
     uint16_t denormalized = std::round(deserialized * std::numeric_limits<uint16_t>::max());
+#endif
     if (static_cast<uint16_t>(i) != denormalized) {
       precisionOk = false;
       break;
