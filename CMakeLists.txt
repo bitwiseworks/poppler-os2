@@ -492,6 +492,8 @@ endif()
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_library(poppler STATIC ${poppler_SRCS})
+elseif(OS2)
+add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
@@ -502,13 +504,13 @@ if(MINGW AND BUILD_SHARED_LIBS)
 endif()
 target_link_libraries(poppler LINK_PRIVATE ${poppler_LIBS})
 
-if(OS2)
-  set_target_properties(poppler PROPERTIES
-    OS2_DEF_VENDOR "$ENV{VENDOR}"
-    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
-    OS2_DEF_VERSION "${POPPLER_VERSION}"
-    TARGET_SHORT popple)
-endif()
+#if(OS2)
+#  set_target_properties(poppler PROPERTIES
+#    OS2_DEF_VENDOR "$ENV{VENDOR}"
+#    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+#    OS2_DEF_VERSION "${POPPLER_VERSION}"
+#    TARGET_SHORT popple)
+#endif()
 
 if(CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(poppler LINK_PRIVATE Threads::Threads)
