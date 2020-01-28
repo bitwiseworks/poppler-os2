@@ -14,6 +14,12 @@ if (ENABLE_SPLASH)
   )
   add_executable(pdftoppm ${pdftoppm_SOURCES})
   target_link_libraries(pdftoppm ${common_libs})
+  if (OS2)
+    set_target_properties(pdftoppm PROPERTIES
+      OS2_DEF_VENDOR "$ENV{VENDOR}"
+      OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+      OS2_DEF_VERSION "${POPPLER_VERSION}")
+  endif()
   install(TARGETS pdftoppm DESTINATION bin)
   install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endif ()
@@ -44,6 +50,12 @@ if (HAVE_CAIRO)
   if(LCMS2_FOUND)
     target_link_libraries(pdftocairo ${LCMS2_LIBRARIES})
   endif()
+  if (OS2)
+    set_target_properties(pdftocairo PROPERTIES
+      OS2_DEF_VENDOR "$ENV{VENDOR}"
+      OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+      OS2_DEF_VERSION "${POPPLER_VERSION}")
+  endif()
   install(TARGETS pdftocairo DESTINATION bin)
   install(FILES pdftocairo.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endif ()
@@ -54,6 +66,12 @@ set(pdfdetach_SOURCES ${common_srcs}
 )
 add_executable(pdfdetach ${pdfdetach_SOURCES})
 target_link_libraries(pdfdetach ${common_libs})
+if (OS2)
+  set_target_properties(pdfdetach PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdfdetach DESTINATION bin)
 install(FILES pdfdetach.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -63,6 +81,12 @@ set(pdfattach_SOURCES ${common_srcs}
 )
 add_executable(pdfattach ${pdfattach_SOURCES})
 target_link_libraries(pdfattach ${common_libs})
+if (OS2)
+  set_target_properties(pdfattach PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdfattach DESTINATION bin)
 install(FILES pdfattach.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -72,6 +96,12 @@ set(pdffonts_SOURCES ${common_srcs}
 )
 add_executable(pdffonts ${pdffonts_SOURCES})
 target_link_libraries(pdffonts ${common_libs})
+if (OS2)
+  set_target_properties(pdffonts PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdffonts DESTINATION bin)
 install(FILES pdffonts.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -85,6 +115,12 @@ set(pdfimages_SOURCES ${common_srcs}
 )
 add_executable(pdfimages ${pdfimages_SOURCES})
 target_link_libraries(pdfimages ${common_libs})
+if (OS2)
+  set_target_properties(pdfimages PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdfimages DESTINATION bin)
 install(FILES pdfimages.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -96,6 +132,12 @@ set(pdfinfo_SOURCES ${common_srcs}
 )
 add_executable(pdfinfo ${pdfinfo_SOURCES})
 target_link_libraries(pdfinfo ${common_libs})
+if (OS2)
+  set_target_properties(pdfinfo PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdfinfo DESTINATION bin)
 install(FILES pdfinfo.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -106,6 +148,12 @@ if (ENABLE_NSS3)
   )
   add_executable(pdfsig ${pdfsig_SOURCES})
   target_link_libraries(pdfsig ${common_libs})
+  if (OS2)
+    set_target_properties(pdfsig PROPERTIES
+      OS2_DEF_VENDOR "$ENV{VENDOR}"
+      OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+      OS2_DEF_VERSION "${POPPLER_VERSION}")
+  endif()
   install(TARGETS pdfsig DESTINATION bin)
   install(FILES pdfsig.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endif ()
@@ -116,6 +164,12 @@ set(pdftops_SOURCES ${common_srcs}
 )
 add_executable(pdftops ${pdftops_SOURCES})
 target_link_libraries(pdftops ${common_libs})
+if (OS2)
+set_target_properties(pdftops PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdftops DESTINATION bin)
 install(FILES pdftops.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -125,6 +179,12 @@ set(pdftotext_SOURCES ${common_srcs}
 )
 add_executable(pdftotext ${pdftotext_SOURCES})
 target_link_libraries(pdftotext ${common_libs})
+if (OS2)
+set_target_properties(pdftotext PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdftotext DESTINATION bin)
 install(FILES pdftotext.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -138,6 +198,12 @@ set(pdftohtml_SOURCES ${common_srcs}
 )
 add_executable(pdftohtml ${pdftohtml_SOURCES})
 target_link_libraries(pdftohtml ${common_libs})
+if (OS2)
+set_target_properties(pdftohtml PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdftohtml DESTINATION bin)
 install(FILES pdftohtml.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -147,6 +213,12 @@ set(pdfseparate_SOURCES ${common_srcs}
 )
 add_executable(pdfseparate ${pdfseparate_SOURCES})
 target_link_libraries(pdfseparate ${common_libs})
+if (OS2)
+set_target_properties(pdfseparate PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdfseparate DESTINATION bin)
 install(FILES pdfseparate.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -156,6 +228,12 @@ set(pdfunite_SOURCES ${common_srcs}
 )
 add_executable(pdfunite ${pdfunite_SOURCES})
 target_link_libraries(pdfunite ${common_libs})
+if (OS2)
+set_target_properties(pdfunite PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
+endif()
 install(TARGETS pdfunite DESTINATION bin)
 install(FILES pdfunite.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
@@ -166,5 +244,9 @@ set(text2pdf_SOURCES ${common_srcs}
 )
 add_executable(text2pdf ${text2pdf_SOURCES})
 target_link_libraries(text2pdf ${common_libs})
+set_target_properties(text2pdf PROPERTIES
+    OS2_DEF_VENDOR "$ENV{VENDOR}"
+    OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
+    OS2_DEF_VERSION "${POPPLER_VERSION}")
 install(TARGETS text2pdf DESTINATION bin)
 endif()
