@@ -55,7 +55,6 @@
 #define INCL_DOSERRORS
 #include <os2.h>
 #define __USE_GNU  //for strndup
-#define __USE_EMX  //for _splitpath
 #endif
 
 #include <string.h>
@@ -170,7 +169,7 @@ get_poppler_datadir (void)
 
 #ifdef __OS2__
 
-// we search within the exe first of the data-dir
+// we search within the exe first for the data-dir
 static char *
 get_poppler_datadir(void)
 {
