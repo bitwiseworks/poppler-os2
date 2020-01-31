@@ -207,7 +207,7 @@ private:
   unsigned int transformPixelType;
 };
 
-class GfxColorSpace {
+class POPPLER_LIB_EXPORT GfxColorSpace {
 public:
 
   GfxColorSpace();
@@ -892,7 +892,7 @@ protected:
 // GfxUnivariateShading
 //------------------------------------------------------------------------
 
-class GfxUnivariateShading: public GfxShading {
+class POPPLER_LIB_EXPORT GfxUnivariateShading: public GfxShading {
 public:
 
   GfxUnivariateShading(int typeA,
@@ -939,7 +939,7 @@ private:
 // GfxFunctionShading
 //------------------------------------------------------------------------
 
-class GfxFunctionShading: public GfxShading {
+class POPPLER_LIB_EXPORT GfxFunctionShading: public GfxShading {
 public:
 
   GfxFunctionShading(double x0A, double y0A,
@@ -1044,7 +1044,7 @@ struct GfxGouraudVertex {
   GfxColor color;
 };
 
-class GfxGouraudTriangleShading: public GfxShading {
+class POPPLER_LIB_EXPORT GfxGouraudTriangleShading: public GfxShading {
 public:
 
   GfxGouraudTriangleShading(int typeA,
@@ -1132,7 +1132,7 @@ struct GfxPatch {
   ColorValue color[2][2];
 };
 
-class GfxPatchMeshShading: public GfxShading {
+class POPPLER_LIB_EXPORT GfxPatchMeshShading: public GfxShading {
 public:
 
   GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA,
@@ -1173,7 +1173,7 @@ private:
 // GfxImageColorMap
 //------------------------------------------------------------------------
 
-class GfxImageColorMap {
+class POPPLER_LIB_EXPORT GfxImageColorMap {
 public:
 
   // Constructor.
@@ -1303,7 +1303,7 @@ private:
   GfxSubpath(const GfxSubpath *subpath);
 };
 
-class GfxPath {
+class POPPLER_LIB_EXPORT GfxPath {
 public:
 
   // Constructor.
@@ -1368,7 +1368,7 @@ private:
 // GfxState
 //------------------------------------------------------------------------
 
-class GfxState {
+class POPPLER_LIB_EXPORT GfxState {
 public:
   /**
    * When GfxState::getReusablePath() is invoked, the currently active

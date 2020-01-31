@@ -123,7 +123,7 @@ private:
 // TextWord
 //------------------------------------------------------------------------
 
-class TextWord {
+class POPPLER_LIB_EXPORT TextWord {
 public:
 
   // Constructor.
@@ -498,7 +498,7 @@ private:
 // TextWordList
 //------------------------------------------------------------------------
 
-class TextWordList {
+class POPPLER_LIB_EXPORT TextWordList {
 public:
 
   // Build a flat word list, in content stream order (if
@@ -549,7 +549,7 @@ private:
 // TextPage
 //------------------------------------------------------------------------
 
-class TextPage {
+class POPPLER_LIB_EXPORT TextPage {
 public:
 
   // Constructor.
@@ -734,7 +734,7 @@ private:
 // ActualText
 //------------------------------------------------------------------------
 
-class ActualText {
+class POPPLER_LIB_EXPORT ActualText {
 public:
   // Create an ActualText
   ActualText(TextPage *out);
@@ -765,7 +765,7 @@ private:
 // TextOutputDev
 //------------------------------------------------------------------------
 
-class TextOutputDev: public OutputDev {
+class POPPLER_LIB_EXPORT TextOutputDev: public OutputDev {
 public:
 
   // Open a text output file.  If <fileName> is NULL, no file is

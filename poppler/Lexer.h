@@ -27,6 +27,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include "poppler-config.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -38,7 +39,7 @@ class XRef;
 // Lexer
 //------------------------------------------------------------------------
 
-class Lexer {
+class POPPLER_LIB_EXPORT Lexer {
 public:
 
   // Construct a lexer for a single stream.  Deletes the stream when

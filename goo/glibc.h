@@ -15,6 +15,7 @@
 #define GLIBC_H
 
 #include "config.h"
+#include "poppler-config.h"
 
 #include <time.h>
 
@@ -27,7 +28,7 @@ struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif
 
 #ifndef HAVE_TIMEGM
-time_t timegm(struct tm *tm);
+POPPLER_LIB_EXPORT time_t timegm(struct tm *tm);
 #endif
 
 #ifndef HAVE_STRTOK_R

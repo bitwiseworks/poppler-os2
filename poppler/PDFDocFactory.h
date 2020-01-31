@@ -13,6 +13,7 @@
 #ifndef PDFDOCFACTORY_H
 #define PDFDOCFACTORY_H
 
+#include "poppler-config.h"
 #include "PDFDoc.h"
 
 class GooString;
@@ -30,7 +31,7 @@ class PDFDocBuilder;
 // the constructor, or by registering a new PDFDocBuilder afterwards.
 //------------------------------------------------------------------------
 
-class PDFDocFactory {
+class POPPLER_LIB_EXPORT PDFDocFactory {
 
 public:
 

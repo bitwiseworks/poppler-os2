@@ -15,8 +15,9 @@
 #ifndef GBASENAME_H
 #define GBASENAME_H
 
+#include "poppler-config.h"
 #include <string>
 
-std::string gbasename(const char* input);
+POPPLER_LIB_EXPORT std::string gbasename(const char* input);
 
 #endif // ndef GBASENAME_H

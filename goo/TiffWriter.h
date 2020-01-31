@@ -23,7 +23,7 @@
 
 struct TiffWriterPrivate;
 
-class TiffWriter : public ImgWriter
+class POPPLER_LIB_EXPORT TiffWriter : public ImgWriter
 {
 public:
   /* RGB                 - 3 bytes/pixel

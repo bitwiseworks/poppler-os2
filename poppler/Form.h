@@ -25,6 +25,7 @@
 #ifndef FORM_H
 #define FORM_H
 
+#include "poppler-config.h"
 #include "Object.h"
 #include "Annot.h"
 
@@ -84,7 +85,7 @@ class FormFieldChoice;
 // to a page.
 //------------------------------------------------------------------------
 
-class FormWidget {
+class POPPLER_LIB_EXPORT FormWidget {
 public:
   virtual ~FormWidget();
 
@@ -161,7 +162,7 @@ protected:
 // FormWidgetButton
 //------------------------------------------------------------------------
 
-class FormWidgetButton: public FormWidget {
+class POPPLER_LIB_EXPORT FormWidgetButton: public FormWidget {
 public:
   FormWidgetButton(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   ~FormWidgetButton ();
@@ -184,7 +185,7 @@ protected:
 // FormWidgetText
 //------------------------------------------------------------------------
 
-class FormWidgetText: public FormWidget {
+class POPPLER_LIB_EXPORT FormWidgetText: public FormWidget {
 public:
   FormWidgetText(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   //return the field's content (UTF16BE)
@@ -216,7 +217,7 @@ protected:
 // FormWidgetChoice
 //------------------------------------------------------------------------
 
-class FormWidgetChoice: public FormWidget {
+class POPPLER_LIB_EXPORT FormWidgetChoice: public FormWidget {
 public:
   FormWidgetChoice(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   ~FormWidgetChoice();
@@ -257,7 +258,7 @@ protected:
 // FormWidgetSignature
 //------------------------------------------------------------------------
 
-class FormWidgetSignature: public FormWidget {
+class POPPLER_LIB_EXPORT FormWidgetSignature: public FormWidget {
 public:
   FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   void updateWidgetAppearance() override;
@@ -543,7 +544,7 @@ private:
 // Catalog entry).
 //------------------------------------------------------------------------
 
-class Form {
+class POPPLER_LIB_EXPORT Form {
 public:
   Form(PDFDoc *docA, Object* acroForm);
 
@@ -595,7 +596,7 @@ private:
 // FormPageWidgets
 //------------------------------------------------------------------------
 
-class FormPageWidgets {
+class POPPLER_LIB_EXPORT FormPageWidgets {
 public:
   FormPageWidgets (Annots* annots, unsigned int page, Form *form);
   ~FormPageWidgets();

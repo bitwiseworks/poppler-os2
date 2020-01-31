@@ -62,7 +62,7 @@ class StructTreeRoot;
 // NameTree
 //------------------------------------------------------------------------
 
-class NameTree {
+class POPPLER_LIB_EXPORT NameTree {
 public:
   NameTree();
   ~NameTree();
@@ -101,7 +101,7 @@ private:
 // Catalog
 //------------------------------------------------------------------------
 
-class Catalog {
+class POPPLER_LIB_EXPORT Catalog {
 public:
 
   // Constructor.

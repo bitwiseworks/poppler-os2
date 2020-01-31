@@ -93,7 +93,7 @@ typedef GooString *(*PSOutCustomCodeCbk)(PSOutputDev *psOut,
 				       PSOutCustomCodeLocation loc, int n, 
 				       void *data);
 
-class PSOutputDev: public OutputDev {
+class POPPLER_LIB_EXPORT PSOutputDev: public OutputDev {
 public:
 
   // Open a PostScript output file, and write the prolog.

@@ -73,7 +73,7 @@ class Function;
 // OutputDev
 //------------------------------------------------------------------------
 
-class OutputDev {
+class POPPLER_LIB_EXPORT OutputDev {
 public:
 
   // Constructor.

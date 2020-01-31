@@ -63,7 +63,7 @@ class SysFontList;
 //------------------------------------------------------------------------
 
 // The global parameters object.
-extern GlobalParams *globalParams;
+extern POPPLER_LIB_EXPORT GlobalParams *globalParams;
 
 //------------------------------------------------------------------------
 
@@ -95,7 +95,7 @@ enum EndOfLineKind {
 
 //------------------------------------------------------------------------
 
-class GlobalParams {
+class POPPLER_LIB_EXPORT GlobalParams {
 public:
 
   // Initialize the global parameters

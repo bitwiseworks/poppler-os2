@@ -30,6 +30,7 @@
 #ifndef LINK_H
 #define LINK_H
 
+#include "poppler-config.h"
 #include "Object.h"
 #include <memory>
 #include <set>
@@ -61,7 +62,7 @@ enum LinkActionKind {
   actionUnknown			// anything else
 };
 
-class LinkAction {
+class POPPLER_LIB_EXPORT LinkAction {
 public:
 
   LinkAction();
@@ -111,7 +112,7 @@ enum LinkDestKind {
   destFitBV
 };
 
-class LinkDest {
+class POPPLER_LIB_EXPORT LinkDest {
 public:
 
   // Build a LinkDest from the array.
@@ -525,7 +526,7 @@ private:
 // Links
 //------------------------------------------------------------------------
 
-class Links {
+class POPPLER_LIB_EXPORT Links {
 public:
 
   // Extract links from array of annotations.

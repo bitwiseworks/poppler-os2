@@ -25,6 +25,7 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
+#include "poppler-config.h"
 #include "Object.h"
 #include "CharTypes.h"
 
@@ -53,7 +54,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class OutlineItem {
+class POPPLER_LIB_EXPORT OutlineItem {
 public:
 
   OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);

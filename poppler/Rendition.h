@@ -25,6 +25,7 @@
 #ifndef _RENDITION_H_
 #define _RENDITION_H_
 
+#include "poppler-config.h"
 #include "Object.h"
 
 struct MediaWindowParameters {
@@ -116,7 +117,7 @@ struct MediaParameters {
   MediaWindowParameters windowParams;
 };
 
-class MediaRendition {
+class POPPLER_LIB_EXPORT MediaRendition {
  public:
   MediaRendition(Object *obj);
   MediaRendition(const MediaRendition &other);

@@ -24,7 +24,7 @@
 //   http://netpbm.sourceforge.net/doc/pbm.html
 //   http://netpbm.sourceforge.net/doc/ppm.html
 
-class NetPBMWriter : public ImgWriter
+class POPPLER_LIB_EXPORT NetPBMWriter : public ImgWriter
 {
 public:
 

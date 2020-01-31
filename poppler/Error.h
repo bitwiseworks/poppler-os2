@@ -47,10 +47,10 @@ enum ErrorCategory {
   errInternal          // internal error - malfunction within the Xpdf code
 };
 
-extern void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
+extern POPPLER_LIB_EXPORT void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
 					 Goffset pos, const char *msg),
 			     void *data);
 
-extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
+extern POPPLER_LIB_EXPORT void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
 
 #endif

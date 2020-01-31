@@ -52,7 +52,7 @@ struct UnicodeMapExt;
 
 //------------------------------------------------------------------------
 
-class UnicodeMap {
+class POPPLER_LIB_EXPORT UnicodeMap {
 public:
 
   // Create the UnicodeMap specified by <encodingName>.  Sets the

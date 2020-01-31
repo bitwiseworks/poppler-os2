@@ -91,21 +91,21 @@ extern GooString *appendToPath(GooString *path, const char *fileName);
 // Open a file descriptor
 // Could be implemented on WIN32 too, but the only external caller of
 // this function is not used on WIN32
-extern int openFileDescriptor(const char *path, int flags);
+extern POPPLER_LIB_EXPORT int openFileDescriptor(const char *path, int flags);
 #endif
 
 // Open a file.  On Windows, this converts the path from UTF-8 to
 // UCS-2 and calls _wfopen (if available).  On other OSes, this simply
 // calls fopen.
-extern FILE *openFile(const char *path, const char *mode);
+extern POPPLER_LIB_EXPORT FILE *openFile(const char *path, const char *mode);
 
 // Just like fgets, but handles Unix, Mac, and/or DOS end-of-line
 // conventions.
 extern char *getLine(char *buf, int size, FILE *f);
 
 // Like fseek/ftell but uses platform specific variants that support large files
-extern int Gfseek(FILE *f, Goffset offset, int whence);
-extern Goffset Gftell(FILE *f);
+extern POPPLER_LIB_EXPORT int Gfseek(FILE *f, Goffset offset, int whence);
+extern POPPLER_LIB_EXPORT Goffset Gftell(FILE *f);
 
 // Largest offset supported by Gfseek/Gftell
 extern Goffset GoffsetMax();
@@ -114,7 +114,7 @@ extern Goffset GoffsetMax();
 // GooFile
 //------------------------------------------------------------------------
 
-class GooFile
+class POPPLER_LIB_EXPORT GooFile
 {
 public:
   GooFile(const GooFile &) = delete;

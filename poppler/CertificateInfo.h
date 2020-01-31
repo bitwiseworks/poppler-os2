@@ -13,6 +13,7 @@
 #ifndef CERTIFICATEINFO_H
 #define CERTIFICATEINFO_H
 
+#include "poppler-config.h"
 #include <memory>
 #include <time.h>
 #include "goo/GooString.h"
@@ -38,7 +39,7 @@ enum PublicKeyType
   OTHERKEY
 };
 
-class X509CertificateInfo {
+class POPPLER_LIB_EXPORT X509CertificateInfo {
 public:
   X509CertificateInfo();
   ~X509CertificateInfo();

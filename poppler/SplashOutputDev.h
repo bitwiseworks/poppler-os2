@@ -187,7 +187,7 @@ private:
 // SplashOutputDev
 //------------------------------------------------------------------------
 
-class SplashOutputDev: public OutputDev {
+class POPPLER_LIB_EXPORT SplashOutputDev: public OutputDev {
 public:
 
   // Constructor.

@@ -111,7 +111,7 @@ enum PDFSubtypeConformance {
 // PDFDoc
 //------------------------------------------------------------------------
 
-class PDFDoc {
+class POPPLER_LIB_EXPORT PDFDoc {
 public:
 
   PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr,

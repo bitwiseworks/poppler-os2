@@ -24,7 +24,7 @@
 
 struct PNGWriterPrivate;
 
-class PNGWriter : public ImgWriter
+class POPPLER_LIB_EXPORT PNGWriter : public ImgWriter
 {
 public:
 

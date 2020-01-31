@@ -16,6 +16,7 @@
 #ifndef SIGNATUREINFO_H
 #define SIGNATUREINFO_H
 
+#include "poppler-config.h"
 #include <memory>
 #include <time.h>
 
@@ -43,7 +44,7 @@ enum CertificateValidationStatus
 
 class X509CertificateInfo;
 
-class SignatureInfo {
+class POPPLER_LIB_EXPORT SignatureInfo {
 public:
   SignatureInfo();
   SignatureInfo(SignatureValidationStatus, CertificateValidationStatus);

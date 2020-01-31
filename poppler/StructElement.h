@@ -14,6 +14,7 @@
 #ifndef STRUCTELEMENT_H
 #define STRUCTELEMENT_H
 
+#include "poppler-config.h"
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
 #include "Object.h"
@@ -26,7 +27,7 @@ class StructElement;
 class StructTreeRoot;
 
 
-class Attribute {
+class POPPLER_LIB_EXPORT Attribute {
 public:
   enum Type {
     Unknown = 0,        // Uninitialized, parsing error, etc.
@@ -119,7 +120,7 @@ private:
 };
 
 
-class StructElement {
+class POPPLER_LIB_EXPORT StructElement {
 public:
   enum Type {
     Unknown = 0,

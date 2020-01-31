@@ -41,7 +41,7 @@ class XRef;
 // Array
 //------------------------------------------------------------------------
 
-class Array {
+class POPPLER_LIB_EXPORT Array {
 public:
 
   // Constructor.

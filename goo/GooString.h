@@ -35,6 +35,7 @@
 #ifndef GooString_H
 #define GooString_H
 
+#include "poppler-config.h"
 #include <cstdarg>
 #include <string>
 
@@ -44,7 +45,7 @@
 # define GOOSTRING_FORMAT
 #endif
 
-class GooString : private std::string {
+class POPPLER_LIB_EXPORT GooString : private std::string {
 public:
 
   // Create an empty string.

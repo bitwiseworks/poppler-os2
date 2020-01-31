@@ -137,7 +137,7 @@ private:
 // Page
 //------------------------------------------------------------------------
 
-class Page {
+class POPPLER_LIB_EXPORT Page {
 public:
 
   // Constructor.

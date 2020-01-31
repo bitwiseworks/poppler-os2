@@ -15,6 +15,7 @@
 #ifndef OPTIONALCONTENT_H
 #define OPTIONALCONTENT_H
 
+#include "poppler-config.h"
 #include "Object.h"
 #include "CharTypes.h"
 #include <unordered_map>
@@ -28,7 +29,7 @@ class OCDisplayNode;
 
 //------------------------------------------------------------------------
 
-class OCGs {
+class POPPLER_LIB_EXPORT OCGs {
 public:
 
   OCGs(Object *ocgObject, XRef *xref);
@@ -74,7 +75,7 @@ private:
 
 //------------------------------------------------------------------------
 
-class OptionalContentGroup {
+class POPPLER_LIB_EXPORT OptionalContentGroup {
 public:
   enum State { On, Off };
 

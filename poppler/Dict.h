@@ -43,7 +43,7 @@
 // Dict
 //------------------------------------------------------------------------
 
-class Dict {
+class POPPLER_LIB_EXPORT Dict {
 public:
 
   // Constructor.

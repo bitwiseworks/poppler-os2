@@ -87,7 +87,7 @@ struct XRefEntry {
   }
 };
 
-class XRef {
+class POPPLER_LIB_EXPORT XRef {
 public:
 
   // Constructor, create an empty XRef, used for PDF writing

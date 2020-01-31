@@ -28,6 +28,7 @@
 #ifndef FOFITRUETYPE_H
 #define FOFITRUETYPE_H
 
+#include "poppler-config.h"
 #include "stddef.h"
 #include <unordered_map>
 #include <string>
@@ -41,7 +42,7 @@ struct TrueTypeCmap;
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-class FoFiTrueType: public FoFiBase {
+class POPPLER_LIB_EXPORT FoFiTrueType: public FoFiBase {
 public:
 
   // Create a FoFiTrueType object from a memory buffer.

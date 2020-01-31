@@ -144,7 +144,7 @@ private:
 // Gfx
 //------------------------------------------------------------------------
 
-class Gfx {
+class POPPLER_LIB_EXPORT Gfx {
 public:
 
   // Constructor for regular output.

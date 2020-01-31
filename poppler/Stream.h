@@ -92,7 +92,7 @@ typedef struct _ByteRange {
 // Stream (base class)
 //------------------------------------------------------------------------
 
-class Stream {
+class POPPLER_LIB_EXPORT Stream {
 public:
 
   // Constructor.
@@ -245,7 +245,7 @@ private:
 //
 // This is the base class for all streams that output to a file
 //------------------------------------------------------------------------
-class OutStream {
+class POPPLER_LIB_EXPORT OutStream {
 public:
   // Constructor.
   OutStream ();
@@ -271,7 +271,7 @@ public:
 //------------------------------------------------------------------------
 // FileOutStream
 //------------------------------------------------------------------------
-class FileOutStream : public OutStream {
+class POPPLER_LIB_EXPORT FileOutStream : public OutStream {
 public:
   FileOutStream (FILE* fa, Goffset startA);
 
@@ -297,7 +297,7 @@ private:
 // This is the base class for all streams that read directly from a file.
 //------------------------------------------------------------------------
 
-class BaseStream: public Stream {
+class POPPLER_LIB_EXPORT BaseStream: public Stream {
 public:
 
     // TODO Mirar si puedo hacer que dictA sea un puntero
@@ -357,7 +357,7 @@ protected:
 // ImageStream
 //------------------------------------------------------------------------
 
-class ImageStream {
+class POPPLER_LIB_EXPORT ImageStream {
 public:
 
   // Create an image stream object for an image with the specified
@@ -694,7 +694,7 @@ public:
 // that creating a new FileStream (using makeSubStream).
 //------------------------------------------------------------------------
 
-class EmbedStream: public BaseStream {
+class POPPLER_LIB_EXPORT EmbedStream: public BaseStream {
 public:
 
   EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset lengthA, bool reusableA = false);

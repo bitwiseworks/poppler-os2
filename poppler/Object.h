@@ -33,6 +33,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "poppler-config.h"
 #include <cassert>
 #include <set>
 #include <stdio.h>
@@ -153,7 +154,7 @@ constexpr int numObjTypes = 16;		// total number of object types
 // Object
 //------------------------------------------------------------------------
 
-class Object {
+class POPPLER_LIB_EXPORT Object {
 public:
   Object() : type(objNone) {}
   ~Object() { free(); }

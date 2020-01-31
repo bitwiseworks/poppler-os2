@@ -20,6 +20,8 @@
 #ifndef Sound_H
 #define Sound_H
 
+#include "poppler-config.h"
+
 class GooString;
 class Object;
 class Stream;
@@ -38,7 +40,7 @@ enum SoundEncoding {
   soundALaw			// A-law-encoded samples
 };
 
-class Sound
+class POPPLER_LIB_EXPORT Sound
 {
 public:
   // Try to parse the Object s

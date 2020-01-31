@@ -23,6 +23,8 @@
 #ifndef GSTRTOD_H
 #define GSTRTOD_H
 
+#include "poppler-config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,7 +35,7 @@ extern "C" {
  * A limitation of the implementation is that this function
  * will still accept localized versions of infinities and NANs.
  */
-double gatof(const char *nptr);
+POPPLER_LIB_EXPORT double gatof(const char *nptr);
 double gstrtod(const char *nptr, char **endptr);
 
 #ifdef __cplusplus

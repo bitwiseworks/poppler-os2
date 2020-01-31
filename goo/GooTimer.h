@@ -33,7 +33,7 @@
 // GooTimer
 //------------------------------------------------------------------------
 
-class GooTimer {
+class POPPLER_LIB_EXPORT GooTimer {
 public:
 
   // Create a new timer.

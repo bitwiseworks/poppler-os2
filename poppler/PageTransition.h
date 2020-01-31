@@ -20,6 +20,7 @@
 #ifndef PAGE_TRANSITION_H
 #define PAGE_TRANSITION_H
 
+#include "poppler-config.h"
 #include "Object.h"
 
 //------------------------------------------------------------------------
@@ -54,7 +55,7 @@ enum PageTransitionDirection {
   transitionOutward
 };
 
-class PageTransition {
+class POPPLER_LIB_EXPORT PageTransition {
 public:
   // Construct a Page Transition.
   PageTransition (Object *trans);

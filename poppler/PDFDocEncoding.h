@@ -23,12 +23,13 @@
 #ifndef PDFDOCENCODING_H
 #define PDFDOCENCODING_H
 
+#include "poppler-config.h"
 #include "CharTypes.h"
 
 class GooString;
 
-extern Unicode pdfDocEncoding[256];
+extern POPPLER_LIB_EXPORT Unicode pdfDocEncoding[256];
 
-char* pdfDocEncodingToUTF16 (const GooString* orig, int* length);
+POPPLER_LIB_EXPORT char* pdfDocEncodingToUTF16 (const GooString* orig, int* length);
 
 #endif
