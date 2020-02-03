@@ -43,12 +43,12 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+#include <climits>
 #include <algorithm>
 #include "goo/gmem.h"
 #include "Error.h"
@@ -233,7 +233,7 @@ GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict
   return font;
 }
 
-GfxFont::GfxFont(const char *tagA, Ref idA, GooString *nameA,
+GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA,
 		 GfxFontType typeA, Ref embFontIDA) {
   ok = false;
   tag = new GooString(tagA);
@@ -759,7 +759,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
   return nullptr;
 }
 
-GfxFontLoc *GfxFont::locateBase14Font(GooString *base14Name) {
+GfxFontLoc *GfxFont::locateBase14Font(const GooString *base14Name) {
   GooString *path;
 
   path = globalParams->findFontFile(base14Name);
@@ -1325,8 +1325,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   //----- get the character widths -----
 
   // initialize all widths
-  for (int code = 0; code < 256; ++code) {
-    widths[code] = missingWidth * 0.001;
+  for (double &width : widths) {
+    width = missingWidth * 0.001;
   }
 
   // use widths from font dict, if present
@@ -1530,7 +1530,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
 }
 
 int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code,
-			     Unicode **u, int *uLen,
+			     Unicode const **u, int *uLen,
 			     double *dx, double *dy, double *ox, double *oy) const {
   CharCode c;
 
@@ -1638,7 +1638,7 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
 
   // map Unicode through the cmap
   } else if (useUnicode) {
-    Unicode *uAux;
+    const Unicode *uAux;
     for (i = 0; i < 256; ++i) {
       if (((charName = enc[i]) && (u = globalParams->mapNameToUnicodeAll(charName))))
 	map[i] = ff->mapCodeToGID(cmap, u);
@@ -1796,8 +1796,8 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	  "Adobe-Japan2",
 	  "Adobe-Korea1",
 	};
-	for (size_t i = 0; i < sizeof(knownCollections)/sizeof(knownCollections[0]); i++) {
-	  if (collection->cmp(knownCollections[i]) == 0) {
+	for (const char *knownCollection : knownCollections) {
+	  if (collection->cmp(knownCollection) == 0) {
 	    error(errSyntaxError, -1, "Missing language pack for '{0:t}' mapping", collection);
 	    return;
 	  }
@@ -2006,7 +2006,7 @@ GfxCIDFont::~GfxCIDFont() {
 }
 
 int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code,
-			    Unicode **u, int *uLen,
+			    Unicode const **u, int *uLen,
 			    double *dx, double *dy, double *ox, double *oy) const {
   CID cid;
   CharCode dummy;
@@ -2097,7 +2097,7 @@ int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
   return gid;
 }
 
-int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
+int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen) {
 #define N_UCS_CANDIDATES 2
   /* space characters */
   static const unsigned long spaces[] = { 
@@ -2183,18 +2183,16 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   Unicode *vumap = nullptr;
   Unicode *tumap = nullptr;
   int *codeToGID = nullptr;
-  unsigned long n;
   int i;
   unsigned long code;
   int wmode;
   const char **cmapName;
-  CMap *cMap;
   CMapListEntry *lp;
   int cmap;
   int cmapPlatform, cmapEncoding;
   Ref embID;
 
-  *mapsizep = 0;
+  *codeToGIDLen = 0;
   if (!ctu || !getCollection()) return nullptr;
   if (getCollection()->cmp("Adobe-Identity") == 0) return nullptr;
   if (getEmbeddedFontID(&embID)) {
@@ -2202,7 +2200,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     * CIDToGIDMap should be embedded in PDF file
     * and already set. So return it.
     */
-    *mapsizep = getCIDToGIDLen();
+    *codeToGIDLen = getCIDToGIDLen();
     return getCIDToGID();
   }
 
@@ -2232,7 +2230,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
       break;
     }
   }
-  n = 65536;
+  const unsigned int n = 65536;
   tumap = new Unicode[n];
   humap = new Unicode[n*N_UCS_CANDIDATES];
   memset(humap,0,sizeof(Unicode)*n*N_UCS_CANDIDATES);
@@ -2244,7 +2242,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
       CharCode cid;
       for (cid = 0;cid < n ;cid++) {
 	int len;
-	Unicode *ucodes;
+	const Unicode *ucodes;
 
 	len = tctu->mapToUnicode(cid,&ucodes);
 	if (len == 1) {
@@ -2261,14 +2259,15 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     for (cmapName = lp->CMaps;*cmapName != nullptr;cmapName++) {
       GooString cname(*cmapName);
 
-      if ((cMap = globalParams->getCMap(getCollection(),&cname))
+      CMap *cnameCMap;
+      if ((cnameCMap = globalParams->getCMap(getCollection(),&cname))
 	   != nullptr) {
-	    if (cMap->getWMode()) {
-		cMap->setReverseMap(vumap,n,1);
+	    if (cnameCMap->getWMode()) {
+		cnameCMap->setReverseMap(vumap,n,1);
 	    } else {
-		cMap->setReverseMap(humap,n,N_UCS_CANDIDATES);
+		cnameCMap->setReverseMap(humap,n,N_UCS_CANDIDATES);
 	    }
-	cMap->decRefCnt();
+	cnameCMap->decRefCnt();
       }
     }
     ff->setupGSUB(lp->scriptTag, lp->languageTag);
@@ -2278,7 +2277,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     if (ctu) {
       CharCode cid;
       for (cid = 0;cid < n ;cid++) {
-	Unicode *ucode;
+	const Unicode *ucode;
 
 	if (ctu->mapToUnicode(cid, &ucode))
 	  humap[cid*N_UCS_CANDIDATES] = ucode[0];
@@ -2338,7 +2337,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     }
     codeToGID[code] = gid;
   }
-  *mapsizep = n;
+  *codeToGIDLen = n;
   if (humap != nullptr) delete[] humap;
   if (tumap != nullptr) delete[] tumap;
   if (vumap != nullptr) delete[] vumap;

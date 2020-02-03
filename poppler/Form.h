@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -19,6 +19,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 João Netto <joaonetto901@gmail.com>
 //
 //========================================================================
 
@@ -28,7 +29,7 @@
 #include "Object.h"
 #include "Annot.h"
 
-#include <time.h>
+#include <ctime>
 
 #include <set>
 #include <vector>
@@ -119,6 +120,7 @@ public:
 
   LinkAction *getActivationAction(); // The caller should not delete the result
   LinkAction *getAdditionalAction(Annot::FormAdditionalActionsType type); // The caller should delete the result
+  bool setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js);
 
   // return the unique ID corresponding to pageNum/fieldNum
   static int encodeID (unsigned pageNum, unsigned fieldNum);
@@ -163,8 +165,8 @@ protected:
 
 class FormWidgetButton: public FormWidget {
 public:
-  FormWidgetButton(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
-  ~FormWidgetButton ();
+  FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
+  ~FormWidgetButton () override;
 
   FormButtonType getButtonType() const;
   
@@ -186,12 +188,14 @@ protected:
 
 class FormWidgetText: public FormWidget {
 public:
-  FormWidgetText(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  FormWidgetText(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   //return the field's content (UTF16BE)
   const GooString* getContent() const;
 
   //expects a UTF16BE string
   void setContent(const GooString* new_content);
+  //sets the text inside the field appearance stream
+  void setAppearanceContent(const GooString* new_content);
 
   void updateWidgetAppearance() override;
 
@@ -218,8 +222,8 @@ protected:
 
 class FormWidgetChoice: public FormWidget {
 public:
-  FormWidgetChoice(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
-  ~FormWidgetChoice();
+  FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
+  ~FormWidgetChoice() override;
 
   int getNumChoices() const;
   //return the display name of the i-th choice (UTF16BE)
@@ -259,7 +263,7 @@ protected:
 
 class FormWidgetSignature: public FormWidget {
 public:
-  FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   void updateWidgetAppearance() override;
 
   FormSignatureType signatureType();
@@ -296,7 +300,7 @@ public:
   Object* getObj() { return &obj; }
   Ref getRef() { return ref; }
 
-  void setReadOnly (bool b);
+  void setReadOnly (bool value);
   bool isReadOnly () const { return readOnly; }
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }
@@ -382,7 +386,7 @@ public:
 
   void print(int indent) override;
 
-  ~FormFieldButton();
+  ~FormFieldButton() override;
 protected:
   void updateState(const char *state);
 
@@ -403,11 +407,13 @@ protected:
 
 class FormFieldText: public FormField {
 public:
-  FormFieldText(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
+  FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
   
   const GooString* getContent () const { return content; }
+  const GooString* getAppearanceContent () const { return internalContent ? internalContent : content; }
   void setContentCopy (const GooString* new_content);
-  ~FormFieldText();
+  void setAppearanceContentCopy (const GooString* new_content);
+  ~FormFieldText() override;
 
   bool isMultiline () const { return multiline; }
   bool isPassword () const { return password; }
@@ -432,6 +438,7 @@ protected:
   int parseDA(std::vector<GooString*>* daToks);
 
   GooString* content;
+  GooString* internalContent;
   bool multiline;
   bool password;
   bool fileSelect;
@@ -450,7 +457,7 @@ class FormFieldChoice: public FormField {
 public:
   FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-  ~FormFieldChoice();
+  ~FormFieldChoice() override;
 
   int getNumChoices() const { return numChoices; }
   const GooString* getChoice(int i) const { return choices ? choices[i].optionName : nullptr; }
@@ -521,7 +528,7 @@ public:
   // Use -1 for now as validationTime
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
-  ~FormFieldSignature();
+  ~FormFieldSignature() override;
   Object* getByteRange() { return &byte_range; }
   const GooString* getSignature() const { return signature; }
 

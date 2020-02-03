@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012, 2017, 2018 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017-2019 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -14,6 +14,8 @@
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
+ * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -44,6 +46,7 @@
 #include <config.h>
 #include <GfxState.h>
 #include <GlobalParams.h>
+#include <Form.h>
 #include <PDFDoc.h>
 #include <FontInfo.h>
 #include <OutputDev.h>
@@ -173,6 +176,7 @@ namespace Poppler {
 		{
 			if (fi->getName()) fontName = fi->getName()->c_str();
 			if (fi->getFile()) fontFile = fi->getFile()->c_str();
+			if (fi->getSubstituteName()) fontSubstituteName = fi->getSubstituteName()->c_str();
 			isEmbedded = fi->getEmbedded();
 			isSubset = fi->getSubset();
 			type = (Poppler::FontInfo::Type)fi->getType();
@@ -183,6 +187,7 @@ namespace Poppler {
 		FontInfoData& operator=(const FontInfoData &) = default;
 
 		QString fontName;
+		QString fontSubstituteName;
 		QString fontFile;
 		bool isEmbedded : 1;
 		bool isSubset : 1;
@@ -236,6 +241,15 @@ namespace Poppler {
 		::Page *page;
 		::FormWidget *fm;
 		QRectF box;
+		static POPPLER_QT5_EXPORT ::FormWidget *getFormWidget( const FormField *f );
+    };
+    
+    class FormFieldIcon;
+    class FormFieldIconData
+    {
+    public:
+    	static POPPLER_QT5_EXPORT FormFieldIconData *getData( const FormFieldIcon &f );
+    	Dict *icon;
     };
 
 }

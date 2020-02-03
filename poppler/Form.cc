@@ -26,6 +26,7 @@
 // Copyright 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
+// Copyright 2019 João Netto <joaonetto901@gmail.com>
 //
 //========================================================================
 
@@ -33,10 +34,10 @@
 
 #include <set>
 #include <limits>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
@@ -173,12 +174,19 @@ LinkAction *FormWidget::getActivationAction() {
   return widget ? widget->getAction() : nullptr;
 }
 
-LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType type) {
-  return widget ? widget->getFormAdditionalAction(type) : nullptr;
+LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType t) {
+  return widget ? widget->getFormAdditionalAction(t) : nullptr;
 }
 
-FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+bool FormWidget::setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js) {
+  if (!widget)
+    return false;
+
+  return widget->setFormAdditionalAction(t, js);
+}
+
+FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *dictObj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, dictObj, num, refA, p)
 {
   type = formButton;
   onStr = nullptr;
@@ -256,8 +264,8 @@ FormFieldButton *FormWidgetButton::parent() const
 }
 
 
-FormWidgetText::FormWidgetText (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+FormWidgetText::FormWidgetText (PDFDoc *docA, Object *dictObj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, dictObj, num, refA, p)
 {
   type = formText;
 }
@@ -328,13 +336,18 @@ void FormWidgetText::setContent(const GooString* new_content)
   parent()->setContentCopy(new_content);
 }
 
+void FormWidgetText::setAppearanceContent(const GooString* new_content)
+{
+  parent()->setAppearanceContentCopy(new_content);
+}
+
 FormFieldText *FormWidgetText::parent() const
 {
   return static_cast<FormFieldText*>(field);
 }
 
-FormWidgetChoice::FormWidgetChoice(PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+FormWidgetChoice::FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, dictObj, num, refA, p)
 {
   type = formChoice;
 }
@@ -445,8 +458,8 @@ FormFieldChoice *FormWidgetChoice::parent() const
   return static_cast<FormFieldChoice*>(field);
 }
 
-FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, dictObj, num, refA, p)
 {
   type = formSignature;
 }
@@ -463,16 +476,16 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
 
 std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds()
 {
-  Object* obj = static_cast<FormFieldSignature*>(field)->getByteRange();
+  Object* byteRangeObj = static_cast<FormFieldSignature*>(field)->getByteRange();
   std::vector<Goffset> range_vec;
-  if (obj->isArray())
+  if (byteRangeObj->isArray())
   {
-    if (obj->arrayGetLength() == 4)
+    if (byteRangeObj->arrayGetLength() == 4)
     {
       for (int i = 0; i < 2; ++i)
       {
-        Object offsetObj(obj->arrayGet(2*i));
-        Object lenObj(obj->arrayGet(2*i+1));
+        Object offsetObj(byteRangeObj->arrayGet(2*i));
+        Object lenObj(byteRangeObj->arrayGet(2*i+1));
         if (offsetObj.isIntOrInt64() && lenObj.isIntOrInt64())
         {
           Goffset offset = offsetObj.getIntOrInt64();
@@ -572,7 +585,7 @@ GooString* FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
             }
             if (sigLen > 0 && 2*(sigLen+lenBytes) <= len-4)
             {
-              for (int i = 2*(sigLen+lenBytes)+4; i < len; ++i)
+              for (Goffset i = 2*(sigLen+lenBytes)+4; i < len; ++i)
               {
                 if (gstr.getChar(i) != '0')
                 {
@@ -585,9 +598,9 @@ GooString* FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
               len = 0;
           }
         }
-        for (int i = 0; i < len; ++i)
+        for ( const char c : gstr.toStr() )
         {
-          if (!isxdigit(gstr.getChar(i)))
+          if (!isxdigit(c))
             len = 0;
         }
         if (len > 0)
@@ -799,7 +812,7 @@ void FormField::createWidgetAnnotations() {
   }
 }
 
-void FormField::_createWidget (Object *obj, Ref aref)
+void FormField::_createWidget (Object *objA, Ref aref)
 {
   terminal = true;
   numChildren++;
@@ -807,16 +820,16 @@ void FormField::_createWidget (Object *obj, Ref aref)
   //ID = index in "widgets" table
   switch (type) {
   case formButton:
-    widgets[numChildren-1] = new FormWidgetButton(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetButton(doc, objA, numChildren-1, aref, this);
     break;
   case formText:
-    widgets[numChildren-1] = new FormWidgetText(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetText(doc, objA, numChildren-1, aref, this);
     break;
   case formChoice:
-    widgets[numChildren-1] = new FormWidgetChoice(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetChoice(doc, objA, numChildren-1, aref, this);
     break;
   case formSignature:
-    widgets[numChildren-1] = new FormWidgetSignature(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetSignature(doc, objA, numChildren-1, aref, this);
     break;
   default:
     error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
@@ -842,7 +855,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 
 GooString* FormField::getFullyQualifiedName() {
   Object obj1;
-  Object parent;
+  Object parentObj;
   const GooString *parent_name;
   GooString *full_name;
   bool unicode_encoded = false;
@@ -853,8 +866,8 @@ GooString* FormField::getFullyQualifiedName() {
   full_name = new GooString();
 
   obj1 = obj.copy();
-  while (parent = obj1.dictLookup("Parent"), parent.isDict()) {
-    Object obj2 = parent.dictLookup("T");
+  while (parentObj = obj1.dictLookup("Parent"), parentObj.isDict()) {
+    Object obj2 = parentObj.dictLookup("T");
     if (obj2.isString()) {
       parent_name = obj2.getString();
 
@@ -879,7 +892,7 @@ GooString* FormField::getFullyQualifiedName() {
         }
       }
     }
-    obj1 = parent.copy();
+    obj1 = parentObj.copy();
   }
 
   if (partialName) {
@@ -964,8 +977,8 @@ void FormField::setReadOnly (bool value)
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(aobj), ref, parent, usedParents, formButton)
+FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&dictObj, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(dictObj), refA, parentA, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
   active_child = -1;
@@ -1134,12 +1147,13 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(aobj), ref, parent, usedParents, formText)
+FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(dictObj), refA, parentA, usedParents, formText)
 {
   Dict* dict = obj.getDict();
   Object obj1;
   content = nullptr;
+  internalContent = nullptr;
   multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
   maxLen = 0;
 
@@ -1207,9 +1221,21 @@ void FormFieldText::setContentCopy (const GooString* new_content)
   updateChildrenAppearance();
 }
 
+void FormFieldText::setAppearanceContentCopy (const GooString* new_content)
+{
+  delete internalContent;
+  internalContent = nullptr;
+
+  if (new_content) {
+    internalContent = new_content->copy();
+  }
+  updateChildrenAppearance();
+}
+
 FormFieldText::~FormFieldText()
 {
   delete content;
+  delete internalContent;
 }
 
 double FormFieldText::getTextFontSize()
@@ -1306,8 +1332,8 @@ int FormFieldText::parseDA(std::vector<GooString*>* daToks)
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(aobj), ref, parent, usedParents, formChoice)
+FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), refA, parentA, usedParents, formChoice)
 {
   numChoices = 0;
   choices = nullptr;
@@ -1415,7 +1441,12 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, For
     } else if (obj1.isArray()) {
       for (int i = 0; i < numChoices; i++) {
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
-          Object obj2 = obj1.arrayGet(j);
+          const Object obj2 = obj1.arrayGet(j);
+          if (!obj2.isString()) {
+            error(errSyntaxError, -1, "FormWidgetChoice:: V array contains a non string object");
+            continue;
+          }
+
           bool matches = false;
 
           if (choices[i].exportVal) {
@@ -1598,8 +1629,8 @@ const GooString *FormFieldChoice::getSelectedChoice() const {
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(dict), ref, parent, usedParents, formSignature),
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature),
     signature_type(adbe_pkcs7_detached),
     signature(nullptr), signature_info(nullptr)
 {
@@ -1907,21 +1938,21 @@ Object Form::fieldLookup(Dict *field, const char *key) {
   return ::fieldLookup(field, key, &usedParents);
 }
 
-FormField *Form::createFieldFromDict (Object &&obj, PDFDoc *docA, const Ref pref, FormField *parent, std::set<int> *usedParents)
+FormField *Form::createFieldFromDict (Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents)
 {
     FormField *field;
 
     const Object obj2 = Form::fieldLookup(obj.getDict (), "FT");
     if (obj2.isName("Btn")) {
-      field = new FormFieldButton(docA, std::move(obj), pref, parent, usedParents);
+      field = new FormFieldButton(docA, std::move(obj), aref, parent, usedParents);
     } else if (obj2.isName("Tx")) {
-      field = new FormFieldText(docA, std::move(obj), pref, parent, usedParents);
+      field = new FormFieldText(docA, std::move(obj), aref, parent, usedParents);
     } else if (obj2.isName("Ch")) {
-      field = new FormFieldChoice(docA, std::move(obj), pref, parent, usedParents);
+      field = new FormFieldChoice(docA, std::move(obj), aref, parent, usedParents);
     } else if (obj2.isName("Sig")) {
-      field = new FormFieldSignature(docA, std::move(obj), pref, parent, usedParents);
+      field = new FormFieldSignature(docA, std::move(obj), aref, parent, usedParents);
     } else { //we don't have an FT entry => non-terminal field
-      field = new FormField(docA, std::move(obj), pref, parent, usedParents);
+      field = new FormField(docA, std::move(obj), aref, parent, usedParents);
     }
 
     return field;

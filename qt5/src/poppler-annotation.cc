@@ -769,8 +769,7 @@ Ref AnnotationPrivate::pdfObjectReference() const
 {
     if (pdfAnnot == nullptr)
     {
-        const Ref invalid_ref = { -1, -1 };
-        return invalid_ref;
+        return Ref::INVALID();
     }
 
     return pdfAnnot->getRef();
@@ -1245,7 +1244,7 @@ void Annotation::storeBaseAnnotationProperties( QDomNode & annNode, QDomDocument
     bE.setAttribute( QStringLiteral("b"), QString::number( (double)brect.bottom() ) );
 
     // Sub-Node-2 - penStyle
-    const QVector<double> dashArray = s.dashArray();
+    const QVector<double> &dashArray = s.dashArray();
     if ( s.width() != 1 || s.lineStyle() != Solid || s.xCorners() != 0 ||
          s.yCorners() != 0.0 || dashArray.size() != 1 || dashArray[0] != 3 )
     {
@@ -3692,7 +3691,7 @@ class LinkAnnotationPrivate : public AnnotationPrivate
 {
     public:
         LinkAnnotationPrivate();
-        ~LinkAnnotationPrivate();
+        ~LinkAnnotationPrivate() override;
         Annotation * makeAlias() override;
         Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
@@ -4171,7 +4170,7 @@ class FileAttachmentAnnotationPrivate : public AnnotationPrivate
 {
     public:
         FileAttachmentAnnotationPrivate();
-        ~FileAttachmentAnnotationPrivate();
+        ~FileAttachmentAnnotationPrivate() override;
         Annotation * makeAlias() override;
         Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
@@ -4275,7 +4274,7 @@ class SoundAnnotationPrivate : public AnnotationPrivate
 {
     public:
         SoundAnnotationPrivate();
-        ~SoundAnnotationPrivate();
+        ~SoundAnnotationPrivate() override;
         Annotation * makeAlias() override;
         Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
@@ -4379,7 +4378,7 @@ class MovieAnnotationPrivate : public AnnotationPrivate
 {
     public:
         MovieAnnotationPrivate();
-        ~MovieAnnotationPrivate();
+        ~MovieAnnotationPrivate() override;
         Annotation * makeAlias() override;
         Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
@@ -4483,7 +4482,7 @@ class ScreenAnnotationPrivate : public AnnotationPrivate
 {
     public:
         ScreenAnnotationPrivate();
-        ~ScreenAnnotationPrivate();
+        ~ScreenAnnotationPrivate() override;
         Annotation * makeAlias() override;
         Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
@@ -4984,7 +4983,7 @@ class RichMediaAnnotationPrivate : public AnnotationPrivate
         {
         }
 
-        ~RichMediaAnnotationPrivate()
+        ~RichMediaAnnotationPrivate() override
         {
             delete settings;
             delete content;

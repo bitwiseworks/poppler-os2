@@ -30,11 +30,11 @@
 //========================================================================
 
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"
@@ -52,44 +52,43 @@ FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage) {
 FontInfoScanner::~FontInfoScanner() {
 }
 
-std::vector<FontInfo*> *FontInfoScanner::scan(int nPages) {
+std::vector<FontInfo*> FontInfoScanner::scan(int nPages) {
   Page *page;
   Dict *resDict;
   Annots *annots;
   int lastPage;
 
+  std::vector<FontInfo*> result;
+
   if (currentPage > doc->getNumPages()) {
-    return nullptr;
+    return result;
   }
- 
-  auto result = new std::vector<FontInfo*>();
 
   lastPage = currentPage + nPages;
   if (lastPage > doc->getNumPages() + 1) {
     lastPage = doc->getNumPages() + 1;
   }
 
-  XRef *xrefA = doc->getXRef()->copy();
+  std::unique_ptr<XRef> xrefA(doc->getXRef()->copy());
   for (int pg = currentPage; pg < lastPage; ++pg) {
     page = doc->getPage(pg);
     if (!page) continue;
 
-    if ((resDict = page->getResourceDictCopy(xrefA))) {
-      scanFonts(xrefA, resDict, result);
+    if ((resDict = page->getResourceDictCopy(xrefA.get()))) {
+      scanFonts(xrefA.get(), resDict, &result);
       delete resDict;
     }
     annots = page->getAnnots();
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       Object obj1 = annots->getAnnot(i)->getAppearanceResDict();
       if (obj1.isDict()) {
-        scanFonts(xrefA, obj1.getDict(), result);
+        scanFonts(xrefA.get(), obj1.getDict(), &result);
       }
     }
   }
 
   currentPage = lastPage;
 
-  delete xrefA;
   return result;
 }
 
@@ -126,8 +125,8 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
   // recursively scan any resource dictionaries in objects in this
   // resource dictionary
   const char *resTypes[] = { "XObject", "Pattern" };
-  for (unsigned int resType = 0; resType < sizeof(resTypes) / sizeof(resTypes[0]); ++resType) {
-    Object objDict = resDict->lookup(resTypes[resType]);
+  for (const char *resType : resTypes) {
+    Object objDict = resDict->lookup(resType);
     if (objDict.isDict()) {
       for (int i = 0; i < objDict.dictGetLength(); ++i) {
         Ref obj2Ref;
@@ -215,7 +214,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
   }
 }
 
-FontInfo::FontInfo(FontInfo& f) {
+FontInfo::FontInfo(const FontInfo& f) {
   name = f.name ? f.name->copy() : nullptr;
   file = f.file ? f.file->copy() : nullptr;
   encoding = f.encoding ? f.encoding->copy() : nullptr;

@@ -30,7 +30,7 @@
 
 #include <config.h>
 
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"
@@ -172,7 +172,7 @@ Object Parser::getObj(bool simpleOnly,
     s2 = new GooString();
     decrypt = new DecryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)),
 				fileKey, encAlgorithm, keyLength,
-				objNum, objGen);
+                {objNum, objGen});
     decrypt->reset();
     while ((c = decrypt->getChar()) != EOF) {
       s2->append((char)c);
@@ -294,7 +294,7 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   // handle decryption
   if (fileKey) {
     str = new DecryptStream(str, fileKey, encAlgorithm, keyLength,
-			    objNum, objGen);
+                            {objNum, objGen});
   }
 
   // get filters

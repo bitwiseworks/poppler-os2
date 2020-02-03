@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -26,6 +26,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -91,9 +92,6 @@ public:
     static_cast<std::string&>(*this).append(*str2);
   }
 
-  // Convert an integer to a string.
-  static GooString *fromInt(int x);
-
   // Create a formatted string.  Similar to printf, but without the
   // string overflow issues.  Formatting elements consist of:
   //     {<arg>:[<width>][.<precision>]<type>}
@@ -142,6 +140,7 @@ public:
   // Append a character or string.
   GooString *append(char c) { push_back(c); return this; }
   GooString *append(const GooString *str) { static_cast<std::string&>(*this).append(*str); return this; }
+  GooString *append(const std::string& str) { static_cast<std::string&>(*this).append(str); return this; }
   GooString *append(const char *str) { static_cast<std::string&>(*this).append(str); return this; }
   GooString *append(const char *str, int lengthA) { static_cast<std::string&>(*this).append(str, lengthA); return this; }
 
@@ -158,12 +157,12 @@ public:
   // Delete a character or range of characters.
   GooString *del(int i, int n = 1) { erase(i, n); return this; }
 
-  // Convert string to all-upper/all-lower case.
-  GooString *upperCase();
+  // Convert string to all-lower case.
   GooString *lowerCase();
 
   // Compare two strings:  -1:<  0:=  +1:>
   int cmp(const GooString *str) const { return compare(*str); }
+  int cmp(const std::string &str) const { return compare(str); }
   int cmpN(GooString *str, int n) const { return compare(0, n, *str); }
   int cmp(const char *sA) const { return compare(sA); }
   int cmpN(const char *sA, int n) const { return compare(0, n, sA); }

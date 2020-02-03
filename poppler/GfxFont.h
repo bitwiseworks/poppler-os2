@@ -173,9 +173,6 @@ public:
   // Build a GfxFont object.
   static GfxFont *makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
 
-  GfxFont(const char *tagA, Ref idA, GooString *nameA,
-	  GfxFontType typeA, Ref embFontIDA);
-
   GfxFont(const GfxFont &) = delete;
   GfxFont& operator=(const GfxFont &other) = delete;
 
@@ -258,7 +255,7 @@ public:
   GfxFontLoc *locateFont(XRef *xref, PSOutputDev *ps);
 
   // Locate a Base-14 font file for a specified font name.
-  static GfxFontLoc *locateBase14Font(GooString *base14Name);
+  static GfxFontLoc *locateBase14Font(const GooString *base14Name);
 
   // Read an external or embedded font file into a buffer.
   char *readEmbFontFile(XRef *xref, int *len);
@@ -270,7 +267,7 @@ public:
   // the number actually used.  Returns the number of bytes used by
   // the char code.
   virtual int getNextChar(const char *s, int len, CharCode *code,
-			  Unicode **u, int *uLen,
+			  Unicode const **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const = 0;
 
   // Does this font have a toUnicode map?
@@ -285,6 +282,7 @@ public:
   static const char *getAlternateName(const char *name);
 
 protected:
+  GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA);
 
   virtual ~GfxFont();
 
@@ -296,7 +294,7 @@ protected:
 
   GooString *tag;			// PDF font tag
   Ref id;			// reference (used as unique ID)
-  GooString *name;		// font name
+  const GooString *name;		// font name
   GooString *family;		// font family
   Stretch stretch;			// font stretch
   Weight weight;			// font weight
@@ -326,7 +324,7 @@ public:
 	      GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
   int getNextChar(const char *s, int len, CharCode *code,
-			  Unicode **u, int *uLen,
+			  Unicode const **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const override;
 
   // Return the encoding.
@@ -362,7 +360,7 @@ public:
   Dict *getResources();
 
 private:
-  ~Gfx8BitFont();
+  ~Gfx8BitFont() override;
 
   const Base14FontMapEntry *base14;	// for Base-14 fonts only; NULL otherwise
   char *enc[256];		// char code --> char name
@@ -391,7 +389,7 @@ public:
   bool isCIDFont() const override { return true; }
 
   int getNextChar(const char *s, int len, CharCode *code,
-			  Unicode **u, int *uLen,
+			  Unicode const **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const override;
 
   // Return the writing mode (0=horizontal, 1=vertical).
@@ -408,12 +406,12 @@ public:
   int *getCIDToGID() const { return cidToGID; }
   int getCIDToGIDLen() const { return cidToGIDLen; }
 
-  int *getCodeToGIDMap(FoFiTrueType *ff, int *length);
+  int *getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen);
 
   double getWidth(char* s, int len) const;
 
 private:
-  ~GfxCIDFont();
+  ~GfxCIDFont() override;
 
   int mapCodeToGID(FoFiTrueType *ff, int cmapi,
     Unicode unicode, bool wmode);

@@ -44,9 +44,9 @@
 
 #include <algorithm>
 #include <memory>
-#include <stddef.h>
-#include <math.h>
-#include <string.h>
+#include <cstddef>
+#include <cmath>
+#include <cstring>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Error.h"
@@ -437,7 +437,7 @@ void GfxColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separat
 }
 
 void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
-				     int maxImgPixel) {
+				     int maxImgPixel) const {
   int i;
 
   for (i = 0; i < getNComps(); ++i) {
@@ -663,7 +663,7 @@ GfxDeviceGrayColorSpace::GfxDeviceGrayColorSpace() {
 GfxDeviceGrayColorSpace::~GfxDeviceGrayColorSpace() {
 }
 
-GfxColorSpace *GfxDeviceGrayColorSpace::copy() {
+GfxColorSpace *GfxDeviceGrayColorSpace::copy() const {
   return new GfxDeviceGrayColorSpace();
 }
 
@@ -728,12 +728,11 @@ void GfxDeviceGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
 }
 
 void GfxDeviceGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   deviceN->c[3] = clip01(gfxColorComp1 - color->c[0]);
 }
 
-void GfxDeviceGrayColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceGrayColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
 }
 
@@ -755,7 +754,7 @@ GfxCalGrayColorSpace::~GfxCalGrayColorSpace() {
 #endif
 }
 
-GfxColorSpace *GfxCalGrayColorSpace::copy() {
+GfxColorSpace *GfxCalGrayColorSpace::copy() const {
   GfxCalGrayColorSpace *cs;
 
   cs = new GfxCalGrayColorSpace();
@@ -796,32 +795,18 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr, GfxState *state) {
   cs = new GfxCalGrayColorSpace();
   obj2 = obj1.dictLookup("WhitePoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->whiteX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->whiteY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->whiteZ = obj3.getNum();
+    cs->whiteX = obj2.arrayGet(0).getNumWithDefaultValue(1);
+    cs->whiteY = obj2.arrayGet(1).getNumWithDefaultValue(1);
+    cs->whiteZ = obj2.arrayGet(2).getNumWithDefaultValue(1);
   }
   obj2 = obj1.dictLookup("BlackPoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->blackX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->blackY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->blackZ = obj3.getNum();
+    cs->blackX = obj2.arrayGet(0).getNumWithDefaultValue(0);
+    cs->blackY = obj2.arrayGet(1).getNumWithDefaultValue(0);
+    cs->blackZ = obj2.arrayGet(2).getNumWithDefaultValue(0);
   }
-  obj2 = obj1.dictLookup("Gamma");
-  if (obj2.isNum()) {
-    cs->gamma = obj2.getNum();
-  }
+
+  cs->gamma = obj1.dictLookup("Gamma").getNumWithDefaultValue(1);
 
   cs->kr = 1 / (xyzrgb[0][0] * cs->whiteX +
 		xyzrgb[0][1] * cs->whiteY +
@@ -948,8 +933,7 @@ void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 
 void GfxCalGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -957,7 +941,7 @@ void GfxCalGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxCalGrayColorSpace::getDefaultColor(GfxColor *color) {
+void GfxCalGrayColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
 }
 
@@ -971,7 +955,7 @@ GfxDeviceRGBColorSpace::GfxDeviceRGBColorSpace() {
 GfxDeviceRGBColorSpace::~GfxDeviceRGBColorSpace() {
 }
 
-GfxColorSpace *GfxDeviceRGBColorSpace::copy() {
+GfxColorSpace *GfxDeviceRGBColorSpace::copy() const {
   return new GfxDeviceRGBColorSpace();
 }
 
@@ -1090,8 +1074,7 @@ void GfxDeviceRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
 
 void GfxDeviceRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -1099,7 +1082,7 @@ void GfxDeviceRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   color->c[1] = 0;
   color->c[2] = 0;
@@ -1126,7 +1109,7 @@ GfxCalRGBColorSpace::~GfxCalRGBColorSpace() {
 #endif
 }
 
-GfxColorSpace *GfxCalRGBColorSpace::copy() {
+GfxColorSpace *GfxCalRGBColorSpace::copy() const {
   GfxCalRGBColorSpace *cs;
   int i;
 
@@ -1166,39 +1149,21 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr, GfxState *state) {
   cs = new GfxCalRGBColorSpace();
   obj2 = obj1.dictLookup("WhitePoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->whiteX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->whiteY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->whiteZ = obj3.getNum();
+    cs->whiteX = obj2.arrayGet(0).getNumWithDefaultValue(1);
+    cs->whiteY = obj2.arrayGet(1).getNumWithDefaultValue(1);
+    cs->whiteZ = obj2.arrayGet(2).getNumWithDefaultValue(1);
   }
   obj2 = obj1.dictLookup("BlackPoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->blackX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->blackY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->blackZ = obj3.getNum();
+    cs->blackX = obj2.arrayGet(0).getNumWithDefaultValue(0);
+    cs->blackY = obj2.arrayGet(1).getNumWithDefaultValue(0);
+    cs->blackZ = obj2.arrayGet(2).getNumWithDefaultValue(0);
   }
   obj2 = obj1.dictLookup("Gamma");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->gammaR = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->gammaG = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->gammaB = obj3.getNum();
+    cs->gammaR = obj2.arrayGet(0).getNumWithDefaultValue(1);
+    cs->gammaG = obj2.arrayGet(1).getNumWithDefaultValue(1);
+    cs->gammaB = obj2.arrayGet(2).getNumWithDefaultValue(1);
   }
   obj2 = obj1.dictLookup("Matrix");
   if (obj2.isArray() && obj2.arrayGetLength() == 9) {
@@ -1333,8 +1298,7 @@ void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 
 void GfxCalRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -1342,7 +1306,7 @@ void GfxCalRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) c
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxCalRGBColorSpace::getDefaultColor(GfxColor *color) {
+void GfxCalRGBColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   color->c[1] = 0;
   color->c[2] = 0;
@@ -1358,7 +1322,7 @@ GfxDeviceCMYKColorSpace::GfxDeviceCMYKColorSpace() {
 GfxDeviceCMYKColorSpace::~GfxDeviceCMYKColorSpace() {
 }
 
-GfxColorSpace *GfxDeviceCMYKColorSpace::copy() {
+GfxColorSpace *GfxDeviceCMYKColorSpace::copy() const {
   return new GfxDeviceCMYKColorSpace();
 }
 
@@ -1466,15 +1430,14 @@ void GfxDeviceCMYKColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
 }
 
 void GfxDeviceCMYKColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   deviceN->c[0] = clip01(color->c[0]);
   deviceN->c[1] = clip01(color->c[1]);
   deviceN->c[2] = clip01(color->c[2]);
   deviceN->c[3] = clip01(color->c[3]);
 }
 
-void GfxDeviceCMYKColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceCMYKColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   color->c[1] = 0;
   color->c[2] = 0;
@@ -1500,7 +1463,7 @@ GfxLabColorSpace::~GfxLabColorSpace() {
 #endif
 }
 
-GfxColorSpace *GfxLabColorSpace::copy() {
+GfxColorSpace *GfxLabColorSpace::copy() const {
   GfxLabColorSpace *cs;
 
   cs = new GfxLabColorSpace();
@@ -1537,32 +1500,22 @@ GfxColorSpace *GfxLabColorSpace::parse(Array *arr, GfxState *state) {
   bool ok = true;
   obj2 = obj1.dictLookup("WhitePoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    cs->whiteX = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(1);
-    cs->whiteY = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(2);
-    cs->whiteZ = obj3.getNum(&ok);
+    cs->whiteX = obj2.arrayGet(0).getNum(&ok);
+    cs->whiteY = obj2.arrayGet(1).getNum(&ok);
+    cs->whiteZ = obj2.arrayGet(2).getNum(&ok);
   }
   obj2 = obj1.dictLookup("BlackPoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    cs->blackX = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(1);
-    cs->blackY = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(2);
-    cs->blackZ = obj3.getNum(&ok);
+    cs->blackX = obj2.arrayGet(0).getNum(&ok);
+    cs->blackY = obj2.arrayGet(1).getNum(&ok);
+    cs->blackZ = obj2.arrayGet(2).getNum(&ok);
   }
   obj2 = obj1.dictLookup("Range");
   if (obj2.isArray() && obj2.arrayGetLength() == 4) {
-    Object obj3 = obj2.arrayGet(0);
-    cs->aMin = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(1);
-    cs->aMax = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(2);
-    cs->bMin = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(3);
-    cs->bMax = obj3.getNum(&ok);
+    cs->aMin = obj2.arrayGet(0).getNum(&ok);
+    cs->aMax = obj2.arrayGet(1).getNum(&ok);
+    cs->bMin = obj2.arrayGet(2).getNum(&ok);
+    cs->bMax = obj2.arrayGet(3).getNum(&ok);
   }
 
   if (!ok) {
@@ -1731,8 +1684,7 @@ void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 
 void GfxLabColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -1740,7 +1692,7 @@ void GfxLabColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) cons
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxLabColorSpace::getDefaultColor(GfxColor *color) {
+void GfxLabColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   if (aMin > 0) {
     color->c[1] = dblToCol(aMin);
@@ -1759,7 +1711,7 @@ void GfxLabColorSpace::getDefaultColor(GfxColor *color) {
 }
 
 void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
-					int maxImgPixel) {
+					int maxImgPixel) const {
   decodeLow[0] = 0;
   decodeRange[0] = 100;
   decodeLow[1] = aMin;
@@ -1795,7 +1747,7 @@ GfxICCBasedColorSpace::~GfxICCBasedColorSpace() {
 #endif
 }
 
-GfxColorSpace *GfxICCBasedColorSpace::copy() {
+GfxColorSpace *GfxICCBasedColorSpace::copy() const {
   GfxICCBasedColorSpace *cs;
   int i;
 
@@ -1818,16 +1770,16 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   int nCompsA;
   GfxColorSpace *altA;
   Dict *dict;
-  Object obj1, obj2, obj3;
+  Object obj1, obj2;
   int i;
 
   if (arr->getLength() < 2) {
     error(errSyntaxError, -1, "Bad ICCBased color space");
     return nullptr;
   }
+#ifdef USE_CMS
   const Object &obj1Ref = arr->getNF(1);
   const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
-#ifdef USE_CMS
   // check cache
   if (out && iccProfileStreamA != Ref::INVALID()) {
     if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
@@ -1897,14 +1849,9 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   cs = new GfxICCBasedColorSpace(nCompsA, altA);
   obj2 = dict->lookup("Range");
   if (obj2.isArray() && obj2.arrayGetLength() == 2 * nCompsA) {
-    Object obj4;
     for (i = 0; i < nCompsA; ++i) {
-      obj3 = obj2.arrayGet(2*i);
-      obj4 = obj2.arrayGet(2*i+1);
-      if (obj3.isNum() && obj4.isNum()) {
-        cs->rangeMin[i] = obj3.getNum();
-        cs->rangeMax[i] = obj4.getNum();
-      }
+      cs->rangeMin[i] = obj2.arrayGet(2*i).getNumWithDefaultValue(0);
+      cs->rangeMax[i] = obj2.arrayGet(2*i+1).getNumWithDefaultValue(1);
     }
   }
 
@@ -2380,8 +2327,7 @@ bool GfxICCBasedColorSpace::useGetDeviceNLine() const {
 
 void GfxICCBasedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -2389,7 +2335,7 @@ void GfxICCBasedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN)
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) {
+void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) const {
   int i;
 
   for (i = 0; i < nComps; ++i) {
@@ -2405,7 +2351,7 @@ void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) {
 
 void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow,
 					     double *decodeRange,
-					     int maxImgPixel) {
+					     int maxImgPixel) const {
   alt->getDefaultRanges(decodeLow, decodeRange, maxImgPixel);
 
 #if 0
@@ -2438,7 +2384,7 @@ GfxIndexedColorSpace::~GfxIndexedColorSpace() {
   gfree(lookup);
 }
 
-GfxColorSpace *GfxIndexedColorSpace::copy() {
+GfxColorSpace *GfxIndexedColorSpace::copy() const {
   GfxIndexedColorSpace *cs;
 
   cs = new GfxIndexedColorSpace(base->copy(), indexHigh);
@@ -2638,13 +2584,13 @@ void GfxIndexedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   base->getDeviceN(mapColorToBase(color, &color2), deviceN);
 }
 
-void GfxIndexedColorSpace::getDefaultColor(GfxColor *color) {
+void GfxIndexedColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
 }
 
 void GfxIndexedColorSpace::getDefaultRanges(double *decodeLow,
 					    double *decodeRange,
-					    int maxImgPixel) {
+					    int maxImgPixel) const {
   decodeLow[0] = 0;
   decodeRange[0] = maxImgPixel;
 }
@@ -2695,7 +2641,7 @@ GfxSeparationColorSpace::~GfxSeparationColorSpace() {
     gfree(mapping);
 }
 
-GfxColorSpace *GfxSeparationColorSpace::copy() {
+GfxColorSpace *GfxSeparationColorSpace::copy() const {
   int *mappingA = nullptr;
   if (mapping != nullptr) {
     mappingA = (int *) gmalloc(sizeof(int));
@@ -2830,8 +2776,7 @@ void GfxSeparationColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
 }
 
 void GfxSeparationColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   if (mapping == nullptr || mapping[0] == -1) {
     GfxCMYK cmyk;
 
@@ -2845,7 +2790,7 @@ void GfxSeparationColorSpace::getDeviceN(const GfxColor *color, GfxColor *device
   }
 }
 
-void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
+void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = gfxColorComp1;
 }
 
@@ -2903,33 +2848,32 @@ void GfxSeparationColorSpace::createMapping(std::vector<GfxSeparationColorSpace*
 //------------------------------------------------------------------------
 
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
-					   GooString **namesA,
+					   std::vector<std::string> &&namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
-					   std::vector<GfxSeparationColorSpace*> *sepsCSA) {
-  int i;
-
-  nComps = nCompsA;
+					   std::vector<GfxSeparationColorSpace*> *sepsCSA)
+ : nComps(nCompsA)
+ , names(std::move(namesA))
+{
   alt = altA;
   func = funcA;
   sepsCS = sepsCSA;
   nonMarking = true;
   overprintMask = 0;
   mapping = nullptr;
-  for (i = 0; i < nComps; ++i) {
-    names[i] = namesA[i];
-    if (names[i]->cmp("None")) {
+  for (int i = 0; i < nComps; ++i) {
+    if (names[i] != "None") {
       nonMarking = false;
     }
-    if (!names[i]->cmp("Cyan")) {
+    if (names[i] == "Cyan") {
       overprintMask |= 0x01;
-    } else if (!names[i]->cmp("Magenta")) {
+    } else if (names[i] == "Magenta") {
       overprintMask |= 0x02;
-    } else if (!names[i]->cmp("Yellow")) {
+    } else if (names[i] == "Yellow") {
       overprintMask |= 0x04;
-    } else if (!names[i]->cmp("Black")) {
+    } else if (names[i] == "Black") {
       overprintMask |= 0x08;
-    } else if (!names[i]->cmp("All")) {
+    } else if (names[i] == "All") {
       overprintMask = 0xffffffff;
     } else {
       overprintMask = 0x0f;
@@ -2938,33 +2882,25 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 }
 
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
-					   GooString **namesA,
+					   const std::vector<std::string> &namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
 					   std::vector<GfxSeparationColorSpace*> *sepsCSA,
 					   int *mappingA,
 					   bool nonMarkingA,
-					   unsigned int overprintMaskA) {
-  int i;
-
-  nComps = nCompsA;
+					   unsigned int overprintMaskA)
+ : nComps(nCompsA)
+ , names(namesA)
+{
   alt = altA;
   func = funcA;
   sepsCS = sepsCSA;
   mapping = mappingA;
   nonMarking = nonMarkingA;
   overprintMask = overprintMaskA;
-  for (i = 0; i < nComps; ++i) {
-    names[i] = namesA[i]->copy();
-  }
 }
 
 GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
-  int i;
-
-  for (i = 0; i < nComps; ++i) {
-    delete names[i];
-  }
   delete alt;
   delete func;
   for (auto entry : *sepsCS) {
@@ -2975,21 +2911,19 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
     gfree(mapping);
 }
 
-GfxColorSpace *GfxDeviceNColorSpace::copy() {
-  int i;
+GfxColorSpace *GfxDeviceNColorSpace::copy() const {
   int *mappingA = nullptr;
 
   auto sepsCSA = new std::vector<GfxSeparationColorSpace*>();
   sepsCSA->reserve(sepsCS->size());
-  for (std::size_t i = 0; i < sepsCS->size(); i++) {
-    GfxSeparationColorSpace *scs = (*sepsCS)[i];
+  for (const GfxSeparationColorSpace *scs : *sepsCS) {
     if (likely(scs != nullptr)) {
       sepsCSA->push_back((GfxSeparationColorSpace*)scs->copy());
     }
   }
   if (mapping != nullptr) {
     mappingA = (int *)gmalloc(sizeof(int) * nComps);
-    for (i = 0; i < nComps; i++)
+    for (int i = 0; i < nComps; i++)
       mappingA[i] = mapping[i];
   }
   return new GfxDeviceNColorSpace(nComps, names, alt->copy(), func->copy(),
@@ -2999,11 +2933,10 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
 //~ handle the 'None' colorant
 GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion) {
   int nCompsA;
-  GooString *namesA[gfxColorMaxComps];
+  std::vector<std::string> namesA;
   GfxColorSpace *altA;
   Function *funcA;
   Object obj1;
-  int i;
   auto separationList = new std::vector<GfxSeparationColorSpace*>();
 
   if (arr->getLength() != 4 && arr->getLength() != 5) {
@@ -3021,19 +2954,19 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
 	  nCompsA, gfxColorMaxComps);
     nCompsA = gfxColorMaxComps;
   }
-  for (i = 0; i < nCompsA; ++i) {
+  for (int i = 0; i < nCompsA; ++i) {
     Object obj2 = obj1.arrayGet(i);
     if (!obj2.isName()) {
       error(errSyntaxWarning, -1, "Bad DeviceN color space (names)");
       nCompsA = i;
-      goto err3;
+      goto err1;
     }
-    namesA[i] = new GooString(obj2.getName());
+    namesA.emplace_back(obj2.getName());
   }
   obj1 = arr->get(2);
   if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space (alternate color space)");
-    goto err3;
+    goto err1;
   }
   obj1 = arr->get(3);
   if (!(funcA = Function::parse(&obj1))) {
@@ -3049,10 +2982,13 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
     Object obj2 = attribs->lookup("Colorants");
     if (obj2.isDict()) {
       Dict *colorants = obj2.getDict();
-      for (i = 0; i < colorants->getLength(); i++) {
+      for (int i = 0; i < colorants->getLength(); i++) {
         Object obj3 = colorants->getVal(i);
         if (obj3.isArray()) {
-	  separationList->push_back((GfxSeparationColorSpace*)GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion));
+	  GfxSeparationColorSpace *cs = (GfxSeparationColorSpace*)GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion);
+	  if (cs) {
+	    separationList->push_back(cs);
+	  }
         } else {
           error(errSyntaxWarning, -1, "Bad DeviceN color space (colorant value entry is not an Array)");
           goto err5;
@@ -3060,16 +2996,12 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
       }
     }
   }
-  return new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA, separationList);
+  return new GfxDeviceNColorSpace(nCompsA, std::move(namesA), altA, funcA, separationList);
 
  err5:
   delete funcA;
  err4:
   delete altA;
- err3:
-  for (i = 0; i < nCompsA; ++i) {
-    delete namesA[i];
-  }
  err1:
   delete separationList;
   return nullptr;
@@ -3121,8 +3053,7 @@ void GfxDeviceNColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 }
 
 void GfxDeviceNColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   if (mapping == nullptr) {
     GfxCMYK cmyk;
 
@@ -3138,7 +3069,7 @@ void GfxDeviceNColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   }
 }
 
-void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) const {
   int i;
 
   for (i = 0; i < nComps; ++i) {
@@ -3152,18 +3083,18 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
   mapping = (int *)gmalloc(sizeof(int) * nComps);
   unsigned int newOverprintMask = 0;
   for (int i = 0; i < nComps; i++) {
-    if (!names[i]->cmp("None")) {
+    if (names[i] == "None") {
       mapping[i] = -1;
-    } else if (!names[i]->cmp("Cyan")) {
+    } else if (names[i] == "Cyan") {
       newOverprintMask |= 0x01;
       mapping[i] = 0;
-    } else if (!names[i]->cmp("Magenta")) {
+    } else if (names[i] == "Magenta") {
       newOverprintMask |= 0x02;
       mapping[i] = 1;
-    } else if (!names[i]->cmp("Yellow")) {
+    } else if (names[i] == "Yellow") {
       newOverprintMask |= 0x04;
       mapping[i] = 2;
-    } else if (!names[i]->cmp("Black")) {
+    } else if (names[i] == "Black") {
       newOverprintMask |= 0x08;
       mapping[i] = 3;
     } else {
@@ -3173,8 +3104,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
       if (nComps == 1)
         sepFunc = func;
       else {
-        for (std::size_t k = 0; k < sepsCS->size(); k++) {
-          GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
+        for (const GfxSeparationColorSpace *sepCS : *sepsCS) {
           if (!sepCS->getName()->cmp(names[i])) {
             sepFunc = sepCS->getFunc();
             break;
@@ -3186,7 +3116,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
         if (!sepCS->getName()->cmp(names[i])) {
           if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
             error(errSyntaxWarning, -1,
-              "Different functions found for '{0:t}', convert immediately", names[i]);
+              "Different functions found for '{0:s}', convert immediately", names[i].c_str());
             gfree(mapping);
             mapping = nullptr;
             overprintMask = 0xffffffff;
@@ -3202,7 +3132,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
       if (!found) {
         if ((int)separationList->size() == maxSepComps) {
           error(errSyntaxWarning, -1,
-            "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, names[i]);
+            "Too many ({0:d}) spots, convert '{1:s}' immediately", maxSepComps, names[i].c_str());
           gfree(mapping);
           mapping = nullptr;
           overprintMask = 0xffffffff;
@@ -3211,10 +3141,9 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
         mapping[i] = separationList->size() + 4;
         newOverprintMask |= startOverprintMask;
         if (nComps == 1)
-	  separationList->push_back(new GfxSeparationColorSpace(names[i]->copy(),alt->copy(), func->copy()));
+	  separationList->push_back(new GfxSeparationColorSpace(new GooString(names[i]),alt->copy(), func->copy()));
         else {
-          for (std::size_t k = 0; k < sepsCS->size(); k++) {
-            GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
+          for (const GfxSeparationColorSpace *sepCS : *sepsCS) {
             if (!sepCS->getName()->cmp(names[i])) {
               found = true;
 	      separationList->push_back((GfxSeparationColorSpace*)sepCS->copy());
@@ -3249,7 +3178,7 @@ GfxPatternColorSpace::~GfxPatternColorSpace() {
   }
 }
 
-GfxColorSpace *GfxPatternColorSpace::copy() {
+GfxColorSpace *GfxPatternColorSpace::copy() const {
   return new GfxPatternColorSpace(under ? under->copy() :
 				          nullptr);
 }
@@ -3289,12 +3218,11 @@ void GfxPatternColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 }
 
 void GfxPatternColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   deviceN->c[3] = 1;
 }
 
-void GfxPatternColorSpace::getDefaultColor(GfxColor *color) {
+void GfxPatternColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0]=0;
 }
 
@@ -3413,9 +3341,9 @@ GfxTilingPattern *GfxTilingPattern::parse(Object *patObj, int patternRefNum) {
 }
 
 GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA,
-				   double *bboxA, double xStepA, double yStepA,
-				   Object *resDictA, double *matrixA,
-				   Object *contentStreamA, int patternRefNumA) :
+				   const double *bboxA, double xStepA, double yStepA,
+				   const Object *resDictA, const double *matrixA,
+				   const Object *contentStreamA, int patternRefNumA) :
   GfxPattern(1, patternRefNumA)
 {
   int i;
@@ -3437,7 +3365,7 @@ GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA,
 GfxTilingPattern::~GfxTilingPattern() {
 }
 
-GfxPattern *GfxTilingPattern::copy() {
+GfxPattern *GfxTilingPattern::copy() const {
   return new GfxTilingPattern(paintType, tilingType, bbox, xStep, yStep,
 			      &resDict, matrix, &contentStream, getPatternRefNum());
 }
@@ -3480,7 +3408,7 @@ GfxShadingPattern *GfxShadingPattern::parse(GfxResources *res, Object *patObj, O
   return new GfxShadingPattern(shadingA, matrixA, patternRefNum);
 }
 
-GfxShadingPattern::GfxShadingPattern(GfxShading *shadingA, double *matrixA, int patternRefNumA):
+GfxShadingPattern::GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA):
   GfxPattern(2, patternRefNumA)
 {
   int i;
@@ -3495,7 +3423,7 @@ GfxShadingPattern::~GfxShadingPattern() {
   delete shading;
 }
 
-GfxPattern *GfxShadingPattern::copy() {
+GfxPattern *GfxShadingPattern::copy() const {
   return new GfxShadingPattern(shading->copy(), matrix, getPatternRefNum());
 }
 
@@ -3508,7 +3436,7 @@ GfxShading::GfxShading(int typeA) {
   colorSpace = nullptr;
 }
 
-GfxShading::GfxShading(GfxShading *shading) {
+GfxShading::GfxShading(const GfxShading *shading) {
   int i;
 
   type = shading->type;
@@ -3517,10 +3445,10 @@ GfxShading::GfxShading(GfxShading *shading) {
     background.c[i] = shading->background.c[i];
   }
   hasBackground = shading->hasBackground;
-  xMin = shading->xMin;
-  yMin = shading->yMin;
-  xMax = shading->xMax;
-  yMax = shading->yMax;
+  bbox_xMin = shading->bbox_xMin;
+  bbox_yMin = shading->bbox_yMin;
+  bbox_xMax = shading->bbox_xMax;
+  bbox_yMax = shading->bbox_yMax;
   hasBBox = shading->hasBBox;
 }
 
@@ -3631,23 +3559,17 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
     }
   }
 
-  xMin = yMin = xMax = yMax = 0;
+  bbox_xMin = bbox_yMin = bbox_xMax = bbox_yMax = 0;
   hasBBox = false;
   obj1 = dict->lookup("BBox");
   if (obj1.isArray()) {
     if (obj1.arrayGetLength() == 4) {
-      Object obj2 = obj1.arrayGet(0);
-      Object obj3 = obj1.arrayGet(1);
-      Object obj4 = obj1.arrayGet(2);
-      Object obj5 = obj1.arrayGet(3);
-      if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum())
-      {
-        hasBBox = true;
-        xMin = obj2.getNum();
-        yMin = obj3.getNum();
-        xMax = obj4.getNum();
-        yMax = obj5.getNum();
-      } else {
+      hasBBox = true;
+      bbox_xMin = obj1.arrayGet(0).getNum(&hasBBox);
+      bbox_yMin = obj1.arrayGet(1).getNum(&hasBBox);
+      bbox_xMax = obj1.arrayGet(2).getNum(&hasBBox);
+      bbox_yMax = obj1.arrayGet(3).getNum(&hasBBox);
+      if (!hasBBox) {
         error(errSyntaxWarning, -1, "Bad BBox in shading dictionary (Values not numbers)");
       }
     } else {
@@ -3664,7 +3586,7 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
 
 GfxFunctionShading::GfxFunctionShading(double x0A, double y0A,
 				       double x1A, double y1A,
-				       double *matrixA,
+				       const double *matrixA,
 				       Function **funcsA, int nFuncsA):
   GfxShading(1)
 {
@@ -3683,7 +3605,7 @@ GfxFunctionShading::GfxFunctionShading(double x0A, double y0A,
   }
 }
 
-GfxFunctionShading::GfxFunctionShading(GfxFunctionShading *shading):
+GfxFunctionShading::GfxFunctionShading(const GfxFunctionShading *shading):
   GfxShading(shading)
 {
   int i;
@@ -3723,11 +3645,10 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
     bool decodeOk = true;
-    Object obj2;
-    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    x1A = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
-    y0A = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    y1A = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    x0A = obj1.arrayGet(0).getNum(&decodeOk);
+    x1A = obj1.arrayGet(1).getNum(&decodeOk);
+    y0A = obj1.arrayGet(2).getNum(&decodeOk);
+    y1A = obj1.arrayGet(3).getNum(&decodeOk);
 
     if (!decodeOk) {
       error(errSyntaxWarning, -1, "Invalid Domain array in function shading dictionary");
@@ -3741,13 +3662,12 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   obj1 = dict->lookup("Matrix");
   if (obj1.isArray() && obj1.arrayGetLength() == 6) {
     bool decodeOk = true;
-    Object obj2;
-    matrixA[0] = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    matrixA[1] = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
-    matrixA[2] = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    matrixA[3] = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
-    matrixA[4] = (obj2 = obj1.arrayGet(4), obj2.getNum(&decodeOk));
-    matrixA[5] = (obj2 = obj1.arrayGet(5), obj2.getNum(&decodeOk));
+    matrixA[0] = obj1.arrayGet(0).getNum(&decodeOk);
+    matrixA[1] = obj1.arrayGet(1).getNum(&decodeOk);
+    matrixA[2] = obj1.arrayGet(2).getNum(&decodeOk);
+    matrixA[3] = obj1.arrayGet(3).getNum(&decodeOk);
+    matrixA[4] = obj1.arrayGet(4).getNum(&decodeOk);
+    matrixA[5] = obj1.arrayGet(5).getNum(&decodeOk);
 
     if (!decodeOk) {
       error(errSyntaxWarning, -1, "Invalid Matrix array in function shading dictionary");
@@ -3787,7 +3707,7 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   return shading;
 }
 
-GfxShading *GfxFunctionShading::copy() {
+GfxShading *GfxFunctionShading::copy() const {
   return new GfxFunctionShading(this);
 }
 
@@ -3838,7 +3758,7 @@ GfxUnivariateShading::GfxUnivariateShading(int typeA,
   cacheValues = nullptr;
 }
 
-GfxUnivariateShading::GfxUnivariateShading(GfxUnivariateShading *shading):
+GfxUnivariateShading::GfxUnivariateShading(const GfxUnivariateShading *shading):
   GfxShading(shading)
 {
   int i;
@@ -3880,8 +3800,7 @@ int GfxUnivariateShading::getColor(double t, GfxColor *color) {
   }
 
   if (unlikely(nFuncs < 1 || nComps > gfxColorMaxComps)) {
-    for (int i = 0; i < gfxColorMaxComps; i++)
-        color->c[i] = 0;
+    clearGfxColor(color);
     return gfxColorMaxComps;
   }
 
@@ -4027,7 +3946,7 @@ GfxAxialShading::GfxAxialShading(double x0A, double y0A,
   y1 = y1A;
 }
 
-GfxAxialShading::GfxAxialShading(GfxAxialShading *shading):
+GfxAxialShading::GfxAxialShading(const GfxAxialShading *shading):
   GfxUnivariateShading(shading)
 {
   x0 = shading->x0;
@@ -4051,16 +3970,10 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   x0A = y0A = x1A = y1A = 0;
   obj1 = dict->lookup("Coords");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
-    Object obj2 = obj1.arrayGet(0);
-    Object obj3 = obj1.arrayGet(1);
-    Object obj4 = obj1.arrayGet(2);
-    Object obj5 = obj1.arrayGet(3);
-    if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum()) {
-      x0A = obj2.getNum();
-      y0A = obj3.getNum();
-      x1A = obj4.getNum();
-      y1A = obj5.getNum();
-    }
+    x0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    y0A = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    x1A = obj1.arrayGet(2).getNumWithDefaultValue(0);
+    y1A = obj1.arrayGet(3).getNumWithDefaultValue(0);
   } else {
     error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
     return nullptr;
@@ -4070,12 +3983,8 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   t1A = 1;
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
-    Object obj2 = obj1.arrayGet(0);
-    Object obj3 = obj1.arrayGet(1);
-    if (obj2.isNum() && obj3.isNum()) {
-      t0A = obj2.getNum();
-      t1A = obj3.getNum();
-    }
+    t0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    t1A = obj1.arrayGet(1).getNumWithDefaultValue(1);
   }
 
   obj1 = dict->lookup("Function");
@@ -4126,11 +4035,11 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   return shading;
 }
 
-GfxShading *GfxAxialShading::copy() {
+GfxShading *GfxAxialShading::copy() const {
   return new GfxAxialShading(this);
 }
 
-double GfxAxialShading::getDistance(double sMin, double sMax) {
+double GfxAxialShading::getDistance(double sMin, double sMax) const {
   double xMin, yMin, xMax, yMax;
 
   xMin = x0 + sMin * (x1 - x0);
@@ -4219,7 +4128,7 @@ GfxRadialShading::GfxRadialShading(double x0A, double y0A, double r0A,
   r1 = r1A;
 }
 
-GfxRadialShading::GfxRadialShading(GfxRadialShading *shading):
+GfxRadialShading::GfxRadialShading(const GfxRadialShading *shading):
   GfxUnivariateShading(shading)
 {
   x0 = shading->x0;
@@ -4246,14 +4155,12 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   x0A = y0A = r0A = x1A = y1A = r1A = 0;
   obj1 = dict->lookup("Coords");
   if (obj1.isArray() && obj1.arrayGetLength() == 6) {
-    Object obj2;
-    bool dummy; // just so that we can use the getNum that returns 0 on obj2 not being a num instead of aborting
-    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum(&dummy));
-    y0A = (obj2 = obj1.arrayGet(1), obj2.getNum(&dummy));
-    r0A = (obj2 = obj1.arrayGet(2), obj2.getNum(&dummy));
-    x1A = (obj2 = obj1.arrayGet(3), obj2.getNum(&dummy));
-    y1A = (obj2 = obj1.arrayGet(4), obj2.getNum(&dummy));
-    r1A = (obj2 = obj1.arrayGet(5), obj2.getNum(&dummy));
+    x0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    y0A = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    r0A = obj1.arrayGet(2).getNumWithDefaultValue(0);
+    x1A = obj1.arrayGet(3).getNumWithDefaultValue(0);
+    y1A = obj1.arrayGet(4).getNumWithDefaultValue(0);
+    r1A = obj1.arrayGet(5).getNumWithDefaultValue(0);
   } else {
     error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
     return nullptr;
@@ -4263,9 +4170,8 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   t1A = 1;
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
-    Object obj2;
-    t0A = (obj2 = obj1.arrayGet(0), obj2.isNum() ? obj2.getNum() : 0);
-    t1A = (obj2 = obj1.arrayGet(1), obj2.isNum() ? obj2.getNum() : 1);
+    t0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    t1A = obj1.arrayGet(1).getNumWithDefaultValue(1);
   }
 
   obj1 = dict->lookup("Function");
@@ -4278,6 +4184,9 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
     for (i = 0; i < nFuncsA; ++i) {
       Object obj2 = obj1.arrayGet(i);
       if (!(funcsA[i] = Function::parse(&obj2))) {
+	for (int j = 0; j < i; ++j) {
+	  delete funcsA[j];
+	}
 	return nullptr;
       }
     }
@@ -4305,11 +4214,11 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   return shading;
 }
 
-GfxShading *GfxRadialShading::copy() {
+GfxShading *GfxRadialShading::copy() const {
   return new GfxRadialShading(this);
 }
 
-double GfxRadialShading::getDistance(double sMin, double sMax) {
+double GfxRadialShading::getDistance(double sMin, double sMax) const {
   double xMin, yMin, rMin, xMax, yMax, rMax;
 
   xMin = x0 + sMin * (x1 - x0);
@@ -4711,7 +4620,7 @@ GfxGouraudTriangleShading::GfxGouraudTriangleShading(
 }
 
 GfxGouraudTriangleShading::GfxGouraudTriangleShading(
-			       GfxGouraudTriangleShading *shading):
+			       const GfxGouraudTriangleShading *shading):
   GfxShading(shading)
 {
   int i;
@@ -4801,17 +4710,16 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   }
   obj1 = dict->lookup("Decode");
   if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
-    Object obj2;
     bool decodeOk = true;
-    xMin = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    xMax = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
+    xMin = obj1.arrayGet(0).getNum(&decodeOk);
+    xMax = obj1.arrayGet(1).getNum(&decodeOk);
     xMul = (xMax - xMin) / (pow(2.0, coordBits) - 1);
-    yMin = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    yMax = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    yMin = obj1.arrayGet(2).getNum(&decodeOk);
+    yMax = obj1.arrayGet(3).getNum(&decodeOk);
     yMul = (yMax - yMin) / (pow(2.0, coordBits) - 1);
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
-      cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
-      cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
+      cMin[i] = obj1.arrayGet(4 + 2*i).getNum(&decodeOk);
+      cMax[i] = obj1.arrayGet(5 + 2*i).getNum(&decodeOk);
       cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
@@ -4856,7 +4764,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   state = 0;
   flag = 0; // make gcc happy
   bitBuf = new GfxShadingBitBuf(str);
-  while (1) {
+  while (true) {
     if (typeA == 4) {
       if (!bitBuf->getBits(flagBits, &flag)) {
 	break;
@@ -4878,7 +4786,13 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
       int oldVertSize = vertSize;
       vertSize = (vertSize == 0) ? 16 : 2 * vertSize;
       verticesA = (GfxGouraudVertex *)
-	              greallocn(verticesA, vertSize, sizeof(GfxGouraudVertex));
+	              greallocn_checkoverflow(verticesA, vertSize, sizeof(GfxGouraudVertex));
+      if (unlikely(!verticesA)) {
+        error(errSyntaxWarning, -1, "GfxGouraudTriangleShading::parse: vertices size overflow");
+        gfree(trianglesA);
+        delete bitBuf;
+        return nullptr;
+      }
       memset(verticesA + oldVertSize, 0, (vertSize - oldVertSize) * sizeof(GfxGouraudVertex));
     }
     verticesA[nVerticesA].x = xMin + xMul * (double)x;
@@ -4955,7 +4869,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   return shading;
 }
 
-GfxShading *GfxGouraudTriangleShading::copy() {
+GfxShading *GfxGouraudTriangleShading::copy() const {
   return new GfxGouraudTriangleShading(this);
 }
 
@@ -5072,7 +4986,7 @@ GfxPatchMeshShading::GfxPatchMeshShading(int typeA,
   }
 }
 
-GfxPatchMeshShading::GfxPatchMeshShading(GfxPatchMeshShading *shading):
+GfxPatchMeshShading::GfxPatchMeshShading(const GfxPatchMeshShading *shading):
   GfxShading(shading)
 {
   int i;
@@ -5147,16 +5061,15 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   obj1 = dict->lookup("Decode");
   if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
     bool decodeOk = true;
-    Object obj2;
-    xMin = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    xMax = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
+    xMin = obj1.arrayGet(0).getNum(&decodeOk);
+    xMax = obj1.arrayGet(1).getNum(&decodeOk);
     xMul = (xMax - xMin) / (pow(2.0, coordBits) - 1);
-    yMin = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    yMax = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    yMin = obj1.arrayGet(2).getNum(&decodeOk);
+    yMax = obj1.arrayGet(3).getNum(&decodeOk);
     yMul = (yMax - yMin) / (pow(2.0, coordBits) - 1);
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
-      cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
-      cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
+      cMin[i] = obj1.arrayGet(4 + 2*i).getNum(&decodeOk);
+      cMax[i] = obj1.arrayGet(5 + 2*i).getNum(&decodeOk);
       cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
@@ -5198,7 +5111,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   patchesA = nullptr;
   patchesSize = 0;
   auto bitBuf = std::make_unique<GfxShadingBitBuf>(str);
-  while (1) {
+  while (true) {
     if (!bitBuf->getBits(flagBits, &flag)) {
       break;
     }
@@ -5252,8 +5165,12 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     if (nPatchesA == patchesSize) {
       int oldPatchesSize = patchesSize;
       patchesSize = (patchesSize == 0) ? 16 : 2 * patchesSize;
-      patchesA = (GfxPatch *)greallocn(patchesA,
+      patchesA = (GfxPatch *)greallocn_checkoverflow(patchesA,
 				       patchesSize, sizeof(GfxPatch));
+      if (unlikely(!patchesA)) {
+	for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
+	return nullptr;
+      }
       memset(patchesA + oldPatchesSize, 0, (patchesSize - oldPatchesSize) * sizeof(GfxPatch));
     }
     p = &patchesA[nPatchesA];
@@ -5652,7 +5569,7 @@ void GfxPatchMeshShading::getParameterizedColor(double t, GfxColor *color) const
   }
 }
 
-GfxShading *GfxPatchMeshShading::copy() {
+GfxShading *GfxPatchMeshShading::copy() const {
   return new GfxPatchMeshShading(this);
 }
 
@@ -5830,7 +5747,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   ok = false;
 }
 
-GfxImageColorMap::GfxImageColorMap(GfxImageColorMap *colorMap) {
+GfxImageColorMap::GfxImageColorMap(const GfxImageColorMap *colorMap) {
   int n, i, k;
 
   colorSpace = colorMap->colorSpace->copy();
@@ -5892,7 +5809,7 @@ GfxImageColorMap::~GfxImageColorMap() {
   gfree(byte_lookup);
 }
 
-void GfxImageColorMap::getGray(unsigned char *x, GfxGray *gray) {
+void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray) {
   GfxColor color;
   int i;
 
@@ -5909,7 +5826,7 @@ void GfxImageColorMap::getGray(unsigned char *x, GfxGray *gray) {
   }
 }
 
-void GfxImageColorMap::getRGB(unsigned char *x, GfxRGB *rgb) {
+void GfxImageColorMap::getRGB(const unsigned char *x, GfxRGB *rgb) {
   GfxColor color;
   int i;
 
@@ -6190,7 +6107,7 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
 
 }
 
-void GfxImageColorMap::getCMYK(unsigned char *x, GfxCMYK *cmyk) {
+void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk) {
   GfxColor color;
   int i;
 
@@ -6207,7 +6124,7 @@ void GfxImageColorMap::getCMYK(unsigned char *x, GfxCMYK *cmyk) {
   }
 }
 
-void GfxImageColorMap::getDeviceN(unsigned char *x, GfxColor *deviceN) {
+void GfxImageColorMap::getDeviceN(const unsigned char *x, GfxColor *deviceN) {
   GfxColor color;
   int i;
 
@@ -6224,7 +6141,7 @@ void GfxImageColorMap::getDeviceN(unsigned char *x, GfxColor *deviceN) {
   }
 }
 
-void GfxImageColorMap::getColor(unsigned char *x, GfxColor *color) {
+void GfxImageColorMap::getColor(const unsigned char *x, GfxColor *color) {
   int maxPixel, i;
 
   maxPixel = (1 << bits) - 1;
@@ -6770,7 +6687,7 @@ void GfxState::setPath(GfxPath *pathA) {
 }
 
 void GfxState::getUserClipBBox(double *xMin, double *yMin,
-			       double *xMax, double *yMax) {
+			       double *xMax, double *yMax) const {
   double ictm[6];
   double xMin1, yMin1, xMax1, yMax1, tx, ty;
 
@@ -6838,7 +6755,7 @@ void GfxState::getUserClipBBox(double *xMin, double *yMin,
   *yMax = yMax1;
 }
 
-double GfxState::transformWidth(double w) {
+double GfxState::transformWidth(double w) const {
   double x, y;
 
   x = ctm[0] + ctm[2];
@@ -6846,7 +6763,7 @@ double GfxState::transformWidth(double w) {
   return w * sqrt(0.5 * (x * x + y * y));
 }
 
-double GfxState::getTransformedFontSize() {
+double GfxState::getTransformedFontSize() const {
   double x1, y1, x2, y2;
 
   x1 = textMat[2] * fontSize;
@@ -6857,7 +6774,7 @@ double GfxState::getTransformedFontSize() {
 }
 
 void GfxState::getFontTransMat(double *m11, double *m12,
-			       double *m21, double *m22) {
+			       double *m21, double *m22) const {
   *m11 = (textMat[0] * ctm[0] + textMat[1] * ctm[2]) * fontSize;
   *m12 = (textMat[0] * ctm[1] + textMat[1] * ctm[3]) * fontSize;
   *m21 = (textMat[2] * ctm[0] + textMat[3] * ctm[2]) * fontSize;

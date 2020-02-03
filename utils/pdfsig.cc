@@ -12,16 +12,18 @@
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 Nelson Efrain A. Cruz <neac03@gmail.com>
 //
 //========================================================================
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <ctime>
 #include <hasht.h>
 #include <fstream>
 #include "parseargs.h"
@@ -95,12 +97,12 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
-static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
+static bool dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
 {
     const GooString *signature = sig_widget->getSignature();
     if (!signature) {
         printf("Cannot dump signature #%d\n", sig_num);
-        return;
+        return false;
     }
 
     const int sigCountLength = numberOfCharacters(sigCount);
@@ -115,6 +117,8 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     outfile.close();
     delete format;
     delete path;
+
+    return true;
 }
 
 static GooString nssDir;
@@ -151,7 +155,7 @@ int main(int argc, char *argv[])
   SignatureInfo *sig_info = nullptr;
   char *time_str = nullptr;
   std::vector<FormWidgetSignature*> sig_widgets;
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   Win32Console win32Console(&argc, &argv);
   int exitCode = 99;
@@ -188,9 +192,13 @@ int main(int argc, char *argv[])
 
   if (sigCount >= 1) {
     if (dumpSignatures) {
+      exitCode = 0;
       printf("Dumping Signatures: %u\n", sigCount);
       for (unsigned int i = 0; i < sigCount; i++) {
-        dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        const bool dumpingOk = dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        if (!dumpingOk) {
+          exitCode = 3;
+        }
       }
       goto end;
     } else {
@@ -257,13 +265,12 @@ int main(int argc, char *argv[])
              ranges[0], ranges[1], ranges[2], ranges[3]);
       Goffset checked_file_size;
       GooString* signature = sig_widgets.at(i)->getCheckedSignature(&checked_file_size);
-      if (signature && checked_file_size == ranges[3])
-      {
+      if (signature && checked_file_size == ranges[3]) {
         printf("  - Total document signed\n");
-        delete signature;
-      }
-      else
+      } else {
         printf("  - Not total document signed\n");
+      }
+      delete signature;
     }
     printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
     gfree(time_str);
@@ -278,7 +285,6 @@ int main(int argc, char *argv[])
 end:
   delete fileName;
   delete doc;
-  delete globalParams;
 
   return exitCode;
 }

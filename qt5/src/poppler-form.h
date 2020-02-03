@@ -8,6 +8,7 @@
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +28,8 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
-#include <time.h>
+#include <memory>
+#include <ctime>
 #include <QtCore/QDateTime>
 #include <QtCore/QList>
 #include <QtCore/QRectF>
@@ -49,12 +51,39 @@ namespace Poppler {
     class Link;
 
     class FormFieldData;
+    class FormFieldIconData;
+
+    /**
+	 The class containing the appearance information
+
+	 \since 0.79
+     */
+
+    class POPPLER_QT5_EXPORT FormFieldIcon {
+    
+    friend class FormFieldIconData;
+    
+    public:
+
+    	FormFieldIcon(FormFieldIconData *data);
+    	FormFieldIcon(const FormFieldIcon &ffIcon);
+    	~FormFieldIcon();
+
+    	FormFieldIcon& operator=(const FormFieldIcon &ffIcon);
+
+    private:
+
+    	FormFieldIconData *d_ptr;
+    };
     /**
       The base class representing a form field.
 
       \since 0.6
      */
     class POPPLER_QT5_EXPORT FormField {
+
+    friend class FormFieldData;
+
     public:
 
 	/**
@@ -131,6 +160,18 @@ namespace Poppler {
 	void setVisible(bool value);
 
 	/**
+	  Whether this field is printable.
+	  \since 0.79
+	 */	
+	bool isPrintable() const;
+
+	/**
+	  Set whether this field is printable.
+	  \since 0.79
+	 */
+	void setPrintable(bool value);
+
+	/**
 	  The activation action of this form field.
 
 	  \note It may be null.
@@ -165,9 +206,9 @@ namespace Poppler {
 
     protected:
 	/// \cond PRIVATE
-	FormField(FormFieldData &dd);
+	FormField(std::unique_ptr<FormFieldData> dd);
 
-	FormFieldData *m_formData;
+	std::unique_ptr<FormFieldData> m_formData;
 	/// \endcond
 
     private:
@@ -195,7 +236,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w);
 	/// \endcond
-	~FormFieldButton();
+	~FormFieldButton() override;
 
 	FormType type() const override;
 
@@ -208,6 +249,21 @@ namespace Poppler {
 	 * The caption to be used for the button.
 	 */
 	QString caption() const;
+
+	/**
+	 * Gets the icon used by the button
+	 *
+	 * \since 0.79
+	 */
+	FormFieldIcon icon() const;
+
+	/**
+	 * Sets a new icon for the button, it has to be a icon 
+	 * returned by FormFieldButton::icon.
+	 *
+	 * \since 0.79
+	 */ 
+	void setIcon(const FormFieldIcon &icon);
 
 	/**
 	  The state of the button.
@@ -251,7 +307,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldText(DocumentData *doc, ::Page *p, ::FormWidgetText *w);
 	/// \endcond
-	~FormFieldText();
+	~FormFieldText() override;
 
 	FormType type() const override;
 
@@ -270,6 +326,13 @@ namespace Poppler {
 	  \p text.
 	 */
 	void setText( const QString& text );
+
+	/**
+	  Sets the text inside the Appearance Stream to the specified
+	  \p text
+	  \since 0.80
+	 */
+	void setAppearanceText( const QString& text );
 
 	/**
 	  Whether this text field is a password input, eg its text \b must be
@@ -333,7 +396,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w);
 	/// \endcond
-	~FormFieldChoice();
+	~FormFieldChoice() override;
 
 	FormType type() const override;
 
@@ -693,7 +756,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w);
 	/// \endcond
-	~FormFieldSignature();
+	~FormFieldSignature() override;
 
 	FormType type() const override;
 

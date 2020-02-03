@@ -14,6 +14,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -161,7 +162,7 @@ int main (int argc, char *argv[])
     return exitCode;
   }
   exitCode = 0;
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   for (i = 1; i < argc - 1; i++) {
     GooString *gfileName = new GooString(argv[i]);
@@ -405,6 +406,5 @@ int main (int argc, char *argv[])
   delete yRef;
   delete countRef;
   for (i = 0; i < (int) docs.size (); i++) delete docs[i];
-  delete globalParams;
   return exitCode;
 }

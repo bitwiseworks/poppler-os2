@@ -21,7 +21,7 @@
 #include "PDFDoc.h"
 #include "Dict.h"
 
-#include <assert.h>
+#include <cassert>
 
 class GfxState;
 
@@ -471,9 +471,9 @@ static const struct OwnerMapEntry {
 
 static bool ownerHasMorePriority(Attribute::Owner a, Attribute::Owner b)
 {
-  unsigned aIndex, bIndex;
+  size_t aIndex, bIndex, i;
 
-  for (unsigned i = aIndex = bIndex = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
+  for (i = aIndex = bIndex = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
     if (ownerMap[i].owner == a)
       aIndex = i;
     if (ownerMap[i].owner == b)
@@ -592,18 +592,18 @@ getAttributeMapEntry(const AttributeMapEntry **entryList, const char *name)
 
 static inline const OwnerMapEntry *getOwnerMapEntry(Attribute::Owner owner)
 {
-  for (unsigned i = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
-    if (owner == ownerMap[i].owner)
-      return &ownerMap[i];
+  for (const OwnerMapEntry &entry : ownerMap) {
+    if (owner == entry.owner)
+      return &entry;
   }
   return nullptr;
 }
 
 static inline const OwnerMapEntry *getOwnerMapEntry(const char *name)
 {
-  for (unsigned i = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
-    if (strcmp(name, ownerMap[i].name) == 0)
-      return &ownerMap[i];
+  for (const OwnerMapEntry &entry : ownerMap) {
+    if (strcmp(name, entry.name) == 0)
+      return &entry;
   }
   return nullptr;
 }
@@ -622,18 +622,18 @@ static Attribute::Owner nameToOwner(const char *name)
 
 static inline const TypeMapEntry *getTypeMapEntry(StructElement::Type type)
 {
-  for (unsigned i = 0; i < sizeof(typeMap) / sizeof(typeMap[0]); i++) {
-    if (type == typeMap[i].type)
-      return &typeMap[i];
+  for (const TypeMapEntry &entry : typeMap) {
+    if (type == entry.type)
+      return &entry;
   }
   return nullptr;
 }
 
 static inline const TypeMapEntry *getTypeMapEntry(const char *name)
 {
-  for (unsigned i = 0; i < sizeof(typeMap) / sizeof(typeMap[0]); i++) {
-    if (strcmp(name, typeMap[i].name) == 0)
-      return &typeMap[i];
+  for (const TypeMapEntry &entry : typeMap) {
+    if (strcmp(name, entry.name) == 0)
+      return &entry;
   }
   return nullptr;
 }
@@ -829,8 +829,8 @@ StructElement::StructData::~StructData()
   delete id;
   delete title;
   delete language;
-  for (ElemPtrArray::iterator i = elements.begin(); i != elements.end(); ++i) delete *i;
-  for (AttrPtrArray::iterator i = attributes.begin(); i != attributes.end(); ++i) delete *i;
+  for (StructElement *element : elements) delete element;
+  for (Attribute *attribute : attributes) delete attribute;
 }
 
 
@@ -975,8 +975,8 @@ GooString* StructElement::appendSubTreeText(GooString *string, bool recursive) c
     if (!string)
       string = new GooString();
 
-    for (TextSpanArray::const_iterator i = spans.begin(); i != spans.end(); ++i)
-      string->append(i->getText());
+    for (const TextSpan &span : spans)
+      string->append(span.getText());
 
     return string;
   }
@@ -1297,13 +1297,13 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
       for (int i = 0; i < attributes->getLength(); i++) {
         const char *key = attributes->getKey(i);
         if (strcmp(key, "O") != 0) {
-          Attribute::Type type = Attribute::getTypeForName(key, this);
+          Attribute::Type t = Attribute::getTypeForName(key, this);
 
           // Check if the attribute is already defined.
           if (keepExisting) {
             bool exists = false;
             for (unsigned j = 0; j < getNumAttributes(); j++) {
-              if (getAttribute(j)->getType() == type) {
+              if (getAttribute(j)->getType() == t) {
                 exists = true;
                 break;
               }
@@ -1312,10 +1312,10 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
               continue;
           }
 
-          if (type != Attribute::Unknown) {
+          if (t != Attribute::Unknown) {
             Object value = attributes->getVal(i);
             bool typeCheckOk = true;
-            Attribute *attribute = new Attribute(type, &value);
+            Attribute *attribute = new Attribute(t, &value);
 
             if (attribute->isOk() && (typeCheckOk = attribute->checkType(this))) {
               appendAttribute(attribute);

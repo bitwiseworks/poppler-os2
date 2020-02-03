@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2012, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2012, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
@@ -27,6 +27,7 @@
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 <corentinf@free.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,8 +36,8 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/gfile.h"
@@ -124,7 +125,7 @@ CharCodeToUnicode *CharCodeToUnicode::makeIdentityMapping() {
 }
 
 CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(const char *fileName,
-							GooString *collection) {
+							const GooString *collection) {
   FILE *f;
   Unicode *mapA;
   CharCode size, mapLenA;
@@ -165,7 +166,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(const char *fileName,
 }
 
 CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
-						    GooString *fileName) {
+						    const GooString *fileName) {
   FILE *f;
   Unicode *mapA;
   CharCodeToUnicodeString *sMapA;
@@ -263,7 +264,7 @@ CharCodeToUnicode *CharCodeToUnicode::make8BitToUnicode(Unicode *toUnicode) {
   return new CharCodeToUnicode(nullptr, toUnicode, 256, true, nullptr, 0, 0);
 }
 
-CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
+CharCodeToUnicode *CharCodeToUnicode::parseCMap(const GooString *buf, int nBits) {
   CharCodeToUnicode *ctu;
 
   ctu = new CharCodeToUnicode(nullptr);
@@ -272,7 +273,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
   return ctu;
 }
 
-CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(GooString *fileName,
+CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(const GooString *fileName,
   int nBits) {
   CharCodeToUnicode *ctu;
   FILE *f;
@@ -288,7 +289,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(GooString *fileName,
   return ctu;
 }
 
-void CharCodeToUnicode::mergeCMap(GooString *buf, int nBits) {
+void CharCodeToUnicode::mergeCMap(const GooString *buf, int nBits) {
   const char *p = buf->c_str();
   parseCMap1(&getCharFromString, &p, nBits);
 }
@@ -538,7 +539,7 @@ void CharCodeToUnicode::decRefCnt() {
   }
 }
 
-bool CharCodeToUnicode::match(GooString *tagA) {
+bool CharCodeToUnicode::match(const GooString *tagA) {
   return tag && !tag->cmp(tagA);
 }
 
@@ -579,7 +580,7 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len) {
   }
 }
 
-int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
+int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode const **u) const {
   int i;
 
   if (isIdentity) {
@@ -603,7 +604,7 @@ int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
   return 0;
 }
 
-int CharCodeToUnicode::mapToCharCode(Unicode* u, CharCode *c, int usize) const {
+int CharCodeToUnicode::mapToCharCode(const Unicode* u, CharCode *c, int usize) const {
   //look for charcode in map
   if (usize == 1 || (usize > 1 && !(*u & ~0xff))) {
     if (isIdentity) {
@@ -664,7 +665,7 @@ CharCodeToUnicodeCache::~CharCodeToUnicodeCache() {
   gfree(cache);
 }
 
-CharCodeToUnicode *CharCodeToUnicodeCache::getCharCodeToUnicode(GooString *tag) {
+CharCodeToUnicode *CharCodeToUnicodeCache::getCharCodeToUnicode(const GooString *tag) {
   CharCodeToUnicode *ctu;
   int i, j;
 

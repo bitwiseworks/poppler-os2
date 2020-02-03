@@ -39,6 +39,9 @@
 
 namespace Poppler
 {
+  // TODO use qAsConst when we can depend on Qt 5.7
+  //      or std::as_const when we can depend on C++17
+  template <class T> constexpr std::add_const_t<T>& as_const(T& t) noexcept { return t; }
 
   RadioButtonGroup::RadioButtonGroup( OptContentModelPrivate *ocModel, Array *rbarray )
   {
@@ -51,8 +54,7 @@ namespace Poppler
       OptContentItem *item = ocModel->itemFromRef( QString::number(ref.getRefNum() ) );
       itemsInGroup.append( item );
     }
-    for (int i = 0; i < itemsInGroup.size(); ++i) {
-      OptContentItem *item = itemsInGroup.at(i);
+    for (OptContentItem *item : as_const(itemsInGroup)) {
       item->appendRBGroup( this );
     }
   }
@@ -64,8 +66,7 @@ namespace Poppler
   QSet<OptContentItem *> RadioButtonGroup::setItemOn( OptContentItem *itemToSetOn )
   {
     QSet<OptContentItem *> changedItems;
-    for (int i = 0; i < itemsInGroup.size(); ++i) {
-      OptContentItem *thisItem = itemsInGroup.at(i);
+    for (OptContentItem *thisItem : as_const(itemsInGroup)) {
       if (thisItem != itemToSetOn) {
         QSet<OptContentItem *> newChangedItems;
         thisItem->setState(OptContentItem::Off, false /*obeyRadioGroups*/, newChangedItems);
@@ -131,14 +132,15 @@ namespace Poppler
       child->m_enabled = state == OptContentItem::On;
       child->m_stateBackup = oldState;
     }
-    if (!m_group || !obeyRadioGroups) {
+    if (!m_group) {
       return;
     }
     if ( state == OptContentItem::On ) {
       m_group->setState( OptionalContentGroup::On );
-      for (int i = 0; i < m_rbGroups.size(); ++i) {
-        RadioButtonGroup *rbgroup = m_rbGroups.at(i);
-        changedItems += rbgroup->setItemOn( this );
+      if (obeyRadioGroups) {
+	for (RadioButtonGroup *rbgroup : as_const(m_rbGroups)) {
+	  changedItems += rbgroup->setItemOn( this );
+	}
       }
     } else if ( state == OptContentItem::Off ) {
       m_group->setState( OptionalContentGroup::Off );
@@ -365,7 +367,7 @@ namespace Poppler
           Q_FOREACH (OptContentItem *item, changedItems) {
             indexes.append(d->indexFromItem(item, 0));
           }
-          qStableSort(indexes);
+          std::stable_sort(indexes.begin(), indexes.end());
           Q_FOREACH (const QModelIndex &changedIndex, indexes) {
             emit dataChanged(changedIndex, changedIndex);
           }
@@ -399,18 +401,15 @@ namespace Poppler
 
     QSet<OptContentItem *> changedItems;
 
-    const std::vector<::LinkOCGState::StateList*> *statesList = popplerLinkOCGState->getStateList();
-    for (std::size_t i = 0; i < statesList->size(); ++i) {
-        ::LinkOCGState::StateList *stateList = (*statesList)[i];
+    const std::vector<::LinkOCGState::StateList>& statesList = popplerLinkOCGState->getStateList();
+    for (const ::LinkOCGState::StateList& stateList : statesList) {
+        const std::vector<Ref>& refsList = stateList.list;
+        for (const Ref& ref : refsList) {
+            OptContentItem *item = d->itemFromRef(QString::number(ref.num));
 
-        std::vector<Ref*> *refsList = stateList->list;
-        for (std::size_t j = 0; j < refsList->size(); ++j) {
-            Ref *ref = (*refsList)[j];
-            OptContentItem *item = d->itemFromRef(QString::number(ref->num));
-
-            if (stateList->st == ::LinkOCGState::On) {
+            if (stateList.st == ::LinkOCGState::On) {
               item->setState(OptContentItem::On, popplerLinkOCGState->getPreserveRB(), changedItems);
-            } else if (stateList->st == ::LinkOCGState::Off) {
+            } else if (stateList.st == ::LinkOCGState::Off) {
               item->setState(OptContentItem::Off, popplerLinkOCGState->getPreserveRB(), changedItems);
             } else {
               OptContentItem::ItemState newState = item->state() == OptContentItem::On ? OptContentItem::Off : OptContentItem::On;
@@ -429,7 +428,7 @@ namespace Poppler
       Q_FOREACH (OptContentItem *item, changedItems) {
         indexes.append(d->indexFromItem(item, 0));
       }
-      qStableSort(indexes);
+      std::stable_sort(indexes.begin(), indexes.end());
       Q_FOREACH (const QModelIndex &changedIndex, indexes) {
         emit dataChanged(changedIndex, changedIndex);
       }

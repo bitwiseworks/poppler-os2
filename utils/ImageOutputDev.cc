@@ -34,11 +34,11 @@
 #include "config.h"
 #include <poppler-config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <ctype.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cctype>
+#include <cmath>
 #include "goo/gmem.h"
 #include "goo/NetPBMWriter.h"
 #include "goo/PNGWriter.h"
@@ -695,7 +695,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
-			       bool interpolate, int *maskColors, bool inlineImg) {
+			       bool interpolate, const int *maskColors, bool inlineImg) {
   if (listImages)
     listImage(state, ref, str, width, height, colorMap, interpolate, inlineImg, imgImage);
   else

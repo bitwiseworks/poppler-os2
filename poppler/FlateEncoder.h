@@ -3,7 +3,7 @@
 // FlateEncoder.h
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 //
 // This file is under the GPLv2 or later license
 //
@@ -13,14 +13,14 @@
 #define FLATEENCODE_H
 
 #include "poppler-config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "Error.h"
@@ -41,8 +41,8 @@ class FlateEncoder: public FilterStream {
 public:
 
   FlateEncoder(Stream *strA);
-  ~FlateEncoder();
-  StreamKind getKind() override { return strWeird; }
+  ~FlateEncoder() override;
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }

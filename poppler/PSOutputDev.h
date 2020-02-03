@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -38,7 +38,7 @@
 #define PSOUTPUTDEV_H
 
 #include "poppler-config.h"
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "GfxState.h"
 #include "GlobalParams.h"
@@ -128,7 +128,7 @@ public:
 	      void *customCodeCbkDataA = nullptr);
 
   // Destructor -- writes the trailer and closes the file.
-  virtual ~PSOutputDev();
+  ~PSOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }
@@ -166,9 +166,9 @@ public:
   //----- header/trailer (used only if manualCtrl is true)
 
   // Write the document-level header.
-  void writeHeader(const std::vector<int> &pages,
+  void writeHeader(int nPages,
 		   const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
-		   int pageRotate, char *pstitle);
+		   int pageRotate, const char *title);
 
   // Write the Xpdf procset.
   void writeXpdfProcset();
@@ -271,7 +271,7 @@ public:
   void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
-			 bool interpolate, int *maskColors, bool inlineImg) override;
+			 bool interpolate, const int *maskColors, bool inlineImg) override;
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
@@ -383,27 +383,27 @@ private:
   void setupForm(Ref id, Object *strObj);
   void addProcessColor(double c, double m, double y, double k);
   void addCustomColor(GfxSeparationColorSpace *sepCS);
-  void doPath(GfxPath *path);
+  void doPath(const GfxPath *path);
   void maskToClippingPath(Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
   void doImageL1(Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
-		 int *maskColors, Stream *maskStr,
+		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
   void doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
 		    bool invert, bool inlineImg,
 		    Stream *str, int width, int height, int len,
-		    int *maskColors, Stream *maskStr,
+		    const int *maskColors, Stream *maskStr,
 		    int maskWidth, int maskHeight, bool maskInvert);
   void doImageL2(Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
-		 int *maskColors, Stream *maskStr,
+		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
   void doImageL3(Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
-		 int *maskColors, Stream *maskStr,
+		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
   void dumpColorSpaceL2(GfxColorSpace *colorSpace,
 			bool genXform, bool updateColors,
@@ -429,13 +429,13 @@ private:
   GooString *filterPSName(const GooString *name);
 
   // Write the document-level setup.
-  void writeDocSetup(PDFDoc *doc, Catalog *catalog, const std::vector<int> &pages, bool duplexA);
+  void writeDocSetup(Catalog *catalog, const std::vector<int> &pageList, bool duplexA);
 
   void writePSChar(char c);
   void writePS(const char *s);
   void writePSBuf(const char *s, int len);
   void writePSFmt(const char *fmt, ...);
-  void writePSString(const GooString *s);
+  void writePSString(const std::string &s);
   void writePSName(const char *s);
   GooString *filterPSLabel(GooString *label, bool *needParens=nullptr);
   void writePSTextLine(const GooString *s);
@@ -479,7 +479,7 @@ private:
   int fontIDSize;		// size of fontIDs array
   std::set<int> resourceIDs;	// list of object IDs of objects containing Resources we've already set up
   std::unordered_set<std::string> fontNames; // all used font names
-  std::unordered_map<std::string, int> fontMaxValidGlyph; // max valid glyph of each font
+  std::unordered_map<std::string, int> perFontMaxValidGlyph; // max valid glyph of each font
   PST1FontName *t1FontNames;	// font names for Type 1/1C fonts
   int t1FontNameLen;		// number of entries in t1FontNames array
   int t1FontNameSize;		// size of t1FontNames array

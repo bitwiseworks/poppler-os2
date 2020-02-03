@@ -35,9 +35,9 @@
 
 #include <cassert>
 #include <set>
-#include <stdio.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstring>
+#include <climits>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/GooLikely.h"
@@ -183,13 +183,13 @@ public:
 
   template<typename T> Object(T) = delete;
 
-  Object(Object&& other)
+  Object(Object&& other) noexcept
   {
     std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
     other.type = objDead;
   }
 
-  Object& operator=(Object&& other)
+  Object& operator=(Object&& other) noexcept
   {
     free();
 
@@ -236,7 +236,6 @@ public:
   bool isName(const char *nameA) const
     { return type == objName && !strcmp(cString, nameA); }
   bool isDict(const char *dictType) const;
-  bool isStream(const char *dictType) const;
   bool isCmd(const char *cmdA) const
     { return type == objCmd && !strcmp(cString, cmdA); }
 
@@ -292,20 +291,23 @@ public:
   const Object &dictGetValNF(int i) const;
 
   // Stream accessors.
-  bool streamIs(const char *dictType) const;
   void streamReset();
   void streamClose();
   int streamGetChar() const;
   int streamGetChars(int nChars, unsigned char *buffer) const;
-  int streamLookChar() const;
-  char *streamGetLine(char *buf, int size) const;
-  Goffset streamGetPos() const;
   void streamSetPos(Goffset pos, int dir = 0);
   Dict *streamGetDict() const;
 
   // Output.
   const char *getTypeName() const;
   void print(FILE *f = stdout) const;
+
+  double getNumWithDefaultValue(double defaultValue) const {
+    if (unlikely(type != objInt && type != objInt64 && type != objReal)) {
+      return defaultValue;
+    }
+    return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
+  }
 
 private:
   // Free object contents.
@@ -392,12 +394,6 @@ inline const Object &Object::dictGetValNF(int i) const
 
 #include "Stream.h"
 
-inline bool Object::streamIs(const char *dictType) const
-  { OBJECT_TYPE_CHECK(objStream); return stream->getDict()->is(dictType); }
-
-inline bool Object::isStream(const char *dictType) const
-  { return type == objStream && streamIs(dictType); }
-
 inline void Object::streamReset()
   { OBJECT_TYPE_CHECK(objStream); stream->reset(); }
 
@@ -409,18 +405,6 @@ inline int Object::streamGetChar() const
 
 inline int Object::streamGetChars(int nChars, unsigned char *buffer) const
   { OBJECT_TYPE_CHECK(objStream); return stream->doGetChars(nChars, buffer); }
-
-inline int Object::streamLookChar() const
-  { OBJECT_TYPE_CHECK(objStream); return stream->lookChar(); }
-
-inline char *Object::streamGetLine(char *buf, int size) const
-  { OBJECT_TYPE_CHECK(objStream); return stream->getLine(buf, size); }
-
-inline Goffset Object::streamGetPos() const
-  { OBJECT_TYPE_CHECK(objStream); return stream->getPos(); }
-
-inline void Object::streamSetPos(Goffset pos, int dir)
-  { OBJECT_TYPE_CHECK(objStream); stream->setPos(pos, dir); }
 
 inline Dict *Object::streamGetDict() const
   { OBJECT_TYPE_CHECK(objStream); return stream->getDict(); }

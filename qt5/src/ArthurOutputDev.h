@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
@@ -69,7 +69,7 @@ public:
   ArthurOutputDev(QPainter *painter );
 
   // Destructor.
-  ~ArthurOutputDev();
+  ~ArthurOutputDev() override;
 
   void setFontHinting(FontHinting hinting) { m_fontHinting = hinting; }
 
@@ -141,7 +141,7 @@ public:
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,
 		double originX, double originY,
-		CharCode code, int nBytes, Unicode *u, int uLen) override;
+		CharCode code, int nBytes, const Unicode *u, int uLen) override;
   void endTextObject(GfxState *state) override;
 
   //----- image drawing
@@ -150,7 +150,7 @@ public:
 		     bool interpolate, bool inlineImg) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 		 int width, int height, GfxImageColorMap *colorMap,
-		 bool interpolate, int *maskColors, bool inlineImg) override;
+		 bool interpolate, const int *maskColors, bool inlineImg) override;
 
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
                            int width, int height,
@@ -167,12 +167,12 @@ public:
 	       double llx, double lly, double urx, double ury) override;
 
   //----- transparency groups and soft masks
-  virtual void beginTransparencyGroup(GfxState *state, const double *bbox,
+  void beginTransparencyGroup(GfxState *state, const double *bbox,
                                       GfxColorSpace *blendingColorSpace,
                                       bool isolated, bool knockout,
                                       bool forSoftMask) override;
-  virtual void endTransparencyGroup(GfxState *state) override;
-  virtual void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+  void endTransparencyGroup(GfxState *state) override;
+  void paintTransparencyGroup(GfxState *state, const double *bbox) override;
 
   //----- special access
 

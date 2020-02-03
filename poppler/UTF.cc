@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
@@ -42,7 +42,7 @@ bool UnicodeIsValid(Unicode ucs4)
     ((ucs4 & 0xfffe) != 0xfffe);
 }
 
-int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
+int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4_out)
 {
   int i, n, len;
   Unicode *u;
@@ -56,7 +56,7 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
     }
     len++;
   }
-  if (ucs4 == nullptr)
+  if (ucs4_out == nullptr)
     return len;
 
   u = (Unicode*)gmallocn(len, sizeof(Unicode));
@@ -85,7 +85,7 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
     }
     n++;
   }
-  *ucs4 = u;
+  *ucs4_out = u;
   return len;
 }
 
@@ -431,7 +431,7 @@ struct Ascii7Map
 };
 
 void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
-                     int *out_len, int *in_idx, int **indices)
+                     int *out_len, const int *in_idx, int **indices)
 {
   static Ascii7Map uMap;
   int *idx = nullptr;
@@ -446,7 +446,7 @@ void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
     if (!in_idx)
       indices = nullptr;
     else
-      idx = (int *) gmallocn(len * 2 + 1, sizeof(int));
+      idx = (int *) gmallocn(len * 8 + 1, sizeof(int));
   }
 
   GooString gstr;

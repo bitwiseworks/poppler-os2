@@ -6,6 +6,20 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #ifndef JPXSTREAM_H
 #define JPXSTREAM_H
 
@@ -257,14 +271,14 @@ public:
 
   JPXStream(Stream *strA);
   virtual ~JPXStream();
-  virtual StreamKind getKind() override { return strJPX; }
-  virtual void reset() override;
-  virtual void close() override;
-  virtual int getChar() override;
-  virtual int lookChar() override;
-  virtual GooString *getPSFilter(int psLevel, const char *indent) override;
-  virtual bool isBinary(bool last = true) override;
-  virtual void getImageParams(int *bitsPerComponent,
+  StreamKind getKind() const override { return strJPX; }
+  void reset() override;
+  void close() override;
+  int getChar() override;
+  int lookChar() override;
+  GooString *getPSFilter(int psLevel, const char *indent) override;
+  bool isBinary(bool last = true) override;
+  void getImageParams(int *bitsPerComponent,
 			      StreamColorSpaceMode *csMode) override;
 
 private:

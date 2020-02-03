@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -29,6 +29,8 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
+// Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -37,10 +39,10 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #include "parseargs.h"
 #include "printencodings.h"
 #include "goo/GooString.h"
@@ -83,9 +85,10 @@ static bool bboxLayout = false;
 static bool physLayout = false;
 static double fixedPitch = 0;
 static bool rawOrder = false;
+static bool discardDiag = false;
 static bool htmlMeta = false;
 static char textEncName[128] = "";
-static char textEOL[16] = "";
+static char textEOLStr[16] = "";
 static bool noPageBreaks = false;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
@@ -115,13 +118,15 @@ static const ArgDesc argDesc[] = {
    "assume fixed-pitch (or tabular) text"},
   {"-raw",     argFlag,     &rawOrder,      0,
    "keep strings in content stream order"},
+  {"-nodiag",  argFlag,     &discardDiag,   0,
+   "discard diagonal text"},
   {"-htmlmeta", argFlag,   &htmlMeta,       0,
    "generate a simple HTML file, including the meta information"},
   {"-enc",     argString,   textEncName,    sizeof(textEncName),
    "output text encoding name"},
   {"-listenc",argFlag,     &printEnc,      0,
    "list available encodings"},
-  {"-eol",     argString,   textEOL,        sizeof(textEOL),
+  {"-eol",     argString,   textEOLStr,        sizeof(textEOLStr),
    "output end-of-line convention (unix, dos, or mac)"},
   {"-nopgbrk", argFlag,     &noPageBreaks,  0,
    "don't insert page breaks between pages"},
@@ -183,6 +188,7 @@ int main(int argc, char *argv[]) {
   Object info;
   bool ok;
   int exitCode;
+  EndOfLineKind textEOL = TextOutputDev::defaultEndOfLine();
 
   Win32Console win32Console(&argc, &argv);
   exitCode = 99;
@@ -208,11 +214,10 @@ int main(int argc, char *argv[]) {
   }
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   if (printEnc) {
     printEncodings();
-    delete globalParams;
     exitCode = 0;
     goto err0;
   }
@@ -225,13 +230,16 @@ int main(int argc, char *argv[]) {
   if (textEncName[0]) {
     globalParams->setTextEncoding(textEncName);
   }
-  if (textEOL[0]) {
-    if (!globalParams->setTextEOL(textEOL)) {
+  if (textEOLStr[0]) {
+    if (!strcmp(textEOLStr, "unix")) {
+      textEOL = eolUnix;
+    } else if (!strcmp(textEOLStr, "dos")) {
+      textEOL = eolDOS;
+    } else if (!strcmp(textEOLStr, "mac")) {
+      textEOL = eolMac;
+    } else {
       fprintf(stderr, "Bad '-eol' value on command line\n");
     }
-  }
-  if (noPageBreaks) {
-    globalParams->setTextPageBreaks(false);
   }
   if (quiet) {
     globalParams->setErrQuiet(quiet);
@@ -363,9 +371,13 @@ int main(int argc, char *argv[]) {
 
   // write text file
   if (htmlMeta && bbox) { // htmlMeta && is superfluous but makes gcc happier
-    textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta);
+    textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
 
     if (textOut->isOk()) {
+      textOut->setTextEOL(textEOL);
+      if (noPageBreaks) {
+	textOut->setTextPageBreaks(false);
+      }
       if (bboxLayout) {
         printDocBBox(f, doc, textOut, firstPage, lastPage);
       }
@@ -378,8 +390,12 @@ int main(int argc, char *argv[]) {
     }
   } else {
     textOut = new TextOutputDev(textFileName->c_str(),
-				physLayout, fixedPitch, rawOrder, htmlMeta);
+				physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
     if (textOut->isOk()) {
+      textOut->setTextEOL(textEOL);
+      if (noPageBreaks) {
+	textOut->setTextPageBreaks(false);
+      }
       if ((w==0) && (h==0) && (x==0) && (y==0)) {
 	doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0,
 			  true, false, false);
@@ -429,7 +445,6 @@ int main(int argc, char *argv[]) {
   delete fileName;
   uMap->decRefCnt();
  err1:
-  delete globalParams;
  err0:
 
   return exitCode;
@@ -484,10 +499,10 @@ static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *
   }
 }
 
-static void printLine(FILE *f, TextLine *line) {
+static void printLine(FILE *f, const TextLine *line) {
   double xMin, yMin, xMax, yMax;
   double lineXMin = 0, lineYMin = 0, lineXMax = 0, lineYMax = 0;
-  TextWord *word;
+  const TextWord *word;
   std::stringstream wordXML;
   wordXML << std::fixed << std::setprecision(6);
 
@@ -513,9 +528,9 @@ static void printLine(FILE *f, TextLine *line) {
 
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last) {
   double xMin, yMin, xMax, yMax;
-  TextFlow *flow;
-  TextBlock *blk;
-  TextLine *line;
+  const TextFlow *flow;
+  const TextBlock *blk;
+  const TextLine *line;
 
   fprintf(f, "<doc>\n");
   for (int page = first; page <= last; ++page) {

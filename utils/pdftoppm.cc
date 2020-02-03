@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011, 2015, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -29,6 +29,10 @@
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 <corentinf@free.fr>
+// Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
+// Copyright (C) 2019 Sébastien Berthier <s.berthier@bee-buzziness.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -41,8 +45,8 @@
 #include <fcntl.h> // for O_BINARY
 #include <io.h>    // for setmode
 #endif
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -63,7 +67,7 @@
 // #define UTILS_USE_PTHREADS 1
 
 #ifdef UTILS_USE_PTHREADS
-#include <errno.h>
+#include <cerrno>
 #include <pthread.h>
 #include <deque>
 #endif // UTILS_USE_PTHREADS
@@ -73,6 +77,7 @@ static int lastPage = 0;
 static bool printOnlyOdd = false;
 static bool printOnlyEven = false;
 static bool singleFile = false;
+static bool scaleDimensionBeforeRotation = false;
 static double resolution = 0.0;
 static double x_resolution = 150.0;
 static double y_resolution = 150.0;
@@ -84,6 +89,7 @@ static int param_y = 0;
 static int param_w = 0;
 static int param_h = 0;
 static int sz = 0;
+static bool hideAnnotations = false;
 static bool useCropBox = false;
 static bool mono = false;
 static bool gray = false;
@@ -97,10 +103,9 @@ static GooString jpegOpt;
 static int jpegQuality = -1;
 static bool jpegProgressive = false;
 static bool jpegOptimize = false;
-#ifdef SPLASH_CMYK
 static bool overprint = false;
-#endif
 static char enableFreeTypeStr[16] = "";
+static bool enableFreeType = true;
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
 static bool fontAntialias = true;
@@ -128,6 +133,8 @@ static const ArgDesc argDesc[] = {
    "print only even pages"},
   {"-singlefile", argFlag,  &singleFile,   0,
    "write only the first page and do not add digits"},
+  {"-scale-dimension-before-rotation", argFlag,  &scaleDimensionBeforeRotation,   0,
+   "for rotated pdf, resize dimensions before the rotation"},
 
   {"-r",      argFP,       &resolution,    0,
    "resolution, in DPI (default is 150)"},
@@ -154,6 +161,8 @@ static const ArgDesc argDesc[] = {
    "size of crop square in pixels (sets W and H)"},
   {"-cropbox",argFlag,     &useCropBox,    0,
    "use the crop box rather than media box"},
+  {"-hide-annotations", argFlag,  &hideAnnotations,    0,
+   "do not show annotations"},
 
   {"-mono",   argFlag,     &mono,          0,
    "generate a monochrome PBM file"},
@@ -170,17 +179,13 @@ static const ArgDesc argDesc[] = {
 #ifdef ENABLE_LIBJPEG
   {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
-#ifdef SPLASH_CMYK
   {"-jpegcmyk",argFlag,    &jpegcmyk,       0,
    "generate a CMYK JPEG file"},
-#endif
   {"-jpegopt",  argGooString, &jpegOpt,    0,
    "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*"},
 #endif
-#ifdef SPLASH_CMYK
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
-#endif
 #ifdef ENABLE_LIBTIFF
   {"-tiff",    argFlag,     &tiff,           0,
    "generate a TIFF file"},
@@ -221,6 +226,11 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {}
 };
+
+static bool needToRotate(int angle)
+{
+    return (angle == 90) || (angle == 270);
+}
 
 static bool parseJpegOptions()
 {
@@ -282,6 +292,10 @@ static bool parseJpegOptions()
   return true;
 }
 
+static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data) {
+  return !hideAnnotations;
+};
+
 static void savePageSlice(PDFDoc *doc,
                    SplashOutputDev *splashOut, 
                    int pg, int x, int y, int w, int h, 
@@ -295,7 +309,8 @@ static void savePageSlice(PDFDoc *doc,
     pg, x_resolution, y_resolution, 
     0,
     !useCropBox, false, false,
-    x, y, w, h
+    x, y, w, h,
+    nullptr, nullptr, annotDisplayDecideCbk, nullptr
   );
 
   SplashBitmap *bitmap = splashOut->getBitmap();
@@ -368,12 +383,11 @@ static void processPageJobs() {
     // process the job    
     SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 :
                   gray ? splashModeMono8 :
-#ifdef SPLASH_CMYK
         			    (jpegcmyk || overprint) ? splashModeDeviceN8 :
-#endif
 		              splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
+    splashOut->setEnableFreeType(enableFreeType);
     splashOut->startDoc(pageJob.doc);
     
     savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
@@ -400,7 +414,7 @@ int main(int argc, char *argv[]) {
   bool ok;
   int exitCode;
   int pg, pg_num_len;
-  double pg_w, pg_h, tmp;
+  double pg_w, pg_h;
 
   Win32Console win32Console(&argc, &argv);
   exitCode = 99;
@@ -448,9 +462,9 @@ int main(int argc, char *argv[]) {
   }
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (enableFreeTypeStr[0]) {
-    if (!globalParams->setEnableFreeType(enableFreeTypeStr)) {
+    if (!GlobalParams::parseYesNo2(enableFreeTypeStr, &enableFreeType)) {
       fprintf(stderr, "Bad '-freetype' value on command line\n");
     }
   }
@@ -514,6 +528,17 @@ int main(int argc, char *argv[]) {
     goto err1;
   }
 
+  // If our page range selection and document size indicate we're only
+  // outputting a single page, ensure that even/odd page selection doesn't
+  // filter out that single page.
+  if (firstPage == lastPage &&
+       ((printOnlyEven && firstPage % 2 == 0) ||
+        (printOnlyOdd && firstPage % 2 == 1))) {
+    fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
+    goto err1;
+  }
+
+
   if (singleFile && firstPage < lastPage) {
     if (!quiet) {
       fprintf(stderr,
@@ -524,14 +549,10 @@ int main(int argc, char *argv[]) {
   }
 
   // write PPM files
-#ifdef SPLASH_CMYK
   if (jpegcmyk || overprint) {
     globalParams->setOverprintPreview(true);
-    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      paperColor[cp] = 0;
-  } else 
-#endif
-  {
+    splashClearColor(paperColor);
+  } else {
     paperColor[0] = 255;
     paperColor[1] = 255;
     paperColor[2] = 255;
@@ -541,9 +562,7 @@ int main(int argc, char *argv[]) {
 
   splashOut = new SplashOutputDev(mono ? splashModeMono1 :
 				    gray ? splashModeMono8 :
-#ifdef SPLASH_CMYK
 				    (jpegcmyk || overprint) ? splashModeDeviceN8 :
-#endif
 				             splashModeRGB8, 4,
 				  false, paperColor, true, thinLineMode);
 
@@ -551,6 +570,7 @@ int main(int argc, char *argv[]) {
 
   splashOut->setFontAntialias(fontAntialias);
   splashOut->setVectorAntialias(vectorAntialias);
+  splashOut->setEnableFreeType(enableFreeType);
   splashOut->startDoc(doc);
   
 #endif // UTILS_USE_PTHREADS
@@ -567,6 +587,9 @@ int main(int argc, char *argv[]) {
       pg_w = doc->getPageMediaWidth(pg);
       pg_h = doc->getPageMediaHeight(pg);
     }
+
+    if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+      std::swap(pg_w, pg_h);
 
     if (scaleTo != 0) {
       resolution = (72.0 * scaleTo) / (pg_w > pg_h ? pg_w : pg_h);
@@ -585,11 +608,10 @@ int main(int argc, char *argv[]) {
     }
     pg_w = pg_w * (x_resolution / 72.0);
     pg_h = pg_h * (y_resolution / 72.0);
-    if ((doc->getPageRotate(pg) == 90) || (doc->getPageRotate(pg) == 270)) {
-      tmp = pg_w;
-      pg_w = pg_h;
-      pg_h = tmp;
-    }
+
+    if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+      std::swap(pg_w, pg_h);
+
     if (ppmRoot != nullptr) {
       const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
       if (singleFile && !forceNum ) {
@@ -655,7 +677,6 @@ int main(int argc, char *argv[]) {
   // clean up
  err1:
   delete doc;
-  delete globalParams;
  err0:
 
   return exitCode;

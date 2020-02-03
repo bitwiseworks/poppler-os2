@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -28,6 +28,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -36,14 +37,14 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <time.h>
+#include <ctime>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gbase64.h"
@@ -173,15 +174,15 @@ public:
         bool reverseVideoA, SplashColorPtr paperColorA,
         bool bitmapTopDownA = true) : SplashOutputDev(colorModeA,
             bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA) { }
-  virtual ~SplashOutputDevNoText() { }
+  ~SplashOutputDevNoText() override { }
   
   void drawChar(GfxState *state, double x, double y,
       double dx, double dy,
       double originX, double originY,
-      CharCode code, int nBytes, Unicode *u, int uLen) override { }
+      CharCode code, int nBytes, const Unicode *u, int uLen) override { }
   bool beginType3Char(GfxState *state, double x, double y,
       double dx, double dy,
-      CharCode code, Unicode *u, int uLen) override { return false; }
+      CharCode code, const Unicode *u, int uLen) override { return false; }
   void endType3Char(GfxState *state) override { }
   void beginTextObject(GfxState *state) override { }
   void endTextObject(GfxState *state) override { }
@@ -223,7 +224,7 @@ int main(int argc, char *argv[]) {
   //errorInit();
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   if (errQuiet) {
     globalParams->setErrQuiet(errQuiet);
@@ -440,7 +441,6 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Your pdftohtml was built without splash backend support. It is needed for the option you want to use.\n");
     delete htmlOut;
     delete htmlFileName;
-    delete globalParams;
     delete fileName;
     delete doc;
     return -1;
@@ -462,7 +462,6 @@ int main(int argc, char *argv[]) {
  error:
   if(doc) delete doc;
   delete fileName;
-  if(globalParams) delete globalParams;
 
   if(htmlFileName) delete htmlFileName;
 

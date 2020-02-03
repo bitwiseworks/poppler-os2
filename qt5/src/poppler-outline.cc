@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +44,9 @@ OutlineItem::OutlineItem(const OutlineItem &other) : m_data{new OutlineItemData{
 
 OutlineItem &OutlineItem::operator=(const OutlineItem &other)
 {
+  if (this == &other)
+    return *this;
+
   auto *data = new OutlineItemData{*other.m_data};
   qSwap(m_data, data);
   delete data;
@@ -50,12 +54,12 @@ OutlineItem &OutlineItem::operator=(const OutlineItem &other)
   return *this;
 }
 
-OutlineItem::OutlineItem(OutlineItem &&other) : m_data{other.m_data}
+OutlineItem::OutlineItem(OutlineItem &&other) noexcept : m_data{other.m_data}
 {
   other.m_data = nullptr;
 }
 
-OutlineItem &OutlineItem::operator=(OutlineItem &&other)
+OutlineItem &OutlineItem::operator=(OutlineItem &&other) noexcept
 {
   qSwap(m_data, other.m_data);
 

@@ -2,7 +2,8 @@
  * Copyright (C) 2004, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,6 +153,25 @@ typedef enum
 } PopplerPrintScaling;
 
 /**
+ * PopplerPrintDuplex:
+ * @POPPLER_PRINT_DUPLEX_NONE: No preference on duplex printing
+ * @POPPLER_PRINT_DUPLEX_SIMPLEX: Print single-sided
+ * @POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_SHORT_EDGE: Duplex and flip on the short edge of the sheet
+ * @POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_LONG_EDGE: Duplex and flip on the long edge of the sheet
+ *
+ * Duplex viewer preference
+ *
+ * Since: 0.80
+ */
+typedef enum
+{
+  POPPLER_PRINT_DUPLEX_NONE,
+  POPPLER_PRINT_DUPLEX_SIMPLEX,
+  POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_SHORT_EDGE,
+  POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_LONG_EDGE
+} PopplerPrintDuplex;
+
+/**
  * PopplerPermissions:
  * @POPPLER_PERMISSIONS_OK_TO_PRINT: document can be printer
  * @POPPLER_PERMISSIONS_OK_TO_MODIFY: document contents can be modified
@@ -278,6 +298,10 @@ PopplerDocument   *poppler_document_new_from_data          (char            *dat
 							    const char      *password,
 							    GError         **error);
 POPPLER_PUBLIC
+PopplerDocument   *poppler_document_new_from_bytes         (GBytes          *bytes,
+							    const char      *password,
+							    GError         **error);
+POPPLER_PUBLIC
 PopplerDocument   *poppler_document_new_from_stream        (GInputStream    *stream,
                                                             goffset          length,
                                                             const char      *password,
@@ -372,7 +396,15 @@ POPPLER_PUBLIC
 PopplerPDFConformance poppler_document_get_pdf_conformance (PopplerDocument *document);
 POPPLER_PUBLIC
 gchar             *poppler_document_get_metadata           (PopplerDocument *document);
+POPPLER_PUBLIC
 PopplerPrintScaling poppler_document_get_print_scaling     (PopplerDocument *document);
+POPPLER_PUBLIC
+PopplerPrintDuplex poppler_document_get_print_duplex       (PopplerDocument *document);
+POPPLER_PUBLIC
+gint               poppler_document_get_print_n_copies     (PopplerDocument *document);
+POPPLER_PUBLIC
+PopplerPageRange  *poppler_document_get_print_page_ranges  (PopplerDocument *document,
+                                                            int             *n_ranges) G_GNUC_MALLOC;
 
 /* Attachments */
 POPPLER_PUBLIC
@@ -386,6 +418,8 @@ GList             *poppler_document_get_attachments        (PopplerDocument  *do
 POPPLER_PUBLIC
 PopplerDest       *poppler_document_find_dest              (PopplerDocument  *document,
 							    const gchar      *link_name);
+POPPLER_PUBLIC
+GTree             *poppler_document_create_dests_tree      (PopplerDocument  *document);
 
 /* Form */
 POPPLER_PUBLIC
@@ -494,7 +528,20 @@ void           poppler_ps_file_set_duplex     (PopplerPSFile   *ps_file,
 POPPLER_PUBLIC
 void           poppler_ps_file_free           (PopplerPSFile   *ps_file);
 
-
+/**
+ * PopplerPageRange:
+ * @start_page: first page in the range of pages
+ * @end_page:   last page in the range of pages
+ *
+ * A #PopplerPageRange is used to specify a range of pages.
+ *
+ * Since: 0.80
+ */
+struct _PopplerPageRange
+{
+  gint start_page;
+  gint end_page;
+};
 
 G_END_DECLS
 

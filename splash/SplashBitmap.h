@@ -17,7 +17,7 @@
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
-// Copyright (C) 2010 Christian Feuers‰nger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2010 Christian Feuers√§nger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
@@ -35,7 +35,7 @@
 
 #include "SplashTypes.h"
 #include "poppler/GfxState.h"
-#include <stdio.h>
+#include <cstdio>
 
 class ImgWriter;
 
@@ -98,9 +98,7 @@ public:
   void getPixel(int x, int y, SplashColorPtr pixel);
   void getRGBLine(int y, SplashColorPtr line);
   void getXBGRLine(int y, SplashColorPtr line, ConversionMode conversionMode = conversionOpaque);
-#ifdef SPLASH_CMYK
   void getCMYKLine(int y, SplashColorPtr line);
-#endif
   unsigned char getAlpha(int x, int y);
 
   // Caller takes ownership of the bitmap data.  The SplashBitmap

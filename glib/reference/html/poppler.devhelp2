@@ -32,9 +32,11 @@
     <sub name="Index of new symbols in 0.70" link="api-index-0-70.html"/>
     <sub name="Index of new symbols in 0.72" link="api-index-0-72.html"/>
     <sub name="Index of new symbols in 0.73" link="api-index-0-73.html"/>
+    <sub name="Index of new symbols in 0.78" link="api-index-0-78.html"/>
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
   </chapters>
   <functions>
+    <keyword type="function" name="poppler_document_create_dests_tree ()" link="PopplerDocument.html#poppler-document-create-dests-tree" since="0.78"/>
     <keyword type="function" name="poppler_document_find_dest ()" link="PopplerDocument.html#poppler-document-find-dest"/>
     <keyword type="function" name="poppler_document_get_attachments ()" link="PopplerDocument.html#poppler-document-get-attachments"/>
     <keyword type="function" name="poppler_document_get_author ()" link="PopplerDocument.html#poppler-document-get-author" since="0.16"/>
@@ -58,12 +60,16 @@
     <keyword type="function" name="poppler_document_get_pdf_version ()" link="PopplerDocument.html#poppler-document-get-pdf-version" since="0.16"/>
     <keyword type="function" name="poppler_document_get_pdf_version_string ()" link="PopplerDocument.html#poppler-document-get-pdf-version-string" since="0.16"/>
     <keyword type="function" name="poppler_document_get_permissions ()" link="PopplerDocument.html#poppler-document-get-permissions" since="0.16"/>
+    <keyword type="function" name="poppler_document_get_print_duplex ()" link="PopplerDocument.html#poppler-document-get-print-duplex" since="0.80"/>
+    <keyword type="function" name="poppler_document_get_print_n_copies ()" link="PopplerDocument.html#poppler-document-get-print-n-copies" since="0.80"/>
+    <keyword type="function" name="poppler_document_get_print_page_ranges ()" link="PopplerDocument.html#poppler-document-get-print-page-ranges" since="0.80"/>
     <keyword type="function" name="poppler_document_get_print_scaling ()" link="PopplerDocument.html#poppler-document-get-print-scaling" since="0.73"/>
     <keyword type="function" name="poppler_document_get_producer ()" link="PopplerDocument.html#poppler-document-get-producer" since="0.16"/>
     <keyword type="function" name="poppler_document_get_subject ()" link="PopplerDocument.html#poppler-document-get-subject" since="0.16"/>
     <keyword type="function" name="poppler_document_get_title ()" link="PopplerDocument.html#poppler-document-get-title" since="0.16"/>
     <keyword type="function" name="poppler_document_has_attachments ()" link="PopplerDocument.html#poppler-document-has-attachments"/>
     <keyword type="function" name="poppler_document_is_linearized ()" link="PopplerDocument.html#poppler-document-is-linearized" since="0.16"/>
+    <keyword type="function" name="poppler_document_new_from_bytes ()" link="PopplerDocument.html#poppler-document-new-from-bytes" since="0.82"/>
     <keyword type="function" name="poppler_document_new_from_data ()" link="PopplerDocument.html#poppler-document-new-from-data"/>
     <keyword type="function" name="poppler_document_new_from_file ()" link="PopplerDocument.html#poppler-document-new-from-file"/>
     <keyword type="function" name="poppler_document_new_from_gfile ()" link="PopplerDocument.html#poppler-document-new-from-gfile" since="0.22"/>
@@ -137,6 +143,8 @@
     <keyword type="property" name="The “page-layout” property" link="PopplerDocument.html#PopplerDocument--page-layout"/>
     <keyword type="property" name="The “page-mode” property" link="PopplerDocument.html#PopplerDocument--page-mode"/>
     <keyword type="property" name="The “permissions” property" link="PopplerDocument.html#PopplerDocument--permissions"/>
+    <keyword type="property" name="The “print-duplex” property" link="PopplerDocument.html#PopplerDocument--print-duplex"/>
+    <keyword type="property" name="The “print-n-copies” property" link="PopplerDocument.html#PopplerDocument--print-n-copies"/>
     <keyword type="property" name="The “print-scaling” property" link="PopplerDocument.html#PopplerDocument--print-scaling"/>
     <keyword type="property" name="The “producer” property" link="PopplerDocument.html#PopplerDocument--producer"/>
     <keyword type="property" name="The “subject” property" link="PopplerDocument.html#PopplerDocument--subject"/>
@@ -388,10 +396,16 @@
     <keyword type="function" name="poppler_media_save ()" link="poppler-Poppler-Media.html#poppler-media-save" since="0.14"/>
     <keyword type="function" name="poppler_media_save_to_callback ()" link="poppler-Poppler-Media.html#poppler-media-save-to-callback" since="0.14"/>
     <keyword type="struct" name="PopplerMedia" link="poppler-Poppler-Media.html#PopplerMedia-struct"/>
+    <keyword type="function" name="poppler_movie_get_duration ()" link="poppler-Poppler-Movie.html#poppler-movie-get-duration" since="0.80"/>
     <keyword type="function" name="poppler_movie_get_filename ()" link="poppler-Poppler-Movie.html#poppler-movie-get-filename" since="0.14"/>
     <keyword type="function" name="poppler_movie_get_play_mode ()" link="poppler-Poppler-Movie.html#poppler-movie-get-play-mode" since="0.54"/>
+    <keyword type="function" name="poppler_movie_get_rate ()" link="poppler-Poppler-Movie.html#poppler-movie-get-rate" since="0.80"/>
+    <keyword type="function" name="poppler_movie_get_rotation_angle ()" link="poppler-Poppler-Movie.html#poppler-movie-get-rotation-angle" since="0.80"/>
+    <keyword type="function" name="poppler_movie_get_start ()" link="poppler-Poppler-Movie.html#poppler-movie-get-start" since="0.80"/>
+    <keyword type="function" name="poppler_movie_get_volume ()" link="poppler-Poppler-Movie.html#poppler-movie-get-volume" since="0.80"/>
     <keyword type="function" name="poppler_movie_need_poster ()" link="poppler-Poppler-Movie.html#poppler-movie-need-poster" since="0.14"/>
     <keyword type="function" name="poppler_movie_show_controls ()" link="poppler-Poppler-Movie.html#poppler-movie-show-controls" since="0.14"/>
+    <keyword type="function" name="poppler_movie_is_synchronous ()" link="poppler-Poppler-Movie.html#poppler-movie-is-synchronous" since="0.80"/>
     <keyword type="struct" name="PopplerMovie" link="poppler-Poppler-Movie.html#PopplerMovie-struct"/>
     <keyword type="enum" name="enum PopplerMoviePlayMode" link="poppler-Poppler-Movie.html#PopplerMoviePlayMode" since="0.54"/>
     <keyword type="function" name="poppler_structure_element_get_abbreviation ()" link="PopplerStructureElement.html#poppler-structure-element-get-abbreviation" since="0.26"/>

@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -70,8 +71,7 @@ int main(int argc, char *argv[]) {
   const GooString attachFilePath(argv[2]);
 
   // init GlobalParams
-  auto gp = std::make_unique<GlobalParams>();
-  globalParams = gp.get();
+  globalParams = std::make_unique<GlobalParams>();
 
   // open PDF file
   std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(pdfFileName, nullptr, nullptr));

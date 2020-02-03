@@ -1,3 +1,151 @@
+Release 0.84.0:
+        core:
+         * Fix crash when converting from Unicode to ASCII-7
+         * Splash::scaleImageYdXu: Protect against crash if srcWidth is too big
+         * JBIG2Stream: fix potential crash in malformed documents
+         * JBIG2Stream: fix leak in reset() if called several times
+         * Internal code improvements
+
+        utils:
+         * pdfimages: Add error message if first page is larger then number of pages.
+         * pdfinfo: Improved paper size recognition
+         * pdfsig: Fix exit code when dumping signatures
+         * pdftocairo: Error out when even/odd selects 0 pages
+         * pdftohtml: Fix memory leak
+         * pdftoppm: Add an option to scale before rotate
+         * pdftoppm: Add -hide-annotations option
+         * pdftoppm: Error out when even/odd selects 0 pages
+         * pdftops: Improve -optimizecolorspace
+
+        qt5:
+         * Code cleanups
+
+        glib:
+         * Fix compiler warrnings
+
+Release 0.83.0:
+        core:
+         * Improve when a file is recognized as Linearized
+         * Improve const-ness of the code
+         * Make code a bit more readable/maintanable
+         * Fix uninitialized memory uses in broken files
+
+        utils:
+         * pdffonts: Make code a bit more readable/maintanable
+         * pdftohtml: Make code a bit more readable/maintanable
+
+        qt5:
+         * Remove a bunch of unused internal functions
+         * trUtf8 -> tr (less warnings)
+
+        build system:
+         * make-glib-api-docs: switch to python3
+
+Release 0.82.0:
+        core:
+         * Fix not being able to open some files. Issue #832
+         * Fix crashes in malformed files
+         * Fix memory leak on broken files
+         * Minor performance improvements
+         * Minor code improvements
+
+        glib:
+         * Add poppler_document_new_from_bytes
+         * PopplerAttachment: Silence deprecation warnings for ctime/mtime
+
+        build system:
+         * pdf-inspector: Support builddir != srcdir
+         * Install Cairo* headers if Cairo has been found
+
+Release 0.81.0:
+        core:
+         * Splash: Always enable support for CMYK rasterization
+         * CairoOutputDev: Check scaled dimensions for 0. Issue #737
+         * BaseCryptStream: Fix potential uninitialized memory read
+         * SplashBitmap: Fix wrong width condition for splashModeDeviceN8
+         * Fix crashes in malformed files
+
+Release 0.80.0:
+        core:
+         * Annotations: Implement support for setting a different text in the appearance stream than the real text
+         * Splash: Optionally use small_vector from boost
+         * Fix memory leaks on broken files
+         * Fix abort on broken files
+         * Small code simplifications
+         * Remove USE_FIXEDPOINT support. Issue #821
+
+        qt5:
+         * Fix MSVC build
+         * Add subsitute-font information
+         * Fix since marker of some functions
+         * Fix leak when aborting text extraction
+         * Small code simplifications
+
+        glib:
+         * Make print scaling getter visible
+         * Make Duplex/NumCopies/PrintPageRange preference available in API
+         * Implement Movie API
+
+        utils:
+         * pdftotext: Add -nodiag flag to remove diagonal text on output
+
+        build system:
+         * Mark external lib include dirs as SYSTEM
+
+Release 0.79.0:
+        core:
+         * Fix regression on TextSelectionPainter
+         * Fix parsing of DefaultAppearance
+         * Fix memory leak in PostScriptFunction
+         * Fix crashes in fuzzed files
+
+        qt5:
+         * Implemented support for setIcon by changing appearance
+         * Added option to set the form available to print
+         * QString::null is deprecated, use QString()
+         * Replace deprecated qStableSort with std::stable_sort
+
+        build system:
+         * Turn README into README.md and expand it
+
+Release 0.78.0:
+        core:
+         * Fix line annotation arrows for usage in dimensioning
+         * Handle Ink annots without an InkList but with an AP
+         * Fix typos preventing parsing of Movie start and duration
+         * Fix crash on malformed files
+
+        glib:
+         * Add poppler_document_create_dests_tree()
+         * Don't use the deprecated g_type_class_add_private()
+         * Document the differences between render() and render_for_printing()
+         * Fix introspection for poppler_document_new_from_data
+         * Don't create PopplerInputStream with length 0. Issue #414
+         * Document G_IO_ERROR as a possible error condition
+         * docs: Add index for API new in 0.78
+
+        build system:
+         * Fixes cross compilation of gir in Void Linux
+         * Add -Wshadow to the default warning flags
+         * install pkg-config pc files if pkg-config is found
+
+Release 0.77.0:
+        core:
+         * Fix crash on signature handling. Issue #766
+         * Fix small memory leak in SignatureHandler::getCertificateInfo
+         * Splash: Restrict filling of overlapping boxes. Issue #750
+         * Fix crash on malformed files
+
+        qt5:
+         * Fix optional content handling with exclusive layers
+
+        cpp:
+         * Make render_page thread-safe
+
+        utils:
+         * pdfsig: Fix small memory leak
+         * pdftotext: Fix typo in manpage
+
 Release 0.76.1:
         core:
          * Make the mul tables be calculated at compile time with constexpr.
