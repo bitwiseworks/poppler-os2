@@ -26,6 +26,7 @@
 #ifndef GMEM_H
 #define GMEM_H
 
+#include "poppler-config.h"
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
@@ -56,7 +57,7 @@ inline void *gmalloc_checkoverflow(size_t size) {
 }
 
 /// Same as free, but checks for and ignores NULL pointers.
-inline void gfree(void *p) {
+inline POPPLER_LIB_EXPORT void gfree(void *p) {
   if (p) {
     std::free(p);
   }
