@@ -25,6 +25,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,10 +34,10 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gmem.h"
@@ -114,9 +115,7 @@ static char userPassword[33] = "\001";
 static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
-#ifdef SPLASH_CMYK
 static bool overprint = false;
-#endif
 
 static const ArgDesc argDesc[] = {
   {"-f",          argInt,      &firstPage,      0,
@@ -187,10 +186,8 @@ static const ArgDesc argDesc[] = {
    "owner password (for encrypted files)"},
   {"-upw",        argString,   userPassword,    sizeof(userPassword),
    "user password (for encrypted files)"},
-#ifdef SPLASH_CMYK
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
-#endif
   {"-q",          argFlag,     &quiet,          0,
    "don't print any messages or errors"},
   {"-v",          argFlag,     &printVersion,   0,
@@ -273,7 +270,7 @@ int main(int argc, char *argv[]) {
   fileName = new GooString(argv[1]);
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (origPageSizes) {
     paperWidth = paperHeight = -1;
   }
@@ -288,11 +285,9 @@ int main(int argc, char *argv[]) {
       goto err0;
     }
   }
-#ifdef SPLASH_CMYK
   if (overprint) {
     globalParams->setOverprintPreview(true);
   }
-#endif  
   if (expand) {
     globalParams->setPSExpandSmaller(true);
   }
@@ -440,7 +435,6 @@ int main(int argc, char *argv[]) {
   delete doc;
   delete fileName;
  err0:
-  delete globalParams;
 
   return exitCode;
 }

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -106,7 +106,7 @@ class IdentityFunction: public Function {
 public:
 
   IdentityFunction();
-  ~IdentityFunction();
+  ~IdentityFunction() override;
   Function *copy() const override { return new IdentityFunction(); }
   int getType() const override { return -1; }
   void transform(const double *in, double *out) const override;
@@ -123,7 +123,7 @@ class SampledFunction: public Function {
 public:
 
   SampledFunction(Object *funcObj, Dict *dict);
-  ~SampledFunction();
+  ~SampledFunction() override;
   Function *copy() const override { return new SampledFunction(this); }
   int getType() const override { return 0; }
   void transform(const double *in, double *out) const override;
@@ -167,7 +167,7 @@ class ExponentialFunction: public Function {
 public:
 
   ExponentialFunction(Object *funcObj, Dict *dict);
-  ~ExponentialFunction();
+  ~ExponentialFunction() override;
   Function *copy() const override { return new ExponentialFunction(this); }
   int getType() const override { return 2; }
   void transform(const double *in, double *out) const override;
@@ -196,7 +196,7 @@ class StitchingFunction: public Function {
 public:
 
   StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents);
-  ~StitchingFunction();
+  ~StitchingFunction() override;
   Function *copy() const override { return new StitchingFunction(this); }
   int getType() const override { return 3; }
   void transform(const double *in, double *out) const override;
@@ -228,7 +228,7 @@ class PostScriptFunction: public Function {
 public:
 
   PostScriptFunction(Object *funcObj, Dict *dict);
-  ~PostScriptFunction();
+  ~PostScriptFunction() override;
   Function *copy() const override { return new PostScriptFunction(this); }
   int getType() const override { return 4; }
   void transform(const double *in, double *out) const override;
@@ -240,7 +240,7 @@ private:
 
   PostScriptFunction(const PostScriptFunction *func);
   bool parseCode(Stream *str, int *codePtr);
-  GooString *getToken(Stream *str);
+  GooString getToken(Stream *str);
   void resizeCode(int newSize);
   void exec(PSStack *stack, int codePtr) const;
 

@@ -32,6 +32,7 @@
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
+// Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -445,16 +446,15 @@ public:
   void removeAllStreams();
 
   // Test if this AnnotAppearance references the specified stream
-  bool referencesStream(Ref targetStreamRef);
+  bool referencesStream(Ref refToStream);
 
 private:
-  static bool referencesStream(const Object *stateObj, Ref targetStreamRef);
+  static bool referencesStream(const Object *stateObj, Ref refToStream);
   void removeStream(Ref refToStream);
   void removeStateStreams(const Object *state);
 
 protected:
   PDFDoc *doc;
-  XRef *xref;                   // the xref table for this PDF file
   Object appearDict;            // Annotation's AP
 };
 
@@ -512,7 +512,7 @@ protected:
 class AnnotAppearanceBBox
 {
 public:
-  AnnotAppearanceBBox(PDFRectangle *init);
+  AnnotAppearanceBBox(PDFRectangle *rect);
 
   void setBorderWidth(double w) { borderWidth = w; }
 
@@ -557,8 +557,8 @@ public:
   void drawLineEndSlash(double x, double y, double size, const Matrix& m);
   void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
   bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
-  static double shortenLineSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size);
-
+  static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
+  static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
   void writeString(const GooString &str);
 
   void append(const char *text);
@@ -685,7 +685,7 @@ public:
   // new_content should never be NULL
   virtual void setContents(GooString *new_content);
   void setName(GooString *new_name);
-  void setModified(GooString *new_date);
+  void setModified(GooString *new_modified);
   void setFlags(unsigned int new_flags);
 
   void setBorder(std::unique_ptr<AnnotBorder> &&new_border);
@@ -695,7 +695,6 @@ public:
 
   // getters
   PDFDoc *getDoc() const { return doc; }
-  XRef *getXRef() const { return xref; }
   bool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
   AnnotSubtype getType() const { return type; }
@@ -726,7 +725,7 @@ private:
   // write vStr[i:j[ in appearBuf
 
   void initialize (PDFDoc *docA, Dict *dict);
-  void setPage (int new_page, bool updateP); // Called by Page::addAnnot and Annots ctor
+  void setPage (int pageIndex, bool updateP); // Called by Page::addAnnot and Annots ctor
 
 
 protected:
@@ -749,7 +748,7 @@ protected:
   Object annotObj;
 
   std::atomic_int refCnt;
-  
+
   // required data
   AnnotSubtype type;                                // Annotation type
   std::unique_ptr<PDFRectangle> rect;               // Rect
@@ -769,7 +768,6 @@ protected:
   Object oc;                                        // OC
 
   PDFDoc *doc;
-  XRef *xref;			// the xref table for this PDF file
   Ref ref;                      // object ref identifying this annotation
   std::unique_ptr<AnnotBorder> border;              // Border, BS
   std::unique_ptr<AnnotColor> color;                // C
@@ -787,7 +785,7 @@ class AnnotPopup: public Annot {
 public:
   AnnotPopup(PDFDoc *docA, PDFRectangle *rect);
   AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotPopup();
+  ~AnnotPopup() override;
 
   bool hasParent() const { return parentRef != Ref::INVALID(); }
   void setParent(Annot *parentA);
@@ -814,7 +812,7 @@ public:
 
   AnnotMarkup(PDFDoc *docA, PDFRectangle *rect);
   AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotMarkup();
+  ~AnnotMarkup() override;
 
   // getters
   const GooString *getLabel() const { return label.get(); }
@@ -875,7 +873,7 @@ public:
 
   AnnotText(PDFDoc *docA, PDFRectangle *rect);
   AnnotText(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotText();
+  ~AnnotText() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -908,7 +906,7 @@ class AnnotMovie: public Annot {
  public:
   AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
   AnnotMovie(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotMovie();
+  ~AnnotMovie() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -932,7 +930,7 @@ class POPPLER_LIB_EXPORT AnnotScreen: public Annot {
 
   AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
   AnnotScreen(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotScreen();
+  ~AnnotScreen() override;
 
   const GooString* getTitle() const { return title.get(); }
 
@@ -968,7 +966,7 @@ public:
 
   AnnotLink(PDFDoc *docA, PDFRectangle *rect);
   AnnotLink(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotLink();
+  ~AnnotLink() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -1011,7 +1009,7 @@ public:
 
   AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
   AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotFreeText();
+  ~AnnotFreeText() override;
 
   void draw(Gfx *gfx, bool printing) override;
   Object getAppearanceResDict() override;
@@ -1074,7 +1072,7 @@ public:
 
   AnnotLine(PDFDoc *docA, PDFRectangle *rect);
   AnnotLine(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotLine();
+  ~AnnotLine() override;
 
   void draw(Gfx *gfx, bool printing) override;
   Object getAppearanceResDict() override;
@@ -1141,7 +1139,7 @@ public:
 
   AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotTextMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotTextMarkup();
+  ~AnnotTextMarkup() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -1168,7 +1166,7 @@ public:
 
   AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
   AnnotStamp(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotStamp();
+  ~AnnotStamp() override;
 
   void setIcon(GooString *new_icon);
 
@@ -1191,7 +1189,7 @@ public:
 
   AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotGeometry(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotGeometry();
+  ~AnnotGeometry() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -1227,7 +1225,7 @@ public:
 
   AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotPolygon(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotPolygon();
+  ~AnnotPolygon() override;
 
   void draw(Gfx *gfx, bool printing) override;
   void generatePolyLineAppearance(AnnotAppearanceBuilder* appearBuilder);
@@ -1277,7 +1275,7 @@ public:
 
   AnnotCaret(PDFDoc *docA, PDFRectangle *rect);
   AnnotCaret(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotCaret();
+  ~AnnotCaret() override;
 
   void setSymbol(AnnotCaretSymbol new_symbol);
 
@@ -1302,7 +1300,7 @@ public:
 
   AnnotInk(PDFDoc *docA, PDFRectangle *rect);
   AnnotInk(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotInk();
+  ~AnnotInk() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -1337,7 +1335,7 @@ public:
 
   AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
   AnnotFileAttachment(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotFileAttachment();
+  ~AnnotFileAttachment() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -1365,7 +1363,7 @@ public:
 
   AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
   AnnotSound(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotSound();
+  ~AnnotSound() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
@@ -1400,11 +1398,11 @@ public:
 
   AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj);
   AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
-  ~AnnotWidget();
+  ~AnnotWidget() override;
 
   void draw(Gfx *gfx, bool printing) override;
 
-  void generateFieldAppearance (bool *addDingbatsResource);
+  void generateFieldAppearance (bool *addedDingbatsResource);
   void updateAppearanceStream ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }
@@ -1413,6 +1411,9 @@ public:
   LinkAction *getAdditionalAction(AdditionalActionsType type); // The caller should delete the result
   LinkAction *getFormAdditionalAction(FormAdditionalActionsType type); // The caller should delete the result
   Dict *getParent() { return parent; }
+  void setNewAppearance(Object &&newAppearance);
+
+  bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
 
 private:
 
@@ -1478,7 +1479,7 @@ public:
 
   Annot3D(PDFDoc *docA, PDFRectangle *rect);
   Annot3D(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~Annot3D();
+  ~Annot3D() override;
 
   // getters
 
@@ -1658,7 +1659,7 @@ public:
 
   AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect);
   AnnotRichMedia(PDFDoc *docA, Object &&dictObject, const Object *obj);
-  ~AnnotRichMedia();
+  ~AnnotRichMedia() override;
 
   Content* getContent() const;
 

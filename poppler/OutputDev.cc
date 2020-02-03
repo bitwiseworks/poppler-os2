@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "Stream.h"
 #include "GfxState.h"
@@ -95,7 +95,7 @@ void OutputDev::updateAll(GfxState *state) {
 
 bool OutputDev::beginType3Char(GfxState *state, double x, double y,
 				double dx, double dy,
-				CharCode code, Unicode *u, int uLen) {
+				CharCode code, const Unicode *u, int uLen) {
   return false;
 }
 
@@ -126,7 +126,7 @@ void OutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) 
 
 void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			  int width, int height, GfxImageColorMap *colorMap,
-			  bool interpolate, int *maskColors, bool inlineImg) {
+			  bool interpolate, const int *maskColors, bool inlineImg) {
   int i, j;
 
   if (inlineImg) {
@@ -183,7 +183,7 @@ void OutputDev::opiEnd(GfxState *state, Dict *opiDict) {
 #endif
 
 void OutputDev::startProfile() {
-  profileHash.reset(new std::unordered_map<std::string, ProfileData>);
+  profileHash = std::make_unique<std::unordered_map<std::string, ProfileData>>();
 }
 
 std::unique_ptr<std::unordered_map<std::string, ProfileData>> OutputDev::endProfile() {

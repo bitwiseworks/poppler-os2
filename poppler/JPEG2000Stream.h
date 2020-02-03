@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008, 2010, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
@@ -27,8 +27,12 @@ class JPXStream: public FilterStream {
 public:
 
   JPXStream(Stream *strA);
-  ~JPXStream();
-  StreamKind getKind() override { return strJPX; }
+  ~JPXStream() override;
+
+  JPXStream(const JPXStream &other) = delete;
+  JPXStream& operator=(const JPXStream &other) = delete;
+
+  StreamKind getKind() const override { return strJPX; }
   void reset() override;
   void close() override;
   Goffset getPos() override;
@@ -42,8 +46,6 @@ public:
     return str->doGetChars(nChars, buffer);
   }
 private:
-  JPXStream(const JPXStream &other);
-  JPXStream& operator=(const JPXStream &other);
   JPXStreamPrivate *priv;
 
   void init();

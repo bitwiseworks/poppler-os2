@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -42,19 +42,19 @@ class CairoFontEngine;
 
 class CairoFont {
 public:
-  CairoFont(Ref ref,
-	    cairo_font_face_t *face,
-	    int *codeToGID,
-	    unsigned int codeToGIDLen,
-	    bool substitute,
-	    bool printing);
+  CairoFont(Ref refA,
+	    cairo_font_face_t *cairo_font_faceA,
+	    int *codeToGIDA,
+	    unsigned int codeToGIDLenA,
+	    bool substituteA,
+	    bool printingA);
   virtual ~CairoFont();
   CairoFont(const CairoFont &) = delete;
   CairoFont& operator=(const CairoFont &other) = delete;
 
   virtual bool matches(Ref &other, bool printing);
-  cairo_font_face_t *getFontFace(void);
-  unsigned long getGlyph(CharCode code, Unicode *u, int uLen);
+  cairo_font_face_t *getFontFace();
+  unsigned long getGlyph(CharCode code, const Unicode *u, int uLen);
   double getSubstitutionCorrection(GfxFont *gfxFont);
 
   bool isSubstitute() { return substitute; }
@@ -74,7 +74,7 @@ protected:
 class CairoFreeTypeFont : public CairoFont {
 public:
   static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
-  ~CairoFreeTypeFont();
+  ~CairoFreeTypeFont() override;
 
 private:
   CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face,
@@ -88,7 +88,7 @@ public:
   static CairoType3Font *create(GfxFont *gfxFont, PDFDoc *doc,
 				CairoFontEngine *fontEngine,
 				bool printing, XRef *xref);
-  ~CairoType3Font();
+  ~CairoType3Font() override;
 
   bool matches(Ref &other, bool printing) override;
 

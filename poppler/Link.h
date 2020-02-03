@@ -169,7 +169,7 @@ public:
   LinkGoTo(const Object *destObj);
 
   // Destructor.
-  ~LinkGoTo();
+  ~LinkGoTo() override;
 
   // Was the LinkGoTo created successfully?
   bool isOk() const override { return dest || namedDest; }
@@ -199,7 +199,7 @@ public:
   LinkGoToR(Object *fileSpecObj, Object *destObj);
 
   // Destructor.
-  ~LinkGoToR();
+  ~LinkGoToR() override;
 
   // Was the LinkGoToR created successfully?
   bool isOk() const override { return fileName && (dest || namedDest); }
@@ -230,7 +230,7 @@ public:
   LinkLaunch(const Object *actionObj);
 
   // Destructor.
-  ~LinkLaunch();
+  ~LinkLaunch() override;
 
   // Was the LinkLaunch created successfully?
   bool isOk() const override { return fileName != nullptr; }
@@ -257,7 +257,7 @@ public:
   LinkURI(const Object *uriObj, const GooString *baseURI);
 
   // Destructor.
-  ~LinkURI();
+  ~LinkURI() override;
 
   // Was the LinkURI created successfully?
   bool isOk() const override { return uri != nullptr; }
@@ -281,7 +281,7 @@ public:
   // Build a LinkNamed given the action name.
   LinkNamed(const Object *nameObj);
 
-  ~LinkNamed();
+  ~LinkNamed() override;
 
   bool isOk() const override { return name != nullptr; }
 
@@ -309,7 +309,7 @@ public:
   };
 
   LinkMovie(const Object *obj);
-  ~LinkMovie();
+  ~LinkMovie() override;
 
   bool isOk() const override { return hasAnnotRef() || hasAnnotTitle(); }
   LinkActionKind getKind() const override { return actionMovie; }
@@ -352,7 +352,7 @@ public:
 
   LinkRendition(const Object *Obj);
 
-  ~LinkRendition();
+  ~LinkRendition() override;
 
   bool isOk() const override { return true; }
 
@@ -390,7 +390,7 @@ public:
 
   LinkSound(const Object *soundObj);
 
-  ~LinkSound();
+  ~LinkSound() override;
 
   bool isOk() const override { return sound != nullptr; }
 
@@ -421,12 +421,14 @@ public:
   // Build a LinkJavaScript given the action name.
   LinkJavaScript(Object *jsObj);
 
-  ~LinkJavaScript();
+  ~LinkJavaScript() override;
 
   bool isOk() const override { return js != nullptr; }
 
   LinkActionKind getKind() const override { return actionJavaScript; }
   const GooString *getScript() const { return js; }
+
+  static Object createObject(XRef *xref, const GooString &js);
 
 private:
 
@@ -440,27 +442,26 @@ class LinkOCGState: public LinkAction {
 public:
   LinkOCGState(const Object *obj);
 
-  ~LinkOCGState();
+  ~LinkOCGState() override = default;
 
-  bool isOk() const override { return stateList != nullptr; }
+  bool isOk() const override { return isValid; }
 
   LinkActionKind getKind() const override { return actionOCGState; }
 
   enum State { On, Off, Toggle};
   struct StateList {
-    StateList() { list = nullptr; }
-    ~StateList();
-    StateList(const StateList &) = delete;
-    StateList& operator=(const StateList &) = delete;
+    StateList() = default;
+    ~StateList() = default;
     State st;
-    std::vector<Ref*> *list;
+    std::vector<Ref> list;
   };
 
-  const std::vector<StateList*> *getStateList() const { return stateList; }
+  const std::vector<StateList>& getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  std::vector<StateList*> *stateList;
+  std::vector<StateList> stateList;
+  bool isValid;
   bool preserveRB;
 };
 
@@ -472,7 +473,7 @@ class LinkHide: public LinkAction {
 public:
   LinkHide(const Object *hideObj);
 
-  ~LinkHide();
+  ~LinkHide() override;
 
   bool isOk() const override { return targetName != nullptr; }
   LinkActionKind getKind() const override { return actionHide; }
@@ -508,7 +509,7 @@ public:
   LinkUnknown(const char *actionA);
 
   // Destructor.
-  ~LinkUnknown();
+  ~LinkUnknown() override;
 
   // Was the LinkUnknown create successfully?
   bool isOk() const override { return action != nullptr; }
@@ -539,20 +540,12 @@ public:
   Links& operator=(const Links &) = delete;
 
   // Iterate through list of links.
-  int getNumLinks() const { return numLinks; }
+  int getNumLinks() const { return links.size(); }
   AnnotLink *getLink(int i) const { return links[i]; }
-
-  // If point <x>,<y> is in a link, return the associated action;
-  // else return nullptr.
-  LinkAction *find(double x, double y) const;
-
-  // Return true if <x>,<y> is in a link.
-  bool onLink(double x, double y) const;
 
 private:
 
-  AnnotLink **links;
-  int numLinks;
+  std::vector<AnnotLink *> links;
 };
 
 #endif

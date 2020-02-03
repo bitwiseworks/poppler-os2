@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -150,7 +150,7 @@ public:
   // Create a FoFiType1C object from a file on disk.
   static FoFiType1C *load(const char *fileName);
 
-  virtual ~FoFiType1C();
+  ~FoFiType1C() override;
 
   // Return the font name.
   const char *getName() const;
@@ -187,7 +187,7 @@ public:
   //     font's internal CID-to-GID mapping is used
   // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
   //     the identity CID-to-GID mapping is used
-  void convertToCIDType0(const char *psName, int *codeMap, int nCodes,
+  void convertToCIDType0(const char *psName, const int *codeMap, int nCodes,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 (but non-CID) composite font, suitable for
@@ -199,7 +199,7 @@ public:
   //     font's internal CID-to-GID mapping is used
   // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
   //     the identity CID-to-GID mapping is used
-  void convertToType0(const char *psName, int *codeMap, int nCodes,
+  void convertToType0(const char *psName, const int *codeMap, int nCodes,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
 private:
@@ -247,7 +247,7 @@ private:
   int nGlyphs;
   int nFDs;
   unsigned char *fdSelect;
-  unsigned short *charset;
+  const unsigned short *charset;
   unsigned short charsetLength;
   int gsubrBias;
 

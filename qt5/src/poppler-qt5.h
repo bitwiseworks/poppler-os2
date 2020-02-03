@@ -1,7 +1,7 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
@@ -19,6 +19,7 @@
  * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -205,9 +206,15 @@ namespace Poppler {
 	~FontInfo();
 
 	/**
-	   The name of the font. Can be QString::null if the font has no name
+	   The name of the font. Can be a null QString if the font has no name
 	*/
 	QString name() const;
+
+	/**
+	   The name of the substitute font. Can be a null QString if the font has no substitute font
+	   @since 0.80
+	*/
+	QString substituteName() const;
 
 	/**
 	   The path of the font file used to represent this font on this system,
@@ -556,7 +563,7 @@ delete it;
 	   because doing a partial rendering update needs to copy the image
 	   buffer so if it is not wanted it is better skipped early.
 
-	   \param closure opaque structure that will be passed
+	   \param payload opaque structure that will be passed
 	   back to partialUpdateCallback and shouldDoPartialUpdateCallback.
 
 	   \warning The parameter (\p x, \p y, \p w, \p h) are not
@@ -571,7 +578,7 @@ delete it;
                              int x, int y, int w, int h, Rotation rotate,
                              RenderToImagePartialUpdateFunc partialUpdateCallback,
                              ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
-                             const QVariant &closure
+                             const QVariant &payload
                             ) const;
 
 	/**
@@ -624,7 +631,7 @@ delete it;
 	   \param shouldAbortRenderCallback callback that will be called
 	   to ask if the rendering should be cancelled.
 
-	   \param closure opaque structure that will be passed
+	   \param payload opaque structure that will be passed
 	   back to partialUpdateCallback, shouldDoPartialUpdateCallback
 	   and shouldAbortRenderCallback.
 
@@ -641,7 +648,7 @@ delete it;
                              RenderToImagePartialUpdateFunc partialUpdateCallback,
                              ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
                              ShouldAbortQueryFunc shouldAbortRenderCallback,
-                             const QVariant &closure
+                             const QVariant &payload
                             ) const;
 
         /**
@@ -774,7 +781,7 @@ delete it;
 
            \since 0.31
         **/
-        bool search(const QString &text, double &rectLeft, double &rectTop, double &rectRight, double &rectBottom, SearchDirection direction, SearchFlags flags = NoSearchFlags, Rotation rotate = Rotate0) const;
+        bool search(const QString &text, double &sLeft, double &sTop, double &sRight, double &sBottom, SearchDirection direction, SearchFlags flags = NoSearchFlags, Rotation rotate = Rotate0) const;
 
 	/**
 	   Returns a list of all occurrences of the specified text on the page.
@@ -999,8 +1006,8 @@ delete it;
       OutlineItem(const OutlineItem &other);
       OutlineItem &operator=(const OutlineItem &other);
 
-      OutlineItem(OutlineItem &&other);
-      OutlineItem &operator=(OutlineItem &&other);
+      OutlineItem(OutlineItem &&other) noexcept;
+      OutlineItem &operator=(OutlineItem &&other) noexcept;
 
       /**
 	 Indicates whether an item is null, i.e. whether it does not represent a valid item in the outline of some PDF document.
@@ -1340,9 +1347,9 @@ QDateTime modified = m_doc->date("ModDate");
 	   - CreationDate: the date of creation of the document
 	   - ModDate: the date of the last change in the document
 
-	   \param data the type of date that is required
+	   \param type the type of date that is required
 	*/
-	QDateTime date( const QString & data ) const;
+	QDateTime date( const QString & type ) const;
 
 	/**
 	   Set the Info dict date entry specified by \param key to \param val
@@ -1387,11 +1394,11 @@ QString subject = m_doc->info("Subject");
 	   In addition to \c Title and \c Subject, other information that may
 	   be available include \c Author, \c Keywords, \c Creator and \c Producer.
 
-	   \param data the information that is required
+	   \param type the information that is required
 
 	   \sa infoKeys() to get a list of the available keys
 	*/
-	QString info( const QString & data ) const;
+	QString info( const QString & type ) const;
 
 	/**
 	   Set the value of the document's Info dictionary entry specified by \param key to \param val
@@ -1611,7 +1618,7 @@ QString subject = m_doc->info("Subject");
 
 	   \since 0.10
 	*/
-	QByteArray fontData(const FontInfo &font) const;
+	QByteArray fontData(const FontInfo &fi) const;
 
 	/**
 	   The documents embedded within the PDF document.
@@ -1921,7 +1928,7 @@ height = dummy.height();
             /**
               Destructor.
             */
-            ~PSConverter();
+            ~PSConverter() override;
 
             /** Sets the list of pages to print. Mandatory. */
             void setPageList(const QList<int> &pageList);
@@ -2042,7 +2049,7 @@ height = dummy.height();
             /**
               Destructor.
             */
-            ~PDFConverter();
+            ~PDFConverter() override;
 
             /**
               Sets the options for the PDF export.

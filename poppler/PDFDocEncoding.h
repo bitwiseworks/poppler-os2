@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -28,7 +29,7 @@
 
 class GooString;
 
-extern POPPLER_LIB_EXPORT Unicode pdfDocEncoding[256];
+extern POPPLER_LIB_EXPORT const Unicode pdfDocEncoding[256];
 
 POPPLER_LIB_EXPORT char* pdfDocEncodingToUTF16 (const GooString* orig, int* length);
 

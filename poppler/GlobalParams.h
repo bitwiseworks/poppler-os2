@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -37,13 +37,14 @@
 #ifndef GLOBALPARAMS_H
 #define GLOBALPARAMS_H
 
-#include <assert.h>
+#include <cassert>
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "CharTypes.h"
 #include "UnicodeMap.h"
 #include <unordered_map>
 #include <string>
+#include <memory>
 #include <mutex>
 #include <vector>
 
@@ -63,7 +64,7 @@ class SysFontList;
 //------------------------------------------------------------------------
 
 // The global parameters object.
-extern POPPLER_LIB_EXPORT GlobalParams *globalParams;
+extern POPPLER_LIB_EXPORT std::unique_ptr<GlobalParams> globalParams;
 
 //------------------------------------------------------------------------
 
@@ -87,12 +88,6 @@ enum PSLevel {
 
 //------------------------------------------------------------------------
 
-enum EndOfLineKind {
-  eolUnix,			// LF
-  eolDOS,			// CR+LF
-  eolMac			// CR
-};
-
 //------------------------------------------------------------------------
 
 class POPPLER_LIB_EXPORT GlobalParams {
@@ -106,11 +101,11 @@ public:
   GlobalParams(const GlobalParams &) = delete;
   GlobalParams& operator=(const GlobalParams &) = delete;
 
-  void setupBaseFonts(char *dir);
+  void setupBaseFonts(const char *dir);
 
   //----- accessors
 
-  CharCode getMacRomanCharCode(char *charName);
+  CharCode getMacRomanCharCode(const char *charName);
 
   // Return Unicode values for character names.  Used for general text
   // extraction.
@@ -125,38 +120,32 @@ public:
   FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
   FILE *findToUnicodeFile(const GooString *name);
   GooString *findFontFile(const GooString *fontName);
-  GooString *findBase14FontFile(const GooString *base14Name, GfxFont *font);
-  GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
+  GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+  GooString *findSystemFontFile(const GfxFont *font, SysFontType *type,
 			      int *fontNum, GooString *substituteFontName = nullptr,
 		              const GooString *base14Name = nullptr);
   bool getPSExpandSmaller();
   bool getPSShrinkLarger();
   PSLevel getPSLevel();
-  GooString *getTextEncodingName();
-  EndOfLineKind getTextEOL();
-  bool getTextPageBreaks();
-  bool getEnableFreeType();
+  std::string getTextEncodingName() const;
   bool getOverprintPreview() { return overprintPreview; }
   bool getPrintCommands();
   bool getProfileCommands();
   bool getErrQuiet();
 
-  CharCodeToUnicode *getCIDToUnicode(GooString *collection);
+  CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
   UnicodeMap *getUnicodeMap(GooString *encodingName);
-  CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = nullptr);
+  CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 
   std::vector<GooString*> *getEncodingNames();
 
   //----- functions to set parameters
-  void addFontFile(GooString *fontName, GooString *path);
+  void addFontFile(const GooString *fontName, const GooString *path);
   void setPSExpandSmaller(bool expand);
   void setPSShrinkLarger(bool shrink);
   void setPSLevel(PSLevel level);
-  void setTextEncoding(char *encodingName);
-  bool setTextEOL(char *s);
-  void setTextPageBreaks(bool pageBreaks);
-  bool setEnableFreeType(char *s);
+  void setTextEncoding(const char *encodingName);
   void setOverprintPreview(bool overprintPreviewA);
   void setPrintCommands(bool printCommandsA);
   void setProfileCommands(bool profileCommandsA);
@@ -210,10 +199,6 @@ private:
   PSLevel psLevel;		// PostScript level to generate
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
-  EndOfLineKind textEOL;	// type of EOL marker to use for text
-				//   output
-  bool textPageBreaks;		// insert end-of-page markers?
-  bool enableFreeType;		// FreeType enable flag
   bool overprintPreview;	// enable overprint preview
   bool printCommands;		// print the drawing commands
   bool profileCommands;	// profile the drawing commands

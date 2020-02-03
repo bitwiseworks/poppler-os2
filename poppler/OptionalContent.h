@@ -25,7 +25,6 @@ class GooString;
 class XRef;
 
 class OptionalContentGroup;
-class OCDisplayNode;
 
 //------------------------------------------------------------------------
 
@@ -44,10 +43,6 @@ public:
   const std::unordered_map< Ref, std::unique_ptr< OptionalContentGroup > > &getOCGs() const { return optionalContentGroups; }
 
   OptionalContentGroup* findOcgByRef( const Ref ref);
-
-  // Get the root node of the optional content group display tree
-  // (which does not necessarily include all of the OCGs).
-  OCDisplayNode *getDisplayRoot();
 
   Array* getOrderArray() 
     { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
@@ -70,7 +65,6 @@ private:
   Object order;
   Object rbgroups;
   XRef *m_xref;
-  std::unique_ptr< OCDisplayNode > display; // root node of display tree
 };
 
 //------------------------------------------------------------------------
@@ -100,11 +94,11 @@ public:
   Ref getRef() const;
   void setRef(const Ref ref);
 
-  State getState() { return m_state; };
+  State getState() const { return m_state; };
   void setState(State state) { m_state = state; };
 
-  UsageState getViewState() { return viewState; }
-  UsageState getPrintState() { return printState; }
+  UsageState getViewState() const { return viewState; }
+  UsageState getPrintState() const { return printState; }
 
 private:
   GooString *m_name;
@@ -115,34 +109,5 @@ private:
 };
 
 //------------------------------------------------------------------------
-
-class OCDisplayNode {
-public:
-
-  static OCDisplayNode *parse(const Object *obj, OCGs *oc, XRef *xref, int recursion = 0);
-  OCDisplayNode();
-  ~OCDisplayNode();
-
-  OCDisplayNode(const OCDisplayNode &) = delete;
-  OCDisplayNode& operator=(const OCDisplayNode &) = delete;
-
-  const GooString *getName() const { return name; }
-  const OptionalContentGroup *getOCG() const { return ocg; }
-  int getNumChildren() const;
-  OCDisplayNode *getChild(int idx) const;
-
-private:
-
-  OCDisplayNode(const GooString *nameA);
-  OCDisplayNode(OptionalContentGroup *ocgA);
-  void addChild(OCDisplayNode *child);
-  void addChildren(std::vector<OCDisplayNode*> *childrenA);
-  std::vector<OCDisplayNode*> *takeChildren();
-
-  GooString *name;		// display name (may be nullptr)
-  OptionalContentGroup *ocg;	// nullptr for display labels
-  std::vector<OCDisplayNode*> *children;		// nullptr if there are no children
-				//   [OCDisplayNode]
-};
 
 #endif

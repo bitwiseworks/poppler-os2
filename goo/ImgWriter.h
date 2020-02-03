@@ -16,7 +16,7 @@
 #define IMGWRITER_H
 
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 
 class POPPLER_LIB_EXPORT ImgWriter
 {

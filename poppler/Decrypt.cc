@@ -31,24 +31,24 @@
 #include <config.h>
 
 #include <cstdint>
-#include <string.h>
+#include <cstring>
 #include "goo/gmem.h"
 #include "goo/grandom.h"
 #include "Decrypt.h"
 #include "Error.h"
 
-static void rc4InitKey(unsigned char *key, int keyLen, unsigned char *state);
+static void rc4InitKey(const unsigned char *key, int keyLen, unsigned char *state);
 static unsigned char rc4DecryptByte(unsigned char *state, unsigned char *x, unsigned char *y, unsigned char c);
 
 static bool aesReadBlock(Stream  *str, unsigned char *in, bool addPadding);
 
-static void aesKeyExpansion(DecryptAESState *s, unsigned char *objKey, int objKeyLen, bool decrypt);
-static void aesEncryptBlock(DecryptAESState *s, unsigned char *in);
-static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last);
+static void aesKeyExpansion(DecryptAESState *s, const unsigned char *objKey, int objKeyLen, bool decrypt);
+static void aesEncryptBlock(DecryptAESState *s, const unsigned char *in);
+static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool last);
 
-static void aes256KeyExpansion(DecryptAES256State *s, unsigned char *objKey, int objKeyLen, bool decrypt);
-static void aes256EncryptBlock(DecryptAES256State *s, unsigned char *in);
-static void aes256DecryptBlock(DecryptAES256State *s, unsigned char *in, bool last);
+static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, int objKeyLen, bool decrypt);
+static void aes256EncryptBlock(DecryptAES256State *s, const unsigned char *in);
+static void aes256DecryptBlock(DecryptAES256State *s, const unsigned char *in, bool last);
 
 static void sha256(unsigned char *msg, int msgLen, unsigned char *hash);
 static void sha384(unsigned char *msg, int msgLen, unsigned char *hash);
@@ -305,7 +305,7 @@ bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
 //------------------------------------------------------------------------
 
 BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-				 int keyLength, int objNum, int objGen):
+				 int keyLength, Ref refA):
   FilterStream(strA)
 {
   algo = algoA;
@@ -321,11 +321,11 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
   switch (algo) {
   case cryptRC4:
     if (likely(keyLength < static_cast<int>(sizeof(objKey) - 4))) {
-      objKey[keyLength] = objNum & 0xff;
-      objKey[keyLength + 1] = (objNum >> 8) & 0xff;
-      objKey[keyLength + 2] = (objNum >> 16) & 0xff;
-      objKey[keyLength + 3] = objGen & 0xff;
-      objKey[keyLength + 4] = (objGen >> 8) & 0xff;
+      objKey[keyLength] = refA.num & 0xff;
+      objKey[keyLength + 1] = (refA.num >> 8) & 0xff;
+      objKey[keyLength + 2] = (refA.num >> 16) & 0xff;
+      objKey[keyLength + 3] = refA.gen & 0xff;
+      objKey[keyLength + 4] = (refA.gen >> 8) & 0xff;
       md5(objKey, keyLength + 5, objKey);
     }
     if ((objKeyLength = keyLength + 5) > 16) {
@@ -333,11 +333,11 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
     }
     break;
   case cryptAES:
-    objKey[keyLength] = objNum & 0xff;
-    objKey[keyLength + 1] = (objNum >> 8) & 0xff;
-    objKey[keyLength + 2] = (objNum >> 16) & 0xff;
-    objKey[keyLength + 3] = objGen & 0xff;
-    objKey[keyLength + 4] = (objGen >> 8) & 0xff;
+    objKey[keyLength] = refA.num & 0xff;
+    objKey[keyLength + 1] = (refA.num >> 8) & 0xff;
+    objKey[keyLength + 2] = (refA.num >> 16) & 0xff;
+    objKey[keyLength + 3] = refA.gen & 0xff;
+    objKey[keyLength + 4] = (refA.gen >> 8) & 0xff;
     objKey[keyLength + 5] = 0x73; // 's'
     objKey[keyLength + 6] = 0x41; // 'A'
     objKey[keyLength + 7] = 0x6c; // 'l'
@@ -355,6 +355,7 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
   }
 
   charactersRead = 0;
+  nextCharBuff = EOF;
   autoDelete = true;
 }
 
@@ -397,8 +398,8 @@ void BaseCryptStream::setAutoDelete(bool val) {
 //------------------------------------------------------------------------
 
 EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-			     int keyLength, int objNum, int objGen):
-  BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
+			     int keyLength, Ref refA):
+  BaseCryptStream(strA, fileKey, algoA, keyLength, refA)
 {
   // Fill the CBC initialization vector for AES and AES-256
   switch (algo) {
@@ -489,8 +490,8 @@ int EncryptStream::lookChar() {
 //------------------------------------------------------------------------
 
 DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-			     int keyLength, int objNum, int objGen):
-  BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
+			     int keyLength, Ref refA):
+  BaseCryptStream(strA, fileKey, algoA, keyLength, refA)
 {
 }
 
@@ -573,7 +574,7 @@ int DecryptStream::lookChar() {
 // RC4-compatible decryption
 //------------------------------------------------------------------------
 
-static void rc4InitKey(unsigned char *key, int keyLen, unsigned char *state) {
+static void rc4InitKey(const unsigned char *key, int keyLen, unsigned char *state) {
   unsigned char index1, index2;
   unsigned char t;
   int i;
@@ -924,7 +925,7 @@ static inline void invMixColumnsW(unsigned int *w) {
   }
 }
 
-static inline void addRoundKey(unsigned char *state, unsigned int *w) {
+static inline void addRoundKey(unsigned char *state, const unsigned int *w) {
   int c;
 
   for (c = 0; c < 4; ++c) {
@@ -936,7 +937,7 @@ static inline void addRoundKey(unsigned char *state, unsigned int *w) {
 }
 
 static void aesKeyExpansion(DecryptAESState *s,
-			    unsigned char *objKey, int /*objKeyLen*/, bool decrypt) {
+			    const unsigned char *objKey, int /*objKeyLen*/, bool decrypt) {
   unsigned int temp;
   int i, round;
 
@@ -962,7 +963,7 @@ static void aesKeyExpansion(DecryptAESState *s,
   }
 }
 
-static void aesEncryptBlock(DecryptAESState *s, unsigned char *in) {
+static void aesEncryptBlock(DecryptAESState *s, const unsigned char *in) {
   int c, round;
 
   // initial state (input is xor'd with previous output because of CBC)
@@ -999,7 +1000,7 @@ static void aesEncryptBlock(DecryptAESState *s, unsigned char *in) {
   s->bufIdx = 0;
 }
 
-static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last) {
+static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool last) {
   int c, round, n, i;
 
   // initial state
@@ -1058,7 +1059,7 @@ static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last) {
 //------------------------------------------------------------------------
 
 static void aes256KeyExpansion(DecryptAES256State *s,
-			       unsigned char *objKey, int objKeyLen, bool decrypt) {
+			       const unsigned char *objKey, int objKeyLen, bool decrypt) {
   unsigned int temp;
   int i, round;
 
@@ -1086,7 +1087,7 @@ static void aes256KeyExpansion(DecryptAES256State *s,
   }
 }
 
-static void aes256EncryptBlock(DecryptAES256State *s, unsigned char *in) {
+static void aes256EncryptBlock(DecryptAES256State *s, const unsigned char *in) {
   int c, round;
 
   // initial state (input is xor'd with previous output because of CBC)
@@ -1123,7 +1124,7 @@ static void aes256EncryptBlock(DecryptAES256State *s, unsigned char *in) {
   s->bufIdx = 0;
 }
 
-static void aes256DecryptBlock(DecryptAES256State *s, unsigned char *in, bool last) {
+static void aes256DecryptBlock(DecryptAES256State *s, const unsigned char *in, bool last) {
   int c, round, n, i;
 
   // initial state
@@ -1212,152 +1213,191 @@ static inline unsigned long md5Round4(unsigned long a, unsigned long b, unsigned
   return b + rotateLeft((a + (c ^ (b | ~d)) + Xk + Ti), s);
 }
 
-void md5(const unsigned char *msg, int msgLen, unsigned char *digest) {
-  unsigned long x[16] = {};
-  unsigned long a, b, c, d, aa, bb, cc, dd;
-  int n64;
-  int i, j, k;
+struct MD5State {
+  unsigned long a, b, c, d;
+  unsigned char buf[64];
+  int bufLen;
+  int msgLen;
+  unsigned char digest[16];
+};
 
-  // sanity check
+
+static void md5Start(MD5State *state) {
+  state->a = 0x67452301;
+  state->b = 0xefcdab89;
+  state->c = 0x98badcfe;
+  state->d = 0x10325476;
+  state->bufLen = 0;
+  state->msgLen = 0;
+}
+
+static void md5ProcessBlock(MD5State *state) {
+  unsigned long x[16];
+
+  for (int i = 0; i < 16; ++i) {
+    x[i] = state->buf[4*i] | (state->buf[4*i+1] << 8) |
+           (state->buf[4*i+2] << 16) | (state->buf[4*i+3] << 24);
+  }
+
+  unsigned long a = state->a;
+  unsigned long b = state->b;
+  unsigned long c = state->c;
+  unsigned long d = state->d;
+
+  // round 1
+  a = md5Round1(a, b, c, d, x[0],   7, 0xd76aa478);
+  d = md5Round1(d, a, b, c, x[1],  12, 0xe8c7b756);
+  c = md5Round1(c, d, a, b, x[2],  17, 0x242070db);
+  b = md5Round1(b, c, d, a, x[3],  22, 0xc1bdceee);
+  a = md5Round1(a, b, c, d, x[4],   7, 0xf57c0faf);
+  d = md5Round1(d, a, b, c, x[5],  12, 0x4787c62a);
+  c = md5Round1(c, d, a, b, x[6],  17, 0xa8304613);
+  b = md5Round1(b, c, d, a, x[7],  22, 0xfd469501);
+  a = md5Round1(a, b, c, d, x[8],   7, 0x698098d8);
+  d = md5Round1(d, a, b, c, x[9],  12, 0x8b44f7af);
+  c = md5Round1(c, d, a, b, x[10], 17, 0xffff5bb1);
+  b = md5Round1(b, c, d, a, x[11], 22, 0x895cd7be);
+  a = md5Round1(a, b, c, d, x[12],  7, 0x6b901122);
+  d = md5Round1(d, a, b, c, x[13], 12, 0xfd987193);
+  c = md5Round1(c, d, a, b, x[14], 17, 0xa679438e);
+  b = md5Round1(b, c, d, a, x[15], 22, 0x49b40821);
+
+  // round 2
+  a = md5Round2(a, b, c, d, x[1],   5, 0xf61e2562);
+  d = md5Round2(d, a, b, c, x[6],   9, 0xc040b340);
+  c = md5Round2(c, d, a, b, x[11], 14, 0x265e5a51);
+  b = md5Round2(b, c, d, a, x[0],  20, 0xe9b6c7aa);
+  a = md5Round2(a, b, c, d, x[5],   5, 0xd62f105d);
+  d = md5Round2(d, a, b, c, x[10],  9, 0x02441453);
+  c = md5Round2(c, d, a, b, x[15], 14, 0xd8a1e681);
+  b = md5Round2(b, c, d, a, x[4],  20, 0xe7d3fbc8);
+  a = md5Round2(a, b, c, d, x[9],   5, 0x21e1cde6);
+  d = md5Round2(d, a, b, c, x[14],  9, 0xc33707d6);
+  c = md5Round2(c, d, a, b, x[3],  14, 0xf4d50d87);
+  b = md5Round2(b, c, d, a, x[8],  20, 0x455a14ed);
+  a = md5Round2(a, b, c, d, x[13],  5, 0xa9e3e905);
+  d = md5Round2(d, a, b, c, x[2],   9, 0xfcefa3f8);
+  c = md5Round2(c, d, a, b, x[7],  14, 0x676f02d9);
+  b = md5Round2(b, c, d, a, x[12], 20, 0x8d2a4c8a);
+
+  // round 3
+  a = md5Round3(a, b, c, d, x[5],   4, 0xfffa3942);
+  d = md5Round3(d, a, b, c, x[8],  11, 0x8771f681);
+  c = md5Round3(c, d, a, b, x[11], 16, 0x6d9d6122);
+  b = md5Round3(b, c, d, a, x[14], 23, 0xfde5380c);
+  a = md5Round3(a, b, c, d, x[1],   4, 0xa4beea44);
+  d = md5Round3(d, a, b, c, x[4],  11, 0x4bdecfa9);
+  c = md5Round3(c, d, a, b, x[7],  16, 0xf6bb4b60);
+  b = md5Round3(b, c, d, a, x[10], 23, 0xbebfbc70);
+  a = md5Round3(a, b, c, d, x[13],  4, 0x289b7ec6);
+  d = md5Round3(d, a, b, c, x[0],  11, 0xeaa127fa);
+  c = md5Round3(c, d, a, b, x[3],  16, 0xd4ef3085);
+  b = md5Round3(b, c, d, a, x[6],  23, 0x04881d05);
+  a = md5Round3(a, b, c, d, x[9],   4, 0xd9d4d039);
+  d = md5Round3(d, a, b, c, x[12], 11, 0xe6db99e5);
+  c = md5Round3(c, d, a, b, x[15], 16, 0x1fa27cf8);
+  b = md5Round3(b, c, d, a, x[2],  23, 0xc4ac5665);
+
+  // round 4
+  a = md5Round4(a, b, c, d, x[0],   6, 0xf4292244);
+  d = md5Round4(d, a, b, c, x[7],  10, 0x432aff97);
+  c = md5Round4(c, d, a, b, x[14], 15, 0xab9423a7);
+  b = md5Round4(b, c, d, a, x[5],  21, 0xfc93a039);
+  a = md5Round4(a, b, c, d, x[12],  6, 0x655b59c3);
+  d = md5Round4(d, a, b, c, x[3],  10, 0x8f0ccc92);
+  c = md5Round4(c, d, a, b, x[10], 15, 0xffeff47d);
+  b = md5Round4(b, c, d, a, x[1],  21, 0x85845dd1);
+  a = md5Round4(a, b, c, d, x[8],   6, 0x6fa87e4f);
+  d = md5Round4(d, a, b, c, x[15], 10, 0xfe2ce6e0);
+  c = md5Round4(c, d, a, b, x[6],  15, 0xa3014314);
+  b = md5Round4(b, c, d, a, x[13], 21, 0x4e0811a1);
+  a = md5Round4(a, b, c, d, x[4],   6, 0xf7537e82);
+  d = md5Round4(d, a, b, c, x[11], 10, 0xbd3af235);
+  c = md5Round4(c, d, a, b, x[2],  15, 0x2ad7d2bb);
+  b = md5Round4(b, c, d, a, x[9],  21, 0xeb86d391);
+
+  // increment a, b, c, d
+  state->a += a;
+  state->b += b;
+  state->c += c;
+  state->d += d;
+
+  state->bufLen = 0;
+}
+
+static void md5Append(MD5State *state, const unsigned char *data, int dataLen) {
+  const unsigned char *p = data;
+  int remain = dataLen;
+  while (state->bufLen + remain >= 64) {
+    const int k = 64 - state->bufLen;
+    memcpy(state->buf + state->bufLen, p, k);
+    state->bufLen = 64;
+    md5ProcessBlock(state);
+    p += k;
+    remain -= k;
+  }
+  if (remain > 0) {
+    memcpy(state->buf + state->bufLen, p, remain);
+    state->bufLen += remain;
+  }
+  state->msgLen += dataLen;
+}
+
+static void md5Finish(MD5State *state) {
+  // padding and length
+  state->buf[state->bufLen++] = 0x80;
+  if (state->bufLen > 56) {
+    while (state->bufLen < 64) {
+      state->buf[state->bufLen++] = 0x00;
+    }
+    md5ProcessBlock(state);
+  }
+  while (state->bufLen < 56) {
+    state->buf[state->bufLen++] = 0x00;
+  }
+  state->buf[56] = (unsigned char)(state->msgLen << 3);
+  state->buf[57] = (unsigned char)(state->msgLen >> 5);
+  state->buf[58] = (unsigned char)(state->msgLen >> 13);
+  state->buf[59] = (unsigned char)(state->msgLen >> 21);
+  state->buf[60] = (unsigned char)(state->msgLen >> 29);
+  state->buf[61] = (unsigned char)0;
+  state->buf[62] = (unsigned char)0;
+  state->buf[63] = (unsigned char)0;
+  state->bufLen = 64;
+  md5ProcessBlock(state);
+
+  // break digest into bytes
+  state->digest[0] = (unsigned char)state->a;
+  state->digest[1] = (unsigned char)(state->a >> 8);
+  state->digest[2] = (unsigned char)(state->a >> 16);
+  state->digest[3] = (unsigned char)(state->a >> 24);
+  state->digest[4] = (unsigned char)state->b;
+  state->digest[5] = (unsigned char)(state->b >> 8);
+  state->digest[6] = (unsigned char)(state->b >> 16);
+  state->digest[7] = (unsigned char)(state->b >> 24);
+  state->digest[8] = (unsigned char)state->c;
+  state->digest[9] = (unsigned char)(state->c >> 8);
+  state->digest[10] = (unsigned char)(state->c >> 16);
+  state->digest[11] = (unsigned char)(state->c >> 24);
+  state->digest[12] = (unsigned char)state->d;
+  state->digest[13] = (unsigned char)(state->d >> 8);
+  state->digest[14] = (unsigned char)(state->d >> 16);
+  state->digest[15] = (unsigned char)(state->d >> 24);
+}
+
+void md5(const unsigned char *msg, int msgLen, unsigned char *digest) {
   if (msgLen < 0) {
     return;
   }
-
-  // compute number of 64-byte blocks
-  // (length + pad byte (0x80) + 8 bytes for length)
-  n64 = (msgLen + 1 + 8 + 63) / 64;
-
-  // initialize a, b, c, d
-  a = 0x67452301;
-  b = 0xefcdab89;
-  c = 0x98badcfe;
-  d = 0x10325476;
-
-  // loop through blocks
-  k = 0;
-  for (i = 0; i < n64; ++i) {
-
-    // grab a 64-byte block
-    for (j = 0; j < 16 && k < msgLen - 3; ++j, k += 4)
-      x[j] = (((((msg[k+3] << 8) + msg[k+2]) << 8) + msg[k+1]) << 8) + msg[k];
-    if (i == n64 - 1) {
-      if (k == msgLen - 3)
-	x[j] = 0x80000000 + (((msg[k+2] << 8) + msg[k+1]) << 8) + msg[k];
-      else if (k == msgLen - 2)
-	x[j] = 0x800000 + (msg[k+1] << 8) + msg[k];
-      else if (k == msgLen - 1)
-	x[j] = 0x8000 + msg[k];
-      else
-	x[j] = 0x80;
-      ++j;
-      while (j < 16)
-	x[j++] = 0;
-      x[14] = msgLen << 3;
-    }
-
-    // save a, b, c, d
-    aa = a;
-    bb = b;
-    cc = c;
-    dd = d;
-
-    // round 1
-    a = md5Round1(a, b, c, d, x[0],   7, 0xd76aa478);
-    d = md5Round1(d, a, b, c, x[1],  12, 0xe8c7b756);
-    c = md5Round1(c, d, a, b, x[2],  17, 0x242070db);
-    b = md5Round1(b, c, d, a, x[3],  22, 0xc1bdceee);
-    a = md5Round1(a, b, c, d, x[4],   7, 0xf57c0faf);
-    d = md5Round1(d, a, b, c, x[5],  12, 0x4787c62a);
-    c = md5Round1(c, d, a, b, x[6],  17, 0xa8304613);
-    b = md5Round1(b, c, d, a, x[7],  22, 0xfd469501);
-    a = md5Round1(a, b, c, d, x[8],   7, 0x698098d8);
-    d = md5Round1(d, a, b, c, x[9],  12, 0x8b44f7af);
-    c = md5Round1(c, d, a, b, x[10], 17, 0xffff5bb1);
-    b = md5Round1(b, c, d, a, x[11], 22, 0x895cd7be);
-    a = md5Round1(a, b, c, d, x[12],  7, 0x6b901122);
-    d = md5Round1(d, a, b, c, x[13], 12, 0xfd987193);
-    c = md5Round1(c, d, a, b, x[14], 17, 0xa679438e);
-    b = md5Round1(b, c, d, a, x[15], 22, 0x49b40821);
-
-    // round 2
-    a = md5Round2(a, b, c, d, x[1],   5, 0xf61e2562);
-    d = md5Round2(d, a, b, c, x[6],   9, 0xc040b340);
-    c = md5Round2(c, d, a, b, x[11], 14, 0x265e5a51);
-    b = md5Round2(b, c, d, a, x[0],  20, 0xe9b6c7aa);
-    a = md5Round2(a, b, c, d, x[5],   5, 0xd62f105d);
-    d = md5Round2(d, a, b, c, x[10],  9, 0x02441453);
-    c = md5Round2(c, d, a, b, x[15], 14, 0xd8a1e681);
-    b = md5Round2(b, c, d, a, x[4],  20, 0xe7d3fbc8);
-    a = md5Round2(a, b, c, d, x[9],   5, 0x21e1cde6);
-    d = md5Round2(d, a, b, c, x[14],  9, 0xc33707d6);
-    c = md5Round2(c, d, a, b, x[3],  14, 0xf4d50d87);
-    b = md5Round2(b, c, d, a, x[8],  20, 0x455a14ed);
-    a = md5Round2(a, b, c, d, x[13],  5, 0xa9e3e905);
-    d = md5Round2(d, a, b, c, x[2],   9, 0xfcefa3f8);
-    c = md5Round2(c, d, a, b, x[7],  14, 0x676f02d9);
-    b = md5Round2(b, c, d, a, x[12], 20, 0x8d2a4c8a);
-
-    // round 3
-    a = md5Round3(a, b, c, d, x[5],   4, 0xfffa3942);
-    d = md5Round3(d, a, b, c, x[8],  11, 0x8771f681);
-    c = md5Round3(c, d, a, b, x[11], 16, 0x6d9d6122);
-    b = md5Round3(b, c, d, a, x[14], 23, 0xfde5380c);
-    a = md5Round3(a, b, c, d, x[1],   4, 0xa4beea44);
-    d = md5Round3(d, a, b, c, x[4],  11, 0x4bdecfa9);
-    c = md5Round3(c, d, a, b, x[7],  16, 0xf6bb4b60);
-    b = md5Round3(b, c, d, a, x[10], 23, 0xbebfbc70);
-    a = md5Round3(a, b, c, d, x[13],  4, 0x289b7ec6);
-    d = md5Round3(d, a, b, c, x[0],  11, 0xeaa127fa);
-    c = md5Round3(c, d, a, b, x[3],  16, 0xd4ef3085);
-    b = md5Round3(b, c, d, a, x[6],  23, 0x04881d05);
-    a = md5Round3(a, b, c, d, x[9],   4, 0xd9d4d039);
-    d = md5Round3(d, a, b, c, x[12], 11, 0xe6db99e5);
-    c = md5Round3(c, d, a, b, x[15], 16, 0x1fa27cf8);
-    b = md5Round3(b, c, d, a, x[2],  23, 0xc4ac5665);
-
-    // round 4
-    a = md5Round4(a, b, c, d, x[0],   6, 0xf4292244);
-    d = md5Round4(d, a, b, c, x[7],  10, 0x432aff97);
-    c = md5Round4(c, d, a, b, x[14], 15, 0xab9423a7);
-    b = md5Round4(b, c, d, a, x[5],  21, 0xfc93a039);
-    a = md5Round4(a, b, c, d, x[12],  6, 0x655b59c3);
-    d = md5Round4(d, a, b, c, x[3],  10, 0x8f0ccc92);
-    c = md5Round4(c, d, a, b, x[10], 15, 0xffeff47d);
-    b = md5Round4(b, c, d, a, x[1],  21, 0x85845dd1);
-    a = md5Round4(a, b, c, d, x[8],   6, 0x6fa87e4f);
-    d = md5Round4(d, a, b, c, x[15], 10, 0xfe2ce6e0);
-    c = md5Round4(c, d, a, b, x[6],  15, 0xa3014314);
-    b = md5Round4(b, c, d, a, x[13], 21, 0x4e0811a1);
-    a = md5Round4(a, b, c, d, x[4],   6, 0xf7537e82);
-    d = md5Round4(d, a, b, c, x[11], 10, 0xbd3af235);
-    c = md5Round4(c, d, a, b, x[2],  15, 0x2ad7d2bb);
-    b = md5Round4(b, c, d, a, x[9],  21, 0xeb86d391);
-
-    // increment a, b, c, d
-    a += aa;
-    b += bb;
-    c += cc;
-    d += dd;
+  MD5State state;
+  md5Start(&state);
+  md5Append(&state, msg, msgLen);
+  md5Finish(&state);
+  for (int i = 0; i < 16; ++i) {
+    digest[i] = state.digest[i];
   }
-
-  // break digest into bytes
-  digest[0] = (unsigned char)(a & 0xff);
-  digest[1] = (unsigned char)((a >>= 8) & 0xff);
-  digest[2] = (unsigned char)((a >>= 8) & 0xff);
-  digest[3] = (unsigned char)((a >>= 8) & 0xff);
-  digest[4] = (unsigned char)(b & 0xff);
-  digest[5] = (unsigned char)((b >>= 8) & 0xff);
-  digest[6] = (unsigned char)((b >>= 8) & 0xff);
-  digest[7] = (unsigned char)((b >>= 8) & 0xff);
-  digest[8] = (unsigned char)(c & 0xff);
-  digest[9] = (unsigned char)((c >>= 8) & 0xff);
-  digest[10] = (unsigned char)((c >>= 8) & 0xff);
-  digest[11] = (unsigned char)((c >>= 8) & 0xff);
-  digest[12] = (unsigned char)(d & 0xff);
-  digest[13] = (unsigned char)((d >>= 8) & 0xff);
-  digest[14] = (unsigned char)((d >>= 8) & 0xff);
-  digest[15] = (unsigned char)((d >>= 8) & 0xff);
 }
+
 
 //------------------------------------------------------------------------
 // SHA-256 hash
@@ -1410,7 +1450,7 @@ static inline unsigned int sha256sigma1(unsigned int x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
 
-static void sha256HashBlock(unsigned char *blk, unsigned int *H) {
+static void sha256HashBlock(const unsigned char *blk, unsigned int *H) {
   unsigned int W[64];
   unsigned int a, b, c, d, e, f, g, h;
   unsigned int T1, T2;
@@ -1560,7 +1600,7 @@ static inline uint64_t sha512sigma1(uint64_t x) {
   return rotr(x, 19) ^ rotr(x, 61) ^ (x >> 6);
 }
 
-static void sha512HashBlock(unsigned char *blk, uint64_t *H) {
+static void sha512HashBlock(const unsigned char *blk, uint64_t *H) {
   uint64_t W[80];
   uint64_t a, b, c, d, e, f, g, h;
   uint64_t T1, T2;

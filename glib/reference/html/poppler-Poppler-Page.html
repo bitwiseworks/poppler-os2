@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerDocument.html" title="PopplerDocument">
 <link rel="next" href="PopplerAction.html" title="PopplerAction">
-<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -37,8 +37,8 @@
 <a name="poppler-Poppler-Page.functions"></a><h2>Functions</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="functions_return">
-<col class="functions_name">
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -576,8 +576,8 @@
 <a name="poppler-Poppler-Page.other"></a><h2>Types and Values</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="name">
-<col class="description">
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -2001,7 +2001,9 @@ poppler_page_render (<em class="parameter"><code><a class="link" href="poppler-P
 <p>Render the page to the given cairo context. This function
 is for rendering a page that will be displayed. If you want
 to render a page that will be printed use
-<a class="link" href="poppler-Poppler-Page.html#poppler-page-render-for-printing" title="poppler_page_render_for_printing ()"><code class="function">poppler_page_render_for_printing()</code></a> instead</p>
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-render-for-printing" title="poppler_page_render_for_printing ()"><code class="function">poppler_page_render_for_printing()</code></a> instead.  Please see the documentation
+for that function for the differences between rendering to the screen and
+rendering to a printer.</p>
 <div class="refsect3">
 <a name="poppler-page-render.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2031,7 +2033,33 @@ to render a page that will be printed use
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_page_render_for_printing (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                   <em class="parameter"><code><a href="../cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);</pre>
-<p>Render the page to the given cairo context for printing.</p>
+<p>Render the page to the given cairo context for printing with
+<a class="link" href="poppler-Poppler-Page.html#POPPLER-PRINT-ALL:CAPS"><span class="type">POPPLER_PRINT_ALL</span></a> flags selected.  If you want a different set of flags,
+use <a class="link" href="poppler-Poppler-Page.html#poppler-page-render-for-printing-with-options" title="poppler_page_render_for_printing_with_options ()"><code class="function">poppler_page_render_for_printing_with_options()</code></a>.</p>
+<p>The difference between <a class="link" href="poppler-Poppler-Page.html#poppler-page-render" title="poppler_page_render ()"><code class="function">poppler_page_render()</code></a> and this function is that some
+things get rendered differently between screens and printers:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+    PDF annotations get rendered according to their <a class="link" href="poppler-Poppler-Annotation.html#PopplerAnnotFlag" title="enum PopplerAnnotFlag"><span class="type">PopplerAnnotFlag</span></a> value.
+    For example, <a class="link" href="poppler-Poppler-Annotation.html#POPPLER-ANNOT-FLAG-PRINT:CAPS"><span class="type">POPPLER_ANNOT_FLAG_PRINT</span></a> refers to whether an annotation
+    is printed or not, whereas <a class="link" href="poppler-Poppler-Annotation.html#POPPLER-ANNOT-FLAG-NO-VIEW:CAPS"><span class="type">POPPLER_ANNOT_FLAG_NO_VIEW</span></a> refers to whether
+    an annotation is invisible when displaying to the screen.
+  </li>
+<li class="listitem">
+    PDF supports "hairlines" of width 0.0, which often get rendered as
+    having a width of 1 device pixel.  When displaying on a screen, Cairo
+    may render such lines wide so that they are hard to see, and Poppler
+    makes use of PDF's Stroke Adjust graphics parameter to make the lines
+    easier to see.  However, when printing, Poppler is able to directly use a
+    printer's pixel size instead.
+  </li>
+<li class="listitem">
+    Some advanced features in PDF may require an image to be rasterized
+    before sending off to a printer.  This may produce raster images which
+    exceed Cairo's limits.  The "printing" functions will detect this condition
+    and try to down-scale the intermediate surfaces as appropriate.
+  </li>
+</ul></div>
 <div class="refsect3">
 <a name="poppler-page-render-for-printing.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2065,6 +2093,8 @@ poppler_page_render_for_printing_with_options
                                 <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPrintFlags" title="enum PopplerPrintFlags"><span class="type">PopplerPrintFlags</span></a> options</code></em>);</pre>
 <p>Render the page to the given cairo context for printing
 with the specified options</p>
+<p>See the documentation for <a class="link" href="poppler-Poppler-Page.html#poppler-page-render-for-printing" title="poppler_page_render_for_printing ()"><code class="function">poppler_page_render_for_printing()</code></a> for the
+differences between rendering to the screen and rendering to a printer.</p>
 <div class="refsect3">
 <a name="poppler-page-render-for-printing-with-options.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2668,7 +2698,8 @@ of <em class="parameter"><code>field</code></em>
 <a name="PopplerImageMapping-struct"></a><h3>PopplerImageMapping</h3>
 <pre class="programlisting">typedef struct {
   PopplerRectangle area;
-  gint image_id;	
+  gint image_id;
+
 } PopplerImageMapping;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a> structure represents the location
@@ -3254,12 +3285,13 @@ locations on a page and bounding boxes</p>
 <a name="PopplerPage--label"></a><h3>The <code class="literal">“label”</code> property</h3>
 <pre class="programlisting">  “label”                    <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
 <p>The label of the page or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. See also <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-label" title="poppler_page_get_label ()"><code class="function">poppler_page_get_label()</code></a></p>
+<p>Owner: PopplerPage</p>
 <p>Flags: Read</p>
 <p>Default value: NULL</p>
 </div>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.29</div>
+<hr>Generated by GTK-Doc V1.32</div>
 </body>
 </html>

@@ -32,8 +32,8 @@
 
 #include <config.h>
 
-#include <stddef.h>
-#include <string.h>
+#include <cstddef>
+#include <cstring>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
@@ -197,6 +197,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
           const Ref ref = obj3Ref.getRef();
           if (!seenNextActions->insert(ref.num).second) {
               error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
+              delete actionList;
               return action;
           }
       }
@@ -823,80 +824,63 @@ LinkJavaScript::~LinkJavaScript() {
   }
 }
 
+Object LinkJavaScript::createObject(XRef *xref, const GooString &js)
+{
+  Dict *linkDict = new Dict(xref);
+  linkDict->add("S", Object(objName, "JavaScript"));
+  linkDict->add("JS", Object(js.copy()));
+
+  return Object(linkDict);
+}
+
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-LinkOCGState::LinkOCGState(const Object *obj) {
-  stateList = new std::vector<StateList*>();
+LinkOCGState::LinkOCGState(const Object *obj)
+: isValid(true)
+{
   preserveRB = true;
 
   Object obj1 = obj->dictLookup("State");
   if (obj1.isArray()) {
-    StateList *stList = nullptr;
+    StateList stList;
 
     for (int i = 0; i < obj1.arrayGetLength(); ++i) {
       const Object &obj2 = obj1.arrayGetNF(i);
       if (obj2.isName()) {
-        if (stList)
-	  stateList->push_back(stList);
+        if (!stList.list.empty())
+	  stateList.push_back(stList);
 
 	const char *name = obj2.getName();
-	stList = new StateList();
-	stList->list = new std::vector<Ref*>();
+	stList.list.clear();
 	if (!strcmp (name, "ON")) {
-	  stList->st = On;
+	  stList.st = On;
 	} else if (!strcmp (name, "OFF")) {
-	  stList->st = Off;
+	  stList.st = Off;
 	} else if (!strcmp (name, "Toggle")) {
-	  stList->st = Toggle;
+	  stList.st = Toggle;
 	} else {
 	  error(errSyntaxWarning, -1, "Invalid name '{0:s}' in OCG Action state array", name);
-	  delete stList;
-	  stList = nullptr;
+	  isValid = false;
 	}
       } else if (obj2.isRef()) {
-        if (stList) {
-	  Ref ocgRef = obj2.getRef();
-	  Ref *item = new Ref();
-	  *item = ocgRef;
-	  stList->list->push_back(item);
-	} else {
-	  error(errSyntaxWarning, -1, "Invalid OCG Action State array, expected name instead of ref");
-	}
+	  stList.list.push_back(obj2.getRef());
       } else {
         error(errSyntaxWarning, -1, "Invalid item in OCG Action State array");
+        isValid = false;
       }
     }
     // Add the last group
-    if (stList)
-      stateList->push_back(stList);
+    if (!stList.list.empty())
+      stateList.push_back(stList);
   } else {
     error(errSyntaxWarning, -1, "Invalid OCGState action");
-    delete stateList;
-    stateList = nullptr;
+    isValid = false;
   }
 
   obj1 = obj->dictLookup("PreserveRB");
   if (obj1.isBool()) {
     preserveRB = obj1.getBool();
-  }
-}
-
-LinkOCGState::~LinkOCGState() {
-  if (stateList) {
-    for (auto entry : *stateList) {
-      delete entry;
-    }
-    delete stateList;
-  }
-}
-
-LinkOCGState::StateList::~StateList() {
-  if (list) {
-    for (auto entry : *list) {
-      delete entry;
-    }
-    delete list;
   }
 }
 
@@ -941,57 +925,21 @@ LinkUnknown::~LinkUnknown() {
 //------------------------------------------------------------------------
 
 Links::Links(Annots *annots) {
-  int size;
-  int i;
-
-  links = nullptr;
-  size = 0;
-  numLinks = 0;
-
   if (!annots)
     return;
 
-  for (i = 0; i < annots->getNumAnnots(); ++i) {
+  for (int i = 0; i < annots->getNumAnnots(); ++i) {
     Annot *annot = annots->getAnnot(i);
 
     if (annot->getType() != Annot::typeLink)
       continue;
 
-    if (numLinks >= size) {
-      size += 16;
-      links = (AnnotLink **)greallocn(links, size, sizeof(AnnotLink *));
-    }
     annot->incRefCnt();
-    links[numLinks++] = static_cast<AnnotLink *>(annot);
+    links.push_back(static_cast<AnnotLink *>(annot));
   }
 }
 
 Links::~Links() {
-  int i;
-
-  for (i = 0; i < numLinks; ++i)
-    links[i]->decRefCnt();
-
-  gfree(links);
-}
-
-LinkAction *Links::find(double x, double y) const {
-  int i;
-
-  for (i = numLinks - 1; i >= 0; --i) {
-    if (links[i]->inRect(x, y)) {
-      return links[i]->getAction();
-    }
-  }
-  return nullptr;
-}
-
-bool Links::onLink(double x, double y) const {
-  int i;
-
-  for (i = 0; i < numLinks; ++i) {
-    if (links[i]->inRect(x, y))
-      return true;
-  }
-  return false;
+  for (AnnotLink *link : links)
+    link->decRefCnt();
 }

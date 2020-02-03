@@ -26,6 +26,8 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2019 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -34,8 +36,8 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <limits.h>
+#include <cstdlib>
+#include <climits>
 #include "Error.h"
 #include "JArithmeticDecoder.h"
 #include "JBIG2Stream.h"
@@ -63,7 +65,7 @@ struct JBIG2HuffmanTable {
   unsigned int prefix;
 };
 
-static JBIG2HuffmanTable huffTableA[] = {
+static const JBIG2HuffmanTable huffTableA[] = {
   {     0, 1,  4,              0x000 },
   {    16, 2,  8,              0x002 },
   {   272, 3, 16,              0x006 },
@@ -71,7 +73,7 @@ static JBIG2HuffmanTable huffTableA[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableB[] = {
+static const JBIG2HuffmanTable huffTableB[] = {
   {     0, 1,  0,              0x000 },
   {     1, 2,  0,              0x002 },
   {     2, 3,  0,              0x006 },
@@ -82,7 +84,7 @@ static JBIG2HuffmanTable huffTableB[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableC[] = {
+static const JBIG2HuffmanTable huffTableC[] = {
   {     0, 1,  0,              0x000 },
   {     1, 2,  0,              0x002 },
   {     2, 3,  0,              0x006 },
@@ -95,7 +97,7 @@ static JBIG2HuffmanTable huffTableC[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableD[] = {
+static const JBIG2HuffmanTable huffTableD[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  0,              0x002 },
   {     3, 3,  0,              0x006 },
@@ -105,7 +107,7 @@ static JBIG2HuffmanTable huffTableD[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableE[] = {
+static const JBIG2HuffmanTable huffTableE[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  0,              0x002 },
   {     3, 3,  0,              0x006 },
@@ -117,7 +119,7 @@ static JBIG2HuffmanTable huffTableE[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableF[] = {
+static const JBIG2HuffmanTable huffTableF[] = {
   {     0, 2,  7,              0x000 },
   {   128, 3,  7,              0x002 },
   {   256, 3,  8,              0x003 },
@@ -135,7 +137,7 @@ static JBIG2HuffmanTable huffTableF[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableG[] = {
+static const JBIG2HuffmanTable huffTableG[] = {
   {  -512, 3,  8,              0x000 },
   {   256, 3,  8,              0x001 },
   {   512, 3,  9,              0x002 },
@@ -154,7 +156,7 @@ static JBIG2HuffmanTable huffTableG[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableH[] = {
+static const JBIG2HuffmanTable huffTableH[] = {
   {     0, 2,  1,              0x000 },
   {     0, 2, jbig2HuffmanOOB, 0x001 },
   {     4, 3,  4,              0x004 },
@@ -179,7 +181,7 @@ static JBIG2HuffmanTable huffTableH[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableI[] = {
+static const JBIG2HuffmanTable huffTableI[] = {
   {     0, 2, jbig2HuffmanOOB, 0x000 },
   {    -1, 3,  1,              0x002 },
   {     1, 3,  1,              0x003 },
@@ -205,7 +207,7 @@ static JBIG2HuffmanTable huffTableI[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableJ[] = {
+static const JBIG2HuffmanTable huffTableJ[] = {
   {    -2, 2,  2,              0x000 },
   {     6, 2,  6,              0x001 },
   {     0, 2, jbig2HuffmanOOB, 0x002 },
@@ -230,7 +232,7 @@ static JBIG2HuffmanTable huffTableJ[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableK[] = {
+static const JBIG2HuffmanTable huffTableK[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  1,              0x002 },
   {     4, 4,  0,              0x00c },
@@ -247,7 +249,7 @@ static JBIG2HuffmanTable huffTableK[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableL[] = {
+static const JBIG2HuffmanTable huffTableL[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  0,              0x002 },
   {     3, 3,  1,              0x006 },
@@ -264,7 +266,7 @@ static JBIG2HuffmanTable huffTableL[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableM[] = {
+static const JBIG2HuffmanTable huffTableM[] = {
   {     1, 1,  0,              0x000 },
   {     2, 3,  0,              0x004 },
   {     7, 3,  3,              0x005 },
@@ -281,7 +283,7 @@ static JBIG2HuffmanTable huffTableM[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableN[] = {
+static const JBIG2HuffmanTable huffTableN[] = {
   {     0, 1,  0,              0x000 },
   {    -2, 3,  0,              0x004 },
   {    -1, 3,  0,              0x005 },
@@ -290,7 +292,7 @@ static JBIG2HuffmanTable huffTableN[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableO[] = {
+static const JBIG2HuffmanTable huffTableO[] = {
   {     0, 1,  0,              0x000 },
   {    -1, 3,  0,              0x004 },
   {     1, 3,  0,              0x005 },
@@ -321,7 +323,7 @@ public:
   void reset();
 
   // Returns false for OOB, otherwise sets *<x> and returns true.
-  bool decodeInt(int *x, JBIG2HuffmanTable *table);
+  bool decodeInt(int *x, const JBIG2HuffmanTable *table);
 
   unsigned int readBits(unsigned int n);
   unsigned int readBit();
@@ -350,7 +352,7 @@ void JBIG2HuffmanDecoder::reset() {
 }
 
 //~ optimize this
-bool JBIG2HuffmanDecoder::decodeInt(int *x, JBIG2HuffmanTable *table) {
+bool JBIG2HuffmanDecoder::decodeInt(int *x, const JBIG2HuffmanTable *table) {
   unsigned int i, len, prefix;
 
   i = 0;
@@ -536,7 +538,7 @@ int JBIG2MMRDecoder::getWhiteCode() {
     bufLen = 8;
     ++nBytesRead;
   }
-  while (1) {
+  while (true) {
     if (bufLen >= 11 && ((buf >> (bufLen - 7)) & 0x7f) == 0) {
       if (bufLen <= 12) {
 	code = buf << (12 - bufLen);
@@ -579,7 +581,7 @@ int JBIG2MMRDecoder::getBlackCode() {
     bufLen = 8;
     ++nBytesRead;
   }
-  while (1) {
+  while (true) {
     if (bufLen >= 10 && ((buf >> (bufLen - 6)) & 0x3f) == 0) {
       if (bufLen <= 13) {
 	code = buf << (13 - bufLen);
@@ -681,17 +683,17 @@ class JBIG2Bitmap: public JBIG2Segment {
 public:
 
   JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
-  ~JBIG2Bitmap();
+  JBIG2Bitmap(JBIG2Bitmap *bitmap);
+  ~JBIG2Bitmap() override;
   JBIG2SegmentType getType() override { return jbig2SegBitmap; }
-  JBIG2Bitmap *copy() { return new JBIG2Bitmap(0, this); }
   JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
   void expand(int newH, unsigned int pixel);
   void clearToZero();
   void clearToOne();
-  int getWidth() { return w; }
-  int getHeight() { return h; }
-  int getLineSize() { return line; }
-  int getPixel(int x, int y)
+  int getWidth() const { return w; }
+  int getHeight() const { return h; }
+  int getLineSize() const { return line; }
+  int getPixel(int x, int y) const
     { return (x < 0 || x >= w || y < 0 || y >= h) ? 0 :
              (data[y * line + (x >> 3)] >> (7 - (x & 7))) & 1; }
   void setPixel(int x, int y)
@@ -703,13 +705,10 @@ public:
   void duplicateRow(int yDest, int ySrc);
   void combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp);
   unsigned char *getDataPtr() { return data; }
-  int getDataSize() { return h * line; }
-  bool isOk() { return data != nullptr; }
+  int getDataSize() const { return h * line; }
+  bool isOk() const { return data != nullptr; }
 
 private:
-
-  JBIG2Bitmap(unsigned int segNumA, JBIG2Bitmap *bitmap);
-
   int w, h, line;
   unsigned char *data;
 };
@@ -733,8 +732,8 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA):
   }
 }
 
-JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, JBIG2Bitmap *bitmap):
-  JBIG2Segment(segNumA)
+JBIG2Bitmap::JBIG2Bitmap(JBIG2Bitmap *bitmap):
+  JBIG2Segment(0)
 {
   if (unlikely(bitmap == nullptr)) {
     error(errSyntaxError, -1, "NULL bitmap in JBIG2Bitmap");
@@ -1057,7 +1056,7 @@ class JBIG2SymbolDict: public JBIG2Segment {
 public:
 
   JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
-  ~JBIG2SymbolDict();
+  ~JBIG2SymbolDict() override;
   JBIG2SegmentType getType() override { return jbig2SegSymbolDict; }
   unsigned int getSize() { return size; }
   void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
@@ -1118,7 +1117,7 @@ class JBIG2PatternDict: public JBIG2Segment {
 public:
 
   JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
-  ~JBIG2PatternDict();
+  ~JBIG2PatternDict() override;
   JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
   unsigned int getSize() { return size; }
   void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { if (likely(idx < size)) bitmaps[idx] = bitmap; }
@@ -1159,7 +1158,7 @@ class JBIG2CodeTable: public JBIG2Segment {
 public:
 
   JBIG2CodeTable(unsigned int segNumA, JBIG2HuffmanTable *tableA);
-  ~JBIG2CodeTable();
+  ~JBIG2CodeTable() override;
   JBIG2SegmentType getType() override { return jbig2SegCodeTable; }
   JBIG2HuffmanTable *getHuffTable() { return table; }
 
@@ -1243,6 +1242,8 @@ JBIG2Stream::~JBIG2Stream() {
 }
 
 void JBIG2Stream::reset() {
+  freeSegments();
+
   // read the globals stream
   globalSegments = new std::vector<JBIG2Segment*>();
   if (globalsStream.isStream()) {
@@ -1273,11 +1274,7 @@ void JBIG2Stream::reset() {
   }
 }
 
-void JBIG2Stream::close() {
-  if (pageBitmap) {
-    delete pageBitmap;
-    pageBitmap = nullptr;
-  }
+void JBIG2Stream::freeSegments() {
   if (segments) {
     for (auto entry : *segments) {
       delete entry;
@@ -1292,6 +1289,14 @@ void JBIG2Stream::close() {
     delete globalSegments;
     globalSegments = nullptr;
   }
+}
+
+void JBIG2Stream::close() {
+  if (pageBitmap) {
+    delete pageBitmap;
+    pageBitmap = nullptr;
+  }
+  freeSegments();
   dataPtr = dataEnd = nullptr;
   FilterStream::close();
 }
@@ -1559,8 +1564,8 @@ void JBIG2Stream::readSegments() {
 bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
 				     unsigned int *refSegs, unsigned int nRefSegs) {
   JBIG2SymbolDict *symbolDict;
-  JBIG2HuffmanTable *huffDHTable, *huffDWTable;
-  JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
+  const JBIG2HuffmanTable *huffDHTable, *huffDWTable;
+  const JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
   JBIG2Segment *seg;
   std::vector<JBIG2Segment*> *codeTables;
   JBIG2SymbolDict *inputSymbolDict;
@@ -1800,7 +1805,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     j = i;
 
     // read the symbols in this height class
-    while (1) {
+    while (true) {
 
       // read the delta width
       if (huff) {
@@ -1959,7 +1964,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     }
     if (ex) {
       for (cnt = 0; cnt < run; ++cnt) {
-	symbolDict->setBitmap(j++, bitmaps[i++]->copy());
+	symbolDict->setBitmap(j++, new JBIG2Bitmap(bitmaps[i++]));
       }
     } else {
       i += run;
@@ -2021,9 +2026,9 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
   JBIG2Bitmap *bitmap;
   JBIG2HuffmanTable runLengthTab[36];
   JBIG2HuffmanTable *symCodeTab = nullptr;
-  JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
-  JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
-  JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
+  const JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
+  const JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
+  const JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
   JBIG2Segment *seg;
   std::vector<JBIG2Segment*> *codeTables;
   JBIG2SymbolDict *symbolDict;
@@ -2262,7 +2267,10 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
 	  symCodeTab[i++].prefixLen = 0;
 	}
       } else if (j > 0x100) {
-	if (unlikely(i == 0)) ++i;
+	if (unlikely(i == 0)) {
+	  symCodeTab[i].prefixLen = 0;
+	  ++i;
+	}
 	for (j -= 0x100; j && i < numSyms; --j) {
 	  symCodeTab[i].prefixLen = symCodeTab[i-1].prefixLen;
 	  ++i;
@@ -2340,20 +2348,20 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine,
 					 unsigned int numInstances,
 					 unsigned int logStrips,
 					 int numSyms,
-					 JBIG2HuffmanTable *symCodeTab,
+					 const JBIG2HuffmanTable *symCodeTab,
 					 unsigned int symCodeLen,
 					 JBIG2Bitmap **syms,
 					 unsigned int defPixel, unsigned int combOp,
 					 unsigned int transposed, unsigned int refCorner,
 					 int sOffset,
-					 JBIG2HuffmanTable *huffFSTable,
-					 JBIG2HuffmanTable *huffDSTable,
-					 JBIG2HuffmanTable *huffDTTable,
-					 JBIG2HuffmanTable *huffRDWTable,
-					 JBIG2HuffmanTable *huffRDHTable,
-					 JBIG2HuffmanTable *huffRDXTable,
-					 JBIG2HuffmanTable *huffRDYTable,
-					 JBIG2HuffmanTable *huffRSizeTable,
+					 const JBIG2HuffmanTable *huffFSTable,
+					 const JBIG2HuffmanTable *huffDSTable,
+					 const JBIG2HuffmanTable *huffDTTable,
+					 const JBIG2HuffmanTable *huffRDWTable,
+					 const JBIG2HuffmanTable *huffRDHTable,
+					 const JBIG2HuffmanTable *huffRDXTable,
+					 const JBIG2HuffmanTable *huffRDYTable,
+					 const JBIG2HuffmanTable *huffRSizeTable,
 					 unsigned int templ,
 					 int *atx, int *aty) {
   JBIG2Bitmap *bitmap;
@@ -3180,7 +3188,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
 
       // convert the run lengths to a bitmap line
       i = 0;
-      while (1) {
+      while (true) {
 	for (x = codingLine[i]; x < codingLine[i+1]; ++x) {
 	  bitmap->setPixel(x, y);
 	}
@@ -3224,7 +3232,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
       }
     }
 
-    ltp = 0;
+    ltp = false;
     cx = cx0 = cx1 = cx2 = 0; // make gcc happy
     for (y = 0; y < h; ++y) {
 
@@ -3879,7 +3887,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h,
     ltpCX = 0x0010;
   }
 
-  ltp = 0;
+  ltp = false;
   for (y = 0; y < h; ++y) {
 
     if (templ) {
@@ -4183,16 +4191,12 @@ void JBIG2Stream::readExtensionSeg(unsigned int length) {
 }
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum) {
-  JBIG2Segment *seg;
-
-  for (std::size_t i = 0; i < globalSegments->size(); ++i) {
-    seg = (*globalSegments)[i];
+  for (JBIG2Segment *seg : *globalSegments) {
     if (seg->getSegNum() == segNum) {
       return seg;
     }
   }
-  for (std::size_t i = 0; i < segments->size(); ++i) {
-    seg = (*segments)[i];
+  for (JBIG2Segment *seg : *segments) {
     if (seg->getSegNum() == segNum) {
       return seg;
     }

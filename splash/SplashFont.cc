@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2014, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -21,8 +21,8 @@
 
 #include <config.h>
 
-#include <limits.h>
-#include <string.h>
+#include <climits>
+#include <cstring>
 #include "goo/gmem.h"
 #include "SplashMath.h"
 #include "SplashGlyphBitmap.h"
@@ -42,7 +42,7 @@ struct SplashFontCacheTag {
 // SplashFont
 //------------------------------------------------------------------------
 
-SplashFont::SplashFont(SplashFontFile *fontFileA, SplashCoord *matA,
+SplashFont::SplashFont(SplashFontFile *fontFileA, const SplashCoord *matA,
 		       const SplashCoord *textMatA, bool aaA) {
   fontFile = fontFileA;
   fontFile->incRefCnt();

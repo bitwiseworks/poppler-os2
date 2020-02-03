@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -25,6 +25,7 @@
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,7 +36,7 @@
 #define TEXTOUTPUTDEV_H
 
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "GfxFont.h"
 #include "GfxState.h"
 #include "OutputDev.h"
@@ -69,6 +70,12 @@ enum SelectionStyle {
   selectionStyleLine
 };
 
+enum EndOfLineKind {
+  eolUnix,			// LF
+  eolDOS,			// CR+LF
+  eolMac			// CR
+};
+
 //------------------------------------------------------------------------
 // TextFontInfo
 //------------------------------------------------------------------------
@@ -76,13 +83,13 @@ enum SelectionStyle {
 class TextFontInfo {
 public:
 
-  TextFontInfo(GfxState *state);
+  TextFontInfo(const GfxState *state);
   ~TextFontInfo();
 
   TextFontInfo(const TextFontInfo &) = delete;
   TextFontInfo& operator=(const TextFontInfo &) = delete;
 
-  bool matches(GfxState *state) const;
+  bool matches(const GfxState *state) const;
   bool matches(const TextFontInfo *fontInfo) const;
 
   // Get the font ascent, or a default value if the font is not set
@@ -136,7 +143,7 @@ public:
   TextWord& operator=(const TextWord &) = delete;
 
   // Add a character to the word.
-  void addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
+  void addChar(const GfxState *state, TextFontInfo *fontA, double x, double y,
 	       double dx, double dy, int charPosA, int charLen,
 	       CharCode c, Unicode u, const Matrix &textMatA);
 
@@ -144,7 +151,7 @@ public:
   // Either character u or the last character in the word must be an
   // acute, dieresis, or other combining character.  Returns true if
   // the character was added.
-  bool addCombining(GfxState *state, TextFontInfo *fontA, double fontSizeA, double x, double y,
+  bool addCombining(const GfxState *state, TextFontInfo *fontA, double fontSizeA, double x, double y,
 		     double dx, double dy, int charPosA, int charLen,
 		     CharCode c, Unicode u, const Matrix &textMatA);
 
@@ -153,47 +160,47 @@ public:
 
   // Compares <this> to <word>, returning -1 (<), 0 (=), or +1 (>),
   // based on a primary-axis comparison, e.g., x ordering if rot=0.
-  int primaryCmp(TextWord *word);
+  int primaryCmp(const TextWord *word) const;
 
   // Return the distance along the primary axis between <this> and
   // <word>.
-  double primaryDelta(TextWord *word);
+  double primaryDelta(const TextWord *word) const;
 
   static int cmpYX(const void *p1, const void *p2);
 
   void visitSelection(TextSelectionVisitor *visitor,
-		      PDFRectangle *selection,
+		      const PDFRectangle *selection,
 		      SelectionStyle style);
 
   // Get the TextFontInfo object associated with a character.
-  TextFontInfo *getFontInfo(int idx) { return font[idx]; }
+  const TextFontInfo *getFontInfo(int idx) const { return font[idx]; }
 
   // Get the next TextWord on the linked list.
-  TextWord *getNext() { return next; }
+  const TextWord *getNext() const { return next; }
 
 #ifdef TEXTOUT_WORD_LIST
-  int getLength() { return len; }
-  const Unicode *getChar(int idx) { return &text[idx]; }
-  GooString *getText();
-  GooString *getFontName(int idx) { return font[idx]->fontName; }
-  void getColor(double *r, double *g, double *b)
+  int getLength() const { return len; }
+  const Unicode *getChar(int idx) const { return &text[idx]; }
+  GooString *getText() const;
+  const GooString *getFontName(int idx) const { return font[idx]->fontName; }
+  void getColor(double *r, double *g, double *b) const
     { *r = colorR; *g = colorG; *b = colorB; }
-  void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA)
+  void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const
     { *xMinA = xMin; *yMinA = yMin; *xMaxA = xMax; *yMaxA = yMax; }
   void getCharBBox(int charIdx, double *xMinA, double *yMinA,
-		   double *xMaxA, double *yMaxA);
-  double getFontSize() { return fontSize; }
-  int getRotation() { return rot; }
-  int getCharPos() { return charPos[0]; }
-  int getCharLen() { return charPos[len] - charPos[0]; }
-  bool getSpaceAfter() { return spaceAfter; }
+		   double *xMaxA, double *yMaxA) const;
+  double getFontSize() const { return fontSize; }
+  int getRotation() const { return rot; }
+  int getCharPos() const { return charPos[0]; }
+  int getCharLen() const { return charPos[len] - charPos[0]; }
+  bool getSpaceAfter() const { return spaceAfter; }
 #endif
-  bool isUnderlined() { return underlined; }
-  AnnotLink *getLink() { return link; }
-  double getEdge(int i) { return edge[i]; }
-  double getBaseline () { return base; }
-  bool hasSpaceAfter  () { return spaceAfter; }
-  TextWord* nextWord () { return next; };
+  bool isUnderlined() const { return underlined; }
+  const AnnotLink *getLink() const { return link; }
+  double getEdge(int i) const { return edge[i]; }
+  double getBaseline () const { return base; }
+  bool hasSpaceAfter  () const { return spaceAfter; }
+  const TextWord* nextWord () const { return next; };
 private:
   void ensureCapacity(int capacity);
   void setInitialBounds(TextFontInfo *fontA, double x, double y);
@@ -256,7 +263,7 @@ public:
   TextWord *getPool(int baseIdx) { return pool[baseIdx - minBaseIdx]; }
   void setPool(int baseIdx, TextWord *p) { pool[baseIdx - minBaseIdx] = p; }
 
-  int getBaseIdx(double base);
+  int getBaseIdx(double base) const;
 
   void addWord(TextWord *word);
 
@@ -292,35 +299,35 @@ public:
 
   // Return the distance along the primary axis between <this> and
   // <line>.
-  double primaryDelta(TextLine *line);
+  double primaryDelta(const TextLine *line) const;
 
   // Compares <this> to <line>, returning -1 (<), 0 (=), or +1 (>),
   // based on a primary-axis comparison, e.g., x ordering if rot=0.
-  int primaryCmp(TextLine *line);
+  int primaryCmp(const TextLine *line) const;
 
   // Compares <this> to <line>, returning -1 (<), 0 (=), or +1 (>),
   // based on a secondary-axis comparison of the baselines, e.g., y
   // ordering if rot=0.
-  int secondaryCmp(TextLine *line);
+  int secondaryCmp(const TextLine *line) const;
 
-  int cmpYX(TextLine *line);
+  int cmpYX(const TextLine *line) const;
 
   static int cmpXY(const void *p1, const void *p2);
 
-  void coalesce(UnicodeMap *uMap);
+  void coalesce(const UnicodeMap *uMap);
 
   void visitSelection(TextSelectionVisitor *visitor,
-		      PDFRectangle *selection,
+		      const PDFRectangle *selection,
 		      SelectionStyle style);
 
   // Get the head of the linked list of TextWords.
-  TextWord *getWords() { return words; }
+  const TextWord *getWords() const { return words; }
 
   // Get the next TextLine on the linked list.
-  TextLine *getNext() { return next; }
+  const TextLine *getNext() const { return next; }
 
   // Returns true if the last char of the line is a hyphen.
-  bool isHyphenated() { return hyphenated; }
+  bool isHyphenated() const { return hyphenated; }
 
 private:
 
@@ -373,43 +380,43 @@ public:
 
   void addWord(TextWord *word);
 
-  void coalesce(UnicodeMap *uMap, double fixedPitch);
+  void coalesce(const UnicodeMap *uMap, double fixedPitch);
 
   // Update this block's priMin and priMax values, looking at <blk>.
-  void updatePriMinMax(TextBlock *blk);
+  void updatePriMinMax(const TextBlock *blk);
 
   static int cmpXYPrimaryRot(const void *p1, const void *p2);
 
   static int cmpYXPrimaryRot(const void *p1, const void *p2);
 
-  int primaryCmp(TextBlock *blk);
+  int primaryCmp(const TextBlock *blk) const;
 
-  double secondaryDelta(TextBlock *blk);
+  double secondaryDelta(const TextBlock *blk) const;
 
   // Returns true if <this> is below <blk>, relative to the page's
   // primary rotation.
-  bool isBelow(TextBlock *blk);
+  bool isBelow(const TextBlock *blk) const;
 
   void visitSelection(TextSelectionVisitor *visitor,
-		      PDFRectangle *selection,
+		      const PDFRectangle *selection,
 		      SelectionStyle style);
 
   // Get the head of the linked list of TextLines.
-  TextLine *getLines() { return lines; }
+  const TextLine *getLines() const { return lines; }
 
   // Get the next TextBlock on the linked list.
-  TextBlock *getNext() { return next; }
+  const TextBlock *getNext() const { return next; }
 
-  void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA)
+  void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const
     { *xMinA = xMin; *yMinA = yMin; *xMaxA = xMax; *yMaxA = yMax; }
 
-  int getLineCount() { return nLines; }
+  int getLineCount() const { return nLines; }
 
 private:
 
-  bool isBeforeByRule1(TextBlock *blk1);
-  bool isBeforeByRepeatedRule1(TextBlock *blkList, TextBlock *blk1);
-  bool isBeforeByRule2(TextBlock *blk1);
+  bool isBeforeByRule1(const TextBlock *blk1);
+  bool isBeforeByRepeatedRule1(const TextBlock *blkList, const TextBlock *blk1);
+  bool isBeforeByRule2(const TextBlock *blk1);
 
   int visitDepthFirst(TextBlock *blkList, int pos1,
 		      TextBlock **sorted, int sortPos,
@@ -470,13 +477,13 @@ public:
   // it uses a font no larger than the last block added to the flow,
   // and (2) it fits within the flow's [priMin, priMax] along the
   // primary axis.
-  bool blockFits(TextBlock *blk, TextBlock *prevBlk);
+  bool blockFits(const TextBlock *blk, const TextBlock *prevBlk) const;
 
   // Get the head of the linked list of TextBlocks.
-  TextBlock *getBlocks() { return blocks; }
+  const TextBlock *getBlocks() const { return blocks; }
 
   // Get the next TextFlow on the linked list.
-  TextFlow *getNext() { return next; }
+  const TextFlow *getNext() const { return next; }
 
 private:
 
@@ -505,7 +512,7 @@ public:
   // text->rawOrder is true), physical layout order (if <physLayout>
   // is true and text->rawOrder is false), or reading order (if both
   // flags are false).
-  TextWordList(TextPage *text, bool physLayout);
+  TextWordList(const TextPage *text, bool physLayout);
 
   ~TextWordList();
 
@@ -513,7 +520,7 @@ public:
   TextWordList& operator=(const TextWordList &) = delete;
 
   // Return the number of words on the list.
-  int getLength();
+  int getLength() const;
 
   // Return the <idx>th word from the list.
   TextWord *get(int idx);
@@ -527,17 +534,17 @@ private:
 
 class TextWordSelection {
 public:
-  TextWordSelection(TextWord *wordA, int beginA, int endA)
+  TextWordSelection(const TextWord *wordA, int beginA, int endA)
     : word(wordA), begin(beginA), end(endA)
   {
   }
 
-  TextWord * getWord() const { return word; }
+  const TextWord * getWord() const { return word; }
   int getBegin() const { return begin; }
   int getEnd() const { return end; }
 
 private:
-  TextWord *word;
+  const TextWord *word;
   int begin;
   int end;
 
@@ -553,7 +560,7 @@ class POPPLER_LIB_EXPORT TextPage {
 public:
 
   // Constructor.
-  TextPage(bool rawOrderA);
+  TextPage(bool rawOrderA, bool discardDiagA = false);
 
   TextPage(const TextPage &) = delete;
   TextPage& operator=(const TextPage &) = delete;
@@ -562,21 +569,21 @@ public:
   void decRefCnt();
 
   // Start a new page.
-  void startPage(GfxState *state);
+  void startPage(const GfxState *state);
 
   // End the current page.
   void endPage();
 
   // Update the current font.
-  void updateFont(GfxState *state);
+  void updateFont(const GfxState *state);
 
   // Begin a new word.
-  void beginWord(GfxState *state);
+  void beginWord(const GfxState *state);
 
   // Add a character to the current word.
-  void addChar(GfxState *state, double x, double y,
+  void addChar(const GfxState *state, double x, double y,
 	       double dx, double dy,
-	       CharCode c, int nBytes, Unicode *u, int uLen);
+	       CharCode c, int nBytes, const Unicode *u, int uLen);
 
   // Add <nChars> invisible characters.
   void incCharCount(int nChars);
@@ -603,7 +610,7 @@ public:
   // bottom of the page; else if <stopAtLast> is true, stops looking
   // just before the last find result; else stops looking at
   // <xMax>,<yMax>.
-  bool findText(Unicode *s, int len,
+  bool findText(const Unicode *s, int len,
 		 bool startAtTop, bool stopAtBottom,
 		 bool startAtLast, bool stopAtLast,
 		 bool caseSensitive, bool backward,
@@ -615,7 +622,7 @@ public:
   // insensitive search, i.e. ignore accents, umlauts, diaeresis,etc.
   // while matching. This option will be ignored if <s> contains characters
   // which are not pure ascii.
-  bool findText(Unicode *s, int len,
+  bool findText(const Unicode *s, int len,
 		 bool startAtTop, bool stopAtBottom,
 		 bool startAtLast, bool stopAtLast,
 		 bool caseSensitive, bool ignoreDiacritics,
@@ -625,27 +632,27 @@ public:
 
   // Get the text which is inside the specified rectangle.
   GooString *getText(double xMin, double yMin,
-		     double xMax, double yMax);
+		     double xMax, double yMax, EndOfLineKind textEOL) const;
 
   void visitSelection(TextSelectionVisitor *visitor,
-		      PDFRectangle *selection,
+		      const PDFRectangle *selection,
 		      SelectionStyle style);
 
   void drawSelection(OutputDev *out,
 		     double scale,
 		     int rotation,
-		     PDFRectangle *selection,
+		     const PDFRectangle *selection,
 		     SelectionStyle style,
-		     GfxColor *glyph_color, GfxColor *box_color);
+		     const GfxColor *glyph_color, const GfxColor *box_color);
 
-  std::vector<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
+  std::vector<PDFRectangle*> *getSelectionRegion(const PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 
-  GooString *getSelectionText(PDFRectangle *selection,
+  GooString *getSelectionText(const PDFRectangle *selection,
 			      SelectionStyle style);
 
-  std::vector<TextWordSelection*> **getSelectionWords(PDFRectangle *selection,
+  std::vector<TextWordSelection*> **getSelectionWords(const PDFRectangle *selection,
                               SelectionStyle style,
                               int *nLines);
 
@@ -654,14 +661,14 @@ public:
   // false.
   bool findCharRange(int pos, int length,
 		      double *xMin, double *yMin,
-		      double *xMax, double *yMax);
+		      double *xMax, double *yMax) const;
 
   // Dump contents of page to a file.
   void dump(void *outputStream, TextOutputFunc outputFunc,
-	    bool physLayout);
+	    bool physLayout, EndOfLineKind textEOL, bool pageBreaks);
 
   // Get the head of the linked list of TextFlows.
-  TextFlow *getFlows() { return flows; }
+  const TextFlow *getFlows() const { return flows; }
 
   // If true, will combine characters when a base and combining
   // character are drawn on eachother.
@@ -681,10 +688,11 @@ private:
   ~TextPage();
   
   void clear();
-  void assignColumns(TextLineFrag *frags, int nFrags, bool rot);
-  int dumpFragment(Unicode *text, int len, UnicodeMap *uMap, GooString *s);
+  void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
+  int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
 
   bool rawOrder;		// keep text in content stream order
+  bool discardDiag;		// discard diagonal text
   bool mergeCombining;		// merge when combining and base characters
 				// are drawn on top of each other
 
@@ -698,6 +706,7 @@ private:
   int nTinyChars;		// number of "tiny" chars seen so far
   bool lastCharOverlap;	// set if the last added char overlapped the
 				//   previous char
+  bool diagonal;		// whether the current text is diagonal
 
   TextPool *pools[4];		// a "pool" of TextWords for each rotation
   TextFlow *flows;		// linked list of flows
@@ -743,11 +752,11 @@ public:
   ActualText(const ActualText &) = delete;
   ActualText& operator=(const ActualText &) = delete;
 
-  void addChar(GfxState *state, double x, double y,
+  void addChar(const GfxState *state, double x, double y,
 	       double dx, double dy,
-	       CharCode c, int nBytes, Unicode *u, int uLen);
-  void begin(GfxState *state, const GooString *text);
-  void end(GfxState *state);
+	       CharCode c, int nBytes, const Unicode *u, int uLen);
+  void begin(const GfxState *state, const GooString *text);
+  void end(const GfxState *state);
 
 private:
   TextPage *text;
@@ -772,21 +781,23 @@ public:
   // written (this is useful, e.g., for searching text).  If
   // <physLayoutA> is true, the original physical layout of the text
   // is maintained.  If <rawOrder> is true, the text is kept in
-  // content stream order.
+  // content stream order.  If <discardDiag> is true, diagonal text
+  // is removed from output.
   TextOutputDev(const char *fileName, bool physLayoutA,
 		double fixedPitchA, bool rawOrderA,
-		bool append);
+		bool append, bool discardDiagA = false);
 
   // Create a TextOutputDev which will write to a generic stream.  If
   // <physLayoutA> is true, the original physical layout of the text
   // is maintained.  If <rawOrder> is true, the text is kept in
-  // content stream order.
+  // content stream order.  If <discardDiag> is true, diagonal text
+  // is removed from output.
   TextOutputDev(TextOutputFunc func, void *stream,
 		bool physLayoutA, double fixedPitchA,
-		bool rawOrderA);
+		bool rawOrderA, bool discardDiagA = false);
 
   // Destructor.
-  ~TextOutputDev();
+  ~TextOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }
@@ -831,7 +842,7 @@ public:
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,
 		double originX, double originY,
-		CharCode c, int nBytes, Unicode *u, int uLen) override;
+		CharCode c, int nBytes, const Unicode *u, int uLen) override;
   void incCharCount(int nChars) override;
   void beginActualText(GfxState *state, const GooString *text) override;
   void endActualText(GfxState *state) override;
@@ -853,35 +864,35 @@ public:
   // bottom of the page; else if <stopAtLast> is true, stops looking
   // just before the last find result; else stops looking at
   // <xMax>,<yMax>.
-  bool findText(Unicode *s, int len,
+  bool findText(const Unicode *s, int len,
 		 bool startAtTop, bool stopAtBottom,
 		 bool startAtLast, bool stopAtLast,
 		 bool caseSensitive, bool backward,
 		 bool wholeWord,
 		 double *xMin, double *yMin,
-		 double *xMax, double *yMax);
+		 double *xMax, double *yMax) const;
 
   // Get the text which is inside the specified rectangle.
   GooString *getText(double xMin, double yMin,
-		   double xMax, double yMax);
+		   double xMax, double yMax) const;
 
   // Find a string by character position and length.  If found, sets
   // the text bounding rectangle and returns true; otherwise returns
   // false.
   bool findCharRange(int pos, int length,
 		      double *xMin, double *yMin,
-		      double *xMax, double *yMax);
+		      double *xMax, double *yMax) const;
 
   void drawSelection(OutputDev *out, double scale, int rotation,
-		     PDFRectangle *selection,
+		     const PDFRectangle *selection,
 		     SelectionStyle style,
-		     GfxColor *glyph_color, GfxColor *box_color);
+		     const GfxColor *glyph_color, const GfxColor *box_color);
 
-  std::vector<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
+  std::vector<PDFRectangle*> *getSelectionRegion(const PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 
-  GooString *getSelectionText(PDFRectangle *selection,
+  GooString *getSelectionText(const PDFRectangle *selection,
 			      SelectionStyle style);
 
   // If true, will combine characters when a base and combining
@@ -905,7 +916,17 @@ public:
 
   // Get the head of the linked list of TextFlows for the
   // last rasterized page.
-  TextFlow *getFlows();
+  const TextFlow *getFlows() const;
+
+  static constexpr EndOfLineKind defaultEndOfLine() {
+#if defined(_WIN32)
+    return eolDOS;
+#else
+    return eolUnix;
+#endif
+  }
+  void setTextEOL(EndOfLineKind textEOLA) { textEOL = textEOLA; }
+  void setTextPageBreaks(bool textPageBreaksA) { textPageBreaks = textPageBreaksA; }
 
 private:
 
@@ -920,8 +941,13 @@ private:
 				//   assume fixed-pitch characters with this
 				//   width
   bool rawOrder;		// keep text in content stream order
+  bool discardDiag;     // Diagonal text, i.e., text that is not close to one of the
+				//0, 90, 180, or 270 degree axes, is discarded. This is useful
+				// to skip watermarks drawn on top of body text, etc.
   bool doHTML;			// extra processing for HTML conversion
   bool ok;			// set up ok?
+  bool textPageBreaks;		// insert end-of-page markers?
+  EndOfLineKind textEOL;       // type of EOL marker to use
 
   ActualText *actualText;
 };

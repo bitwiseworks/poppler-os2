@@ -806,8 +806,8 @@ namespace Poppler {
 
         Form *form = m_doc->doc->getCatalog()->getForm();
         const std::vector<Ref> &calculateOrder = form->getCalculateOrder();
-        for (uint i = 0; i < calculateOrder.size(); ++i) {
-            FormWidget *w = form->findWidgetByRef(calculateOrder[i]);
+        for (Ref r : calculateOrder) {
+            FormWidget *w = form->findWidgetByRef(r);
             if (w) {
                 result << w->getID();
             }
@@ -863,11 +863,7 @@ namespace Poppler {
     }
 
     bool isOverprintPreviewAvailable() {
-#ifdef SPLASH_CMYK
         return true;
-#else
-        return false;
-#endif
    }
 
 }

@@ -1,5 +1,5 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, 2016, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, 2018, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -34,8 +34,6 @@
 
 struct Ref;
 class MediaRendition;
-class MovieAnnotation;
-class ScreenAnnotation;
 
 namespace Poppler {
 
@@ -53,6 +51,8 @@ class LinkRenditionPrivate;
 class LinkOCGStatePrivate;
 class LinkHidePrivate;
 class MediaRendition;
+class MovieAnnotation;
+class ScreenAnnotation;
 class SoundObject;
 
 /**
@@ -264,7 +264,7 @@ class POPPLER_QT5_EXPORT LinkGoto : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkGoto();
+		~LinkGoto() override;
 
 		/**
 		 * Whether the destination is in an external document
@@ -319,7 +319,7 @@ class POPPLER_QT5_EXPORT LinkExecute : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkExecute();
+		~LinkExecute() override;
 		LinkType linkType() const override;
 
 	private:
@@ -353,7 +353,7 @@ class POPPLER_QT5_EXPORT LinkBrowse : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkBrowse();
+		~LinkBrowse() override;
 		LinkType linkType() const override;
 
 	private:
@@ -404,7 +404,7 @@ class POPPLER_QT5_EXPORT LinkAction : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkAction();
+		~LinkAction() override;
 		LinkType linkType() const override;
 
 	private:
@@ -425,7 +425,7 @@ class POPPLER_QT5_EXPORT LinkSound : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkSound();
+		~LinkSound() override;
 
 		LinkType linkType() const override;
 
@@ -502,7 +502,7 @@ class POPPLER_QT5_EXPORT LinkRendition : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkRendition();
+		~LinkRendition() override;
 
 		LinkType linkType() const override;
 
@@ -555,7 +555,7 @@ class POPPLER_QT5_EXPORT LinkJavaScript : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkJavaScript();
+		~LinkJavaScript() override;
 
 		LinkType linkType() const override;
 
@@ -601,7 +601,7 @@ class POPPLER_QT5_EXPORT LinkMovie : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkMovie();
+		~LinkMovie() override;
 		LinkType linkType() const override;
 		/**
 		 * Returns the operation to be performed on the movie.
@@ -632,7 +632,7 @@ class POPPLER_QT5_EXPORT LinkOCGState : public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkOCGState();
+		~LinkOCGState() override;
 
 		LinkType linkType() const override;
 
@@ -656,7 +656,7 @@ class POPPLER_QT5_EXPORT LinkHide: public Link
 		/**
 		 * Destructor.
 		 */
-		~LinkHide();
+		~LinkHide() override;
 
 		LinkType linkType() const override;
 

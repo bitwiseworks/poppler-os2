@@ -17,7 +17,7 @@
  */
 
 #include "config.h"
-#include <math.h>
+#include <cmath>
 
 #ifndef __GI_SCANNER__
 #include <GlobalParams.h>
@@ -373,7 +373,9 @@ _poppler_page_render (PopplerPage      *page,
  * Render the page to the given cairo context. This function
  * is for rendering a page that will be displayed. If you want
  * to render a page that will be printed use
- * poppler_page_render_for_printing() instead
+ * poppler_page_render_for_printing() instead.  Please see the documentation
+ * for that function for the differences between rendering to the screen and
+ * rendering to a printer.
  **/
 void
 poppler_page_render (PopplerPage *page,
@@ -393,6 +395,9 @@ poppler_page_render (PopplerPage *page,
  * Render the page to the given cairo context for printing
  * with the specified options
  *
+ * See the documentation for poppler_page_render_for_printing() for the
+ * differences between rendering to the screen and rendering to a printer.
+ *
  * Since: 0.16
  **/
 void
@@ -410,7 +415,36 @@ poppler_page_render_for_printing_with_options (PopplerPage      *page,
  * @page: the page to render from
  * @cairo: cairo context to render to
  *
- * Render the page to the given cairo context for printing.
+ * Render the page to the given cairo context for printing with
+ * #POPPLER_PRINT_ALL flags selected.  If you want a different set of flags,
+ * use poppler_page_render_for_printing_with_options().
+ *
+ * The difference between poppler_page_render() and this function is that some
+ * things get rendered differently between screens and printers:
+ *
+ * <itemizedlist>
+ *   <listitem>
+ *     PDF annotations get rendered according to their #PopplerAnnotFlag value.
+ *     For example, #POPPLER_ANNOT_FLAG_PRINT refers to whether an annotation
+ *     is printed or not, whereas #POPPLER_ANNOT_FLAG_NO_VIEW refers to whether
+ *     an annotation is invisible when displaying to the screen.
+ *   </listitem>
+ *   <listitem>
+ *     PDF supports "hairlines" of width 0.0, which often get rendered as
+ *     having a width of 1 device pixel.  When displaying on a screen, Cairo
+ *     may render such lines wide so that they are hard to see, and Poppler
+ *     makes use of PDF's Stroke Adjust graphics parameter to make the lines
+ *     easier to see.  However, when printing, Poppler is able to directly use a
+ *     printer's pixel size instead.
+ *   </listitem>
+ *   <listitem>
+ *     Some advanced features in PDF may require an image to be rasterized
+ *     before sending off to a printer.  This may produce raster images which
+ *     exceed Cairo's limits.  The "printing" functions will detect this condition
+ *     and try to down-scale the intermediate surfaces as appropriate.
+ *   </listitem>
+ * </itemizedlist>
+ * 
  **/
 void
 poppler_page_render_for_printing (PopplerPage *page,
@@ -659,8 +693,7 @@ poppler_page_get_selection_region (PopplerPage           *page,
   std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, scale);
 
-  for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (*list)[i];
+  for (const PDFRectangle *selection_rect : *list) {
     PopplerRectangle *rect;
 
     rect = poppler_rectangle_new ();
@@ -695,8 +728,7 @@ poppler_page_selection_region_free (GList *region)
   if (G_UNLIKELY (!region))
     return;
 
-  g_list_foreach (region, (GFunc)poppler_rectangle_free, nullptr);
-  g_list_free (region);
+  g_list_free_full (region, (GDestroyNotify)poppler_rectangle_free);
 }
 
 /**
@@ -749,8 +781,7 @@ poppler_page_get_selected_region (PopplerPage           *page,
 
   region = cairo_region_create ();
 
-  for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (*list)[i];
+  for (const PDFRectangle *selection_rect : *list) {
     cairo_rectangle_int_t rect;
 
     rect.x = (gint) ((selection_rect->x1 * scale) + 0.5);
@@ -1083,8 +1114,7 @@ poppler_page_free_image_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_image_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_image_mapping_free);
 }
 
 /**
@@ -1112,7 +1142,7 @@ poppler_page_render_to_ps (PopplerPage   *page,
                                     nullptr, pages,
                                     psModePS, (int)ps_file->paper_width,
                                     (int)ps_file->paper_height, ps_file->duplex,
-                                    0, 0, 0, 0, false, false);
+                                    false, 0, 0, 0, false, false);
   }
 
 
@@ -1267,8 +1297,7 @@ poppler_page_free_link_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_link_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_link_mapping_free);
 }
 
 /**
@@ -1334,8 +1363,7 @@ poppler_page_free_form_field_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc) poppler_form_field_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_form_field_mapping_free);
 }
 
 /**
@@ -1471,8 +1499,7 @@ poppler_page_free_annot_mapping (GList *list)
   if (G_UNLIKELY (!list))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_annot_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_annot_mapping_free);
 }
 
 /**
@@ -1689,9 +1716,9 @@ poppler_text_attributes_new (void)
 }
 
 static gchar *
-get_font_name_from_word (TextWord *word, gint word_i)
+get_font_name_from_word (const TextWord *word, gint word_i)
 {
-  GooString *font_name = word->getFontName(word_i);
+  const GooString *font_name = word->getFontName(word_i);
   const gchar *name;
   gboolean subset;
   gint i;
@@ -1717,7 +1744,7 @@ get_font_name_from_word (TextWord *word, gint word_i)
  * Allocates a new PopplerTextAttributes with word attributes
  */
 static PopplerTextAttributes *
-poppler_text_attributes_new_from_word (TextWord *word, gint i)
+poppler_text_attributes_new_from_word (const TextWord *word, gint i)
 {
   PopplerTextAttributes *attrs = poppler_text_attributes_new ();
   gdouble r, g, b;
@@ -2188,9 +2215,8 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
     {
       std::vector<TextWordSelection*> *line_words = word_list[i];
       n_rects += line_words->size() - 1;
-      for (std::size_t j = 0; j < line_words->size(); j++)
+      for (const TextWordSelection *word_sel : *line_words)
         {
-          TextWordSelection *word_sel = (*line_words)[j];
           n_rects += word_sel->getEnd() - word_sel->getBegin();
         }
     }
@@ -2204,7 +2230,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
           TextWordSelection *word_sel = (*line_words)[j];
-          TextWord *word = word_sel->getWord();
+          const TextWord *word = word_sel->getWord();
           int end = word_sel->getEnd();
 
           for (k = word_sel->getBegin(); k < end; k++)
@@ -2223,9 +2249,9 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 
           if (j < line_words->size() - 1)
             {
-              TextWordSelection *word_sel = (*line_words)[j + 1];
+              TextWordSelection *next_word_sel = (*line_words)[j + 1];
 
-              word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
+              next_word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
 	      // first word.
 	      rect->x1 = x2;
@@ -2272,12 +2298,11 @@ poppler_page_free_text_attributes (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_text_attributes_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_text_attributes_free);
 }
 
 static gboolean
-word_text_attributes_equal (TextWord *a, gint ai, TextWord *b, gint bi)
+word_text_attributes_equal (const TextWord *a, gint ai, const TextWord *b, gint bi)
 {
   double ar, ag, ab, br, bg, bb;
 
@@ -2348,14 +2373,14 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
   PDFRectangle selection;
   int n_lines;
   PopplerTextAttributes *attrs = nullptr;
-  TextWord *word, *prev_word = nullptr;
+  const TextWord *word, *prev_word = nullptr;
   gint word_i, prev_word_i;
   gint i;
   gint offset = 0;
   GList *attributes = nullptr;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
-  g_return_val_if_fail (area != nullptr, FALSE);
+  g_return_val_if_fail (area != nullptr, nullptr);
 
   selection.x1 = area->x1;
   selection.y1 = area->y1;

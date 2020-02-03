@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
-// Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
@@ -15,7 +15,7 @@
 
 #include "poppler-config.h"
 #include <memory>
-#include <time.h>
+#include <ctime>
 #include "goo/GooString.h"
 
 enum CertificateKeyUsageExtension
@@ -44,11 +44,14 @@ public:
   X509CertificateInfo();
   ~X509CertificateInfo();
 
+  X509CertificateInfo(const X509CertificateInfo &) = delete;
+  X509CertificateInfo& operator=(const X509CertificateInfo &) = delete;
+
   struct PublicKeyInfo {
     PublicKeyInfo();
 
-    PublicKeyInfo(PublicKeyInfo &&);
-    PublicKeyInfo &operator=(PublicKeyInfo &&);
+    PublicKeyInfo(PublicKeyInfo &&) noexcept;
+    PublicKeyInfo &operator=(PublicKeyInfo &&) noexcept;
 
     PublicKeyInfo(const PublicKeyInfo &) = delete;
     PublicKeyInfo &operator=(const PublicKeyInfo &) = delete;
@@ -62,8 +65,8 @@ public:
     EntityInfo();
     ~EntityInfo();
 
-    EntityInfo(EntityInfo &&);
-    EntityInfo &operator=(EntityInfo &&);
+    EntityInfo(EntityInfo &&) noexcept;
+    EntityInfo &operator=(EntityInfo &&) noexcept;
 
     EntityInfo(const EntityInfo &) = delete;
     EntityInfo &operator=(const EntityInfo &) = delete;
@@ -104,9 +107,6 @@ public:
   void setIsSelfSigned(bool);
 
 private:
-  X509CertificateInfo(const X509CertificateInfo &) = delete;
-  X509CertificateInfo& operator=(const X509CertificateInfo &) = delete;
-
   EntityInfo issuer_info;
   EntityInfo subject_info;
   PublicKeyInfo public_key_info;

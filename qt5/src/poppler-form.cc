@@ -9,6 +9,7 @@
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  * Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +41,8 @@
 #include "poppler-private.h"
 #include "poppler-annotation-helper.h"
 
-#include <math.h>
-#include <ctype.h>
+#include <cmath>
+#include <cctype>
 
 #ifdef ENABLE_NSS3
   #include <hasht.h>
@@ -70,8 +71,38 @@ Qt::Alignment formTextAlignment(::FormWidget *fm)
 
 namespace Poppler {
 
-FormField::FormField(FormFieldData &dd)
-  : m_formData(&dd)
+FormFieldIcon::FormFieldIcon(FormFieldIconData *data)
+  : d_ptr(data)
+{
+}
+
+FormFieldIcon::FormFieldIcon(const FormFieldIcon &ffIcon)
+{
+  d_ptr = new FormFieldIconData;
+  d_ptr->icon = ffIcon.d_ptr->icon;
+}
+
+FormFieldIcon& FormFieldIcon::operator=(const FormFieldIcon &ffIcon)
+{
+  if(this != &ffIcon)
+  {  
+    delete d_ptr;
+    d_ptr = nullptr;
+
+    d_ptr = new FormFieldIconData;
+    *d_ptr = *ffIcon.d_ptr;
+  }
+  
+  return *this;
+}
+
+FormFieldIcon::~FormFieldIcon()
+{
+  delete d_ptr;
+}
+
+FormField::FormField(std::unique_ptr<FormFieldData> dd)
+  : m_formData(std::move(dd))
 {
   const int rotation = m_formData->page->getRotate();
   // reading the coords
@@ -98,11 +129,7 @@ FormField::FormField(FormFieldData &dd)
   m_formData->box = QRectF(topLeft, QSizeF(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()));
 }
 
-FormField::~FormField()
-{
-  delete m_formData;
-  m_formData = nullptr;
-}
+FormField::~FormField() = default;
 
 QRectF FormField::rect() const
 {
@@ -177,6 +204,22 @@ void FormField::setVisible(bool value)
   m_formData->fm->getWidgetAnnotation()->setFlags(flags);
 }
 
+bool FormField::isPrintable() const
+{
+  return (m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagPrint);
+}
+
+void FormField::setPrintable(bool value)
+{
+  unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+  if (value) {
+    flags |= Annot::flagPrint;
+  } else {
+    flags &= ~Annot::flagPrint;
+  }
+  m_formData->fm->getWidgetAnnotation()->setFlags(flags);
+}
+
 Link* FormField::activationAction() const
 {
   Link* action = nullptr;
@@ -226,7 +269,7 @@ Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
 }
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
@@ -284,6 +327,34 @@ QString FormFieldButton::caption() const
   return ret;
 }
 
+FormFieldIcon FormFieldButton::icon() const
+{
+  FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
+  if (fwb->getButtonType() == formButtonPush)
+  {
+    Dict *dict = m_formData->fm->getObj()->getDict();
+    FormFieldIconData *data = new FormFieldIconData;
+    data->icon = dict;
+    return FormFieldIcon(data);
+  }
+  return FormFieldIcon(nullptr);
+}
+
+void FormFieldButton::setIcon(const FormFieldIcon &icon)
+{
+  if(FormFieldIconData::getData( icon ) == nullptr)
+    return;
+
+  FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
+  if (fwb->getButtonType() == formButtonPush)
+  {
+    ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation(); 
+    FormFieldIconData *data = FormFieldIconData::getData( icon );
+    if(data->icon != nullptr)
+      w->setNewAppearance(data->icon->lookup("AP"));
+  }
+}
+
 bool FormFieldButton::state() const
 {
   FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
@@ -319,7 +390,7 @@ QList<int> FormFieldButton::siblings() const
 
 
 FormFieldText::FormFieldText(DocumentData *doc, ::Page *p, ::FormWidgetText *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
@@ -353,6 +424,14 @@ void FormFieldText::setText( const QString& text )
   FormWidgetText* fwt = static_cast<FormWidgetText*>(m_formData->fm);
   GooString * goo = QStringToUnicodeGooString( text );
   fwt->setContent( goo );
+  delete goo;
+}
+
+void FormFieldText::setAppearanceText( const QString& text )
+{
+  FormWidgetText* fwt = static_cast<FormWidgetText*>(m_formData->fm);
+  GooString * goo = QStringToUnicodeGooString( text );
+  fwt->setAppearanceContent( goo );
   delete goo;
 }
 
@@ -399,7 +478,7 @@ void FormFieldText::setFontSize(int fontSize)
 }
 
 FormFieldChoice::FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
@@ -827,7 +906,7 @@ SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValid
 }
 
 FormFieldSignature::FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 

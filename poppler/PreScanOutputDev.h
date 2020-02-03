@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
@@ -43,7 +43,7 @@ public:
   PreScanOutputDev(PDFDoc *docA);
 
   // Destructor.
-  ~PreScanOutputDev();
+  ~PreScanOutputDev() override;
 
   //----- get info about output device
 
@@ -99,7 +99,7 @@ public:
   void endStringOp(GfxState *state) override;
   bool beginType3Char(GfxState *state, double x, double y,
 		       double dx, double dy,
-		       CharCode code, Unicode *u, int uLen) override;
+		       CharCode code, const Unicode *u, int uLen) override;
   void endType3Char(GfxState *state) override;
 
   //----- image drawing
@@ -108,7 +108,7 @@ public:
 		     bool interpolate, bool inlineImg) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 		 int width, int height, GfxImageColorMap *colorMap,
-		 bool interpolate, int *maskColors, bool inlineImg) override;
+		 bool interpolate, const int *maskColors, bool inlineImg) override;
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 		      int width, int height,
 		      GfxImageColorMap *colorMap,

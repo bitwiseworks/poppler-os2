@@ -23,8 +23,8 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <algorithm>
 #include "goo/gmem.h"
 #include "SplashMath.h"
@@ -129,9 +129,9 @@ void SplashXPathScanner::getSpanBounds(int y, int *spanXMin, int *spanXMax) {
   if (!line.empty()) {
     *spanXMin = line[0].x0;
     int xx = line[0].x1;
-    for (unsigned int i = 1; i < line.size(); ++i) {
-      if (line[i].x1 > xx) {
-	xx = line[i].x1;
+    for (const SplashIntersect &intersect : line) {
+      if (intersect.x1 > xx) {
+	xx = intersect.x1;
       }
     }
     *spanXMax = xx;
@@ -344,9 +344,11 @@ bool SplashXPathScanner::addIntersection(double segYMin, double segYMax,
   }
 
   auto& line = allIntersections[y - yMin];
+#ifndef USE_BOOST_HEADERS
   if (line.empty()) {
       line.reserve(4);
   }
+#endif
   line.push_back(intersect);
 
   return true;

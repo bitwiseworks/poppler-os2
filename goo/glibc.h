@@ -17,7 +17,7 @@
 #include "config.h"
 #include "poppler-config.h"
 
-#include <time.h>
+#include <ctime>
 
 #ifndef HAVE_GMTIME_R
 struct tm *gmtime_r(const time_t *timep, struct tm *result);

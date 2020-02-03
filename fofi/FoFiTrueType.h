@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2011, 2012, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -29,7 +29,7 @@
 #define FOFITRUETYPE_H
 
 #include "poppler-config.h"
-#include "stddef.h"
+#include <cstddef>
 #include <unordered_map>
 #include <string>
 #include "FoFiBase.h"
@@ -51,7 +51,7 @@ public:
   // Create a FoFiTrueType object from a file on disk.
   static FoFiTrueType *load(const char *fileName, int faceIndexA=0);
 
-  ~FoFiTrueType();
+  ~FoFiTrueType() override;
 
   // Returns true if this an OpenType font containing CFF data, false
   // if it's a TrueType font (or OpenType font with TrueType data).
@@ -126,7 +126,7 @@ public:
   // name (so we don't need to depend on the 'name' table in the
   // font).  The <cidMap> array maps CIDs to GIDs; it has <nCIDs>
   // entries.  (Not useful for OpenType CFF fonts.)
-  void convertToCIDType2(const char *psName, int *cidMap, int nCIDs,
+  void convertToCIDType2(const char *psName, const int *cidMap, int nCIDs,
 			 bool needVerticalMetrics,
 			 FoFiOutputFunc outputFunc, void *outputStream) const;
 
@@ -170,7 +170,7 @@ private:
 		   FoFiOutputFunc outputFunc,
 		   void *outputStream) const;
   void cvtCharStrings(char **encoding,
-		      int *codeToGID,
+		      const int *codeToGID,
 		      FoFiOutputFunc outputFunc,
 		      void *outputStream) const;
   void cvtSfnts(FoFiOutputFunc outputFunc,

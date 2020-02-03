@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,10 +60,10 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
 
     m_rotationCombo = new QComboBox(this);
     // NOTE: \302\260 = degree symbol
-    m_rotationCombo->addItem(trUtf8("0\302\260"));
-    m_rotationCombo->addItem(trUtf8("90\302\260"));
-    m_rotationCombo->addItem(trUtf8("180\302\260"));
-    m_rotationCombo->addItem(trUtf8("270\302\260"));
+    m_rotationCombo->addItem(tr("0\302\260"));
+    m_rotationCombo->addItem(tr("90\302\260"));
+    m_rotationCombo->addItem(tr("180\302\260"));
+    m_rotationCombo->addItem(tr("270\302\260"));
     // TODO replace with qOverload once we start requiring Qt 5.7
     connect(m_rotationCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &NavigationToolBar::slotRotationComboChanged);
     addWidget(m_rotationCombo);

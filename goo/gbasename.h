@@ -9,6 +9,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -18,6 +19,6 @@
 #include "poppler-config.h"
 #include <string>
 
-POPPLER_LIB_EXPORT std::string gbasename(const char* input);
+POPPLER_LIB_EXPORT std::string gbasename(const char* filename);
 
 #endif // ndef GBASENAME_H

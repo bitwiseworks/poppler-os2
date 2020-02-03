@@ -12,9 +12,9 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2010 Christian Feuers‰nger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2010 Christian Feuers√§nger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -25,7 +25,7 @@
 #ifndef SPLASH_H
 #define SPLASH_H
 
-#include <stddef.h>
+#include <cstddef>
 #include "SplashTypes.h"
 #include "SplashClip.h"
 #include "SplashPattern.h"
@@ -58,25 +58,18 @@ typedef void (*SplashICCTransform)(void *data, SplashBitmap *bitmap);
 //------------------------------------------------------------------------
 
 enum SplashPipeResultColorCtrl {
-#ifdef SPLASH_CMYK
   splashPipeResultColorNoAlphaBlendCMYK,
   splashPipeResultColorNoAlphaBlendDeviceN,
-#endif
   splashPipeResultColorNoAlphaBlendRGB,
   splashPipeResultColorNoAlphaBlendMono,
   splashPipeResultColorAlphaNoBlendMono,
   splashPipeResultColorAlphaNoBlendRGB,
-#ifdef SPLASH_CMYK
   splashPipeResultColorAlphaNoBlendCMYK,
   splashPipeResultColorAlphaNoBlendDeviceN,
-#endif
   splashPipeResultColorAlphaBlendMono,
-  splashPipeResultColorAlphaBlendRGB
-#ifdef SPLASH_CMYK
-  ,
+  splashPipeResultColorAlphaBlendRGB,
   splashPipeResultColorAlphaBlendCMYK,
   splashPipeResultColorAlphaBlendDeviceN
-#endif
 };
 
 //------------------------------------------------------------------------
@@ -122,8 +115,8 @@ public:
   //----- state write
 
   void setMatrix(SplashCoord *matrix);
-  void setStrokePattern(SplashPattern *strokeColor);
-  void setFillPattern(SplashPattern *fillColor);
+  void setStrokePattern(SplashPattern *strokePattern);
+  void setFillPattern(SplashPattern *fillPattern);
   void setScreen(SplashScreen *screen);
   void setBlendFunc(SplashBlendFunc func);
   void setStrokeAlpha(SplashCoord alpha);
@@ -229,7 +222,7 @@ public:
 
   // Composite this Splash object onto a background color.  The
   // background alpha is assumed to be 1.
-  void compositeBackground(SplashColorPtr color);
+  void compositeBackground(SplashColorConstPtr color);
 
   // Copy a rectangular region from <src> onto the bitmap belonging to
   // this Splash object.  The destination alpha values are all set to
@@ -256,14 +249,6 @@ public:
   // Setter/Getter for thin line mode
   void setThinLineMode(SplashThinLineMode thinLineModeA) { thinLineMode = thinLineModeA; }
   SplashThinLineMode getThinLineMode() { return thinLineMode; }
-
-  // Get a bounding box which includes all modifications since the
-  // last call to clearModRegion.
-  void getModRegion(int *xMin, int *yMin, int *xMax, int *yMax)
-    { *xMin = modXMin; *yMin = modYMin; *xMax = modXMax; *yMax = modYMax; }
-
-  // Clear the modified region bounding box.
-  void clearModRegion();
 
   // Get clipping status for the last drawing operation subject to
   // clipping.
@@ -297,19 +282,15 @@ private:
   void pipeRunSimpleRGB8(SplashPipe *pipe);
   void pipeRunSimpleXBGR8(SplashPipe *pipe);
   void pipeRunSimpleBGR8(SplashPipe *pipe);
-#ifdef SPLASH_CMYK
   void pipeRunSimpleCMYK8(SplashPipe *pipe);
   void pipeRunSimpleDeviceN8(SplashPipe *pipe);
-#endif
   void pipeRunAAMono1(SplashPipe *pipe);
   void pipeRunAAMono8(SplashPipe *pipe);
   void pipeRunAARGB8(SplashPipe *pipe);
   void pipeRunAAXBGR8(SplashPipe *pipe);
   void pipeRunAABGR8(SplashPipe *pipe);
-#ifdef SPLASH_CMYK
   void pipeRunAACMYK8(SplashPipe *pipe);
   void pipeRunAADeviceN8(SplashPipe *pipe);
-#endif
   void pipeSetXY(SplashPipe *pipe, int x, int y);
   void pipeIncX(SplashPipe *pipe);
   void drawPixel(SplashPipe *pipe, int x, int y, bool noClip);
@@ -317,10 +298,8 @@ private:
   void drawAAPixel(SplashPipe *pipe, int x, int y);
   void drawSpan(SplashPipe *pipe, int x0, int x1, int y, bool noClip);
   void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, unsigned char lineOpacity = 0);
-  void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
+  void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
 		 SplashCoord *xo, SplashCoord *yo);
-  void updateModX(int x);
-  void updateModY(int y);
   void strokeNarrow(SplashPath *path);
   void strokeWide(SplashPath *path, SplashCoord w);
   SplashPath *flattenPath(SplashPath *path, SplashCoord *matrix,
@@ -420,7 +399,6 @@ private:
   SplashCoord aaGamma[splashAASize * splashAASize + 1];
   SplashCoord minLineWidth;
   SplashThinLineMode thinLineMode;
-  int modXMin, modYMin, modXMax, modYMax;
   SplashClipResult opClipRes;
   bool vectorAntialias;
   bool inShading;

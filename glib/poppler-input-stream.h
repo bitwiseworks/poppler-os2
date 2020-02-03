@@ -1,6 +1,7 @@
 /* poppler-input-stream.h: glib interface to poppler
  *
  * Copyright (C) 2012 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +33,11 @@ public:
 
   PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
                      Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
-  ~PopplerInputStream();
+  ~PopplerInputStream() override;
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, bool limited,
                         Goffset lengthA, Object &&dictA) override;
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   void close() override;
   int getChar() override

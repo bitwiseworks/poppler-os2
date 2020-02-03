@@ -2,7 +2,7 @@
 //
 // DateInfo.cc
 //
-// Copyright (C) 2008, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
@@ -26,8 +26,8 @@
 #include "glibc.h"
 #include "DateInfo.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
 bool parseDateString(const char *dateString, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
@@ -76,7 +76,7 @@ bool parseDateString(const char *dateString, int *year, int *month, int *day, in
    return false;
 }
 
-GooString *timeToDateString(time_t *timeA)
+GooString *timeToDateString(const time_t *timeA)
 {
   const time_t timet = timeA ? *timeA : time(nullptr);
 

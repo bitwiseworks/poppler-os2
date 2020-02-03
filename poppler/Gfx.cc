@@ -43,6 +43,7 @@
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -51,11 +52,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
 #include <memory>
 #include "goo/gmem.h"
 #include "goo/GooTimer.h"
@@ -133,7 +134,7 @@
 // Operator table
 //------------------------------------------------------------------------
 
-Operator Gfx::opTab[] = {
+const Operator Gfx::opTab[] = {
   {"\"",  3, {tchkNum,    tchkNum,    tchkString},
           &Gfx::opMoveSetShowText},
   {"'",   1, {tchkString},
@@ -454,20 +455,13 @@ Object GfxResources::lookupColorSpace(const char *name) {
 
 GfxPattern *GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state) {
   GfxResources *resPtr;
-  GfxPattern *pattern;
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->patternDict.isDict()) {
-      Object obj = resPtr->patternDict.dictLookupNF(name).copy();
+      Ref patternRef = Ref::INVALID();
+      Object obj = resPtr->patternDict.getDict()->lookup(name, &patternRef);
       if (!obj.isNull()) {
-	Ref patternRef = { -1, -1 };
-	if (obj.isRef()) {
-	  patternRef = obj.getRef();
-	  obj = obj.fetch(resPtr->patternDict.getDict()->getXRef());
-	}
-
-	pattern = GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
-	return pattern;
+	return GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
       }
     }
   }
@@ -830,7 +824,7 @@ void Gfx::go(bool topLevel) {
 }
 
 void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
-  Operator *op;
+  const Operator *op;
   Object *argPtr;
   int i;
 
@@ -877,7 +871,7 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
   (this->*op->func)(argPtr, numArgs);
 }
 
-Operator *Gfx::findOp(const char *name) {
+const Operator *Gfx::findOp(const char *name) {
   int a, b, m, cmp;
 
   a = -1;
@@ -952,10 +946,8 @@ void Gfx::opSetDash(Object args[], int numArgs) {
     dash = nullptr;
   } else {
     dash = (double *)gmallocn(length, sizeof(double));
-    bool dummyOk;
     for (i = 0; i < length; ++i) {
-      const Object obj = a->get(i);
-      dash[i] = obj.getNum(&dummyOk);
+      dash[i] = a->get(i).getNumWithDefaultValue(0);
     }
   }
   state->setLineDash(dash, length, args[1].getNum());
@@ -3880,7 +3872,7 @@ void Gfx::doShowText(const GooString *s) {
   int wMode;
   double riseX, riseY;
   CharCode code;
-  Unicode *u = nullptr;
+  const Unicode *u = nullptr;
   double x, y, dx, dy, dx2, dy2, curX, curY, tdx, tdy, ddx, ddy;
   double originX, originY, tOriginX, tOriginY;
   double x0, y0, x1, y1;
@@ -4007,7 +3999,10 @@ void Gfx::doShowText(const GooString *s) {
       curX += tdx;
       curY += tdy;
       state->moveTo(curX, curY);
-      out->updateCTM(state, 0, 0, 0, 0, 0, 0);
+      // Call updateCTM with the identity transformation.  That way, the CTM is unchanged,
+      // but any side effect that the method may have is triggered.  This is the case,
+      // in particular, for the Splash backend.
+      out->updateCTM(state, 1, 0, 0, 1, 0, 0);
       p += n;
       len -= n;
     }
@@ -4355,9 +4350,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
       char *tempIntent = nullptr;
       Object objIntent = dict->lookup("Intent");
       if (objIntent.isName()) {
-        tempIntent = state->getRenderingIntent();
-        if (tempIntent != nullptr) {
-          tempIntent = strdup(tempIntent);
+        const char *stateIntent = state->getRenderingIntent();
+        if (stateIntent != nullptr) {
+          tempIntent = strdup(stateIntent);
         }
         state->setRenderingIntent(objIntent.getName());
       }
@@ -4468,7 +4463,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
       if (obj1.isNull()) {
 	obj1 = maskDict->lookup("D");
       }
-      maskColorMap.reset(new GfxImageColorMap(maskBits, &obj1, maskColorSpace));
+      maskColorMap = std::make_unique<GfxImageColorMap>(maskBits, &obj1, maskColorSpace);
       if (!maskColorMap->isOk()) {
 	goto err1;
       }

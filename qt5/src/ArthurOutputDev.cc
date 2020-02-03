@@ -35,8 +35,8 @@
 
 #include <config.h>
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 
 #include <array>
 
@@ -180,10 +180,6 @@ ArthurOutputDev::~ArthurOutputDev()
 void ArthurOutputDev::startDoc(PDFDoc* doc) {
   xref = doc->getXRef();
   m_doc = doc;
-
-  if (!globalParams->getEnableFreeType()) {
-    qCritical() << "Arthur backend will not render text without FreeType, but it is disabled!";
-  }
 
   for (auto& codeToGID : m_codeToGIDCache) {
     gfree(const_cast<int*>(codeToGID.second));
@@ -698,15 +694,14 @@ void ArthurOutputDev::updateFont(GfxState *state)
   }
 }
 
-static QPainterPath convertPath(GfxState *state, GfxPath *path, Qt::FillRule fillRule)
+static QPainterPath convertPath(GfxState *state, const GfxPath *path, Qt::FillRule fillRule)
 {
-  GfxSubpath *subpath;
   int i, j;
 
   QPainterPath qPath;
   qPath.setFillRule(fillRule);
   for (i = 0; i < path->getNumSubpaths(); ++i) {
-    subpath = path->getSubpath(i);
+    const GfxSubpath *subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
       qPath.moveTo(subpath->getX(0), subpath->getY(0));
       j = 1;
@@ -844,7 +839,6 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
     }
 
     // set the color
-    GfxRGB rgb;
     shading->getColorSpace()->getRGB(&color1, &rgb);
     qColor.setRgb(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b));
     gradient.setColorAt((ta[j] - tMin)/(tMax - tMin), qColor);
@@ -883,7 +877,7 @@ void ArthurOutputDev::eoClip(GfxState *state)
 void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
 			       double dx, double dy,
 			       double originX, double originY,
-			       CharCode code, int nBytes, Unicode *u, int uLen) {
+			       CharCode code, int nBytes, const Unicode *u, int uLen) {
 
   // First handle type3 fonts
   GfxFont *gfxFont = state->getFont();
@@ -1055,7 +1049,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap,
-				bool interpolate, int *maskColors, bool inlineImg)
+				bool interpolate, const int *maskColors, bool inlineImg)
 {
   unsigned int *data;
   unsigned int *line;

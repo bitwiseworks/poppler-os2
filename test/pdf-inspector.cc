@@ -4,6 +4,7 @@
 //
 // Copyright 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -41,11 +42,11 @@ enum {
 class PdfInspector {
 public:
 
-  PdfInspector(void);
+  PdfInspector();
 
   void set_file_name (const char *file_name);
   void load (const char *file_name);
-  void run (void);
+  void run ();
   void error_dialog (const char *error_message);
   void analyze_page (int page);
 
@@ -62,14 +63,14 @@ private:
 
 
 
-PdfInspector::PdfInspector(void)
+PdfInspector::PdfInspector()
 {
   GtkWidget *widget;
   GError* error = nullptr;
   
   builder = gtk_builder_new ();
 
-  if (!gtk_builder_add_from_file (builder, "./pdf-inspector.ui", &error))
+  if (!gtk_builder_add_from_file (builder, SRC_DIR "/pdf-inspector.ui", &error))
   {
     g_warning ("Couldn't load builder file: %s", error->message);
     g_error_free (error);
@@ -333,7 +334,7 @@ main (int argc, char *argv [])
   
   gtk_init (&argc, &argv);
   
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   globalParams->setProfileCommands (true);
   globalParams->setPrintCommands (true);
 
@@ -353,7 +354,6 @@ main (int argc, char *argv [])
   inspector->run ();
 
   delete inspector;
-  delete globalParams;
   
   return 0;
 }

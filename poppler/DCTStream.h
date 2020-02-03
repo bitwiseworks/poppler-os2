@@ -6,7 +6,7 @@
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright 2005-2007, 2009-2011, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2007, 2009-2011, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -17,15 +17,15 @@
 #define DCTSTREAM_H
 
 #include "poppler-config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <setjmp.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <csetjmp>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "Error.h"
@@ -56,8 +56,8 @@ class DCTStream: public FilterStream {
 public:
 
   DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
-  ~DCTStream();
-  StreamKind getKind() override { return strDCT; }
+  ~DCTStream() override;
+  StreamKind getKind() const override { return strDCT; }
   void reset() override;
   int getChar() override;
   int lookChar() override;

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
@@ -300,8 +300,8 @@ text_box_data::~text_box_data() = default;
 
 text_box::~text_box() = default;
 
-text_box& text_box::operator=(text_box&& a) = default;
-text_box::text_box(text_box&& a) = default;
+text_box& text_box::operator=(text_box&& a) noexcept = default;
+text_box::text_box(text_box&& a) noexcept = default;
 
 text_box::text_box(text_box_data *data) : m_data{data}
 {
@@ -384,7 +384,7 @@ std::vector<text_box> page::text_list() const
             tb.m_data->char_bboxes.reserve(word->getLength());
             for (int j = 0; j < word->getLength(); j ++) {
                 word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);
-                tb.m_data->char_bboxes.push_back({xMin, yMin, xMax-xMin, yMax-yMin});
+                tb.m_data->char_bboxes.emplace_back(xMin, yMin, xMax-xMin, yMax-yMin);
             }
 
             output_list.push_back(std::move(tb));

@@ -31,6 +31,7 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -40,9 +41,9 @@
 #include <config.h>
 
 #include <cstdint>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
+#include <cstring>
+#include <cmath>
+#include <cassert>
 #include <cairo.h>
 
 #include "goo/gfile.h"
@@ -87,12 +88,12 @@
 // CairoImage
 //------------------------------------------------------------------------
 
-CairoImage::CairoImage (double x1, double y1, double x2, double y2) {
-  this->image = nullptr;
-  this->x1 = x1;
-  this->y1 = y1;
-  this->x2 = x2;
-  this->y2 = y2;
+CairoImage::CairoImage (double x1A, double y1A, double x2A, double y2A) {
+  image = nullptr;
+  x1 = x1A;
+  y1 = y1A;
+  x2 = x2A;
+  y2 = y2A;
 }
 
 CairoImage::~CairoImage () {
@@ -100,10 +101,10 @@ CairoImage::~CairoImage () {
     cairo_surface_destroy (image);
 }
 
-void CairoImage::setImage (cairo_surface_t *image) {
-  if (this->image)
-    cairo_surface_destroy (this->image);
-  this->image = cairo_surface_reference (image);
+void CairoImage::setImage (cairo_surface_t *i) {
+  if (image)
+    cairo_surface_destroy (image);
+  image = cairo_surface_reference (i);
 }
 
 //------------------------------------------------------------------------
@@ -161,7 +162,7 @@ CairoOutputDev::CairoOutputDev() {
   cairo_shape = nullptr;
   knockoutCount = 0;
 
-  text = nullptr;
+  textPage = nullptr;
   actualText = nullptr;
 
   // the SA parameter supposedly defaults to false, but Acrobat
@@ -187,53 +188,53 @@ CairoOutputDev::~CairoOutputDev() {
     cairo_pattern_destroy (mask);
   if (shape)
     cairo_pattern_destroy (shape);
-  if (text) 
-    text->decRefCnt();
+  if (textPage)
+    textPage->decRefCnt();
   if (actualText)
     delete actualText;  
 }
 
-void CairoOutputDev::setCairo(cairo_t *cairo)
+void CairoOutputDev::setCairo(cairo_t *c)
 {
-  if (this->cairo != nullptr) {
-    cairo_status_t status = cairo_status (this->cairo);
+  if (cairo != nullptr) {
+    cairo_status_t status = cairo_status (cairo);
     if (status) {
       error(errInternal, -1, "cairo context error: {0:s}\n", cairo_status_to_string(status));
     }
-    cairo_destroy (this->cairo);
+    cairo_destroy (cairo);
     assert(!cairo_shape);
   }
-  if (cairo != nullptr) {
-    this->cairo = cairo_reference (cairo);
+  if (c != nullptr) {
+    cairo = cairo_reference (c);
 	/* save the initial matrix so that we can use it for type3 fonts. */
 	//XXX: is this sufficient? could we miss changes to the matrix somehow?
 	cairo_get_matrix(cairo, &orig_matrix);
 	setContextAntialias(cairo, antialias);
   } else {
-    this->cairo = nullptr;
-    this->cairo_shape = nullptr;
+    cairo = nullptr;
+    cairo_shape = nullptr;
   }
 }
 
 void CairoOutputDev::setTextPage(TextPage *text)
 {
-  if (this->text) 
-    this->text->decRefCnt();
+  if (textPage)
+    textPage->decRefCnt();
   if (actualText)
     delete actualText;
   if (text) {
-    this->text = text;
-    this->text->incRefCnt();
+    textPage = text;
+    textPage->incRefCnt();
     actualText = new ActualText(text);
   } else {
-    this->text = nullptr;
+    textPage = nullptr;
     actualText = nullptr;
   }
 }
 
-void CairoOutputDev::setAntialias(cairo_antialias_t antialias)
+void CairoOutputDev::setAntialias(cairo_antialias_t a)
 {
-  this->antialias = antialias;
+  antialias = a;
   if (cairo)
     setContextAntialias (cairo, antialias);
   if (cairo_shape)
@@ -276,17 +277,17 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   stroke_pattern = cairo_pattern_reference(fill_pattern);
   stroke_color.r = stroke_color.g = stroke_color.b = 0;
 
-  if (text)
-    text->startPage(state);
+  if (textPage)
+    textPage->startPage(state);
   if (xrefA != nullptr) {
     xref = xrefA;
   }
 }
 
 void CairoOutputDev::endPage() {
-  if (text) {
-    text->endPage();
-    text->coalesce(true, 0, false);
+  if (textPage) {
+    textPage->endPage();
+    textPage->coalesce(true, 0, false);
   }
 }
 
@@ -354,8 +355,8 @@ void CairoOutputDev::updateAll(GfxState *state) {
   updateStrokeOpacity(state);
   updateBlendMode(state);
   needFontUpdate = true;
-  if (text)
-    text->updateFont(state);
+  if (textPage)
+    textPage->updateFont(state);
 }
 
 void CairoOutputDev::setDefaultCTM(const double *ctm) {
@@ -659,8 +660,8 @@ void CairoOutputDev::updateFont(GfxState *state) {
   needFontUpdate = false;
 
   //FIXME: use cairo font engine?
-  if (text)
-    text->updateFont(state);
+  if (textPage)
+    textPage->updateFont(state);
   
   currentFont = fontEngine->getFont (state->getFont(), doc, printing, xref);
 
@@ -711,7 +712,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
 
 /* Align stroke coordinate i if the point is the start or end of a
  * horizontal or vertical line */
-void CairoOutputDev::alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y)
+void CairoOutputDev::alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y)
 {
   double x1, y1, x2, y2;
   bool align = false;
@@ -751,13 +752,12 @@ void CairoOutputDev::alignStrokeCoords(GfxSubpath *subpath, int i, double *x, do
 
 #undef STROKE_COORD_TOLERANCE
 
-void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
-  GfxSubpath *subpath;
+void CairoOutputDev::doPath(cairo_t *c, GfxState *state, const GfxPath *path) {
   int i, j;
   double x, y;
-  cairo_new_path (cairo);
+  cairo_new_path (c);
   for (i = 0; i < path->getNumSubpaths(); ++i) {
-    subpath = path->getSubpath(i);
+    const GfxSubpath *subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
       if (align_stroke_coords) {
         alignStrokeCoords(subpath, 0, &x, &y);
@@ -765,7 +765,7 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
         x = subpath->getX(0);
         y = subpath->getY(0);
       }
-      cairo_move_to (cairo, x, y);
+      cairo_move_to (c, x, y);
       j = 1;
       while (j < subpath->getNumPoints()) {
 	if (subpath->getCurve(j)) {
@@ -775,7 +775,7 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
             x = subpath->getX(j+2);
             y = subpath->getY(j+2);
           }
-	  cairo_curve_to( cairo,
+	  cairo_curve_to( c,
 			  subpath->getX(j), subpath->getY(j),
 			  subpath->getX(j+1), subpath->getY(j+1),
 			  x, y);
@@ -788,13 +788,13 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
             x = subpath->getX(j);
             y = subpath->getY(j);
           }
-          cairo_line_to (cairo, x, y);
+          cairo_line_to (c, x, y);
 	  ++j;
 	}
       }
       if (subpath->isClosed()) {
 	LOG (printf ("close\n"));
-	cairo_close_path (cairo);
+	cairo_close_path (c);
       }
     }
   }
@@ -1394,7 +1394,7 @@ void CairoOutputDev::beginString(GfxState *state, const GooString *s)
 void CairoOutputDev::drawChar(GfxState *state, double x, double y,
 			      double dx, double dy,
 			      double originX, double originY,
-			      CharCode code, int nBytes, Unicode *u, int uLen)
+			      CharCode code, int nBytes, const Unicode *u, int uLen)
 {
   if (currentFont) {
     glyphs[glyphCount].index = currentFont->getGlyph (code, u, uLen);
@@ -1423,7 +1423,7 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
     }
   }
 
-  if (!text)
+  if (!textPage)
     return;
   actualText->addChar (state, x, y, dx, dy, code, nBytes, u, uLen);
 }
@@ -1511,7 +1511,7 @@ finish:
 
 bool CairoOutputDev::beginType3Char(GfxState *state, double x, double y,
 				      double dx, double dy,
-				      CharCode code, Unicode *u, int uLen) {
+				      CharCode code, const Unicode *u, int uLen) {
 
   cairo_save (cairo);
   cairo_matrix_t matrix;
@@ -1580,13 +1580,13 @@ void CairoOutputDev::endTextObject(GfxState *state) {
 
 void CairoOutputDev::beginActualText(GfxState *state, const GooString *text)
 {
-  if (this->text)
+  if (textPage)
     actualText->begin(state, text);
 }
 
 void CairoOutputDev::endActualText(GfxState *state)
 {
-  if (text)
+  if (textPage)
     actualText->end(state);
 }
 
@@ -1652,7 +1652,7 @@ void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double *
     /* we need to track the shape */
     cairo_push_group (cairo_shape);
   }
-  if (0 && forSoftMask)
+  if (false && forSoftMask)
     cairo_push_group_with_content (cairo, CAIRO_CONTENT_ALPHA);
   else
     cairo_push_group (cairo);
@@ -3067,7 +3067,7 @@ private:
   GfxRGB *lookup;
   int width;
   GfxImageColorMap *colorMap;
-  int *maskColors;
+  const int *maskColors;
   int current_row;
   bool imageError;
 
@@ -3077,7 +3077,7 @@ public:
                                   int scaledWidth, int scaledHeight,
                                   bool printing,
                                   GfxImageColorMap *colorMapA,
-                                  int *maskColorsA) {
+                                  const int *maskColorsA) {
     cairo_surface_t *image = nullptr;
     int i;
 
@@ -3134,6 +3134,13 @@ public:
 	  scaledWidth = MAX_PRINT_IMAGE_SIZE * (double)width/height;
 	}
 	needsCustomDownscaling = true;
+
+        if (scaledWidth == 0) {
+          scaledWidth = 1;
+        }
+        if (scaledHeight == 0) {
+          scaledHeight = 1;
+        }
       } else {
 	needsCustomDownscaling = false;
       }
@@ -3245,7 +3252,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			       int widthA, int heightA,
 			       GfxImageColorMap *colorMap,
 			       bool interpolate,
-			       int *maskColors, bool inlineImg)
+			       const int *maskColors, bool inlineImg)
 {
   cairo_surface_t *image;
   cairo_pattern_t *pattern, *maskPattern;
@@ -3466,7 +3473,7 @@ void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref,
 
 void CairoImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				    int width, int height, GfxImageColorMap *colorMap,
-				    bool interpolate, int *maskColors, bool inlineImg)
+				    bool interpolate, const int *maskColors, bool inlineImg)
 {
   cairo_t *cr;
   cairo_surface_t *surface;

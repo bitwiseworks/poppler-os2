@@ -36,8 +36,8 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "76")
-set(POPPLER_MICRO_VERSION "1")
+set(POPPLER_MINOR_VERSION "84")
+set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 set (CMAKE_CXX_STANDARD 14)
@@ -65,8 +65,6 @@ set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possi
 option(ENABLE_LIBCURL "Build libcurl based HTTP support." ON)
 option(ENABLE_ZLIB "Build with zlib." ON)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
-option(SPLASH_CMYK "Include support for CMYK rasterization." OFF)
-option(USE_FIXEDPOINT "Use fixed point arithmetic in the Splash backend" OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
 if(WIN32)
@@ -232,7 +230,7 @@ endif()
 if(ENABLE_LIBCURL)
   find_package(CURL)
   if(CURL_FOUND)
-    include_directories(${CURL_INCLUDE_DIR})
+    include_directories(SYSTEM ${CURL_INCLUDE_DIR})
     set(POPPLER_HAS_CURL_SUPPORT ON)
   else()
     set(ENABLE_LIBCURL OFF)
@@ -245,7 +243,7 @@ if(MINGW)
 endif()
 if(FONTCONFIG_FOUND)
   add_definitions(${FONTCONFIG_DEFINITIONS})
-  include_directories(${FONTCONFIG_INCLUDE_DIR})
+  include_directories(SYSTEM ${FONTCONFIG_INCLUDE_DIR})
 endif()
 if(WITH_FONTCONFIGURATION_WIN32)
   if(MINGW)
@@ -260,33 +258,41 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/poppler
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
+  SYSTEM
   ${FREETYPE_INCLUDE_DIRS}
 )
 
 if(ENABLE_ZLIB)
-  include_directories(${ZLIB_INCLUDE_DIR})
+  include_directories(SYSTEM ${ZLIB_INCLUDE_DIR})
 endif()
 
 if (NSS3_FOUND)
-  add_definitions(${NSS3_CFLAGS})
   set(ENABLE_NSS3 ON)
 endif()
 if(JPEG_FOUND)
-  include_directories(${JPEG_INCLUDE_DIR})
+  include_directories(SYSTEM ${JPEG_INCLUDE_DIR})
 endif()
 if(PNG_FOUND)
-  include_directories(${PNG_INCLUDE_DIR})
+  include_directories(SYSTEM ${PNG_INCLUDE_DIR})
   set(ENABLE_LIBPNG ON)
 endif()
 if(TIFF_FOUND)
-  include_directories(${TIFF_INCLUDE_DIR})
+  include_directories(SYSTEM ${TIFF_INCLUDE_DIR})
   set(ENABLE_LIBTIFF ON)
 endif()
 if(OpenJPEG_FOUND)
-  include_directories(${OPENJPEG_INCLUDE_DIRS})
+  include_directories(SYSTEM ${OPENJPEG_INCLUDE_DIRS})
 endif()
 if(LCMS2_FOUND)
-  include_directories(${LCMS2_INCLUDE_DIR})
+  include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
+endif()
+
+if(ENABLE_SPLASH)
+  find_package(Boost 1.58.0)
+  if(Boost_FOUND)
+    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+    set(USE_BOOST_HEADERS ON)
+  endif()
 endif()
 
 # Recent versions of poppler-data install a .pc file.
@@ -323,7 +329,6 @@ set(poppler_SRCS
   goo/gfile.cc
   goo/GooTimer.cc
   goo/GooString.cc
-  goo/FixedPoint.cc
   goo/NetPBMWriter.cc
   goo/PNGWriter.cc
   goo/TiffWriter.cc
@@ -459,6 +464,7 @@ if (ENABLE_NSS3)
   )
   if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
     set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
+    include_directories(SYSTEM ${NSS3_INCLUDE_DIRS})
   else()
     set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
   endif()
@@ -495,7 +501,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 87.0.0 SOVERSION 87)
+set_target_properties(poppler PROPERTIES VERSION 94.0.0 SOVERSION 94)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -598,7 +604,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     goo/gmem.h
     goo/gdir.h
     goo/gfile.h
-    goo/FixedPoint.h
     goo/ImgWriter.h
     goo/GooCheckedOps.h
     goo/GooLikely.h
@@ -670,6 +675,13 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
       splash/SplashXPathScanner.h
       DESTINATION include/poppler/splash)
   endif()
+  if(CAIRO_FOUND)
+    install(FILES
+      poppler/CairoFontEngine.h
+      poppler/CairoOutputDev.h
+      poppler/CairoRescaleBox.h
+      DESTINATION include/poppler)
+  endif()
 endif()
 
 
@@ -700,30 +712,30 @@ else()
   set(PC_REQUIRES_PRIVATE "")
 endif()
 
-poppler_create_install_pkgconfig(poppler.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-if(ENABLE_SPLASH)
-  poppler_create_install_pkgconfig(poppler-splash.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+if(PKG_CONFIG_EXECUTABLE)
+  poppler_create_install_pkgconfig(poppler.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  if(ENABLE_SPLASH)
+    poppler_create_install_pkgconfig(poppler-splash.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  endif()
+  if(ENABLE_QT5)
+    poppler_create_install_pkgconfig(poppler-qt5.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  endif()
+  if(ENABLE_GLIB)
+    poppler_create_install_pkgconfig(poppler-glib.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  endif()
+  if(CAIRO_FOUND)
+    poppler_create_install_pkgconfig(poppler-cairo.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  endif()
+  if(ENABLE_CPP)
+    poppler_create_install_pkgconfig(poppler-cpp.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+  endif()
+else()
+  MESSAGE(STATUS ".pc files will not be installed becasue of missing 'pkg-config'!")
 endif()
-if(ENABLE_QT5)
-  poppler_create_install_pkgconfig(poppler-qt5.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
-if(ENABLE_GLIB)
-  poppler_create_install_pkgconfig(poppler-glib.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
-if(CAIRO_FOUND)
-  poppler_create_install_pkgconfig(poppler-cairo.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
-if(ENABLE_CPP)
-  poppler_create_install_pkgconfig(poppler-cpp.pc ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
-
 
 message("Building Poppler with support for:")
 show_end_message("font configuration" ${font_configuration})
 show_end_message_yesno("splash output" ENABLE_SPLASH)
-if(SPLASH_CMYK)
-  message("      with CMYK support")
-endif()
 show_end_message_yesno("cairo output" CAIRO_FOUND)
 show_end_message_yesno("qt5 wrapper" ENABLE_QT5)
 show_end_message_yesno("glib wrapper" ENABLE_GLIB)
@@ -739,16 +751,13 @@ show_end_message_yesno("use nss3" ENABLE_NSS3)
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg2" WITH_OPENJPEG)
 show_end_message_yesno("use lcms2" USE_CMS)
+show_end_message_yesno("use boost" Boost_FOUND)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
 
 if(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
   message("Warning: There is no rendering backend enabled")
-endif()
-
-if(USE_FIXEDPOINT AND USE_FLOAT)
-  message("Warning: Single precision and fixed point options should not be enabled at the same time")
 endif()
 
 if(NOT ENABLE_LIBJPEG AND HAVE_DCT_DECODER)
@@ -769,6 +778,10 @@ endif()
 
 if(NOT HAVE_JPX_DECODER)
   message("Warning: You're not compiling any JPX decoder. Some files will fail to display properly.")
+endif()
+
+if(ENABLE_SPLASH AND NOT Boost_FOUND)
+  message("Warning: Use of boost is recommended for better performance.")
 endif()
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${POPPLER_VERSION})

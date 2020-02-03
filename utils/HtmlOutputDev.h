@@ -14,7 +14,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2007, 2009, 2012, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2007, 2009, 2012, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
@@ -35,7 +35,7 @@
 #ifndef HTMLOUTPUTDEV_H
 #define HTMLOUTPUTDEV_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "goo/gbasename.h"
 #include "GfxFont.h"
 #include "OutputDev.h"
@@ -132,7 +132,7 @@ public:
   void addChar(GfxState *state, double x, double y,
 	       double dx, double dy, 
 		double ox, double oy, 
-		Unicode *u, int uLen); //unsigned char c);
+		const Unicode *u, int uLen); //unsigned char c);
 
   void updateFont(GfxState *state);
 
@@ -208,7 +208,7 @@ public:
     HtmlMetaVar(const HtmlMetaVar &) = delete;
     HtmlMetaVar& operator=(const HtmlMetaVar &) = delete;
 
-    GooString* toString();
+    GooString* toString() const;
 
 private:
 
@@ -236,10 +236,10 @@ public:
 	  const char *date,
 	  bool rawOrder,
 	  int firstPage = 1,
-	  bool outline = 0);
+	  bool outline = false);
 
   // Destructor.
-  virtual ~HtmlOutputDev();
+  ~HtmlOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }
@@ -262,7 +262,7 @@ public:
 
   //----- initialization and control
 
-  bool checkPageSlice(Page *page, double hDPI, double vDPI,
+  bool checkPageSlice(Page *p, double hDPI, double vDPI,
                        int rotate, bool useMediaBox, bool crop,
                        int sliceX, int sliceY, int sliceW, int sliceH,
                        bool printing,
@@ -271,7 +271,7 @@ public:
                        bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
                        void *annotDisplayDecideCbkData = nullptr) override
   {
-   docPage = page;
+   docPage = p;
    return true;
   }
 
@@ -295,7 +295,7 @@ public:
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,
 		double originX, double originY,
-		CharCode code, int nBytes, Unicode *u, int uLen) override;
+		CharCode code, int nBytes, const Unicode *u, int uLen) override;
   
   void drawImageMask(GfxState *state, Object *ref,
 		     Stream *str,
@@ -303,7 +303,7 @@ public:
 		     bool interpolate, bool inlineImg) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 		 int width, int height, GfxImageColorMap *colorMap,
-		 bool interpolate, int *maskColors, bool inlineImg) override;
+		 bool interpolate, const int *maskColors, bool inlineImg) override;
 
   //new feature    
   virtual int DevType() {return 1234;}
@@ -315,9 +315,8 @@ public:
 
 private:
   // convert encoding into a HTML standard, or encoding->c_str if not
-  // recognized. Will delete encoding for you and return a new one
-  // that you have to delete
-  static GooString* mapEncodingToHtml(GooString* encoding);
+  // recognized.
+  static std::string mapEncodingToHtml(const std::string &encoding);
   void doProcessLink(AnnotLink *link);
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);

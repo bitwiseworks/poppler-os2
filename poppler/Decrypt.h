@@ -17,7 +17,7 @@
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2013, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -99,9 +99,9 @@ class BaseCryptStream : public FilterStream {
 public:
 
   BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-                  int keyLength, int objNum, int objGen);
-  ~BaseCryptStream();
-  StreamKind getKind() override { return strCrypt; }
+                  int keyLength, Ref ref);
+  ~BaseCryptStream() override;
+  StreamKind getKind() const override { return strCrypt; }
   void reset() override;
   int getChar() override;
   int lookChar() override = 0;
@@ -133,8 +133,8 @@ class EncryptStream : public BaseCryptStream {
 public:
 
   EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-                int keyLength, int objNum, int objGen);
-  ~EncryptStream();
+                int keyLength, Ref ref);
+  ~EncryptStream() override;
   void reset() override;
   int lookChar() override;
 };
@@ -143,8 +143,8 @@ class DecryptStream : public BaseCryptStream {
 public:
 
   DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-                int keyLength, int objNum, int objGen);
-  ~DecryptStream();
+                int keyLength, Ref ref);
+  ~DecryptStream() override;
   void reset() override;
   int lookChar() override;
 };

@@ -12,21 +12,22 @@
 // Copyright (C) 2017 Léonard Michelet <leonard.michelet@smile.fr>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
 #include "Win32Console.h"
-#include <ctype.h>
+#include <cctype>
 
 static int firstPage = 0;
 static int lastPage = 0;
@@ -168,12 +169,11 @@ main (int argc, char *argv[])
 	exitCode = 0;
       goto err0;
     }
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   ok = extractPages (argv[1], argv[2]);
   if (ok) {
     exitCode = 0;
   }
-  delete globalParams;
 
 err0:
 

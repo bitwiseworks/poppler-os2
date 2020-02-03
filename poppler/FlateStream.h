@@ -3,7 +3,7 @@
 // FlateStream.h
 //
 // Copyright (C) 2005, Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2010, 2011, Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2019, Albert Astals Cid <aacid@kde.org>
 //
 // This file is under the GPLv2 or later license
 //
@@ -13,14 +13,14 @@
 #define FLATESTREAM_H
 
 #include "poppler-config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "Error.h"
@@ -37,14 +37,14 @@ public:
 
   FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
   virtual ~FlateStream();
-  virtual StreamKind getKind() override { return strFlate; }
-  virtual void reset() override;
-  virtual int getChar() override;
-  virtual int lookChar() override;
-  virtual int getRawChar() override;
-  virtual void getRawChars(int nChars, int *buffer) override;
-  virtual GooString *getPSFilter(int psLevel, const char *indent) override;
-  virtual bool isBinary(bool last = true) override;
+  StreamKind getKind() const override { return strFlate; }
+  void reset() override;
+  int getChar() override;
+  int lookChar() override;
+  int getRawChar() override;
+  void getRawChars(int nChars, int *buffer) override;
+  GooString *getPSFilter(int psLevel, const char *indent) override;
+  bool isBinary(bool last = true) override;
 
 private:
   inline int doGetRawChar() {

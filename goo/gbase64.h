@@ -8,6 +8,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -18,7 +19,7 @@
 #include <string>
 #include <vector>
 
-POPPLER_LIB_EXPORT std::string gbase64Encode(const void* input, size_t sz);
+POPPLER_LIB_EXPORT std::string gbase64Encode(const void* input, size_t len);
 
 inline std::string gbase64Encode(const std::vector<char>& input)
     { return input.empty() ? std::string() : gbase64Encode(&input[0], input.size()); }
