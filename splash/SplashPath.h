@@ -22,6 +22,7 @@
 #ifndef SPLASHPATH_H
 #define SPLASHPATH_H
 
+#include "poppler-config.h"
 #include "SplashTypes.h"
 
 //------------------------------------------------------------------------
@@ -62,7 +63,7 @@ struct SplashPathHint {
 // SplashPath
 //------------------------------------------------------------------------
 
-class SplashPath {
+class POPPLER_LIB_EXPORT SplashPath {
 public:
 
   // Create an empty path.

@@ -29,6 +29,7 @@
 
 #include <array>
 
+#include "poppler-config.h"
 #include "SplashTypes.h"
 
 class SplashT1FontEngine;
@@ -44,7 +45,7 @@ class SplashFontSrc;
 // SplashFontEngine
 //------------------------------------------------------------------------
 
-class SplashFontEngine {
+class POPPLER_LIB_EXPORT SplashFontEngine {
 public:
 
   // Create a font engine.
