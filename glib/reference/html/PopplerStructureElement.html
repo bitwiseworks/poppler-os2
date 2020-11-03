@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="poppler-Poppler-Movie.html" title="PopplerMovie">
 <link rel="next" href="poppler-Poppler-Color.html" title="PopplerColor">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -418,7 +418,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<span class="returnvalue">PopplerTextSpan</span> **
+<a class="link" href="poppler-Poppler-Text-Span.html#PopplerTextSpan"><span class="returnvalue">PopplerTextSpan</span></a> **
 </td>
 <td class="function_name">
 <a class="link" href="PopplerStructureElement.html#poppler-structure-element-get-text-spans" title="poppler_structure_element_get_text_spans ()">poppler_structure_element_get_text_spans</a> <span class="c_punctuation">()</span>
@@ -618,6 +618,24 @@
 <a name="PopplerStructureElement.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="screen">    <a href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html">GBoxed</a>
     <span class="lineart">╰──</span> PopplerStructureElementIter
+    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">├──</span> PopplerStructureBlockAlign
+    <span class="lineart">├──</span> PopplerStructureBorderStyle
+    <span class="lineart">├──</span> PopplerStructureElementKind
+    <span class="lineart">├──</span> PopplerStructureFormRole
+    <span class="lineart">├──</span> PopplerStructureFormState
+    <span class="lineart">├──</span> PopplerStructureGlyphOrientation
+    <span class="lineart">├──</span> PopplerStructureInlineAlign
+    <span class="lineart">├──</span> PopplerStructureListNumbering
+    <span class="lineart">├──</span> PopplerStructurePlacement
+    <span class="lineart">├──</span> PopplerStructureRubyAlign
+    <span class="lineart">├──</span> PopplerStructureRubyPosition
+    <span class="lineart">├──</span> PopplerStructureTableScope
+    <span class="lineart">├──</span> PopplerStructureTextAlign
+    <span class="lineart">├──</span> PopplerStructureTextDecoration
+    <span class="lineart">╰──</span> PopplerStructureWritingMode
+    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GFlags</a>
+    <span class="lineart">╰──</span> PopplerStructureGetTextFlags
     <a href="../gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
     <span class="lineart">╰──</span> PopplerStructureElement
 </pre>
@@ -2149,11 +2167,11 @@ poppler_structure_element_get_text_indent
 <hr>
 <div class="refsect2">
 <a name="poppler-structure-element-get-text-spans"></a><h3>poppler_structure_element_get_text_spans ()</h3>
-<pre class="programlisting"><span class="returnvalue">PopplerTextSpan</span> **
+<pre class="programlisting"><a class="link" href="poppler-Poppler-Text-Span.html#PopplerTextSpan"><span class="returnvalue">PopplerTextSpan</span></a> **
 poppler_structure_element_get_text_spans
                                (<em class="parameter"><code><a class="link" href="PopplerStructureElement.html" title="PopplerStructureElement"><span class="type">PopplerStructureElement</span></a> *poppler_structure_element</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *n_text_spans</code></em>);</pre>
-<p>Obtains the text enclosed by an element, as an array of <span class="type">PopplerTextSpan</span>
+<p>Obtains the text enclosed by an element, as an array of <a class="link" href="poppler-Poppler-Text-Span.html#PopplerTextSpan"><span class="type">PopplerTextSpan</span></a>
 structures. Each item in the list is a piece of text which share the same
 attributes, plus its attributes. The following example shows how to
 obtain and free the text spans of an element:</p>
@@ -2205,7 +2223,7 @@ the returned array will be stored. </p></td>
 </div>
 <div class="refsect3">
 <a name="poppler-structure-element-get-text-spans.returns"></a><h4>Returns</h4>
-<p>An array of <span class="type">PopplerTextSpan</span> elements. </p>
+<p>An array of <a class="link" href="poppler-Poppler-Text-Span.html#PopplerTextSpan"><span class="type">PopplerTextSpan</span></a> elements. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_text_spans][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextSpan]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
@@ -3502,6 +3520,6 @@ enclosed in the subtree.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.32.1</div>
 </body>
 </html>

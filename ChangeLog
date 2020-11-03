@@ -1,3 +1,3620 @@
+commit 79ee55abfb58c1f3b5f2e8dc68a403908484ef43
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Jul 11 00:52:30 2020 +0200
+
+    0.90.1
+
+ CMakeLists.txt   |  2 +-
+ NEWS             | 12 ++++++++++++
+ cpp/Doxyfile     |  2 +-
+ qt5/src/Doxyfile |  2 +-
+ 4 files changed, 15 insertions(+), 3 deletions(-)
+
+commit 969562d387b3791c7bc192a213e74049e08c9395
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Jul 11 00:41:13 2020 +0200
+
+    Fix UTF16LE support in TextStringToUCS4
+
+    Make test a bit more complex by using a nice checkbox
+
+    Also copy the text to the qt6 folder
+
+ poppler/UTF.cc                     |  2 +-
+ qt5/tests/check_utf_conversion.cpp | 36 ++++++++++++++++++++-----------
+ qt6/tests/check_utf_conversion.cpp | 44
+ +++++++++++++++++++++++++++++++++++++-
+ 3 files changed, 68 insertions(+), 14 deletions(-)
+
+commit 8ee6907bd64b0eb77997ca05c2fc910d5225f4b5
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 10 23:09:44 2020 +0200
+
+    Update (C)
+
+ poppler/UTF.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9a880ecd7d865a12b0f91f56285907bbb409f32f
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Thu Jul 9 01:36:24 2020 -0400
+
+    Add test for UTF16LE string support
+
+    Issue #941
+
+ qt5/tests/check_utf_conversion.cpp | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+
+commit 232cba307e8be35022426ba85f34198af7406899
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Thu Jul 9 01:37:20 2020 -0400
+
+    Make TextStringToUCS4() support UTF16-LE too
+
+    UTF16-LE strings can 'de facto' appear on pdf's
+    (eg. title of Outline items) and Acrobat display
+    them fine, so let's support that so we don't
+    show an ugly 'ÿþ' at start of the text (Okular)
+    or even no text at all (Evince).
+
+    Issue #941
+
+    Evince issue:
+    https://gitlab.gnome.org/GNOME/evince/-/issues/1444
+
+ poppler/UTF.cc | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+commit d3af7282507be3846c680a4f66b84b6b3e54853a
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 10 17:14:17 2020 +0200
+
+    qt6: Drop the AnnotationUtils functions to store/read from xml
+
+    Basically it's undocumented API, you'd have to read this very
+    same code
+    to know what to expect on the XML
+
+ qt6/src/poppler-annotation.cc | 1102
+ -----------------------------------------
+ qt6/src/poppler-annotation.h  |   58 ---
+ 2 files changed, 1160 deletions(-)
+
+commit b2fadd0f7c5346c07181dd3730bf8d8a255f55b0
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jul 9 00:28:48 2020 +0200
+
+    Fix conversion to PS in locales where decimal point is ,
+
+    The bug is only present in newer versions of lcms
+
+ poppler/GfxState.cc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+commit 2ec6bb9d0b1cfb3a1176e2b761b99c8e9d712642
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jul 8 00:52:17 2020 +0200
+
+    CI: image tweaks
+
+    qt5_docs can go back to debian unstable
+
+    clazy one still needs fedora 31, on fedora 32 clazy crashes, they are
+    investigating it
+
+ .gitlab-ci.yml | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit c290052d1060dbc53b565f1a34f1375324e2a668
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Jul 4 01:17:34 2020 +0200
+
+    CI: add missing dependency in freetype
+
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit e225b4b804881de02a5d1beb3f3f908a8f8ddc3d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jun 16 09:26:54 2020 +0200
+
+    Qt6 frontend
+
+    Basically a copy of qt5 to qt6
+
+    Tested with the tests and the demo, seems to work relatively well
+
+    Changes:
+     * Changed a few QLinkedList to QVector, we don't need the features
+     that
+       QLinkedList provided
+     * Adapt code to QByteArray behaviour change in [] with indexes
+     past the
+       size
+     * Removed a few deprecated functions from our API
+     * Use more modern cmake syntax to link against the libraries
+     * QDate::toString is gone, use QLocale::toString with a date
+     * Use the QDateTime variants of secsSinceEpoch instead of time_t
+
+ .gitlab-ci.yml                               |    8 +-
+ CMakeLists.txt                               |   14 +
+ qt6/.gitignore                               |    4 +
+ qt6/CMakeLists.txt                           |   11 +
+ qt6/demos/.gitignore                         |    4 +
+ qt6/demos/CMakeLists.txt                     |   25 +
+ qt6/demos/abstractinfodock.cpp               |   52 +
+ qt6/demos/abstractinfodock.h                 |   48 +
+ qt6/demos/documentobserver.cpp               |   45 +
+ qt6/demos/documentobserver.h                 |   53 +
+ qt6/demos/embeddedfiles.cpp                  |   73 +
+ qt6/demos/embeddedfiles.h                    |   44 +
+ qt6/demos/fonts.cpp                          |   67 +
+ qt6/demos/fonts.h                            |   43 +
+ qt6/demos/info.cpp                           |   67 +
+ qt6/demos/info.h                             |   43 +
+ qt6/demos/main_viewer.cpp                    |   33 +
+ qt6/demos/metadata.cpp                       |   45 +
+ qt6/demos/metadata.h                         |   43 +
+ qt6/demos/navigationtoolbar.cpp              |  141 +
+ qt6/demos/navigationtoolbar.h                |   66 +
+ qt6/demos/optcontent.cpp                     |   63 +
+ qt6/demos/optcontent.h                       |   47 +
+ qt6/demos/pageview.cpp                       |   96 +
+ qt6/demos/pageview.h                         |   53 +
+ qt6/demos/permissions.cpp                    |   61 +
+ qt6/demos/permissions.h                      |   43 +
+ qt6/demos/thumbnails.cpp                     |   79 +
+ qt6/demos/thumbnails.h                       |   48 +
+ qt6/demos/toc.cpp                            |  165 +
+ qt6/demos/toc.h                              |   45 +
+ qt6/demos/viewer.cpp                         |  311 ++
+ qt6/demos/viewer.h                           |   73 +
+ qt6/src/.gitignore                           |    9 +
+ qt6/src/ArthurOutputDev.cc                   | 1155 +++++++
+ qt6/src/ArthurOutputDev.h                    |  206 ++
+ qt6/src/CMakeLists.txt                       |   68 +
+ qt6/src/Doxyfile                             | 1637 +++++++++
+ qt6/src/Mainpage.dox                         |   85 +
+ qt6/src/poppler-annotation-helper.h          |   73 +
+ qt6/src/poppler-annotation-private.h         |  112 +
+ qt6/src/poppler-annotation-private.h.orig    |  115 +
+ qt6/src/poppler-annotation.cc                | 4636
+ ++++++++++++++++++++++++++
+ qt6/src/poppler-annotation.h                 | 1397 ++++++++
+ qt6/src/poppler-base-converter.cc            |   89 +
+ qt6/src/poppler-converter-private.h          |   52 +
+ qt6/src/poppler-document.cc                  |  873 +++++
+ qt6/src/poppler-embeddedfile-private.h       |   44 +
+ qt6/src/poppler-embeddedfile.cc              |  129 +
+ qt6/src/poppler-export.h                     |   20 +
+ qt6/src/poppler-fontinfo.cc                  |  153 +
+ qt6/src/poppler-form.cc                      | 1015 ++++++
+ qt6/src/poppler-form.h                       |  755 +++++
+ qt6/src/poppler-link-extractor-private.h     |   56 +
+ qt6/src/poppler-link-extractor.cc            |   81 +
+ qt6/src/poppler-link-private.h               |   70 +
+ qt6/src/poppler-link.cc                      |  664 ++++
+ qt6/src/poppler-link.h                       |  657 ++++
+ qt6/src/poppler-media.cc                     |  154 +
+ qt6/src/poppler-media.h                      |   98 +
+ qt6/src/poppler-movie.cc                     |  106 +
+ qt6/src/poppler-optcontent-private.h         |  133 +
+ qt6/src/poppler-optcontent.cc                |  437 +++
+ qt6/src/poppler-optcontent.h                 |   81 +
+ qt6/src/poppler-outline-private.h            |   48 +
+ qt6/src/poppler-outline.cc                   |  183 +
+ qt6/src/poppler-page-private.h               |   58 +
+ qt6/src/poppler-page-transition-private.h    |   35 +
+ qt6/src/poppler-page-transition.cc           |  100 +
+ qt6/src/poppler-page-transition.h            |  142 +
+ qt6/src/poppler-page.cc                      |  882 +++++
+ qt6/src/poppler-pdf-converter.cc             |  103 +
+ qt6/src/poppler-private.cc                   |  291 ++
+ qt6/src/poppler-private.h                    |  262 ++
+ qt6/src/poppler-ps-converter.cc              |  256 ++
+ qt6/src/poppler-qiodeviceinstream-private.h  |   48 +
+ qt6/src/poppler-qiodeviceinstream.cc         |   59 +
+ qt6/src/poppler-qiodeviceoutstream-private.h |   47 +
+ qt6/src/poppler-qiodeviceoutstream.cc        |   57 +
+ qt6/src/poppler-qt6.h                        | 2151 ++++++++++++
+ qt6/src/poppler-sound.cc                     |  125 +
+ qt6/src/poppler-textbox.cc                   |   63 +
+ qt6/src/poppler-version.cpp                  |   40 +
+ qt6/src/poppler-version.h.in                 |   68 +
+ qt6/tests/.gitignore                         |   33 +
+ qt6/tests/CMakeLists.txt                     |   69 +
+ qt6/tests/README.unittest                    |   23 +
+ qt6/tests/check_actualtext.cpp               |   57 +
+ qt6/tests/check_annotations.cpp              |  194 ++
+ qt6/tests/check_attachments.cpp              |  154 +
+ qt6/tests/check_dateConversion.cpp           |  104 +
+ qt6/tests/check_fonts.cpp                    |  235 ++
+ qt6/tests/check_forms.cpp                    |  257 ++
+ qt6/tests/check_goostring.cpp                |  161 +
+ qt6/tests/check_lexer.cpp                    |  108 +
+ qt6/tests/check_links.cpp                    |  121 +
+ qt6/tests/check_metadata.cpp                 |  286 ++
+ qt6/tests/check_object.cpp                   |   41 +
+ qt6/tests/check_optcontent.cpp               |  453 +++
+ qt6/tests/check_outline.cpp                  |   50 +
+ qt6/tests/check_pagelabelinfo.cpp            |   72 +
+ qt6/tests/check_pagelayout.cpp               |   50 +
+ qt6/tests/check_pagemode.cpp                 |   74 +
+ qt6/tests/check_password.cpp                 |  115 +
+ qt6/tests/check_permissions.cpp              |   45 +
+ qt6/tests/check_search.cpp                   |  282 ++
+ qt6/tests/check_strings.cpp                  |  228 ++
+ qt6/tests/check_stroke_opacity.cpp           |   96 +
+ qt6/tests/check_utf_conversion.cpp           |  147 +
+ qt6/tests/poppler-attachments.cpp            |   36 +
+ qt6/tests/poppler-fonts.cpp                  |   87 +
+ qt6/tests/poppler-forms.cpp                  |  272 ++
+ qt6/tests/poppler-page-labels.cpp            |   45 +
+ qt6/tests/poppler-texts.cpp                  |   37 +
+ qt6/tests/stress-poppler-dir.cpp             |   66 +
+ qt6/tests/stress-poppler-qt6.cpp             |   74 +
+ qt6/tests/stress-threads-qt6.cpp             |  272 ++
+ qt6/tests/test-password-qt6.cpp              |  132 +
+ qt6/tests/test-poppler-qt6.cpp               |  218 ++
+ qt6/tests/test-render-to-file.cpp            |   59 +
+ 120 files changed, 26942 insertions(+), 2 deletions(-)
+
+commit cd4feb323f005e3b0443572a1123683af5fab71b
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jun 18 23:54:45 2020 +0200
+
+    Add .git-blame-ignore-revs and some instructions for clang-format
+
+ .git-blame-ignore-revs |  2 ++
+ README.contributors    | 17 +++++++++++++++++
+ hooks/pre-commit       | 10 ++++++++++
+ 3 files changed, 29 insertions(+)
+
+commit 9d9e20bdcdaf8d6da562e792b9e5672193e714e2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jun 19 16:52:02 2020 +0200
+
+    Check clang-format at CI stage
+
+ .gitlab-ci.yml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+commit 814fbda28cc8a37fed3134c2db8da28f86fb5ee0
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 3 23:51:42 2020 +0200
+
+    Run clang-format
+
+    find . \( -name "*.cpp" -or -name "*.h"  -or -name "*.c"  -or -name
+    "*.cc" \) -exec clang-format -i {} \;
+
+    If you reached this file doing a git blame, please see
+    README.contributors (instructions added 2 commits in the future to
+    this one)
+
+ cmake/modules/CheckFileOffsetBits.c                |     7 +-
+ cpp/poppler-destination-private.h                  |     3 +-
+ cpp/poppler-destination.cpp                        |    14 +-
+ cpp/poppler-destination.h                          |     8 +-
+ cpp/poppler-document-private.h                     |    16 +-
+ cpp/poppler-document.cpp                           |    91 +-
+ cpp/poppler-document.h                             |    30 +-
+ cpp/poppler-embedded-file-private.h                |     7 +-
+ cpp/poppler-embedded-file.cpp                      |    13 +-
+ cpp/poppler-embedded-file.h                        |     3 +-
+ cpp/poppler-font-private.h                         |    24 +-
+ cpp/poppler-font.cpp                               |    28 +-
+ cpp/poppler-font.h                                 |     9 +-
+ cpp/poppler-global.cpp                             |    59 +-
+ cpp/poppler-global.h                               |    70 +-
+ cpp/poppler-image-private.h                        |     5 +-
+ cpp/poppler-image.cpp                              |    59 +-
+ cpp/poppler-image.h                                |     8 +-
+ cpp/poppler-page-private.h                         |     8 +-
+ cpp/poppler-page-renderer.cpp                      |   103 +-
+ cpp/poppler-page-renderer.h                        |    14 +-
+ cpp/poppler-page-transition.cpp                    |    18 +-
+ cpp/poppler-page-transition.h                      |    14 +-
+ cpp/poppler-page.cpp                               |   113 +-
+ cpp/poppler-page.h                                 |    43 +-
+ cpp/poppler-private.cpp                            |     5 +-
+ cpp/poppler-private.h                              |    16 +-
+ cpp/poppler-rectangle.cpp                          |     5 +-
+ cpp/poppler-rectangle.h                            |    74 +-
+ cpp/poppler-toc-private.h                          |    12 +-
+ cpp/poppler-toc.cpp                                |    37 +-
+ cpp/poppler-toc.h                                  |     6 +-
+ cpp/tests/pdf_fuzzer.cc                            |    37 +-
+ cpp/tests/poppler-dump.cpp                         |   248 +-
+ cpp/tests/poppler-render.cpp                       |    22 +-
+ fofi/FoFiBase.cc                                   |   289 +-
+ fofi/FoFiBase.h                                    |    44 +-
+ fofi/FoFiEncodings.cc                              |  1882 +--
+ fofi/FoFiEncodings.h                               |     4 +-
+ fofi/FoFiIdentifier.cc                             |   970 +-
+ fofi/FoFiIdentifier.h                              |    34 +-
+ fofi/FoFiTrueType.cc                               |  3261 ++--
+ fofi/FoFiTrueType.h                                |   297 +-
+ fofi/FoFiType1.cc                                  |   613 +-
+ fofi/FoFiType1.h                                   |    50 +-
+ fofi/FoFiType1C.cc                                 |  5136 +++---
+ fofi/FoFiType1C.h                                  |   406 +-
+ glib/demo/annots.c                                 |  1528 +-
+ glib/demo/annots.h                                 |     4 +-
+ glib/demo/attachments.c                            |   522 +-
+ glib/demo/attachments.h                            |     4 +-
+ glib/demo/find.c                                   |   772 +-
+ glib/demo/find.h                                   |     4 +-
+ glib/demo/fonts.c                                  |   440 +-
+ glib/demo/fonts.h                                  |     4 +-
+ glib/demo/forms.c                                  |   904 +-
+ glib/demo/forms.h                                  |     4 +-
+ glib/demo/images.c                                 |   491 +-
+ glib/demo/images.h                                 |     4 +-
+ glib/demo/info.cc                                  |   447 +-
+ glib/demo/info.h                                   |     6 +-
+ glib/demo/layers.c                                 |   648 +-
+ glib/demo/layers.h                                 |     6 +-
+ glib/demo/links.c                                  |   433 +-
+ glib/demo/links.h                                  |     4 +-
+ glib/demo/main.c                                   |   553 +-
+ glib/demo/outline.c                                |   315 +-
+ glib/demo/outline.h                                |     6 +-
+ glib/demo/page.c                                   |   524 +-
+ glib/demo/page.h                                   |     4 +-
+ glib/demo/print.c                                  |   268 +-
+ glib/demo/print.h                                  |     4 +-
+ glib/demo/render.c                                 |   686 +-
+ glib/demo/render.h                                 |     4 +-
+ glib/demo/selections.c                             |   937 +-
+ glib/demo/selections.h                             |     4 +-
+ glib/demo/taggedstruct.c                           |   330 +-
+ glib/demo/taggedstruct.h                           |     4 +-
+ glib/demo/text.c                                   |   915 +-
+ glib/demo/text.h                                   |     4 +-
+ glib/demo/transitions.c                            |   434 +-
+ glib/demo/transitions.h                            |     4 +-
+ glib/demo/utils.c                                  |  1000 +-
+ glib/demo/utils.h                                  |    32 +-
+ glib/poppler-action.cc                             |  1088 +-
+ glib/poppler-action.h                              |   230 +-
+ glib/poppler-annot.cc                              |  1624 +-
+ glib/poppler-annot.h                               |   371 +-
+ glib/poppler-attachment.cc                         |   294 +-
+ glib/poppler-attachment.h                          |    44 +-
+ glib/poppler-cached-file-loader.cc                 |   120 +-
+ glib/poppler-cached-file-loader.h                  |    23 +-
+ glib/poppler-date.cc                               |    18 +-
+ glib/poppler-date.h                                |     3 +-
+ glib/poppler-document.cc                           |  3561 ++--
+ glib/poppler-document.h                            |   381 +-
+ glib/poppler-form-field.cc                         |   504 +-
+ glib/poppler-form-field.h                          |   118 +-
+ glib/poppler-input-stream.cc                       |    36 +-
+ glib/poppler-input-stream.h                        |    29 +-
+ glib/poppler-layer.cc                              |   161 +-
+ glib/poppler-layer.h                               |    20 +-
+ glib/poppler-macros.h                              |     6 +-
+ glib/poppler-media.cc                              |   287 +-
+ glib/poppler-media.h                               |    29 +-
+ glib/poppler-movie.cc                              |   275 +-
+ glib/poppler-movie.h                               |    39 +-
+ glib/poppler-page.cc                               |  2688 ++-
+ glib/poppler-page.h                                |   299 +-
+ glib/poppler-private.h                             |   238 +-
+ glib/poppler-structure-element.cc                  |  1471 +-
+ glib/poppler-structure-element.h                   |   456 +-
+ glib/poppler.cc                                    |    58 +-
+ glib/poppler.h                                     |   158 +-
+ glib/tests/check_bb.c                              |   156 +-
+ glib/tests/check_text.c                            |    81 +-
+ glib/tests/pdfdrawbb.c                             |   237 +-
+ goo/GooCheckedOps.h                                |    65 +-
+ goo/GooLikely.h                                    |     8 +-
+ goo/GooString.cc                                   |  1077 +-
+ goo/GooString.h                                    |   341 +-
+ goo/GooTimer.cc                                    |    71 +-
+ goo/GooTimer.h                                     |    34 +-
+ goo/ImgWriter.cc                                   |     4 +-
+ goo/ImgWriter.h                                    |    18 +-
+ goo/JpegWriter.cc                                  |   215 +-
+ goo/JpegWriter.h                                   |    47 +-
+ goo/NetPBMWriter.cc                                |    54 +-
+ goo/NetPBMWriter.h                                 |    31 +-
+ goo/PNGWriter.cc                                   |   257 +-
+ goo/PNGWriter.h                                    |    47 +-
+ goo/TiffWriter.cc                                  |   317 +-
+ goo/TiffWriter.h                                   |    50 +-
+ goo/gbase64.cc                                     |    32 +-
+ goo/gbase64.h                                      |    14 +-
+ goo/gbasename.cc                                   |    18 +-
+ goo/gbasename.h                                    |     2 +-
+ goo/gdir.h                                         |    50 +-
+ goo/gfile.cc                                       |   633 +-
+ goo/gfile.h                                        |    96 +-
+ goo/glibc.cc                                       |    42 +-
+ goo/glibc.h                                        |     3 +-
+ goo/glibc_strtok_r.cc                              |    46 +-
+ goo/gmem.h                                         |   186 +-
+ goo/grandom.cc                                     |    23 +-
+ goo/grandom.h                                      |     2 +-
+ goo/gstrtod.cc                                     |   210 +-
+ goo/gstrtod.h                                      |     2 +-
+ poppler/Annot.cc                                   | 11269 ++++++-------
+ poppler/Annot.h                                    |  2342 +--
+ poppler/Array.cc                                   |   111 +-
+ poppler/Array.h                                    |    62 +-
+ poppler/BBoxOutputDev.cc                           |   320 +-
+ poppler/BBoxOutputDev.h                            |    90 +-
+ poppler/BuiltinFont.h                              |   109 +-
+ poppler/BuiltinFontWidth.h                         |     4 +-
+ poppler/CMap.cc                                    |   899 +-
+ poppler/CMap.h                                     |   139 +-
+ poppler/CachedFile.cc                              |   354 +-
+ poppler/CachedFile.h                               |   121 +-
+ poppler/CairoFontEngine.cc                         |  1309 +-
+ poppler/CairoFontEngine.h                          |    93 +-
+ poppler/CairoOutputDev.cc                          |  6011 ++++---
+ poppler/CairoOutputDev.h                           |   774 +-
+ poppler/CairoRescaleBox.cc                         |   275 +-
+ poppler/CairoRescaleBox.h                          |    22 +-
+ poppler/Catalog.cc                                 |  1541 +-
+ poppler/Catalog.h                                  |   375 +-
+ poppler/CertificateInfo.cc                         |    73 +-
+ poppler/CertificateInfo.h                          |   178 +-
+ poppler/CharCodeToUnicode.cc                       |  1108 +-
+ poppler/CharCodeToUnicode.h                        |   143 +-
+ poppler/CourierBoldObliqueWidths.pregenerated.c    |  1718 +-
+ poppler/CourierBoldWidths.pregenerated.c           |  1718 +-
+ poppler/CourierObliqueWidths.pregenerated.c        |  1718 +-
+ poppler/CourierWidths.pregenerated.c               |  1718 +-
+ poppler/CurlCachedFile.cc                          |   116 +-
+ poppler/CurlCachedFile.h                           |    21 +-
+ poppler/CurlPDFDocBuilder.cc                       |    23 +-
+ poppler/CurlPDFDocBuilder.h                        |    10 +-
+ poppler/DCTStream.cc                               |   393 +-
+ poppler/DCTStream.h                                |    58 +-
+ poppler/DateInfo.cc                                |   157 +-
+ poppler/Decrypt.cc                                 |  3026 ++--
+ poppler/Decrypt.h                                  |   145 +-
+ poppler/Dict.cc                                    |   270 +-
+ poppler/Dict.h                                     |   136 +-
+ poppler/Error.cc                                   |    75 +-
+ poppler/Error.h                                    |    27 +-
+ poppler/ErrorCodes.h                               |    30 +-
+ poppler/FileSpec.cc                                |   424 +-
+ poppler/FileSpec.h                                 |    90 +-
+ poppler/FlateEncoder.cc                            |   172 +-
+ poppler/FlateEncoder.h                             |    47 +-
+ poppler/FlateStream.cc                             |   192 +-
+ poppler/FlateStream.h                              |    55 +-
+ poppler/FontEncodingTables.cc                      |  3354 ++--
+ poppler/FontInfo.cc                                |   329 +-
+ poppler/FontInfo.h                                 |   117 +-
+ poppler/Form.cc                                    |  3199 ++--
+ poppler/Form.h                                     |   872 +-
+ poppler/Function.cc                                |  2960 ++--
+ poppler/Function.h                                 |   288 +-
+ poppler/Gfx.cc                                     |  9125 +++++-----
+ poppler/Gfx.h                                      |   527 +-
+ poppler/GfxFont.cc                                 |  4459 +++--
+ poppler/GfxFont.h                                  |   624 +-
+ poppler/GfxState.cc                                | 11435 +++++++------
+ poppler/GfxState.h                                 |  2454 +--
+ poppler/GfxState_helpers.h                         |   104 +-
+ poppler/GlobalParams.cc                            |  1933 +--
+ poppler/GlobalParams.h                             |   283 +-
+ poppler/GlobalParamsWin.cc                         |   714 +-
+ poppler/HelveticaBoldObliqueWidths.pregenerated.c  |  1718 +-
+ poppler/HelveticaBoldWidths.pregenerated.c         |  1668 +-
+ poppler/HelveticaObliqueWidths.pregenerated.c      |  1718 +-
+ poppler/HelveticaWidths.pregenerated.c             |  1718 +-
+ poppler/Hints.cc                                   |   883 +-
+ poppler/Hints.h                                    |   109 +-
+ poppler/JArithmeticDecoder.cc                      |   547 +-
+ poppler/JArithmeticDecoder.h                       |   145 +-
+ poppler/JBIG2Stream.cc                             |  7527 ++++-----
+ poppler/JBIG2Stream.h                              |   192 +-
+ poppler/JPEG2000Stream.cc                          |   581 +-
+ poppler/JPEG2000Stream.h                           |    48 +-
+ poppler/JPXStream.cc                               |  6040 ++++---
+ poppler/JPXStream.h                                |   499 +-
+ poppler/JSInfo.cc                                  |   381 +-
+ poppler/JSInfo.h                                   |    52 +-
+ poppler/Lexer.cc                                   |  1109 +-
+ poppler/Lexer.h                                    |   106 +-
+ poppler/Linearization.cc                           |   248 +-
+ poppler/Linearization.h                            |    34 +-
+ poppler/Link.cc                                    |  1357 +-
+ poppler/Link.h                                     |   622 +-
+ poppler/LocalPDFDocBuilder.cc                      |    37 +-
+ poppler/LocalPDFDocBuilder.h                       |     9 +-
+ poppler/MarkedContentOutputDev.cc                  |   267 +-
+ poppler/MarkedContentOutputDev.h                   |   163 +-
+ poppler/Movie.cc                                   |   426 +-
+ poppler/Movie.h                                    |   123 +-
+ poppler/NameToCharCode.cc                          |   154 +-
+ poppler/NameToCharCode.h                           |    25 +-
+ poppler/NameToUnicodeTable.h                       |  8716 +++++-----
+ poppler/Object.cc                                  |   271 +-
+ poppler/Object.h                                   |   757 +-
+ poppler/OptionalContent.cc                         |   492 +-
+ poppler/OptionalContent.h                          |   104 +-
+ poppler/Outline.cc                                 |   191 +-
+ poppler/Outline.h                                  |    72 +-
+ poppler/OutputDev.cc                               |   206 +-
+ poppler/OutputDev.h                                |   518 +-
+ poppler/PDFDoc.cc                                  |  3447 ++--
+ poppler/PDFDoc.h                                   |   633 +-
+ poppler/PDFDocBuilder.h                            |    26 +-
+ poppler/PDFDocEncoding.cc                          |    51 +-
+ poppler/PDFDocEncoding.h                           |     2 +-
+ poppler/PDFDocFactory.cc                           |    54 +-
+ poppler/PDFDocFactory.h                            |    29 +-
+ poppler/PSOutputDev.cc                             | 13950
+ ++++++++--------
+ poppler/PSOutputDev.h                              |   885 +-
+ poppler/PSTokenizer.cc                             |   212 +-
+ poppler/PSTokenizer.h                              |    25 +-
+ poppler/Page.cc                                    |  1344 +-
+ poppler/Page.h                                     |   410 +-
+ poppler/PageLabelInfo.cc                           |   311 +-
+ poppler/PageLabelInfo.h                            |    49 +-
+ poppler/PageLabelInfo_p.h                          |   280 +-
+ poppler/PageTransition.cc                          |   200 +-
+ poppler/PageTransition.h                           |   101 +-
+ poppler/Parser.cc                                  |   550 +-
+ poppler/Parser.h                                   |    64 +-
+ poppler/PopplerCache.h                             |    52 +-
+ poppler/PreScanOutputDev.cc                        |   487 +-
+ poppler/PreScanOutputDev.h                         |   237 +-
+ poppler/ProfileData.cc                             |    27 +-
+ poppler/ProfileData.h                              |    22 +-
+ poppler/Rendition.cc                               |   641 +-
+ poppler/Rendition.h                                |   189 +-
+ poppler/SecurityHandler.cc                         |   481 +-
+ poppler/SecurityHandler.h                          |   161 +-
+ poppler/SignatureHandler.cc                        |   617 +-
+ poppler/SignatureHandler.h                         |    64 +-
+ poppler/SignatureInfo.cc                           |    96 +-
+ poppler/SignatureInfo.h                            |   105 +-
+ poppler/Sound.cc                                   |   156 +-
+ poppler/Sound.h                                    |    66 +-
+ poppler/SplashOutputDev.cc                         |  8074 +++++----
+ poppler/SplashOutputDev.h                          |   598 +-
+ poppler/StdinCachedFile.cc                         |    28 +-
+ poppler/StdinCachedFile.h                          |     9 +-
+ poppler/StdinPDFDocBuilder.cc                      |    21 +-
+ poppler/StdinPDFDocBuilder.h                       |     9 +-
+ poppler/Stream-CCITT.h                             |   674 +-
+ poppler/Stream.cc                                  |  9227 +++++------
+ poppler/Stream.h                                   |  1972 ++-
+ poppler/StructElement.cc                           |  1751 +-
+ poppler/StructElement.h                            |   582 +-
+ poppler/StructTreeRoot.cc                          |   248 +-
+ poppler/StructTreeRoot.h                           |   107 +-
+ poppler/SymbolWidths.pregenerated.c                |   806 +-
+ poppler/TextOutputDev.cc                           |  9504 ++++++-----
+ poppler/TextOutputDev.h                            |  1330 +-
+ poppler/TimesBoldItalicWidths.pregenerated.c       |  1718 +-
+ poppler/TimesBoldWidths.pregenerated.c             |  1718 +-
+ poppler/TimesItalicWidths.pregenerated.c           |  1718 +-
+ poppler/TimesRomanWidths.pregenerated.c            |  1718 +-
+ poppler/UTF.cc                                     |   894 +-
+ poppler/UnicodeCClassTables.h                      |  2786 ++--
+ poppler/UnicodeCompTables.h                        |   947 +-
+ poppler/UnicodeDecompTables.h                      | 16531
+ ++++++++-----------
+ poppler/UnicodeMap.cc                              |   432 +-
+ poppler/UnicodeMap.h                               |   114 +-
+ poppler/UnicodeMapFuncs.cc                         |   114 +-
+ poppler/UnicodeMapTables.h                         |   393 +-
+ poppler/UnicodeTypeTable.cc                        |  2279 +--
+ poppler/UnicodeTypeTable.h                         |     7 +-
+ poppler/ViewerPreferences.cc                       |   172 +-
+ poppler/ViewerPreferences.h                        |   107 +-
+ poppler/XRef.cc                                    |  2760 ++--
+ poppler/XRef.h                                     |   487 +-
+ poppler/ZapfDingbatsWidths.pregenerated.c          |   612 +-
+ qt5/demos/abstractinfodock.cpp                     |     8 +-
+ qt5/demos/documentobserver.cpp                     |    11 +-
+ qt5/demos/documentobserver.h                       |     6 +-
+ qt5/demos/embeddedfiles.cpp                        |    22 +-
+ qt5/demos/fonts.cpp                                |    10 +-
+ qt5/demos/info.cpp                                 |    12 +-
+ qt5/demos/metadata.cpp                             |     8 +-
+ qt5/demos/navigationtoolbar.cpp                    |     8 +-
+ qt5/demos/optcontent.cpp                           |    13 +-
+ qt5/demos/pageview.cpp                             |    16 +-
+ qt5/demos/permissions.cpp                          |    24 +-
+ qt5/demos/thumbnails.cpp                           |    11 +-
+ qt5/demos/toc.cpp                                  |   131 +-
+ qt5/demos/viewer.cpp                               |    31 +-
+ qt5/src/ArthurOutputDev.cc                         |  1723 +-
+ qt5/src/ArthurOutputDev.h                          |   288 +-
+ qt5/src/poppler-annotation-helper.h                |    24 +-
+ qt5/src/poppler-annotation-private.h               |   103 +-
+ qt5/src/poppler-annotation.cc                      |  4004 ++---
+ qt5/src/poppler-annotation.h                       |   775 +-
+ qt5/src/poppler-base-converter.cc                  |    86 +-
+ qt5/src/poppler-converter-private.h                |    24 +-
+ qt5/src/poppler-document.cc                        |  1331 +-
+ qt5/src/poppler-embeddedfile-private.h             |    17 +-
+ qt5/src/poppler-embeddedfile.cc                    |    85 +-
+ qt5/src/poppler-export.h                           |    22 +-
+ qt5/src/poppler-fontinfo.cc                        |   130 +-
+ qt5/src/poppler-form.cc                            |  1162 +-
+ qt5/src/poppler-form.h                             |  1420 +-
+ qt5/src/poppler-link-extractor-private.h           |    11 +-
+ qt5/src/poppler-link-extractor.cc                  |    67 +-
+ qt5/src/poppler-link-private.h                     |    39 +-
+ qt5/src/poppler-link.cc                            |  1219 +-
+ qt5/src/poppler-link.h                             |  1002 +-
+ qt5/src/poppler-media.cc                           |   175 +-
+ qt5/src/poppler-media.h                            |    26 +-
+ qt5/src/poppler-movie.cc                           |    77 +-
+ qt5/src/poppler-optcontent-private.h               |    92 +-
+ qt5/src/poppler-optcontent.cc                      |   486 +-
+ qt5/src/poppler-optcontent.h                       |    49 +-
+ qt5/src/poppler-outline-private.h                  |    16 +-
+ qt5/src/poppler-outline.cc                         |   164 +-
+ qt5/src/poppler-page-private.h                     |    30 +-
+ qt5/src/poppler-page-transition-private.h          |     5 +-
+ qt5/src/poppler-page-transition.cc                 |    53 +-
+ qt5/src/poppler-page-transition.h                  |   226 +-
+ qt5/src/poppler-page.cc                            |  1238 +-
+ qt5/src/poppler-pdf-converter.cc                   |   110 +-
+ qt5/src/poppler-private.cc                         |   419 +-
+ qt5/src/poppler-private.h                          |   358 +-
+ qt5/src/poppler-ps-converter.cc                    |   293 +-
+ qt5/src/poppler-qiodeviceinstream-private.h        |     9 +-
+ qt5/src/poppler-qiodeviceinstream.cc               |    18 +-
+ qt5/src/poppler-qiodeviceoutstream-private.h       |     6 +-
+ qt5/src/poppler-qiodeviceoutstream.cc              |    31 +-
+ qt5/src/poppler-qt5.h                              |  4065 ++---
+ qt5/src/poppler-sound.cc                           |   115 +-
+ qt5/src/poppler-textbox.cc                         |    20 +-
+ qt5/tests/check_actualtext.cpp                     |    12 +-
+ qt5/tests/check_annotations.cpp                    |   236 +-
+ qt5/tests/check_attachments.cpp                    |   129 +-
+ qt5/tests/check_dateConversion.cpp                 |    91 +-
+ qt5/tests/check_fonts.cpp                          |   168 +-
+ qt5/tests/check_forms.cpp                          |   166 +-
+ qt5/tests/check_goostring.cpp                      |    93 +-
+ qt5/tests/check_lexer.cpp                          |    13 +-
+ qt5/tests/check_links.cpp                          |    86 +-
+ qt5/tests/check_metadata.cpp                       |   162 +-
+ qt5/tests/check_object.cpp                         |    31 +-
+ qt5/tests/check_optcontent.cpp                     |   417 +-
+ qt5/tests/check_outline.cpp                        |    62 +-
+ qt5/tests/check_pagelabelinfo.cpp                  |    23 +-
+ qt5/tests/check_pagelayout.cpp                     |    19 +-
+ qt5/tests/check_pagemode.cpp                       |    27 +-
+ qt5/tests/check_password.cpp                       |    73 +-
+ qt5/tests/check_permissions.cpp                    |    21 +-
+ qt5/tests/check_search.cpp                         |   345 +-
+ qt5/tests/check_strings.cpp                        |   169 +-
+ qt5/tests/check_stroke_opacity.cpp                 |    35 +-
+ qt5/tests/check_utf_conversion.cpp                 |   118 +-
+ qt5/tests/poppler-attachments.cpp                  |    39 +-
+ qt5/tests/poppler-fonts.cpp                        |   134 +-
+ qt5/tests/poppler-forms.cpp                        |   273 +-
+ qt5/tests/poppler-page-labels.cpp                  |    41 +-
+ qt5/tests/poppler-texts.cpp                        |    43 +-
+ qt5/tests/stress-poppler-dir.cpp                   |    95 +-
+ qt5/tests/stress-poppler-qt5.cpp                   |    99 +-
+ qt5/tests/stress-threads-qt5.cpp                   |   162 +-
+ qt5/tests/test-password-qt5.cpp                    |   103 +-
+ qt5/tests/test-poppler-qt5.cpp                     |   172 +-
+ qt5/tests/test-render-to-file.cpp                  |    36 +-
+ splash/Splash.cc                                   | 11670 +++++++------
+ splash/Splash.h                                    |   598 +-
+ splash/SplashBitmap.cc                             |  1357 +-
+ splash/SplashBitmap.h                              |   147 +-
+ splash/SplashClip.cc                               |   652 +-
+ splash/SplashClip.h                                |   153 +-
+ splash/SplashErrorCodes.h                          |    24 +-
+ splash/SplashFTFont.cc                             |   712 +-
+ splash/SplashFTFont.h                              |    46 +-
+ splash/SplashFTFontEngine.cc                       |   190 +-
+ splash/SplashFTFontEngine.h                        |    49 +-
+ splash/SplashFTFontFile.cc                         |   165 +-
+ splash/SplashFTFontFile.h                          |    51 +-
+ splash/SplashFont.cc                               |   321 +-
+ splash/SplashFont.h                                |   118 +-
+ splash/SplashFontEngine.cc                         |   315 +-
+ splash/SplashFontEngine.h                          |    78 +-
+ splash/SplashFontFile.cc                           |   104 +-
+ splash/SplashFontFile.h                            |    76 +-
+ splash/SplashFontFileID.cc                         |     6 +-
+ splash/SplashFontFileID.h                          |    14 +-
+ splash/SplashGlyphBitmap.h                         |    13 +-
+ splash/SplashMath.h                                |   227 +-
+ splash/SplashPath.cc                               |   315 +-
+ splash/SplashPath.h                                |   133 +-
+ splash/SplashPattern.cc                            |    21 +-
+ splash/SplashPattern.h                             |    71 +-
+ splash/SplashScreen.cc                             |   577 +-
+ splash/SplashScreen.h                              |    78 +-
+ splash/SplashState.cc                              |   406 +-
+ splash/SplashState.h                               |   147 +-
+ splash/SplashTypes.h                               |   230 +-
+ splash/SplashXPath.cc                              |   736 +-
+ splash/SplashXPath.h                               |    96 +-
+ splash/SplashXPathScanner.cc                       |   855 +-
+ splash/SplashXPathScanner.h                        |   121 +-
+ .../goostring-format-checker.cc                    |   617 +-
+ test/gtk-test.cc                                   |   506 +-
+ test/pdf-fullrewrite.cc                            |   517 +-
+ test/pdf-inspector.cc                              |   462 +-
+ test/pdf-operators.c                               |   150 +-
+ test/perf-test-preview-dummy.cc                    |    13 +-
+ test/perf-test-preview-win.cc                      |   109 +-
+ test/perf-test.cc                                  |   304 +-
+ utils/HtmlFonts.cc                                 |   496 +-
+ utils/HtmlFonts.h                                  |   146 +-
+ utils/HtmlLinks.cc                                 |   174 +-
+ utils/HtmlLinks.h                                  |    64 +-
+ utils/HtmlOutputDev.cc                             |  2742 ++-
+ utils/HtmlOutputDev.h                              |   443 +-
+ utils/HtmlUtils.h                                  |    27 +-
+ utils/ImageOutputDev.cc                            |  1138 +-
+ utils/ImageOutputDev.h                             |   232 +-
+ utils/InMemoryFile.cc                              |    42 +-
+ utils/InMemoryFile.h                               |    18 +-
+ utils/Win32Console.cc                              |   211 +-
+ utils/Win32Console.h                               |    39 +-
+ utils/numberofcharacters.h                         |    13 +-
+ utils/parseargs.cc                                 |   332 +-
+ utils/parseargs.h                                  |    48 +-
+ utils/pdfattach.cc                                 |   145 +-
+ utils/pdfdetach.cc                                 |   517 +-
+ utils/pdffonts.cc                                  |   244 +-
+ utils/pdfimages.cc                                 |   289 +-
+ utils/pdfinfo.cc                                   |  1588 +-
+ utils/pdfseparate.cc                               |   240 +-
+ utils/pdfsig.cc                                    |   282 +-
+ utils/pdftocairo-win32.cc                          |   847 +-
+ utils/pdftocairo-win32.h                           |     9 +-
+ utils/pdftocairo.cc                                |  1853 +--
+ utils/pdftohtml.cc                                 |   791 +-
+ utils/pdftoppm.cc                                  |   988 +-
+ utils/pdftops.cc                                   |   581 +-
+ utils/pdftotext.cc                                 |   836 +-
+ utils/pdfunite.cc                                  |   656 +-
+ utils/printencodings.cc                            |    16 +-
+ 489 files changed, 161041 insertions(+), 168881 deletions(-)
+
+commit 0d48722746b9702e219df58ad14cee6184a62bef
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 3 23:26:44 2020 +0200
+
+    Tweak code that clang-format doesn't understand
+
+ glib/poppler-document.h | 2 ++
+ poppler/JBIG2Stream.cc  | 3 ++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+commit afa4803f79b32c47fc2d187198b9f710f5302df0
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jul 3 23:16:24 2020 +0200
+
+    Add _clang-format file
+
+    + tweak to CMakeLists.txt
+
+ CMakeLists.txt |  1 +
+ _clang-format  | 77
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 78 insertions(+)
+
+commit db75242047c75336abe72b1a32fd907c0d319f71
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jul 2 22:32:15 2020 +0200
+
+    0.90.0
+
+ CMakeLists.txt         |  4 ++--
+ NEWS                   | 26 ++++++++++++++++++++++++++
+ cpp/Doxyfile           |  2 +-
+ glib/CMakeLists.txt    |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ 6 files changed, 32 insertions(+), 6 deletions(-)
+
+commit 42457a711e2168e66d3b55bcf32d4760aa2106b3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jul 2 00:20:52 2020 +0200
+
+    FormPageWidgets: Initialize size
+
+ poppler/Form.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit ae5377cc511d05afb12e325a5e953bfb78b7f9df
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jun 30 21:55:47 2020 +0200
+
+    Update (C)
+
+ poppler/JSInfo.cc | 1 +
+ poppler/JSInfo.h  | 1 +
+ poppler/PDFDoc.cc | 1 +
+ poppler/PDFDoc.h  | 1 +
+ 4 files changed, 4 insertions(+)
+
+commit 4b9a643e7308852f1bc6e5932287c313e14416a5
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Thu Jun 18 15:31:23 2020 -0400
+
+    Move utils/JSInfo.cc utils/JSInfo.h to core poppler
+
+    and add new JSInfo::scanJS() variant that returns
+    immediately after finding JS. This variant is used
+    by newly added PDFDoc::hasJavascript() method which
+    is in turn used by newly added poppler-glib function
+    poppler_document_has_javascript()
+
+ CMakeLists.txt                      |  2 ++
+ glib/poppler-document.cc            | 16 ++++++++++++++++
+ glib/poppler-document.h             |  3 +++
+ glib/reference/poppler-sections.txt |  1 +
+ {utils => poppler}/JSInfo.cc        | 30 ++++++++++++++++++++++++++++++
+ {utils => poppler}/JSInfo.h         |  4 ++++
+ poppler/PDFDoc.cc                   |  7 +++++++
+ poppler/PDFDoc.h                    |  2 ++
+ utils/CMakeLists.txt                |  4 ----
+ 9 files changed, 65 insertions(+), 4 deletions(-)
+
+commit 69794176c8be5ebfa2a60d1261c8532695d18681
+Author: sgerwk <sgerwk@aol.com>
+Date:   Tue Jun 30 18:13:26 2020 +0000
+
+    fix boundingbox of type3 fonts
+
+ glib/tests/CMakeLists.txt |  1 +
+ glib/tests/check_bb.c     | 22 +++++++++++++-------
+ poppler/BBoxOutputDev.cc  | 51
+ ++++++++++++++++++++++++-----------------------
+ 3 files changed, 42 insertions(+), 32 deletions(-)
+
+commit 434d7a86d952cf6bc8b66eb5f71991847150d682
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Tue Jun 30 17:48:14 2020 +0000
+
+    poppler-glib: fix adding annots in rotated pages
+
+    This commit adds support to poppler-glib to
+    correctly add annotations to pages that are
+    rotated.
+
+    After this commit, annotations added through
+    Evince will be correctly positioned on rotated
+    pages (without any code change needed in Evince),
+    both for normal and 'flagNoRotate' type
+    annots and also for rotated pages that have a
+    cropbox set in.
+
+    As per PDF spec, annotations in rotated pages
+    must be saved un-rotated, and the pdf client
+    will display them rotated according to the
+    rotation of the page they're in.
+
+    Poppler-glib was not un-rotating them when
+    saving them in core poppler, we now do it
+    after this change, and poppler-glib will
+    continue to serve them to apps with page's
+    rotation applied, through the
+    poppler_page_get_annot_mapping() API.
+
+    No new API has been added or changed as of
+    this commit.
+
+    Evince issue:
+    https://gitlab.gnome.org/GNOME/evince/-/issues/1385
+
+    Poppler issue #256
+
+ glib/poppler-annot.cc  |  86 +++++++++++++++++++++++---------
+ glib/poppler-page.cc   | 131
+ ++++++++++++++++++++++++++++++++++++++++++++++++-
+ glib/poppler-private.h |  13 +++++
+ 3 files changed, 204 insertions(+), 26 deletions(-)
+
+commit 53368f1717e88e40fe65d27e919c9abca11beac3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jun 24 22:34:00 2020 +0200
+
+    CI: switch qt5_docs to debian testing temporarily
+
+    qttools5-dev-tools can't be installed in unstable at this point
+
+ .gitlab-ci.yml | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 513ed0761fa11e0c4b0d668c92f19ec0eb85cf46
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jun 23 00:34:51 2020 +0200
+
+    Small signature improvements
+
+    Add unknown signature type, and default to that one instead of
+    adbe_pkcs7_detached
+
+    Move the check for "can we validate" a bit to the bottom, this way on
+    some files like the one from #929 we can extract propertly some more
+    signature details
+
+ poppler/Form.cc         | 17 +++++++++--------
+ poppler/Form.h          |  3 ++-
+ qt5/src/poppler-form.cc |  3 +++
+ qt5/src/poppler-form.h  |  3 ++-
+ 4 files changed, 16 insertions(+), 10 deletions(-)
+
+commit e5001ae78d82624e4a1f07b1053c9db5e4643d48
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Jun 22 19:34:02 2020 +0200
+
+    qt5: Document that Document::page can return nullptr
+
+ qt5/src/poppler-qt5.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 94e00cbe5481a02e84fc29974c7d0089d847d3eb
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Jun 22 19:33:01 2020 +0200
+
+    qt5: demo: Fix crash on broken files
+
+ qt5/demos/thumbnails.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit ebb77e7a1fbb83c3ab7f9cd948d950bb5243f7c3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jun 17 22:39:47 2020 +0200
+
+    Fix infinite loop in broken file
+
+    oss-fuzz/23515
+
+ poppler/Catalog.cc | 20 ++++++++++++++------
+ poppler/Catalog.h  |  4 ++--
+ 2 files changed, 16 insertions(+), 8 deletions(-)
+
+commit 1460bb960276ef5f62d08fa077515e628a91880d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jun 21 22:20:38 2020 +0200
+
+    Update (C)
+
+ poppler/PSOutputDev.cc          | 2 +-
+ poppler/PSOutputDev.h           | 2 +-
+ qt5/src/poppler-ps-converter.cc | 1 +
+ utils/pdftops.cc                | 2 +-
+ 4 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 6faf2739245b4ab24a4d536953f7d0cb763c9823
+Author: William Bader <williambader@hotmail.com>
+Date:   Sun Jun 21 17:22:24 2020 +0000
+
+    Add a pdftops -rasterize option with values always, never, or
+    whenneeded
+
+ glib/poppler-page.cc            |  7 +++++--
+ poppler/PSOutputDev.cc          |  8 +++++---
+ poppler/PSOutputDev.h           | 13 ++++++++++---
+ qt5/src/poppler-ps-converter.cc |  2 +-
+ utils/pdftops.1                 |  5 +++++
+ utils/pdftops.cc                | 17 +++++++++++++++++
+ 6 files changed, 43 insertions(+), 9 deletions(-)
+
+commit bf15ccd4861d10e2338d0b1b2a65f222eb4e9893
+Author: Corentin Noël <corentin.noel@collabora.com>
+Date:   Fri Jun 12 11:30:39 2020 +0200
+
+    glib: Several fixes to the documentation
+
+    Add the missing symbols and make sure that the links are correct.
+
+ glib/poppler-action.h               |  2 +-
+ glib/poppler-document.cc            |  6 +++---
+ glib/reference/poppler-docs.sgml    | 17 +++++++++++++++++
+ glib/reference/poppler-sections.txt |  7 +++++++
+ make-glib-api-docs                  |  2 +-
+ 5 files changed, 29 insertions(+), 5 deletions(-)
+
+commit 9c9c3df8f22a12569d5f7a8d8add7abf92e30446
+Author: Marek Kasik <mkasik@redhat.com>
+Date:   Mon Jun 8 17:27:28 2020 +0200
+
+    glib: Add ability to reset forms
+
+    Add new PopplerActionType POPPLER_ACTION_RESET_FORM and
+    its handling to PopplerAction.
+    Add poppler_document_reset_form() to PopplerDocument.
+
+ glib/demo/utils.c                   |  3 +++
+ glib/poppler-action.cc              | 34
+ +++++++++++++++++++++++++++++++++
+ glib/poppler-action.h               | 15 ++++++++++++++-
+ glib/poppler-document.cc            | 38
+ +++++++++++++++++++++++++++++++++++++
+ glib/poppler-document.h             |  5 +++++
+ glib/reference/poppler-sections.txt |  1 +
+ 6 files changed, 95 insertions(+), 1 deletion(-)
+
+commit 4e0546d0d9dfc5b97c3abc58a8b1fe672fcd695c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jun 7 11:19:02 2020 +0200
+
+    CI: build lcms and libcurl on Ubuntu 16.04
+
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit e3a48759464806565cfd332a9dac0d0a9e9086ba
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jun 7 11:18:27 2020 +0200
+
+    fix running cmake with cmake < 3.12
+
+ CMakeLists.txt | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+commit b58d77e92a6e627427073703e9120b2a94bde011
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jun 4 17:12:46 2020 +0200
+
+    qt5: make it clear we require Qt 5.5
+
+    Also disable deprecated code until 5.5 and disable later warnings
+    since
+    we can't fix them since most of the times they require a Qt newer than
+    5.5. We'll tackle them when we increase the minimum Qt version
+
+ CMakeLists.txt     | 2 +-
+ qt5/CMakeLists.txt | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+commit 6bf89c78447692ed781918b7cb3fadb21aa0cf89
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Sat May 30 19:18:53 2020 +0200
+
+    pdftoppm: add option to set display profile
+
+ utils/CMakeLists.txt |  3 +++
+ utils/pdftoppm.1     |  4 ++++
+ utils/pdftoppm.cc    | 55
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 62 insertions(+)
+
+commit a628cbb6da948bb3e508f120a4deb76257b96dd3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jun 3 00:09:57 2020 +0200
+
+    Update (C)
+
+ poppler/OutputDev.h       | 1 +
+ poppler/Page.cc           | 1 +
+ qt5/src/poppler-page.cc   | 1 +
+ qt5/src/poppler-private.h | 1 +
+ 4 files changed, 4 insertions(+)
+
+commit 7257d33a3a938d5621aab0ed53b09c7ce797a646
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Fri May 22 18:23:09 2020 +0200
+
+    add a dummy GfxState to Page::loadThumb for proper color space
+    handling
+
+    As far as I can tell this was the only remaining spot in the code
+    where
+    GfxColorSpace::parse was called without a properly initialized
+    GfxState.
+
+ poppler/Page.cc | 27 ++++++++++++++-------------
+ 1 file changed, 14 insertions(+), 13 deletions(-)
+
+commit b2141b8921525141560b8e4ef5a351f505d7cf5b
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Fri May 22 18:17:16 2020 +0200
+
+    cleanup displayprofile initialization
+
+    There were a bunch of global variables that were used to initilize
+    the first version
+    of the display profiles. This code was removed, and all the static
+    initilization was moved
+    from GfxColorSpace to GfxState. Furthermore, for most "users" the
+    setting of the
+    display profile was moved from the static
+    GfxColorSpace::setDisplayProfile function
+    to the OutputDev class. The latter is now invoked early in the
+    initilization of Gfx
+    to set the initial state in the GfxState instance.
+
+ poppler/Gfx.cc              |   1 +
+ poppler/GfxState.cc         | 157
+ ++++++--------------------------------------
+ poppler/GfxState.h          |   9 +--
+ poppler/OutputDev.h         |  26 ++++----
+ qt5/src/CMakeLists.txt      |   3 +
+ qt5/src/poppler-document.cc |  23 +++++--
+ qt5/src/poppler-page.cc     |   8 +++
+ qt5/src/poppler-private.h   |   4 ++
+ utils/pdftocairo.cc         |   4 +-
+ 9 files changed, 70 insertions(+), 165 deletions(-)
+
+commit 7dc4f0b56057aa4facc7ba559998d6dac5042792
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Fri May 22 11:47:54 2020 +0200
+
+    remove sourceProfile variable from GfxColorTransform
+
+    The sourceProfile variable was initially introduced in commit
+    1f698b44564b0313c019557616866eae11bf2cc9
+    for the Postscript CSA generation code. With the last commit this
+    code has been moved to GfxICCBasedColorSpace
+    anyway, so there is no use anymore for storing the profile in
+    GfxColorTransform.
+
+ poppler/GfxState.cc | 19 +++++++++----------
+ poppler/GfxState.h  |  4 +---
+ 2 files changed, 10 insertions(+), 13 deletions(-)
+
+commit 344f3e655cb0018421350c1a9916381d686025b6
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Fri May 22 11:39:28 2020 +0200
+
+    move Postscript CSA generation from GfxColorTransform to
+    GfxICCBasedColorSpace
+
+    With proper ref counting for profiles in place, we can now let
+    GfxICCBasedColorSpace
+    directly generate the CSA rather than going through GfxColorTransform,
+    which in the
+    pre-ref-counting era had the sole ownership on the profiles.
+
+ poppler/GfxState.cc | 83
+ +++++++++++++++++++++++++----------------------------
+ poppler/GfxState.h  |  5 ++--
+ 2 files changed, 42 insertions(+), 46 deletions(-)
+
+commit bf7e84cc2399969cc6a98bbcc689a90e20095f39
+Author: Hannah von Reth <vonreth@kde.org>
+Date:   Tue Jun 2 12:46:44 2020 +0200
+
+    Use a more modern way to use curl
+
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d4bd6df9548cc7c84c2a49472803adeb0cb5b339
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jun 2 12:36:27 2020 +0200
+
+    Increase cmake version requirement to that of the minimum in our CI
+
+    We wouldn't realize if we broke it with cmake 3.3 since we're not
+    testing it and cmake 3.5 is old enough
+
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9d996ed8218c33f616856389f6e252c7596350e8
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed May 27 23:23:59 2020 +0200
+
+    0.89.0
+
+ CMakeLists.txt      |  4 ++--
+ NEWS                | 17 +++++++++++++++++
+ cpp/CMakeLists.txt  |  2 +-
+ cpp/Doxyfile        |  2 +-
+ glib/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile    |  2 +-
+ 6 files changed, 23 insertions(+), 6 deletions(-)
+
+commit e9279fecf6f53c60cc85f30dc38198d5675bbe9e
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue May 26 23:48:17 2020 +0200
+
+    Make Link that are "Unknown destination type" be "no ok"
+
+    otherwise we have uninitialized memory when asking for getKind()
+
+    I mean we have it anyway, but it is understood that if isOk is
+    false any
+    further question you make is allowed to misbehave
+
+ poppler/Link.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9429aac41fefdbb8b70d3c3233835875c78283ba
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 24 00:33:20 2020 +0200
+
+    Update (C)
+
+ poppler/Gfx.cc              | 1 +
+ qt5/src/poppler-document.cc | 1 +
+ qt5/src/poppler-qt5.h       | 1 +
+ utils/pdftocairo.cc         | 1 +
+ 4 files changed, 4 insertions(+)
+
+commit e4ac9761a269805cc8510a11b47e2381ad668215
+Author: sgerwk <sgerwk>
+Date:   Sat May 23 10:37:01 2020 +0200
+
+    include annotations in the bounding box
+
+ glib/poppler-page.cc      | 8 +++-----
+ glib/tests/CMakeLists.txt | 4 +++-
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+commit cdf623865df5343425c2eaea49124c6b45529bea
+Author: sgerwk <sgerwk>
+Date:   Sat May 23 09:49:31 2020 +0200
+
+    use state->getClipBBox() instead of tracking the clipping box
+
+ glib/poppler-page.cc      |  2 +-
+ glib/tests/CMakeLists.txt |  6 ++--
+ poppler/BBoxOutputDev.cc  | 78
+ ++++++++++++++++-------------------------------
+ poppler/BBoxOutputDev.h   | 13 ++------
+ 4 files changed, 34 insertions(+), 65 deletions(-)
+
+commit 5927e0b08f1ad6868d04cb209ee1e17b4ac07b70
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Sat May 23 18:12:46 2020 +0000
+
+    GfxState: substitute manual ref counting in GfxColorTransform by
+    a shared_ptr
+
+    This patch as said replaces the manual ref counting in
+    GfxColorTransform. Along the lines
+    it also introduces another shared_ptr for cmsHPROFILEs, which is
+    named GfxLCMSProfilePtr.
+
+ poppler/Gfx.cc              |   4 +-
+ poppler/GfxState.cc         | 314
+ +++++++++++++++++++++-----------------------
+ poppler/GfxState.h          |  55 ++++----
+ qt5/src/poppler-document.cc |   6 +-
+ qt5/src/poppler-qt5.h       |  11 +-
+ utils/pdftocairo.cc         |   9 +-
+ 6 files changed, 195 insertions(+), 204 deletions(-)
+
+commit ae2fa0be65833e7598ef5e31c2f419c52ec26ad5
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat May 23 13:03:38 2020 +0200
+
+    cpp: Use push back instead of [] direct access
+
+    Otherwise asking for tb_font_info->glyph_to_cache_index.size() always
+    returns 0
+
+ cpp/poppler-page.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 12dea6841940ce31630d60fa7c892da4597393aa
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu May 21 23:53:07 2020 +0200
+
+    Update (C)
+
+ poppler/GfxState.cc    | 3 ++-
+ poppler/GfxState.h     | 3 ++-
+ poppler/PSOutputDev.cc | 3 ++-
+ poppler/PSOutputDev.h  | 2 +-
+ 4 files changed, 7 insertions(+), 4 deletions(-)
+
+commit cc0f7960fd9dc4cfda8dc15cb061f891e909b386
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Sun May 17 21:00:26 2020 +0200
+
+    only activate CSA support for the most recent lcms2 version
+
+    Add a runtime check.
+
+ poppler/GfxState.cc | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+commit 2334bea5208d0506e4eee02ed170abd7e73e2fe4
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Sun May 17 09:11:01 2020 +0200
+
+    make the clang/clazy/Ubuntu/Android pipelines happy
+
+ poppler/GfxState.cc    | 20 ++++++++++----------
+ poppler/GfxState.h     |  2 +-
+ poppler/PSOutputDev.cc |  2 +-
+ 3 files changed, 12 insertions(+), 12 deletions(-)
+
+commit 1f698b44564b0313c019557616866eae11bf2cc9
+Author: Adrian Johnson <ajohnson@redneon.com>
+Date:   Sat May 16 22:08:32 2020 +0200
+
+    Use ICC profiles in PS output
+
+    When printing PDFs that use ICC based colors, Poppler always uses
+    the alternate color space
+    in the PostScript output (usually DeviceRGB or DeviceCMYK). The
+    attached patch will use the
+    ICC profile color space in the PS output. Most of the patch is
+    modifying GfxColorTransform
+    and callers to store the source profile as well as the transform. The
+    GfxICCBasedColorSpace
+    class has a new method, getPostScriptCSA(), which uses the LCMS
+    function cmsGetPostScriptCSA()
+    to generate the CIEBased color space dictionary equivalent to the
+    ICC profile.
+
+    Based on patch from issue #125.
+
+ poppler/GfxState.cc    | 114
+ +++++++++++++++++++++++++++++++++++--------------
+ poppler/GfxState.h     |  12 +++++-
+ poppler/PSOutputDev.cc |  77 ++++++++++++++++++++++++---------
+ poppler/PSOutputDev.h  |   8 ++--
+ 4 files changed, 153 insertions(+), 58 deletions(-)
+
+commit d5efac76267c7adf7636514280614efcc1ac3392
+Author: Philipp Knechtges <philipp-dev@knechtges.com>
+Date:   Sat May 16 14:06:56 2020 +0200
+
+    Revert "GfxICCBasedColorSpace: Remove unused member variable"
+
+    This reverts commit 8c8e0a143e975b16e6c437c03dc2267e7e8ff3fc.
+
+ poppler/GfxState.cc | 8 +++++---
+ poppler/GfxState.h  | 6 ++++--
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+commit 846437d9a9e4dcca2d4e8dad6d395b47477c1707
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue May 19 23:34:20 2020 +0200
+
+    Update (C)
+
+ cpp/poppler-font-private.h | 1 +
+ cpp/poppler-font.cpp       | 1 +
+ cpp/poppler-font.h         | 1 +
+ cpp/poppler-page-private.h | 3 ++-
+ cpp/poppler-page.cpp       | 6 +++---
+ cpp/poppler-page.h         | 3 ++-
+ cpp/poppler-private.h      | 4 ++--
+ cpp/tests/poppler-dump.cpp | 2 +-
+ poppler/TextOutputDev.cc   | 2 +-
+ poppler/TextOutputDev.h    | 1 +
+ 10 files changed, 15 insertions(+), 9 deletions(-)
+
+commit 3189332012ca46998f8ffb872e7ed81c630c4c7a
+Author: suzuki toshiya <mpsuzuki@hiroshima-u.ac.jp>
+Date:   Sat May 16 04:54:55 2020 +0000
+
+    [cpp] separate the font info in text_box to another struct.
+
+    * add new API, page::text_list(int opt_flag). The old one
+    taking no argument is kept for ABI compatibility.
+    The opt_flag is a bitmask-multiple of the new enum,
+    page::text_list_option_enum.
+
+    * text_box.m_data->text_box_font is an unique pointer to
+    the storage (if text_list() requests the font info), or
+    just a null pointer (if text_list() does not request the
+    font info).
+
+    * new option "--show-text-list-with-font" showing font
+    info, to tests/poppler-dump.cpp. "--show-text-list"
+    does not load the font info at all.
+
+    Co-authored-by: Adam Reichold <adam.reichold@t-online.de>
+    Co-authored-by: Albert Astals Cid <aacid@kde.org>
+
+ cpp/poppler-page.cpp       | 101
+ ++++++++++++++++++++++++++++++---------------
+ cpp/poppler-page.h         |  22 ++++++++++
+ cpp/poppler-private.h      |  30 +++++++++-----
+ cpp/tests/poppler-dump.cpp |  18 +++++---
+ 4 files changed, 121 insertions(+), 50 deletions(-)
+
+commit 437553ecb26948f77c3dbf7ad29bca86ffff7f6e
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri May 15 12:57:32 2020 +0000
+
+    [cpp] change page_private::init_font_info_cache() to a void method.
+
+    We already have a boolean font_info_cache_initialized, no need to
+    guess the initialization result by the size of initialized cache.
+
+ cpp/poppler-page-private.h | 2 +-
+ cpp/poppler-page.cpp       | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 57de32198a4406eae18b80eed42e6050e2b48cca
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri May 15 12:23:50 2020 +0000
+
+    [cpp] in poppler-page.h, add "since 0.89" comment to 3 new methods.
+
+ cpp/poppler-page.h | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+commit 507027de297f43146f5bbebe8d098dededffc577
+Author: suzuki toshiya <mpsuzuki@hiroshima-u.ac.jp>
+Date:   Tue May 5 10:11:49 2020 +0000
+
+    [cpp] introduce a boolean font_info_cache_initialized, to distinguish
+    an initialized-but-empty cache from the uninitialized cache
+
+    Co-authored-by: Adam Reichold <adam.reichold@t-online.de>
+
+ cpp/poppler-page-private.h | 1 +
+ cpp/poppler-page.cpp       | 4 +++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+commit 2cd79c7382888559d5d8dcc56a84572ac8a77086
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Tue May 5 01:22:29 2020 +0000
+
+    [cpp] construct a font_iterator instance in the local storage of
+    page_private::init_font_info_cache() method, instead of the heap
+
+ cpp/poppler-page.cpp | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+commit 7279b4eb397667cd4553f5852286b3f3d73a1a83
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Mon May 4 11:51:55 2020 +0000
+
+    [cpp] remove wrong warning note for about the std::string object
+    returned by text_box::get_font_name()
+
+ cpp/poppler-page.h | 4 ----
+ 1 file changed, 4 deletions(-)
+
+commit af3805f0b60289c7f522da29f9375119a1cd778a
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon May 4 04:32:27 2020 +0000
+
+    [cpp] new enum poppler::text_box::writing_mode_enum
+
+ cpp/poppler-page.cpp  | 15 +++++++++++++--
+ cpp/poppler-page.h    | 12 +++++++-----
+ cpp/poppler-private.h |  3 ++-
+ 3 files changed, 22 insertions(+), 8 deletions(-)
+
+commit 65053f43dbb83b66302bddda27732168fc74cca1
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 3 16:21:38 2020 +0000
+
+    [TextOutputDev] simplify TextFontInfo::matches(const Ref *ref)
+
+ poppler/TextOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4ea2e879d4e0e9a5d899adb82bbdaab9e505532c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 3 16:17:11 2020 +0000
+
+    [cpp] simplify the initialization of poppler::font_info_private.ref
+    and .emb_ref
+
+ cpp/poppler-font-private.h | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+commit 60400514324d6e5d0a1c50ce4af84320d350e967
+Author: suzuki toshiya <mpsuzuki@hiroshima-u.ac.jp>
+Date:   Fri May 1 08:04:14 2020 +0000
+
+    [cpp] Add the font infos to the text_box object.
+
+ cpp/CMakeLists.txt         |  1 +
+ cpp/poppler-font-private.h | 84
+ ++++++++++++++++++++++++++++++++++++++++++++++
+ cpp/poppler-font.cpp       | 56 ++++---------------------------
+ cpp/poppler-font.h         |  3 ++
+ cpp/poppler-page-private.h |  4 +++
+ cpp/poppler-page.cpp       | 68 ++++++++++++++++++++++++++++++++++---
+ cpp/poppler-page.h         | 50 +++++++++++++++++++++++++++
+ cpp/poppler-private.h      | 22 ++++++++++++
+ cpp/tests/poppler-dump.cpp |  4 +++
+ poppler/TextOutputDev.cc   |  4 +++
+ poppler/TextOutputDev.h    |  1 +
+ 11 files changed, 243 insertions(+), 54 deletions(-)
+
+commit bf33c25b0f1be07a9a3cedaf6773de22e4305b80
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue May 19 17:47:49 2020 +0200
+
+    Fix memory leak when failing to load some fonts
+
+ poppler/SplashOutputDev.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 562b5a33f6cc55c7bf342e39a9c7eea609cfbe43
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue May 19 11:39:17 2020 +0200
+
+    Move some variables declaration closer to where they are used
+
+ poppler/SplashOutputDev.cc | 26 ++++++++++++++++----------
+ 1 file changed, 16 insertions(+), 10 deletions(-)
+
+commit 0582ea9633d4597b98b3a9c9c7a8c673634aef29
+Author: Marek Kasik <mkasik@redhat.com>
+Date:   Mon May 18 18:02:43 2020 +0000
+
+    Add support for ResetForm action
+
+    Add ability to reset FormField class, its descendants and Form
+    class. This takes hierarchy into account so that resetting a field
+    resets also its children. If exclude flag is specified then all
+    fields are reset except those which are listed in Fields key.
+
+    FormFieldText set DV key as its V key if DV is available. Otherwise,
+    it just removes the V key.
+
+    FormFieldChoice unselect selected items and set the default ones
+    if specified.
+
+    FormFieldButton set default apearance state if it is available,
+    otherwise it just removes V key (and set the state to "Off" if it
+    is check button, which is what Adobe Reader does in this situation).
+
+    FormFieldSignature is not reset.
+
+    Add LinkResetForm class which stores information needed for resetting
+    of fields of forms.
+
+    Issue #225
+
+ poppler/Form.cc         | 225
+ ++++++++++++++++++++++++++++++++++++++++++++++--
+ poppler/Form.h          |  24 ++++++
+ poppler/Link.cc         |  41 +++++++++
+ poppler/Link.h          |  28 ++++++
+ qt5/src/poppler-page.cc |   4 +
+ 5 files changed, 314 insertions(+), 8 deletions(-)
+
+commit 62727d0119b4e1a6c000506f47673385f7eccd43
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun May 17 11:53:21 2020 +0200
+
+    Read CIDToGIDMap for all GfxCIDFont fonts
+
+    Also revert my old hack to fix rendering of bug-poppler20605.pdf since
+    that was breaking the PS export.
+
+    What my old hack did was force the font type to be one of those that
+    read the CIDToGIDMap, what the new fix does is actually just read the
+    CIDToGIDMap for all fonts
+
+ poppler/GfxFont.cc | 32 +++++++++++++++-----------------
+ 1 file changed, 15 insertions(+), 17 deletions(-)
+
+commit 5cdb78fde50e3dc16006070b0884dfb6b23d964c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu May 14 00:22:33 2020 +0200
+
+    Fix crash in PDFDoc::getSignatureFields when there's no Forms at all
+
+ poppler/PDFDoc.cc | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit 0f01638f044c247c2591f873f9f7558ed3c3b4ce
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed May 13 23:12:43 2020 +0200
+
+    Update (C)
+
+ poppler/CairoOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9c3b18b8741f6e68711ce807459504493d6a0be0
+Author: Marek Kasik <mkasik@redhat.com>
+Date:   Fri Apr 6 15:06:46 2018 +0200
+
+    cairo: Fix tiling patterns when pattern cell is too far
+
+    Rendering of tiling pattern which has pattern matrix moving pattern
+    cell
+    far away can fail on allocation of memory. This commit solves the
+    issue by
+    modifying of cairo pattern matrix so that its offset is closer to
+    the path
+    filled by the pattern.
+
+    Fixes #190
+
+ poppler/CairoOutputDev.cc | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+commit 02ec7a70a7a3c654bd94898633f6552fc7eae8b9
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Apr 28 09:07:41 2020 +0200
+
+    Add additional render tests
+
+    The file stroke-alpha-pattern.pdf contains a third shape.
+    It is rendered correctly by all backends, but as the
+    infrastructure is in place we may as well add a quick
+    test for that.
+
+ qt5/tests/check_stroke_opacity.cpp | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+commit d500783fafd9884415005a27641c9b4d49cfe3e4
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Apr 28 08:21:25 2020 +0200
+
+    [cairo] Mention opacity when logging fill color stops
+
+ poppler/CairoOutputDev.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit c2f914359cdc672288d6cd68f157921214e536fa
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Apr 28 08:19:26 2020 +0200
+
+    [cairo] Use stroke opacity when clipping to a stroke path
+
+    Fixes: https://gitlab.freedesktop.org/poppler/poppler/issues/178
+
+ poppler/CairoOutputDev.cc | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+commit 7c890b37ac70394cb330e9d9615ad9532769c9e0
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Apr 28 08:13:08 2020 +0200
+
+    Fix typo in variable name
+
+ utils/pdftocairo.cc | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+commit e10d9cbbc45f2fe470a4da801cb84e85a34d37aa
+Author: Evgeny Stambulchik <fnevgeny@gmail.com>
+Date:   Sat May 9 22:55:10 2020 +0000
+
+    glib: Add poppler_movie_get_aspect
+
+ NEWS                                |  2 +-
+ glib/demo/utils.c                   |  3 +++
+ glib/poppler-movie.cc               | 25 +++++++++++++++++++++++++
+ glib/poppler-movie.h                |  2 ++
+ glib/reference/poppler-sections.txt |  3 ++-
+ 5 files changed, 33 insertions(+), 2 deletions(-)
+
+commit 2c17c9ed7e50ea15255c905170ab1da30b62b3c6
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sat May 2 16:52:09 2020 +0200
+
+    Allow almost-singular tiling pattern matrices
+
+    Issue https://gitlab.freedesktop.org/poppler/poppler/issues/894
+    sports a file with a diagonal tiling pattern matrices with
+    diagonal entries in the range of 5e-4.  While entries of this
+    size are unusual but okay, the determinant is below the rather
+    arbitrary threshold of 1e-6.  Therefore, poppler decided that
+    the matrix is singular and aborts the rendering.
+
+    Fix this by really only aborting if inverting the determinant
+    (which is the first thing that is being done with it) results
+    in a non-finite number.
+
+    As a side effect the code now also allows pattern matrices
+    with a negative determinant.  This does not seem to appear
+    in the wild all that often, but I didn't find anything
+    in the spec that rules it out.
+
+    BUG: https://gitlab.freedesktop.org/poppler/poppler/issues/894
+
+ poppler/Gfx.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 448f8e9830cb0420728e844723770a8cfb3327c0
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Apr 27 23:26:55 2020 +0200
+
+    Poppler 0.88.0
+
+ CMakeLists.txt         |  4 ++--
+ NEWS                   | 26 ++++++++++++++++++++++++++
+ cpp/CMakeLists.txt     |  2 +-
+ cpp/Doxyfile           |  2 +-
+ glib/CMakeLists.txt    |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ 7 files changed, 33 insertions(+), 7 deletions(-)
+
+commit b7aed3eb2950c1389ab81a2261eee2e2221050f6
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Sat Feb 29 22:05:18 2020 -0400
+
+    glib: implement rotation for 'flagNoRotate' annots
+
+    previously poppler_page_get_annot_mapping() function
+    was ignoring to rotate annots flagged as 'flagNoRotate'
+    probably because they require a special rotation where
+    the annotation pivots on the upper left corner, as
+    described in PDF 1.7 spec "8.4.2 Annotation Flags"
+    NoRotate flag.
+
+    Added support for that, while refactoring the code to
+    make it more readable.
+
+    Fixes #767
+
+ glib/poppler-page.cc | 78
+ +++++++++++++++++++++++++++++++++-------------------
+ 1 file changed, 50 insertions(+), 28 deletions(-)
+
+commit 33f3455711916dc9d42b95e168b26748b1acba57
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Apr 23 23:47:42 2020 +0200
+
+    Update (C) year
+
+ poppler/PDFDoc.cc         | 2 +-
+ poppler/PDFDoc.h          | 2 +-
+ poppler/SignatureInfo.cc  | 2 +-
+ poppler/SignatureInfo.h   | 2 +-
+ qt5/src/poppler-private.h | 2 +-
+ qt5/src/poppler-qt5.h     | 2 +-
+ utils/pdfsig.cc           | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 12eeb475fbf3ee0bb43b96ea79d46a426ba809e7
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Apr 10 00:31:40 2020 +0200
+
+    qt5: Add Document::signatures
+
+    Returns all the signatures of a given document, this is better
+    than iterating over all the pages getting the form fields that
+    are of signature type since there's documents with signatures not
+    associated to a given page
+
+    Fixes part of #895
+
+ qt5/src/poppler-document.cc | 16 ++++++++++++++++
+ qt5/src/poppler-form.cc     | 46
+ +++++++++++++++++++++++----------------------
+ qt5/src/poppler-private.h   |  2 +-
+ qt5/src/poppler-qt5.h       | 11 +++++++++++
+ 4 files changed, 52 insertions(+), 23 deletions(-)
+
+commit ba311960d2486e07e66f59dd8d8a5f6e49a918d0
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Apr 9 16:59:54 2020 +0200
+
+    pdfsig: Show also signatures that aren't attached to any page
+
+    Move two methods from FormWidgetSignature to FormFieldSignature where
+    they actually belong
+
+    Rename PDFDoc::getSignatureWidgets to getSignatureFields, making it go
+    through the FormsFields instead of the Page FormWidgets
+
+    Remove the gotos from pdfsig code
+
+    Add a few const here and there
+
+    Fixes part of #895
+
+ poppler/Form.cc          | 277
+ ++++++++++++++++++++++++-----------------------
+ poppler/Form.h           |  21 +++-
+ poppler/PDFDoc.cc        |  39 ++++---
+ poppler/PDFDoc.h         |   2 +-
+ poppler/Page.cc          |   1 +
+ poppler/SignatureInfo.cc |  12 +-
+ poppler/SignatureInfo.h  |  14 +--
+ utils/pdfsig.cc          |  54 ++++-----
+ 8 files changed, 216 insertions(+), 204 deletions(-)
+
+commit 846575911483787a0fe28d76c4e9b51a644d7152
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Apr 21 16:03:37 2020 +0200
+
+    [splash, arthur] Use stroking opacity when clipping to a stroke path
+
+    When filling a region that is clipped to a stroke path, then the
+    stroking opacity shall be used rather than the fill opacity.
+    I couldn't find this in the spec, but it seems to be what
+    Acrobat does.
+
+    BUG: https://gitlab.freedesktop.org/poppler/poppler/-/issues/178
+
+ poppler/SplashOutputDev.cc         | 9 +++++++--
+ qt5/src/ArthurOutputDev.cc         | 5 ++++-
+ qt5/tests/check_stroke_opacity.cpp | 7 +++++++
+ splash/Splash.cc                   | 8 +++++---
+ splash/Splash.h                    | 6 +++++-
+ 5 files changed, 28 insertions(+), 7 deletions(-)
+
+commit 9e302b6bf42c5d8b48bc5b6c04621e52d52da3f2
+Author: Aleix Pol <aleixpol@kde.org>
+Date:   Sun Apr 19 22:51:21 2020 +0000
+
+    CI: android: adaptations to port to new version of the sdk
+
+ .gitlab-ci.yml | 12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
+commit 4fc44c017a4ba7775d3f8eea6bb959ac7c53031f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Apr 20 00:13:28 2020 +0200
+
+    CI: back to debian:unstable
+
+    Better to have newer compilers. etc to get "better" warnings
+
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6654288e6dc93f7495786388902e0934f809b6a5
+Author: sgerwk <sgerwk@aol.com>
+Date:   Sun Apr 19 20:07:26 2020 +0200
+
+    initialize the cairo surface to 1x1, is then changed page by page
+
+ glib/tests/pdfdrawbb.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d37869fc5ed9b8bf2a920058cf63779643d6b25f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Apr 18 15:39:30 2020 +0200
+
+    Update (C)
+
+ poppler/OutputDev.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 8775587096dacd2757917e493f25ca038f169294
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Apr 17 22:09:17 2020 +0200
+
+    [arthur] Implement the clipToStrokePath method
+
+ qt5/src/ArthurOutputDev.cc         | 18 ++++++++++++++++++
+ qt5/src/ArthurOutputDev.h          |  1 +
+ qt5/tests/check_stroke_opacity.cpp | 26 ++++++++++++++++++--------
+ 3 files changed, 37 insertions(+), 8 deletions(-)
+
+commit 6c82422498a2d02fd8acea005e7d6fa843caa1d8
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Apr 17 22:04:45 2020 +0200
+
+    Document the purpose of the clipToStrokePath method
+
+ poppler/OutputDev.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 5ccc03f13b22c11d38f349b95c6d50dcfbaedb4b
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Wed Apr 15 15:40:38 2020 +0200
+
+    [arthur] Set the opacity when filling with axial gradients
+
+ qt5/src/ArthurOutputDev.cc         |  5 +--
+ qt5/tests/CMakeLists.txt           |  1 +
+ qt5/tests/check_stroke_opacity.cpp | 73
+ ++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 77 insertions(+), 2 deletions(-)
+
+commit 9cf9356d334c6a1fa8bc3f1466778541b8f9c276
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Apr 11 00:04:02 2020 +0200
+
+    Update (C) of last commit
+
+ qt5/src/ArthurOutputDev.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 162fdf21717a92428f4fc0c1bf7e86610b9ea703
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Apr 10 22:01:00 2020 +0000
+
+    [arthur] Fix font hinting
+
+    Previously, the ArthurOutputDev would always use the Qt default value
+    for the QFont hinting preference.  At the same time, it contained
+    a custom enum type with various hinting levels that didn't do anything
+    at all.  This patch removes the custom enum, uses
+    QFont::HintingPreference instead, and actually passes the chosen value
+    to the font renderer.
+
+ qt5/src/ArthurOutputDev.cc |  6 +++---
+ qt5/src/ArthurOutputDev.h  | 14 ++------------
+ qt5/src/poppler-page.cc    | 19 +++++++++++++++++++
+ 3 files changed, 24 insertions(+), 15 deletions(-)
+
+commit 17b01bd15db544dbca989938cbf870f6376a8b18
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Sat Mar 28 16:36:32 2020 -0400
+
+    PopplerFormField: add getter for alternative ui name
+
+    There are pdf files which carry a tooltip string
+    in this field, so applications need this getter
+    to show it. API added is:
+
+    gchar*
+    poppler_form_field_get_alternate_ui_name (PopplerFormField *field)
+
+    Related Poppler issue #34
+
+    Related Evince issue:
+    https://gitlab.gnome.org/GNOME/evince/issues/842
+
+ glib/poppler-form-field.cc          | 24 ++++++++++++++++++++++++
+ glib/poppler-form-field.h           |  2 ++
+ glib/reference/poppler-docs.sgml    |  5 +++++
+ glib/reference/poppler-sections.txt |  1 +
+ 4 files changed, 32 insertions(+)
+
+commit 155f73bdd261622323491df4aebb840cde8bfee1
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Apr 7 17:54:22 2020 +0200
+
+    Fix crash in destruction of standalone forms
+
+    If we just give the Dict to Object() it doesn't increase the ref
+    so on destruction we do one unref too much (because we had done
+    one ref
+    too few) and crash
+
+ poppler/Annot.h | 4 ++--
+ poppler/Page.cc | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 4098c6546d9be6ab93a817d52dd749b43aede868
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Apr 7 17:27:16 2020 +0200
+
+    Fix test in MSVC
+
+    For some reason MSVC doesn't like QStringLiteral with non ascii chars
+
+ qt5/tests/check_forms.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 4e3c9a89beab10613b27421d77d8e2deb73e82c7
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Apr 7 00:09:22 2020 +0200
+
+    Update (C) of last commit
+
+ poppler/Annot.h | 1 +
+ poppler/Form.cc | 2 +-
+ poppler/Form.h  | 1 +
+ poppler/Page.cc | 1 +
+ poppler/Page.h  | 1 +
+ 5 files changed, 5 insertions(+), 1 deletion(-)
+
+commit e4badf4d745b8e8f9a0a25b6c3cc97fbadbbb499
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Sat Mar 28 16:35:16 2020 -0400
+
+    support 'de facto' tooltip feature
+
+    Most pdf readers implement a tooltip feature by
+    showing the string content of 'TU' field of a
+    widget annotation that is not linked to any
+    form field.
+
+    Normally, widget annotations carry a reference to a
+    form field which are used together to implement the
+    different form widgets. But, the PDF spec does not
+    forbid standalone (i.e. not linked to any form field)
+    widget annotations, and the fact is they're been used
+    by most pdf readers to show a tooltip when the area
+    of that AnnotWidget is hovered.
+
+    Some API added for this feature:
+
+    bool FormField::isStandAlone()
+    void FormField::setStandAlone (bool value)
+
+    A standalone FormField means it's not part of Catalog's
+    Field array, because of that we store them in a new
+    member inside Page class:
+
+    std::vector<FormField*> standaloneFields;
+
+    and send them alongside the rest of FormWidgets in the
+    existant API:
+
+    FormPageWidgets *Page::getFormWidgets();
+
+    Poppler issue #34
+
+    Evince issue:
+    https://gitlab.gnome.org/GNOME/evince/issues/842
+
+ poppler/Annot.h           |  1 +
+ poppler/Form.cc           | 16 ++++++++++++++++
+ poppler/Form.h            |  9 ++++++++-
+ poppler/Page.cc           | 48
+ ++++++++++++++++++++++++++++++++++++++++++++++-
+ poppler/Page.h            |  8 ++++++++
+ qt5/tests/check_forms.cpp | 31 ++++++++++++++++++++++++++++++
+ 6 files changed, 111 insertions(+), 2 deletions(-)
+
+commit e90fe93eef66e3a2d9c260343273dad8041c3716
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Apr 1 23:59:02 2020 +0200
+
+    Update (C) of last commit
+
+ poppler/BBoxOutputDev.cc | 12 +++++++++---
+ poppler/BBoxOutputDev.h  | 10 ++++++++++
+ 2 files changed, 19 insertions(+), 3 deletions(-)
+
+commit 967a21b5c2bedd0c0debb74ae622edbc1a5b486a
+Author: sgerwk <sgerwk@aol.com>
+Date:   Wed Apr 1 21:53:58 2020 +0000
+
+    bounding box of graphics in the page
+
+ CMakeLists.txt                      |   2 +
+ glib/CMakeLists.txt                 |   1 +
+ glib/poppler-page.cc                |  48 +++++++
+ glib/poppler-page.h                 |   3 +
+ glib/reference/poppler-sections.txt |   1 +
+ glib/tests/CMakeLists.txt           |  43 ++++++
+ glib/tests/check_bb.c               |  92 +++++++++++++
+ glib/tests/check_text.c             |  55 ++++++++
+ glib/tests/pdfdrawbb.c              | 143 ++++++++++++++++++++
+ poppler/BBoxOutputDev.cc            | 251
+ ++++++++++++++++++++++++++++++++++++
+ poppler/BBoxOutputDev.h             |  73 +++++++++++
+ 11 files changed, 712 insertions(+)
+
+commit 04c5fec1047a70ddb5f5ce6ccfc5d31b61d8460d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Mar 31 23:50:53 2020 +0200
+
+    Add missing since
+
+ cpp/poppler-page.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 98d6644607b976e0e5f2342629432f0074aeb453
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Mar 31 23:49:41 2020 +0200
+
+    Add (C) from last commit
+
+ cpp/poppler-page.cpp       | 1 +
+ cpp/poppler-page.h         | 1 +
+ cpp/tests/poppler-dump.cpp | 1 +
+ 3 files changed, 3 insertions(+)
+
+commit 1e098e9b272d57478a3f23a9a6b6bb1542740aaf
+Author: Jiri Jakes <freedesktop@jirijakes.eu>
+Date:   Tue Mar 31 21:38:23 2020 +0000
+
+    cpp: Add non_raw_non_physical layout for page::text()
+
+ cpp/poppler-page.cpp       | 25 ++++++++++++-------------
+ cpp/poppler-page.h         |  3 ++-
+ cpp/tests/poppler-dump.cpp |  4 +++-
+ 3 files changed, 17 insertions(+), 15 deletions(-)
+
+commit 1ff36d6428765185c645ff10df8044cbb961c2a5
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Mar 30 23:27:33 2020 +0200
+
+    pdftohtml: Fix noRoundedCoordinates->noroundcoord in man page
+
+    Fixes #901
+
+ utils/pdftohtml.1 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ba81433a112862fa628a1c3d11eb2379cc384f54
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Mar 29 16:59:41 2020 +0200
+
+    Update (C) of last commit
+
+ poppler/SplashOutputDev.cc | 2 +-
+ poppler/Stream.cc          | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 29cfa16d1f782fa9b5f7f48552183baf4991362a
+Author: Thomas Freitag <Thomas.Freitag@alfa.de>
+Date:   Sun Mar 29 12:48:51 2020 +0200
+
+    Handle 1 bit RGB images in ICC colorspace
+
+ poppler/SplashOutputDev.cc | 2 +-
+ poppler/Stream.cc          | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 4b56adac660e9b0620f5345edb9eef5546de51f6
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Mar 28 23:59:34 2020 +0100
+
+    Make some PDFRectangle methods const
+
+ poppler/Page.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 0e938b2f82fbb1cf129ee40c84a3081a10c39d0a
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Mar 28 15:41:37 2020 +0100
+
+    0.87.0
+
+ CMakeLists.txt         |  6 +++---
+ NEWS                   | 15 +++++++++++++++
+ cpp/Doxyfile           |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ 5 files changed, 21 insertions(+), 6 deletions(-)
+
+commit f19d6723313c0db1b63b8a04c0d2475422b875fb
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Mar 26 22:50:34 2020 +0100
+
+    Update (C)
+
+ qt5/src/ArthurOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 5e1a83dbdc065504291528554cb11ab8fabeb5f6
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Wed Mar 25 21:14:34 2020 +0100
+
+    Avoid division by zero in updateLineDash
+
+    Qt measures dash patterns in terms of line width.
+    This means that you have to divide by the width,
+    which doesn't work if the line width is 'cosmetic',
+    i.e., zero. The Qt documentation states that this
+    case should be treated as if the line width
+    was 1 pixel.
+
+    BUG: 695
+
+ qt5/src/ArthurOutputDev.cc | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+commit 170aa09affc7637cdc8087bb7ae8012b37a80025
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Mar 18 17:51:18 2020 +0100
+
+    Simplify LinkRendition
+
+ glib/poppler-action.cc | 2 +-
+ poppler/Link.cc        | 2 +-
+ poppler/Link.h         | 6 +-----
+ 3 files changed, 3 insertions(+), 7 deletions(-)
+
+commit 535db3f8c2d18b2a3c76794b5cc8d4d79f5aef70
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Mar 26 22:30:17 2020 +0100
+
+    CI: Use debian testing while unstable is broken
+
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 388a7522beaa3abd9c7c0fb437dc3ca513d250b7
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Mar 26 22:30:02 2020 +0100
+
+    Update (C)
+
+ poppler/JPEG2000Stream.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4382264f1b96e6ad6c9e481e4ceae3c22dbcd2f3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Mar 22 12:32:02 2020 +0100
+
+    Fix leak in broken files
+
+    oss-fuzz/21330
+
+ poppler/JPEG2000Stream.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 5c601c40d84686134d90a0f862e2507bd628e188
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Mar 17 23:39:53 2020 +0100
+
+    qt5: Add option to get choice for export value
+
+ poppler/Form.cc         |  5 +++++
+ poppler/Form.h          |  3 ++-
+ qt5/src/poppler-form.cc | 18 +++++++++++++++++-
+ qt5/src/poppler-form.h  | 10 +++++++++-
+ 4 files changed, 33 insertions(+), 3 deletions(-)
+
+commit 4813adfada062a9161b55e412e3997b748123f7f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Mar 19 17:17:04 2020 +0100
+
+    Some more const
+
+ glib/demo/annots.c     | 2 +-
+ splash/SplashFTFont.cc | 4 ++--
+ splash/SplashScreen.cc | 8 ++++----
+ splash/SplashScreen.h  | 6 +++---
+ utils/InMemoryFile.cc  | 3 ++-
+ utils/pdfattach.cc     | 4 ++--
+ utils/pdfdetach.cc     | 2 +-
+ 7 files changed, 15 insertions(+), 14 deletions(-)
+
+commit 81a86064c14a7fc25047b6040d65464e732cf501
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Wed Mar 18 11:39:50 2020 +0100
+
+    Fix vague linkage of Link* class vtables
+
+    Due to falling back to the implicitly inline destructors,
+    some of the Link* classes had all their overridden methods
+    defined inline with made the linkage of their vtables vague.
+
+    This change moves their destructors into a defined translation
+    unit thereby anchoring their vtables in the libpoppler DSO which
+    fixes issues using dynamic_cast when builing Poppler using Clang.
+
+ poppler/Link.cc | 20 ++++++++++++++++++++
+ poppler/Link.h  | 20 +++++++++++++++++++-
+ 2 files changed, 39 insertions(+), 1 deletion(-)
+
+commit 80fa729be74bfcfbf9cf2208a55ad95bf113217b
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Mar 14 17:20:01 2020 +0100
+
+    Update (C)
+
+ utils/HtmlOutputDev.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 68b6dd2ecd868c1a757cb8b9273e2e26687e5229
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Sat Mar 14 14:49:17 2020 +0100
+
+    Replace dynamic_cast by static_cast where we already perform the
+    type checks explicitly before downcasting.
+
+ glib/poppler-action.cc | 18 +++++++++---------
+ utils/HtmlOutputDev.cc |  2 +-
+ 2 files changed, 10 insertions(+), 10 deletions(-)
+
+commit af5565087b63aebfbb20a155dd9318312f688f92
+Author: Alex Henrie <alexhenrie24@gmail.com>
+Date:   Wed Mar 11 17:06:16 2020 -0600
+
+    Fix memory leak in HtmlOutputDev::getLinkDest
+
+ utils/HtmlOutputDev.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit f1480aa0720b3f2d4d12b6e1b4370e2ced4c06f2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Mar 1 20:52:52 2020 +0100
+
+    Poppler 0.86.1
+
+ CMakeLists.txt   | 4 ++--
+ NEWS             | 5 +++++
+ cpp/Doxyfile     | 2 +-
+ qt5/src/Doxyfile | 2 +-
+ 4 files changed, 9 insertions(+), 4 deletions(-)
+
+commit 84c52530992f28fc0623747ee505baad7a9bb287
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Mar 1 19:08:02 2020 +0100
+
+    Fix regression in URI link handling
+
+ poppler/Link.cc           |  1 +
+ qt5/tests/check_links.cpp | 23 +++++++++++++++++++++++
+ 2 files changed, 24 insertions(+)
+
+commit b3cfbbf2679618d0c32670090717a6e2f70faf9c
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Feb 11 22:34:10 2020 +0100
+
+    Use std::unique_ptr for LinkGoto data members
+
+    This makes it clear that these pointers are owning.
+    It makes the code slightly shorter, too.
+
+ poppler/Link.cc | 60
+ ++++++++++++---------------------------------------------
+ poppler/Link.h  | 37 ++++++++++++++---------------------
+ 2 files changed, 26 insertions(+), 71 deletions(-)
+
+commit a9ba550caaaf89d35f8206463e1fe0d4ecfaa161
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Feb 29 00:26:55 2020 +0100
+
+    Poppler 0.86.0
+
+ CMakeLists.txt   |  4 ++--
+ NEWS             | 19 +++++++++++++++++++
+ cpp/Doxyfile     |  2 +-
+ qt5/src/Doxyfile |  2 +-
+ 4 files changed, 23 insertions(+), 4 deletions(-)
+
+commit bad6503c276f306170799cab2e98f53894c6e147
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Feb 28 00:35:25 2020 +0100
+
+    Update (C) of last commit
+
+ splash/SplashPattern.h | 2 +-
+ splash/SplashTypes.h   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 68af136fb2934a65f912d84a619c39c75d6d90b9
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Feb 22 10:05:25 2020 +0100
+
+    Implement Splash::gouraudTriangleShadedFill for non parametrized
+    shadings
+
+    Fixes #881
+
+    Unfortunately only implemented for shadings where the 3 vertices
+    of the
+    triangle have the same color for now since i got lost trying to
+    implement the coloring (and also have no pdf to check against)
+
+    The reason this fixes #881 is because if
+    Splash::gouraudTriangleShadedFill
+    returns false because it doesn't natively support this shading, the
+    default rendering algorithm of Gfx.cc kicks in, and that rendering
+    what
+    does is render different triangles without them knowing they belong to
+    the same shading, meaning that if you have some opacity the edges
+    of the
+    triangles will overlap and and up having different color than the one
+    you really wanted
+
+ poppler/SplashOutputDev.cc |  51 +++++----
+ poppler/SplashOutputDev.h  |  11 +-
+ splash/Splash.cc           | 271
+ +++++++++++++++++++++++++++++++++------------
+ splash/SplashPattern.h     |   7 +-
+ splash/SplashTypes.h       |   7 ++
+ 5 files changed, 246 insertions(+), 101 deletions(-)
+
+commit d4a7367d994483f05151892ee8f14e138e0731c7
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Feb 26 22:54:41 2020 +0100
+
+    Update (C) of last commit
+
+ poppler/Form.h                | 2 +-
+ poppler/Outline.cc            | 2 +-
+ poppler/Outline.h             | 2 +-
+ qt5/src/poppler-annotation.cc | 2 +-
+ utils/JSInfo.h                | 1 +
+ utils/pdftocairo.cc           | 2 +-
+ utils/pdftoppm.cc             | 2 +-
+ 7 files changed, 7 insertions(+), 6 deletions(-)
+
+commit 58dfc767964f133f9bf18b3c5eb641c090584967
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Tue Nov 26 17:02:56 2019 +0100
+
+    Handle LinkAction objects by std::unique_ptrs
+
+    This clarifies the object ownership, and fixes various memory leaks.
+
+ glib/poppler-form-field.cc    |  8 +++---
+ poppler/Annot.cc              | 26 +++++++++---------
+ poppler/Annot.h               |  8 +++---
+ poppler/Catalog.cc            |  7 +++--
+ poppler/Catalog.h             |  2 +-
+ poppler/Form.cc               |  2 +-
+ poppler/Form.h                |  2 +-
+ poppler/Link.cc               | 45 +++++++++++++++----------------
+ poppler/Link.h                |  6 ++---
+ poppler/Outline.cc            |  4 ---
+ poppler/Outline.h             |  6 +++--
+ poppler/Page.cc               |  8 +++---
+ poppler/Page.h                |  4 ++-
+ qt5/src/poppler-annotation.cc |  5 ++--
+ qt5/src/poppler-form.cc       | 10 +++----
+ qt5/src/poppler-page.cc       |  6 ++---
+ utils/JSInfo.cc               | 62
+ +++++++++++++++++++++----------------------
+ 17 files changed, 104 insertions(+), 107 deletions(-)
+
+commit 35b7e926035c7d6852ed148b4dbe6d15e32f3fed
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Nov 22 14:32:44 2019 +0100
+
+    Revert "pdfinfo: Fix another leak"
+
+        This reverts commit 4d799cdf9b9039b003de7d3baf05d858bc507a5a.
+
+    When closing/deallocating a document, poppler should free all memory
+    used by that document internally.  Freeing some of that memory
+    within pdfinfo is not a proper solution when valgrind shows leaks.
+
+ utils/JSInfo.cc | 14 ++++++--------
+ utils/JSInfo.h  |  4 ++--
+ 2 files changed, 8 insertions(+), 10 deletions(-)
+
+commit a11fc679a701879ffd8ba6ccbd4b0a08a03440e6
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Nov 22 08:50:35 2019 +0100
+
+    Use a vector of unique_ptr for LinkAction::nextActionList
+
+    This makes it clear that the vector owns the LinkAction objects.
+
+ poppler/Link.cc         | 14 +++++---------
+ poppler/Link.h          |  5 ++---
+ qt5/src/poppler-page.cc |  4 ++--
+ 3 files changed, 9 insertions(+), 14 deletions(-)
+
+commit afa0528e1dfaafeb09ad9fb52902b13b378e0250
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Feb 22 01:00:05 2020 +0100
+
+    pdftoppm/pdftocairo: Fix more odd/even mismatch
+
+ utils/pdftocairo.cc | 4 ++--
+ utils/pdftoppm.cc   | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 90a1441809fc6ca8713022bf8cb5530e9a7ae832
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Feb 23 18:23:23 2020 +0100
+
+    GooString: remove duplicated code
+
+ goo/GooString.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit ae2660175df533bb93578f7f60a5375a431ad865
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Feb 23 18:21:15 2020 +0100
+
+    Update (C) last commit
+
+ goo/GooString.h            | 2 +-
+ poppler/Annot.cc           | 2 +-
+ poppler/Form.cc            | 2 +-
+ poppler/PDFDocEncoding.h   | 1 +
+ poppler/Sound.cc           | 1 +
+ poppler/Sound.h            | 1 +
+ qt5/src/poppler-private.cc | 2 +-
+ qt5/src/poppler-private.h  | 2 +-
+ utils/JSInfo.cc            | 1 +
+ 9 files changed, 9 insertions(+), 5 deletions(-)
+
+commit 3355e20b2849fc1be131095bc2fe5b0a02d41d5a
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Wed Jan 29 09:41:35 2020 +0100
+
+    Implement fillGooString in terms of fillString
+
+    This requires to add a method to GooString that allows access
+    as a mutable std::string&.
+
+ goo/GooString.h  | 1 +
+ poppler/Stream.h | 7 +------
+ 2 files changed, 2 insertions(+), 6 deletions(-)
+
+commit 5804f51c7cf439432082b668ba8df3b0a6048caf
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Mon Jan 27 17:33:49 2020 +0100
+
+    Use a std::string value in LinkURI
+
+ glib/poppler-action.cc     |  4 +---
+ poppler/Link.cc            | 40 +++++++++++++++-------------------------
+ poppler/Link.h             | 10 ++++------
+ qt5/src/poppler-page.cc    |  2 +-
+ qt5/src/poppler-private.cc |  2 +-
+ utils/HtmlOutputDev.cc     |  2 +-
+ 6 files changed, 23 insertions(+), 37 deletions(-)
+
+commit 06a658708d73b4e2d0bcb9f5572be9b2754368eb
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Mon Jan 27 16:24:54 2020 +0100
+
+    Use a std::string value in LinkNamed
+
+ glib/poppler-action.cc  |  4 +---
+ poppler/Link.cc         | 11 +++--------
+ poppler/Link.h          |  9 ++++-----
+ qt5/src/poppler-page.cc | 26 +++++++++++++-------------
+ 4 files changed, 21 insertions(+), 29 deletions(-)
+
+commit 5d9a9c85bc27f7375a57f6c84913c8e0adcc38d1
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Mon Jan 27 16:11:16 2020 +0100
+
+    Use a std::string value in LinkMovie
+
+ glib/poppler-action.cc |  9 +++------
+ poppler/Link.cc        | 13 ++++---------
+ poppler/Link.h         | 10 +++++-----
+ 3 files changed, 12 insertions(+), 20 deletions(-)
+
+commit 42eebb9bade006ceb602805c474bc9df5ef630b9
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sat Jan 25 20:44:56 2020 +0100
+
+    Use a std::string value in LinkRendition
+
+ poppler/Link.cc | 11 ++++-------
+ poppler/Link.h  |  4 ++--
+ utils/JSInfo.cc | 12 +++++-------
+ 3 files changed, 11 insertions(+), 16 deletions(-)
+
+commit 887d35751979d3441a18db00b99cfc5b6b8d958f
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sat Jan 25 17:29:54 2020 +0100
+
+    LinkSound: Store Sound in a std::unique_ptr
+
+    Because the LinkSound class does own the pointer.
+
+ poppler/Annot.cc | 2 +-
+ poppler/Link.cc  | 4 ----
+ poppler/Link.h   | 6 ++----
+ poppler/Sound.cc | 4 ++--
+ poppler/Sound.h  | 4 +++-
+ 5 files changed, 8 insertions(+), 12 deletions(-)
+
+commit 57c7c79df6105300f32b1f5d8775a2be8d1b96f9
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sat Jan 25 17:29:28 2020 +0100
+
+    Do not include GooString.h
+
+    It is not actually used.
+
+ poppler/Sound.cc | 1 -
+ poppler/Sound.h  | 1 -
+ 2 files changed, 2 deletions(-)
+
+commit 70ba56662286257a84d0d979c8f47eb3d3a5356b
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sat Jan 25 10:20:03 2020 +0100
+
+    Use a std::string value in LinkJavaScript
+
+ glib/poppler-action.cc  |  9 ++++-----
+ poppler/Link.cc         | 15 +++++----------
+ poppler/Link.h          |  9 ++++-----
+ poppler/Stream.h        | 11 +++++++++++
+ qt5/src/poppler-page.cc |  2 +-
+ utils/JSInfo.cc         |  7 ++++---
+ 6 files changed, 29 insertions(+), 24 deletions(-)
+
+commit e9278387cbff75ce75a87a92bc297b53256bd3fc
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sat Jan 25 09:46:10 2020 +0100
+
+    Use a std::string value in LinkHide
+
+ poppler/Link.cc |  9 +++------
+ poppler/Link.h  | 12 ++++++------
+ 2 files changed, 9 insertions(+), 12 deletions(-)
+
+commit 9c8d05116e8d4fc26c5a9cd5a41aadb1f39b7f9f
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Sun Jan 26 04:46:44 2020 +0100
+
+    Implement UnicodeParsedString for std::string
+
+ goo/GooString.h            |  2 ++
+ poppler/Form.cc            | 14 +++++++-------
+ poppler/PDFDocEncoding.h   |  4 +++-
+ qt5/src/poppler-private.cc | 10 +++++++---
+ qt5/src/poppler-private.h  |  2 ++
+ 5 files changed, 21 insertions(+), 11 deletions(-)
+
+commit be45004531235f4dc3cce92e5a24b7cff6c385c1
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Thu Jan 23 17:57:52 2020 +0100
+
+    Use a std::string value in LinkUnknown
+
+ poppler/Link.cc |  6 +-----
+ poppler/Link.h  | 10 ++++------
+ 2 files changed, 5 insertions(+), 11 deletions(-)
+
+commit 9980bc8eb1e7e6a7e39e684622bce52f3637784b
+Author: Alex Henrie <alexhenrie24@gmail.com>
+Date:   Tue Jan 28 18:44:15 2020 -0700
+
+    Add case table for Adlam
+
+ poppler/UnicodeTypeTable.cc | 156
+ ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 156 insertions(+)
+
+commit bb9f1180f22515e619eb189e1e75f16e95ccc8d9
+Author: Alex Henrie <alexhenrie24@gmail.com>
+Date:   Tue Jan 28 18:44:15 2020 -0700
+
+    Add case table for Medefaidrin
+
+ poppler/UnicodeTypeTable.cc | 119
+ ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 119 insertions(+)
+
+commit bbdf276b5cc202855cdb8715924b143dc0b15d4e
+Author: Alex Henrie <alexhenrie24@gmail.com>
+Date:   Tue Jan 28 18:44:15 2020 -0700
+
+    Add case table for Warang Citi
+
+ poppler/UnicodeTypeTable.cc | 45
+ +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 45 insertions(+)
+
+commit e631f11fe666d2075297aaf8685dca91d1503cdc
+Author: Alex Henrie <alexhenrie24@gmail.com>
+Date:   Tue Jan 28 18:44:15 2020 -0700
+
+    Add case table for Old Hungarian
+
+ poppler/UnicodeTypeTable.cc | 41
+ +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 41 insertions(+)
+
+commit 700fe3b70406c5303e333a5626fe58343fc30d5d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Feb 20 23:34:47 2020 +0100
+
+    Update (C) of previous commit
+
+ poppler/Catalog.cc | 2 +-
+ poppler/Dict.cc    | 2 +-
+ poppler/Dict.h     | 2 +-
+ poppler/Stream.cc  | 2 +-
+ poppler/Stream.h   | 2 +-
+ poppler/XRef.cc    | 2 +-
+ poppler/XRef.h     | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
+
+commit ddf97254576a88bd85fcc7b41876c90d1780504e
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Dec 7 00:18:53 2019 +0100
+
+    Make sure Base URI is encrypted if the document is before using it
+
+    Otherwise we may be being targetted by a link content exfiltration
+
+ poppler/Catalog.cc |  4 ++--
+ poppler/Dict.cc    | 17 +++++++++++++++++
+ poppler/Dict.h     |  3 +++
+ poppler/Stream.cc  |  8 ++++++++
+ poppler/Stream.h   |  7 +++++--
+ poppler/XRef.cc    | 29 +++++++++++++++++++++++++++++
+ poppler/XRef.h     |  4 ++++
+ 7 files changed, 68 insertions(+), 4 deletions(-)
+
+commit bdafd6066df79e8183ee311fb086993c480b2c55
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Feb 20 21:24:19 2020 +0100
+
+    CI: Ignore bugprone-sizeof-expression for clang-tidy
+
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit dcce8cc11dd29180bcadbd182d3a8e6900bc08f8
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Mon Feb 17 01:08:30 2020 +0100
+
+    Remove dead code from GfxGouraudTriangleShading::getTriangle
+
+    If we're asserting for !isParameterized, that means nFuncs == 0
+
+ poppler/GfxState.cc | 40 ++++------------------------------------
+ 1 file changed, 4 insertions(+), 36 deletions(-)
+
+commit 16e1d0509be90a121b48e749cb330fe738f735eb
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Feb 15 17:19:52 2020 +0100
+
+    Update(C)
+
+    And fix an include while it
+
+ cpp/poppler-document.cpp | 2 +-
+ poppler/Catalog.cc       | 1 +
+ poppler/Catalog.h        | 6 ++----
+ poppler/PDFDoc.h         | 1 +
+ qt5/src/poppler-link.cc  | 1 +
+ utils/HtmlOutputDev.cc   | 2 +-
+ utils/pdfinfo.cc         | 2 +-
+ 7 files changed, 8 insertions(+), 7 deletions(-)
+
+commit ef5a9f53959d71be273fb9ee0956f516f6d3d39c
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Feb 14 23:37:35 2020 +0100
+
+    Use std::unique_ptr to pass around LinkDest objects
+
+    This provides no functional changes, but it makes the pointer
+    ownership easier to understand.
+
+ cpp/poppler-document.cpp | 12 ++++--------
+ glib/poppler-document.cc | 16 ++++++----------
+ poppler/Catalog.cc       | 17 ++++++++---------
+ poppler/Catalog.h        | 10 ++++++----
+ poppler/PDFDoc.h         |  2 +-
+ qt5/src/poppler-link.cc  |  2 +-
+ utils/HtmlOutputDev.cc   | 11 ++++-------
+ utils/pdfinfo.cc         | 17 ++++++++---------
+ 8 files changed, 38 insertions(+), 49 deletions(-)
+
+commit 5539aeba90d8e5b2ea78444495deaefc900d299c
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Feb 11 23:05:30 2020 +0100
+
+    Update (C)
+
+ utils/pdfdetach.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit b54e06d0f284fd2e72b01c7b7d619d16a69428b7
+Author: coeffier <r.coeffier@bee-buzziness.com>
+Date:   Fri Jan 31 15:07:53 2020 +0100
+
+    pdfdetach: add 'saveFile' option
+
+ utils/pdfdetach.1  |  5 +++++
+ utils/pdfdetach.cc | 20 ++++++++++++++++++--
+ 2 files changed, 23 insertions(+), 2 deletions(-)
+
+commit 4ca0cde98c02794cfdd4982018d5104abbd09b59
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jan 30 22:31:46 2020 +0100
+
+    glib: Fix leak if poppler_document_new_from_file fails
+
+ glib/poppler-document.cc | 24 ++++++++++++------------
+ glib/poppler-private.h   |  2 +-
+ 2 files changed, 13 insertions(+), 13 deletions(-)
+
+commit d27cf873b8db1ca2b20cdc16a724c63a42d6473d
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Tue Oct 29 19:08:30 2019 -0400
+
+    poppler-page: minor optimization
+
+    on poppler_page_get_annot_mapping().
+    Let's retrieve the cropbox just once,
+    on the outside of the _for_ loop.
+
+ glib/poppler-page.cc | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+commit f5ff25788ef23041a498a98e0ba9718590d96db0
+Author: Nelson Benítez León <nbenitezl@gmail.com>
+Date:   Mon Oct 28 21:51:21 2019 -0400
+
+    glib: automatic handle of page's cropbox on annots
+
+    Core poppler annot (Annot.cc) has cropbox offsets included
+    in the coordinates of the relevant fields (rect and
+    quadrilaterals fields).
+
+    This commit makes poppler-glib API _not_ include cropbox
+    offsets when providing annot info to clients (by substracting
+    cropbox offsets from the read core Annot info) and in the same
+    way, assumes no cropbox offsets are included in the info
+    received from clients to create new annots (cropbox offsets will
+    be automatically added to the corresponding core poppler Annot).
+
+    As a result of this, existent clients (like Evince) now automatically
+    work right for annotations placed in pages that have a cropbox.
+
+    Poppler issue: poppler/poppler#129
+    Evince issue: https://gitlab.gnome.org/GNOME/evince/issues/1280
+
+ glib/poppler-annot.cc  | 109
+ +++++++++++++++++++++++++++++++++++++++----------
+ glib/poppler-page.cc   |  55 +++++++++++++++++++++++++
+ glib/poppler-private.h |   2 +
+ 3 files changed, 144 insertions(+), 22 deletions(-)
+
+commit 8ed4623c3aad7899114ddb9754e303c97ce64e50
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Feb 5 21:25:46 2020 +0100
+
+    Update (C)
+
+ qt5/src/poppler-document.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 0bdf0d31d99a7becb1e36b5503213fe777673acb
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jan 30 22:27:55 2020 +0100
+
+    qt5: Fix loading from iodevice
+
+ qt5/src/poppler-document.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 2df04a397d51af7a50e0a11179b04503db2b2f10
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jan 29 23:26:58 2020 +0100
+
+    Poppler 0.85.0
+
+ CMakeLists.txt         |  4 ++--
+ NEWS                   | 21 +++++++++++++++++++++
+ cpp/Doxyfile           |  2 +-
+ qt5/src/CMakeLists.txt |  2 +-
+ qt5/src/Doxyfile       |  2 +-
+ 5 files changed, 26 insertions(+), 5 deletions(-)
+
+commit 2acfe30b35377447be80f9d06e2402d7aeaacdb2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jan 29 00:16:43 2020 +0100
+
+    Update (C) of previous commits
+
+ poppler/UnicodeTypeTable.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 715878e8906155045e6219018af433ec67be74cc
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 28 23:53:04 2020 +0100
+
+    qt5: Add deseret lowercase search test
+
+    Or at least i think this is the lowercase one, at least this is the
+    different case than the one on the actual file
+
+ qt5/tests/check_search.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit b9c8632375e0c8a96dbf706e813ef1639dd297af
+Author: Alex Henrie <alexhenrie24@gmail.com>
+Date:   Thu Jan 23 20:01:57 2020 -0700
+
+    Add case table for Deseret and Osage
+
+    Fixes #853
+
+ poppler/UnicodeTypeTable.cc | 52
+ +++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 43 insertions(+), 9 deletions(-)
+
+commit ceb4206215367b51ff361593ad7ee1771bfe1e97
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 28 23:47:28 2020 +0100
+
+    qt5: add test to show that deseret search works
+
+    The one with ignoring case doesn't work yet
+
+ qt5/tests/check_search.cpp | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+commit 2816a3597f4accadcfe982673b501264e8bdee21
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 28 23:42:31 2020 +0100
+
+    qt5: fix search for "complex" characters
+
+    poppler internals want ucs4 not unicode
+
+    based on a patch by Alex Henrie
+
+ qt5/src/poppler-page.cc | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+commit e249d8965c0f39bd4dcb882048535a5272f66566
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Jan 18 11:35:25 2020 +0100
+
+    Initialize StandardSecurityHandler::encAlgorithm
+
+    Fixes uninitialized memory read on broken files
+
+ poppler/SecurityHandler.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 1f82b0a455659a41b321c9a73c82a38fe4318159
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 17 17:39:17 2020 +0100
+
+    Remove unused SplashOutputDev variable/function
+
+ poppler/SplashOutputDev.cc | 7 +------
+ poppler/SplashOutputDev.h  | 5 +----
+ 2 files changed, 2 insertions(+), 10 deletions(-)
+
+commit f7c420c2859ec6774480e237d5a87af7e8807726
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 17 17:21:37 2020 +0100
+
+    Remove unused SplashOutputDev::setBitmapUpsideDown
+
+ poppler/SplashOutputDev.cc | 1 -
+ poppler/SplashOutputDev.h  | 7 +------
+ 2 files changed, 1 insertion(+), 7 deletions(-)
+
+commit c9d50037bc860c680ba24877b8727c66c95380da
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Jan 15 09:58:22 2020 +0100
+
+    fofi: add some const
+
+ fofi/FoFiTrueType.cc |  2 +-
+ fofi/FoFiTrueType.h  |  4 ++--
+ fofi/FoFiType1C.cc   |  8 ++++----
+ fofi/FoFiType1C.h    | 10 +++++-----
+ 4 files changed, 12 insertions(+), 12 deletions(-)
+
+commit 4b063f84124a13f0561d871e43a08e0cf181ced5
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 12 23:44:25 2020 +0100
+
+    pdftoppm/pdftocairo: Fix -e/-o printing the wrong pages
+
+    Fixes #873
+
+ utils/pdftocairo.cc | 6 +++---
+ utils/pdftoppm.cc   | 6 +++---
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+commit a047dea62d28402e819d8ecacdaca95a18f2e3f1
+Author: Alexander Volkov <a.volkov@rusbitech.ru>
+Date:   Thu Sep 12 00:04:20 2019 +0300
+
+    qt5: Allow to load document from QIODevice
+
+    Extract BaseSeekInputStream class from PopplerInputStream class
+    and inherit an introduced Poppler::QIODeviceInStream from it.
+    This allows to implement Poppler::Document::load(QIODevice *, ...)
+    overload.
+
+ glib/poppler-input-stream.cc                |  98
+ ++-----------------------
+ glib/poppler-input-stream.h                 |  33 ++-------
+ poppler/Stream.cc                           | 107
+ ++++++++++++++++++++++++++++
+ poppler/Stream.h                            |  58 +++++++++++++++
+ qt5/src/CMakeLists.txt                      |   1 +
+ qt5/src/poppler-document.cc                 |  17 ++++-
+ qt5/src/poppler-private.h                   |  16 +++++
+ qt5/src/poppler-qiodeviceinstream-private.h |  49 +++++++++++++
+ qt5/src/poppler-qiodeviceinstream.cc        |  63 ++++++++++++++++
+ qt5/src/poppler-qt5.h                       |  29 ++++++++
+ qt5/tests/check_actualtext.cpp              |  30 ++++++--
+ 11 files changed, 376 insertions(+), 125 deletions(-)
+
+commit 0d31745f9f2ce6fe0ff01da507c13c393c4456a3
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 12 22:30:24 2020 +0100
+
+    Update (C) of last commit
+
+ poppler/BuiltinFont.h      | 2 +-
+ poppler/GlobalParamsWin.cc | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 22a334bbf55c900b3efff12a3a676bd14b18decd
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 12 02:22:33 2020 +0100
+
+    Use gperf for the BuiltinFonts hash table
+
+    Instead of creating one by hand on runtime we create one at compile
+    time
+
+    It's faster and lets us declare things as static const instead of just
+    static and also allows us to remove two init/destroy functions
+
+ CMakeLists.txt                                     |   42 +-
+ poppler/BuiltinFont.cc                             |   61 -
+ poppler/BuiltinFont.h                              |   85 +-
+ poppler/BuiltinFontTables.cc                       | 4298
+ --------------------
+ .../{BuiltinFontTables.h => BuiltinFontWidth.h}    |   21 +-
+ poppler/CourierBoldObliqueWidths.gperf             |  330 ++
+ poppler/CourierBoldObliqueWidths.pregenerated.c    |  995 +++++
+ poppler/CourierBoldWidths.gperf                    |  330 ++
+ poppler/CourierBoldWidths.pregenerated.c           |  995 +++++
+ poppler/CourierObliqueWidths.gperf                 |  330 ++
+ poppler/CourierObliqueWidths.pregenerated.c        |  995 +++++
+ poppler/CourierWidths.gperf                        |  330 ++
+ poppler/CourierWidths.pregenerated.c               |  995 +++++
+ poppler/GfxFont.cc                                 |   16 +-
+ poppler/GlobalParams.cc                            |    5 -
+ poppler/GlobalParamsWin.cc                         |    1 -
+ poppler/HelveticaBoldObliqueWidths.gperf           |  330 ++
+ poppler/HelveticaBoldObliqueWidths.pregenerated.c  |  995 +++++
+ poppler/HelveticaBoldWidths.gperf                  |  331 ++
+ poppler/HelveticaBoldWidths.pregenerated.c         |  986 +++++
+ poppler/HelveticaObliqueWidths.gperf               |  330 ++
+ poppler/HelveticaObliqueWidths.pregenerated.c      |  995 +++++
+ poppler/HelveticaWidths.gperf                      |  330 ++
+ poppler/HelveticaWidths.pregenerated.c             |  995 +++++
+ poppler/SymbolWidths.gperf                         |  205 +
+ poppler/SymbolWidths.pregenerated.c                |  595 +++
+ poppler/TimesBoldItalicWidths.gperf                |  330 ++
+ poppler/TimesBoldItalicWidths.pregenerated.c       |  995 +++++
+ poppler/TimesBoldWidths.gperf                      |  330 ++
+ poppler/TimesBoldWidths.pregenerated.c             |  995 +++++
+ poppler/TimesItalicWidths.gperf                    |  330 ++
+ poppler/TimesItalicWidths.pregenerated.c           |  995 +++++
+ poppler/TimesRomanWidths.gperf                     |  330 ++
+ poppler/TimesRomanWidths.pregenerated.c            |  995 +++++
+ poppler/ZapfDingbatsWidths.gperf                   |  217 +
+ poppler/ZapfDingbatsWidths.pregenerated.c          |  614 +++
+ 36 files changed, 17639 insertions(+), 4413 deletions(-)
+
+commit c80a00125180d396442d7559f6df65bdd1b5b98d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 10 00:46:22 2020 +0100
+
+    PSStack::copy: Fix integer overflow leading to potential crash
+
+    in broken files
+
+    Fixes issue #870
+
+ goo/GooCheckedOps.h | 11 ++++++++++-
+ poppler/Function.cc |  5 +++--
+ 2 files changed, 13 insertions(+), 3 deletions(-)
+
+commit ca9b9cb264b2d2372a171dd8779ac5527dad2b12
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 10 00:30:37 2020 +0100
+
+    Fix crash on broken files
+
+    TIL INT_MIN / -1 causes FPE
+
+    Fixes issue #869
+
+ poppler/Function.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 12a657c5f787605602bb2ad9d79ef719bbf7678f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jan 9 14:58:15 2020 +0100
+
+    Remove getAuthData function that did "nothing"
+
+ poppler/SecurityHandler.cc | 19 ++-----------------
+ poppler/SecurityHandler.h  |  6 ------
+ 2 files changed, 2 insertions(+), 23 deletions(-)
+
+commit ff404bdfcb5763ae5e219e075ca08b41c220f8ec
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jan 9 14:39:14 2020 +0100
+
+    SecurityHandler: add const
+
+ poppler/Parser.cc          |  6 +++---
+ poppler/Parser.h           |  6 +++---
+ poppler/SecurityHandler.cc |  2 +-
+ poppler/SecurityHandler.h  | 34 +++++++++++++++++-----------------
+ 4 files changed, 24 insertions(+), 24 deletions(-)
+
+commit 409a8a36df099a27f75aefad97a11b354415ea06
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Thu Jan 9 14:34:12 2020 +0100
+
+    Remove forward declaration for struct that doesn't exist
+
+ poppler/GlobalParams.h    | 1 -
+ poppler/SecurityHandler.h | 1 -
+ 2 files changed, 2 deletions(-)
+
+commit 0aba2e2b13f27cfa88074258900d571c42751c0a
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 7 23:58:37 2020 +0100
+
+    builtinFontSubst can be const
+
+ poppler/BuiltinFontTables.cc | 16 +++++++++++++++-
+ poppler/BuiltinFontTables.h  | 16 +++++++++++++++-
+ poppler/GfxFont.cc           |  4 ++--
+ 3 files changed, 32 insertions(+), 4 deletions(-)
+
+commit fad2b7341c6a0cb8f2e0ff2e856739cb389d21ef
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 7 17:52:27 2020 +0100
+
+    More static -> static const
+
+ fofi/FoFiTrueType.cc | 4 ++--
+ fofi/FoFiType1C.cc   | 6 +++---
+ splash/Splash.cc     | 6 +++---
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+commit 1bbf480deb1be03fb8c95604a250d4b4f64546d7
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 7 17:48:54 2020 +0100
+
+    Remove unused CompactFontTables.h file
+
+ CMakeLists.txt              |   1 -
+ poppler/CompactFontTables.h | 478
+ --------------------------------------------
+ 2 files changed, 479 deletions(-)
+
+commit d2617256819eac077a9537a1c8dbbb44661d6f62
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Tue Jan 7 17:44:32 2020 +0100
+
+    Mark some static arrays as const
+
+ poppler/CharCodeToUnicode.cc | 4 ++--
+ poppler/Decrypt.cc           | 4 ++--
+ poppler/NameToUnicodeTable.h | 6 +++---
+ poppler/PSOutputDev.cc       | 2 +-
+ poppler/TextOutputDev.cc     | 2 +-
+ 5 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 63ca4951f85b1f9d4a66d24d761e9984327bb20f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Wed Oct 30 23:36:35 2019 +0100
+
+    Introduce Object::getBoolWithDefaultValue
+
+    makes code slightly more readable
+
+ poppler/Annot.cc             | 43
+ +++++++----------------------------------
+ poppler/Form.cc              |  5 ++---
+ poppler/Gfx.cc               | 15 ++++-----------
+ poppler/GfxState.cc          |  7 +++----
+ poppler/Link.cc              |  9 ++-------
+ poppler/Object.h             |  6 +++++-
+ poppler/PageTransition.cc    |  8 ++------
+ poppler/ViewerPreferences.cc | 46
+ +++++++++-----------------------------------
+ 8 files changed, 34 insertions(+), 105 deletions(-)
+
+commit dd0ea681efc1e0a476803be1260f7a7691c26534
+Author: David García Garzón <david.garcia@upf.edu>
+Date:   Sun Jan 5 23:35:51 2020 +0000
+
+    qt5: Fix FormField::name encoding
+
+    Also add a test for it
+
+ qt5/src/poppler-form.cc   |  2 +-
+ qt5/tests/check_forms.cpp | 18 ++++++++++++++++++
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+commit c4f8555b6a8085a6a5b3c18a8a21e8aab51fe6d9
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 01:20:37 2020 +0100
+
+    Make getUnicodeMap param a const & instead a const *
+
+    Now you can write globalParams->getUnicodeMap("UTF-8")
+    which makes much more sense
+
+ poppler/GlobalParams.cc | 15 +++++++--------
+ poppler/GlobalParams.h  |  6 +++---
+ poppler/PSOutputDev.cc  |  4 ++--
+ poppler/UTF.cc          |  3 +--
+ poppler/UnicodeMap.cc   | 22 +++++++++++-----------
+ poppler/UnicodeMap.h    |  8 +++-----
+ 6 files changed, 27 insertions(+), 31 deletions(-)
+
+commit 7489b99bc0e8ee22538e5c4697f43181e74044c1
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 22:49:15 2020 +0100
+
+    Make HtmlFontAccu::Get const
+
+ utils/HtmlFonts.h      | 2 +-
+ utils/HtmlOutputDev.cc | 5 ++---
+ utils/HtmlOutputDev.h  | 4 ++--
+ 3 files changed, 5 insertions(+), 6 deletions(-)
+
+commit 6b1ee539705f1ddf8e252f1589866862ad688bc2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 22:43:52 2020 +0100
+
+    No need for HtmlFontAccu::accu to be a pointer at all
+
+ utils/HtmlFonts.cc | 12 +++++-------
+ utils/HtmlFonts.h  |  6 +++---
+ 2 files changed, 8 insertions(+), 10 deletions(-)
+
+commit cb5bece4f51040cf1d3be5a32af83c989d9c7885
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 22:41:32 2020 +0100
+
+    pdftohtml: Don't substract -2 to font size without any reason
+
+ utils/HtmlFonts.cc     | 2 +-
+ utils/HtmlOutputDev.cc | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit fb9ada7648cb3adb0b8791bab098de1e89c75226
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 22:40:12 2020 +0100
+
+    pdftohtml: Make HtmlFont::size an int
+
+    It comes from a double so it could potentially be negative
+
+ utils/HtmlFonts.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit a0e6c8ffca03d324846db8b099774aafaf64627f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 23:05:54 2020 +0100
+
+    Fix crash in unicodeToAscii7
+
+    Don't make Ascii7Map be static, otherwise it will cache the unicode
+    map
+    between globlParams and end up with a bad pointer
+
+    If we find the constant searching of the unicode in globalparams is a
+    speed problem we need to apply a similar solution to the one we
+    did for
+    UTF8
+
+ poppler/UTF.cc | 15 +++------------
+ 1 file changed, 3 insertions(+), 12 deletions(-)
+
+commit bc8250504b14655eb25d11336899bdcc032df18d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 22:32:55 2020 +0100
+
+    Update (C)
+
+ qt5/src/poppler-form.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit a9ef3cb7dd991ab935ad08f75ae4fc85bb594c78
+Author: David García Garzón <voki@canvoki.net>
+Date:   Sun Jan 5 19:53:04 2020 +0100
+
+    Accepting UTF-16 uiNames for form fields
+
+ qt5/src/poppler-form.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9de38e9f0125dd5636e03847abc13e8a1c89d232
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 20:21:28 2020 +0100
+
+    Update last commit (C)
+
+ poppler/MarkedContentOutputDev.cc | 2 +-
+ poppler/MarkedContentOutputDev.h  | 2 +-
+ poppler/PSOutputDev.cc            | 2 +-
+ poppler/TextOutputDev.cc          | 2 +-
+ poppler/UnicodeMap.cc             | 2 +-
+ poppler/UnicodeMap.h              | 2 +-
+ utils/HtmlFonts.cc                | 2 +-
+ utils/JSInfo.cc                   | 2 +-
+ utils/JSInfo.h                    | 2 +-
+ utils/pdfdetach.cc                | 2 +-
+ utils/pdfinfo.cc                  | 2 +-
+ utils/pdftotext.cc                | 2 +-
+ 12 files changed, 12 insertions(+), 12 deletions(-)
+
+commit eb5e7d9a62be5f76718115a058e2e3c4b32eb5ff
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 01:20:37 2020 +0100
+
+    Remove UnicodeMap reference counting
+
+    And make the cache just be "infinite", it's not like we support
+    that many maps or that there's so many used in a given session,
+    and if they are, well it's good we cached them
+
+    All the unicode maps we support use about 2MB of memory, but
+    PSOutputDev
+    is the only one that loads "random" unicodeMaps so to load them all
+    you'd had to print lots of different documents with fonts with lots of
+    different font encodings, so it seems like a not very likely situation
+    and the code gets simplified a bit
+
+ poppler/GlobalParams.cc           |  8 ++---
+ poppler/GlobalParams.h            |  6 ++--
+ poppler/MarkedContentOutputDev.cc |  2 --
+ poppler/MarkedContentOutputDev.h  |  2 +-
+ poppler/PSOutputDev.cc            |  8 ++---
+ poppler/TextOutputDev.cc          | 21 ++++----------
+ poppler/UTF.cc                    |  2 +-
+ poppler/UnicodeMap.cc             | 61
+ ++++++---------------------------------
+ poppler/UnicodeMap.h              | 16 ++++------
+ utils/HtmlFonts.cc                |  3 +-
+ utils/JSInfo.cc                   |  2 +-
+ utils/JSInfo.h                    |  4 +--
+ utils/pdfdetach.cc                |  3 +-
+ utils/pdfinfo.cc                  | 11 ++++---
+ utils/pdftotext.cc                |  7 ++---
+ 15 files changed, 42 insertions(+), 114 deletions(-)
+
+commit f5c981d70acfcc5742dda677b619431c483045b2
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 01:04:58 2020 +0100
+
+    Use getUtf8Map otherwise the map pointer may go wrong
+
+ glib/poppler-document.cc | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
+
+commit 7f53fa0e0b7bfe2be2763da08fa09127c5ecfe4d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 00:46:04 2020 +0100
+
+    cpp: Make document_private() private just in case
+
+ cpp/poppler-document-private.h | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit 33fa0ebac9e4d247af19ffc5343769684608990d
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sun Jan 5 00:41:52 2020 +0100
+
+    Update (C) for previous commits
+
+ cpp/poppler-document-private.h | 2 +-
+ cpp/poppler-document.cpp       | 2 +-
+ cpp/poppler-global.cpp         | 2 +-
+ cpp/poppler-private.cpp        | 1 +
+ cpp/poppler-private.h          | 2 +-
+ poppler/CairoOutputDev.cc      | 3 ++-
+ poppler/CairoOutputDev.h       | 1 +
+ poppler/Error.cc               | 1 +
+ poppler/Error.h                | 1 +
+ poppler/GlobalParams.cc        | 2 +-
+ poppler/GlobalParams.h         | 2 +-
+ qt5/src/poppler-document.cc    | 2 +-
+ qt5/src/poppler-private.cc     | 2 +-
+ qt5/src/poppler-private.h      | 2 +-
+ test/perf-test.cc              | 1 +
+ 15 files changed, 16 insertions(+), 10 deletions(-)
+
+commit 9e15cbae552be5a7b787a07e661ab849427537aa
+Author: Michal <sudolskym@gmail.com>
+Date:   Sat Jan 4 21:49:29 2020 +0000
+
+    make FT_Library initialisation thread-safe
+
+ poppler/CairoOutputDev.cc | 7 ++-----
+ poppler/CairoOutputDev.h  | 2 +-
+ 2 files changed, 3 insertions(+), 6 deletions(-)
+
+commit 9349ed71f9fabc8961cc1dd9ca57aca8be7939db
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Sat Jan 4 09:40:03 2020 +0100
+
+    Make use of the memoizing UTF-8 UnicodemMap getter in
+    CairoOutputDev::drawChar.
+
+ poppler/CairoOutputDev.cc | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 5c7ec727e059738828ae61bafb5fe5f8b482b267
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Fri Jan 3 22:12:20 2020 +0100
+
+    Remove the error callback data pointer as none of the frontends make
+    use of it.
+
+ cpp/poppler-document.cpp   | 2 +-
+ cpp/poppler-private.cpp    | 2 +-
+ cpp/poppler-private.h      | 2 +-
+ glib/poppler-document.cc   | 8 ++++----
+ glib/poppler-private.h     | 2 +-
+ glib/poppler.cc            | 3 +--
+ poppler/Error.cc           | 6 ++----
+ poppler/Error.h            | 4 ++--
+ poppler/GlobalParams.cc    | 4 ++--
+ poppler/GlobalParams.h     | 2 +-
+ qt5/src/poppler-private.cc | 2 +-
+ qt5/src/poppler-private.h  | 6 +++---
+ test/perf-test.cc          | 4 ++--
+ 13 files changed, 22 insertions(+), 25 deletions(-)
+
+commit 6de0bba0b7d064195b27619667dbbcb7cd810647
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Fri Jan 3 22:05:53 2020 +0100
+
+    Make use of the GlobalParamsIniter to make the glib frontend
+    initialization thread safe.
+
+ glib/poppler-document.cc | 31 +++++++++++++------------------
+ glib/poppler-private.h   |  3 +++
+ glib/poppler.cc          | 22 +++++++---------------
+ 3 files changed, 23 insertions(+), 33 deletions(-)
+
+commit a8220105f964ee4102e4ee886df2d0b162b42ae6
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Fri Jan 3 21:51:25 2020 +0100
+
+    Reuse the GlobalParamsIniter in the qt5 frontend.
+
+ poppler/GlobalParams.cc     | 12 ++++++++++++
+ poppler/GlobalParams.h      |  4 ++++
+ qt5/src/poppler-document.cc |  3 ---
+ qt5/src/poppler-private.cc  | 30 ++----------------------------
+ qt5/src/poppler-private.h   | 12 ++++++------
+ 5 files changed, 24 insertions(+), 37 deletions(-)
+
+commit 7daaa2925858ef1740ec38b25be7bf74c0aefa33
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Fri Jan 3 21:29:23 2020 +0100
+
+    Move the initer of the cpp frontend into the core to able to reuse
+    it for the qt5 and glib frontends.
+
+ cpp/poppler-document-private.h | 21 ++-----------
+ cpp/poppler-document.cpp       | 69
+ +++++++++---------------------------------
+ cpp/poppler-global.cpp         |  2 +-
+ poppler/GlobalParams.cc        | 40 ++++++++++++++++++++++++
+ poppler/GlobalParams.h         | 19 ++++++++++++
+ 5 files changed, 77 insertions(+), 74 deletions(-)
+
+commit f2197842c8e7a8c4f7ee15eba1bd42379803e229
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Fri Jan 3 21:22:44 2020 +0100
+
+    Improve readability of Error module by using a type alias for the
+    error callback function pointer.
+
+ poppler/Error.cc | 7 ++-----
+ poppler/Error.h  | 6 +++---
+ 2 files changed, 5 insertions(+), 8 deletions(-)
+
+commit 04debcf2a044d358aa8cd3694739db7d5471da0e
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Sat Jan 4 11:37:01 2020 +0100
+
+    Update (C) of previous commits
+
+ poppler/Link.cc                | 2 +-
+ poppler/Link.h                 | 1 +
+ qt5/src/poppler-link-private.h | 1 +
+ qt5/src/poppler-link.h         | 1 +
+ qt5/src/poppler-optcontent.cc  | 2 +-
+ 5 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 21a7a98ad926b2e0aa3646d0c07ff13df8777f8b
+Author: Adam Reichold <adam.reichold@t-online.de>
+Date:   Sat Jan 4 09:31:03 2020 +0100
+
+    Remove LinkAction::setNextActions as this setter should not be used
+    outside of the ::parseAction method.
+
+ poppler/Link.cc | 6 +-----
+ poppler/Link.h  | 3 ---
+ 2 files changed, 1 insertion(+), 8 deletions(-)
+
+commit 0053b82841d37077b9b22ea393bb807fbe53eb64
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Jan 3 17:54:17 2020 +0100
+
+    Deep-copy the LinkOCGAction object
+
+    The convertLinkActionToLink method deep-copies every poppler
+    LinkAction
+    object into a Link object as used by the Qt5 frontend.  With one
+    exception: LinkOCGState objects are not deep-copied, but pointers to
+    them are stored instead.  This makes for a memory management that is
+    inconsistent, difficult to understand, and prone to memory errors.
+    The present patch introduces deep-copying for LinkOCGState objects
+    as well.
+
+ qt5/src/poppler-link-private.h | 14 +++++++++++---
+ qt5/src/poppler-link.h         |  4 ++--
+ qt5/src/poppler-optcontent.cc  | 10 +++++-----
+ qt5/src/poppler-page.cc        |  2 +-
+ 4 files changed, 19 insertions(+), 11 deletions(-)
+
+commit 80710e99b3d3cb9fe6a05f73f33ed122474c82ae
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Jan 3 17:15:22 2020 +0100
+
+    Make LinkAction::nextActions return a const reference
+
+    ... rather than a pointer.  This makes it clearer that the
+    result is borrowed, and should not be shallow-copied.
+
+ poppler/Link.cc         |  4 ++--
+ poppler/Link.h          |  2 +-
+ qt5/src/poppler-page.cc | 14 +++++---------
+ 3 files changed, 8 insertions(+), 12 deletions(-)
+
+commit 1239f2dc9c621e6a1962a7ebe0cced9c333c202c
+Author: Oliver Sander <oliver.sander@tu-dresden.de>
+Date:   Fri Jan 3 17:10:02 2020 +0100
+
+    Make LinkAction::nextActionList a std::vector
+
+    Rather than a pointer to a std::vector.  This removes one
+    layer of indirection when accessing the vector.
+
+ poppler/Link.cc | 34 +++++++++++++---------------------
+ poppler/Link.h  |  8 ++++----
+ 2 files changed, 17 insertions(+), 25 deletions(-)
+
+commit d81d5ccfd29e12cadbd70642f65ca1516b4e5d04
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 3 16:55:36 2020 +0100
+
+    Make Sound::fileName a std::string
+
+    Makes the code a bit simpler
+
+ poppler/Sound.cc         | 10 +++-------
+ poppler/Sound.h          |  6 +++---
+ qt5/src/poppler-sound.cc |  5 ++---
+ 3 files changed, 8 insertions(+), 13 deletions(-)
+
+commit 4f16f53e2b2fc0b83bad9ffcb0c869200f06a406
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 3 14:11:01 2020 +0100
+
+    Make UnicodeMap::encodingName be a std::string
+
+ poppler/GlobalParams.cc | 14 +++++++-------
+ poppler/GlobalParams.h  |  2 +-
+ poppler/UnicodeMap.cc   | 18 ++++++++----------
+ poppler/UnicodeMap.h    | 11 ++++++-----
+ 4 files changed, 22 insertions(+), 23 deletions(-)
+
+commit 00aea3562ec628266fe957bfdb8f1188e1beeb4b
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 3 14:15:49 2020 +0100
+
+    Remove GlobalParams::getUnicodeMap2
+
+    GlobalParams::getUnicodeMap was just calling
+    GlobalParams::getUnicodeMap2 so move the code of this one to the other
+    one and save ourselves having one function that just calls the other
+
+ poppler/GlobalParams.cc | 8 ++------
+ poppler/GlobalParams.h  | 3 +--
+ 2 files changed, 3 insertions(+), 8 deletions(-)
+
+commit 6fdf76631cb98012a051f4659583d67c0d5e0fad
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 3 13:51:56 2020 +0100
+
+    Mark 'in' in unicodeToAscii7 as const
+
+ poppler/UTF.cc | 4 ++--
+ poppler/UTF.h  | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 98f5383030929c9b2895ffff9a561023b7de867f
+Author: Albert Astals Cid <aacid@kde.org>
+Date:   Fri Jan 3 13:51:39 2020 +0100
+
+    Welcome 2020
+
+ poppler/poppler-config.h.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 3f306b50f78e6e6d9ba9733fabff8e6c5567038a
 Author: Albert Astals Cid <aacid@kde.org>
 Date:   Sat Dec 28 13:18:51 2019 +0100

@@ -6,9 +6,9 @@
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="Poppler Reference Manual">
 <link rel="up" href="index.html" title="Poppler Reference Manual">
-<link rel="prev" href="poppler-Poppler-Features.html" title="Poppler Features">
+<link rel="prev" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">
 <link rel="next" href="api-index-deprecated.html" title="Index of deprecated symbols">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -26,6 +26,8 @@
                   <a class="shortcut" href="#idxF">F</a>
                      <span class="dim">|</span> 
                   <a class="shortcut" href="#idxG">G</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxH">H</a>
                      <span class="dim">|</span> 
                   <a class="shortcut" href="#idxI">I</a>
                      <span class="dim">|</span> 
@@ -48,7 +50,7 @@
                   <a class="shortcut" href="#idxV">V</a></span></td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
-<td><a accesskey="p" href="poppler-Poppler-Features.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="p" href="poppler-Poppler-Text-Span.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
 <td><a accesskey="n" href="api-index-deprecated.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="index">
@@ -105,6 +107,10 @@
 <dd></dd>
 <dt>
 <a class="link" href="PopplerAction.html#PopplerActionRendition" title="struct PopplerActionRendition">PopplerActionRendition</a>, struct in <a class="link" href="PopplerAction.html" title="PopplerAction">PopplerAction</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="PopplerAction.html#PopplerActionResetForm" title="struct PopplerActionResetForm">PopplerActionResetForm</a>, struct in <a class="link" href="PopplerAction.html" title="PopplerAction">PopplerAction</a>
 </dt>
 <dd></dd>
 <dt>
@@ -493,10 +499,14 @@
 <dd></dd>
 <a name="idxB"></a><h3 class="title">B</h3>
 <dt>
-<a class="link" href="poppler-Poppler-Features.html#PopplerBackend" title="enum PopplerBackend">PopplerBackend</a>, enum in <a class="link" href="poppler-Poppler-Features.html" title="Poppler Features">Poppler Features</a>
+<a class="link" href="poppler-Poppler-Features.html#PopplerBackend" title="enum PopplerBackend">PopplerBackend</a>, enum in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
 </dt>
 <dd></dd>
 <a name="idxC"></a><h3 class="title">C</h3>
+<dt>
+<a class="link" href="poppler-Poppler-Features.html#POPPLER-CHECK-VERSION:CAPS" title="POPPLER_CHECK_VERSION()">POPPLER_CHECK_VERSION</a>, macro in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
+</dt>
+<dd></dd>
 <dt>
 <a class="link" href="poppler-Poppler-Color.html#PopplerColor-struct" title="PopplerColor">PopplerColor</a>, struct in <a class="link" href="poppler-Poppler-Color.html" title="PopplerColor">Poppler Color</a>
 </dt>
@@ -763,6 +773,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="PopplerDocument.html#poppler-document-has-javascript" title="poppler_document_has_javascript ()">poppler_document_has_javascript</a>, function in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="PopplerDocument.html#poppler-document-is-linearized" title="poppler_document_is_linearized ()">poppler_document_is_linearized</a>, function in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
 </dt>
 <dd></dd>
@@ -784,6 +798,10 @@
 <dd></dd>
 <dt>
 <a class="link" href="PopplerDocument.html#poppler-document-new-from-stream" title="poppler_document_new_from_stream ()">poppler_document_new_from_stream</a>, function in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="PopplerDocument.html#poppler-document-reset-form" title="poppler_document_reset_form ()">poppler_document_reset_form</a>, function in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
 </dt>
 <dd></dd>
 <dt>
@@ -1005,6 +1023,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="PopplerFormField.html#poppler-form-field-get-alternate-ui-name" title="poppler_form_field_get_alternate_ui_name ()">poppler_form_field_get_alternate_ui_name</a>, function in <a class="link" href="PopplerFormField.html" title="PopplerFormField">PopplerFormField</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="PopplerFormField.html#poppler-form-field-get-field-type" title="poppler_form_field_get_field_type ()">poppler_form_field_get_field_type</a>, function in <a class="link" href="PopplerFormField.html" title="PopplerFormField">PopplerFormField</a>
 </dt>
 <dd></dd>
@@ -1078,11 +1100,16 @@
 <dd></dd>
 <a name="idxG"></a><h3 class="title">G</h3>
 <dt>
-<a class="link" href="poppler-Poppler-Features.html#poppler-get-backend" title="poppler_get_backend ()">poppler_get_backend</a>, function in <a class="link" href="poppler-Poppler-Features.html" title="Poppler Features">Poppler Features</a>
+<a class="link" href="poppler-Poppler-Features.html#poppler-get-backend" title="poppler_get_backend ()">poppler_get_backend</a>, function in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
 </dt>
 <dd></dd>
 <dt>
-<a class="link" href="poppler-Poppler-Features.html#poppler-get-version" title="poppler_get_version ()">poppler_get_version</a>, function in <a class="link" href="poppler-Poppler-Features.html" title="Poppler Features">Poppler Features</a>
+<a class="link" href="poppler-Poppler-Features.html#poppler-get-version" title="poppler_get_version ()">poppler_get_version</a>, function in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
+</dt>
+<dd></dd>
+<a name="idxH"></a><h3 class="title">H</h3>
+<dt>
+<a class="link" href="poppler-Poppler-Features.html#POPPLER-HAS-CAIRO:CAPS" title="POPPLER_HAS_CAIRO">POPPLER_HAS_CAIRO</a>, macro in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
 </dt>
 <dd></dd>
 <a name="idxI"></a><h3 class="title">I</h3>
@@ -1213,6 +1240,10 @@
 <dd></dd>
 <a name="idxM"></a><h3 class="title">M</h3>
 <dt>
+<a class="link" href="poppler-Poppler-Features.html#POPPLER-MAJOR-VERSION:CAPS" title="POPPLER_MAJOR_VERSION">POPPLER_MAJOR_VERSION</a>, macro in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="poppler-Poppler-Media.html#PopplerMedia-struct" title="PopplerMedia">PopplerMedia</a>, struct in <a class="link" href="poppler-Poppler-Media.html" title="PopplerMedia">Poppler Media</a>
 </dt>
 <dd></dd>
@@ -1241,11 +1272,23 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="poppler-Poppler-Features.html#POPPLER-MICRO-VERSION:CAPS" title="POPPLER_MICRO_VERSION">POPPLER_MICRO_VERSION</a>, macro in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="poppler-Poppler-Features.html#POPPLER-MINOR-VERSION:CAPS" title="POPPLER_MINOR_VERSION">POPPLER_MINOR_VERSION</a>, macro in <a class="link" href="poppler-Poppler-Features.html" title="Version and Features Information">Poppler Features</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="poppler-Poppler-Movie.html#PopplerMovie-struct" title="PopplerMovie">PopplerMovie</a>, struct in <a class="link" href="poppler-Poppler-Movie.html" title="PopplerMovie">Poppler Movie</a>
 </dt>
 <dd></dd>
 <dt>
 <a class="link" href="poppler-Poppler-Movie.html#PopplerMoviePlayMode" title="enum PopplerMoviePlayMode">PopplerMoviePlayMode</a>, enum in <a class="link" href="poppler-Poppler-Movie.html" title="PopplerMovie">Poppler Movie</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="poppler-Poppler-Movie.html#poppler-movie-get-aspect" title="poppler_movie_get_aspect ()">poppler_movie_get_aspect</a>, function in <a class="link" href="poppler-Poppler-Movie.html" title="PopplerMovie">Poppler Movie</a>
 </dt>
 <dd></dd>
 <dt>
@@ -1315,6 +1358,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="PopplerDocument.html#PopplerPageRange" title="PopplerPageRange">PopplerPageRange</a>, struct in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="poppler-Poppler-Page.html#PopplerPageTransition-struct" title="PopplerPageTransition">PopplerPageTransition</a>, struct in <a class="link" href="poppler-Poppler-Page.html" title="PopplerPage">Poppler Page</a>
 </dt>
 <dd></dd>
@@ -1364,6 +1411,10 @@
 <dd></dd>
 <dt>
 <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-annot-mapping" title="poppler_page_get_annot_mapping ()">poppler_page_get_annot_mapping</a>, function in <a class="link" href="poppler-Poppler-Page.html" title="PopplerPage">Poppler Page</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-get-bounding-box" title="poppler_page_get_bounding_box ()">poppler_page_get_bounding_box</a>, function in <a class="link" href="poppler-Poppler-Page.html" title="PopplerPage">Poppler Page</a>
 </dt>
 <dd></dd>
 <dt>
@@ -1523,7 +1574,15 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="PopplerDocument.html#PopplerPrintDuplex" title="enum PopplerPrintDuplex">PopplerPrintDuplex</a>, enum in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="poppler-Poppler-Page.html#PopplerPrintFlags" title="enum PopplerPrintFlags">PopplerPrintFlags</a>, enum in <a class="link" href="poppler-Poppler-Page.html" title="PopplerPage">Poppler Page</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="PopplerDocument.html#PopplerPrintScaling" title="enum PopplerPrintScaling">PopplerPrintScaling</a>, enum in <a class="link" href="PopplerDocument.html" title="PopplerDocument">PopplerDocument</a>
 </dt>
 <dd></dd>
 <dt>
@@ -1907,7 +1966,7 @@
 </dt>
 <dd></dd>
 <dt>
-PopplerTextSpan, struct in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#PopplerTextSpan-struct" title="PopplerTextSpan">PopplerTextSpan</a>, struct in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
@@ -1923,35 +1982,35 @@ PopplerTextSpan, struct in Poppler Text Span
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_copy, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-copy" title="poppler_text_span_copy ()">poppler_text_span_copy</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_free, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-free" title="poppler_text_span_free ()">poppler_text_span_free</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_get_color, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-get-color" title="poppler_text_span_get_color ()">poppler_text_span_get_color</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_get_font_name, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-get-font-name" title="poppler_text_span_get_font_name ()">poppler_text_span_get_font_name</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_get_text, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-get-text" title="poppler_text_span_get_text ()">poppler_text_span_get_text</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_is_bold_font, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-is-bold-font" title="poppler_text_span_is_bold_font ()">poppler_text_span_is_bold_font</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_is_fixed_width_font, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-is-fixed-width-font" title="poppler_text_span_is_fixed_width_font ()">poppler_text_span_is_fixed_width_font</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <dt>
-poppler_text_span_is_serif_font, function in Poppler Text Span
+<a class="link" href="poppler-Poppler-Text-Span.html#poppler-text-span-is-serif-font" title="poppler_text_span_is_serif_font ()">poppler_text_span_is_serif_font</a>, function in <a class="link" href="poppler-Poppler-Text-Span.html" title="Poppler Text Span">Poppler Text Span</a>
 </dt>
 <dd></dd>
 <a name="idxV"></a><h3 class="title">V</h3>
@@ -1961,6 +2020,6 @@ poppler_text_span_is_serif_font, function in Poppler Text Span
 <dd></dd>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.32.1</div>
 </body>
 </html>

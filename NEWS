@@ -1,3 +1,144 @@
+Release 0.90.1:
+        core:
+         * Fix regression on PS conversion.
+           Regression only happened on applications that are locale enabled
+           i.e. Okular but not pdftops, when using a quite new lcms and
+           the user locale uses , as decimal separator instead of .
+         * Add UTF16LE support to TextStringToUCS4.
+           Even if the standard clearly says it should be UTF16BE
+
+        qt6:
+         * Add work in progress qt6 port. Ignore for now :)
+
+Release 0.90.0:
+        core:
+         * Color profile tweaks
+         * Small signature improvements
+         * BBoxOutputDev: Fix calculation when type3 fonts are involved
+         * Fix potential crash when reading Forms
+         * Fix infinite loop in broken file
+
+        glib:
+         * Fix adding annots in rotated pages
+         * Add ability to reset forms
+         * Several fixes to the documentation
+
+        qt5:
+         * Make it clear we require Qt 5.5
+         * demo: Fix crash on broken files
+         * Small documentation improvements
+
+        utils:
+         * pdftoppm: Add option to set display profile
+         * pdftops: Add a -rasterize option with values always, never, or whenneeded
+
+        build system:
+         * Require cmake 3.5
+         * More modern cmake way to link against curl
+
+Release 0.89.0:
+        core:
+         * Add support for ResetForm action. Issue #225
+         * Fix crash in PDFDoc::getSignatureFields when there's no Forms at all
+         * Fix exporting to PS of some files with CID fonts
+         * Use ICC profiles in PS output (if new enough lcms is used)
+         * Allow almost-singular tiling pattern matrices. Issue #894
+         * Fix memory leak when failing to load some fonts
+         * CairoOutputDev: Use stroke opacity when clipping to a stroke path
+         * CairoOutputDev: Fix tiling patterns when pattern cell is too far. Issue #190
+
+        glib:
+         * Add poppler_movie_get_aspect
+
+        cpp:
+         * Add the font infos to the text_box object
+
+Release 0.88.0:
+        core:
+         * Support Widget Annotation Buttons not linked to any Form
+         * SplashOuputDev: Use stroking opacity when clipping to a stroke path
+         * Handle 1 bit RGB images in ICC colorspace
+         * Internal code improvements
+
+        qt5:
+         * Add Document::signatures. Returns signatures not attached to any page
+         * ArthurOutputDev: Fix font hinting
+         * ArthurOutputDev: Set the opacity when filling with axial gradients
+         * ArthurOutputDev: Implement the clipToStrokePath method
+         * ArthurOutputDev: Use stroking opacity when clipping to a stroke path
+
+        glib:
+         * Add poppler_page_get_bounding_box
+         * Add poppler_form_field_get_alternate_ui_name
+         * Implement rotation for 'flagNoRotate' annots. Issue #767
+
+        cpp:
+         * Add non_raw_non_physical layout for page::text()
+
+        utils:
+         * pdftohtml: Fix noRoundedCoordinates->noroundcoord in man page
+         * pdfsig: Show also signatures that aren't attached to any page
+
+Release 0.87.0:
+        core:
+         * Fix leak in broken files
+         * Internal code improvements
+
+        qt5:
+         * Add option to get form choice for export value
+         * ArthurOutputDev: Avoid division by zero in updateLineDash. Issue #695
+
+        glib:
+         * Internal code improvements
+
+         utils:
+         * pdftohtml: Fix memory leak in HtmlOutputDev::getLinkDest
+
+Release 0.86.1:
+        core:
+         * Fix regression in Browse Link handling
+         * Internal code improvements
+
+Release 0.86.0:
+        core:
+         * Fix link content exfiltration attack
+         * Splash: Implement gouraudTriangleShadedFill for some non parametrized shadings. Issue #881
+         * Fix case unsensitive search for Old Hungarian, Warang Citi, Medefaidrin and Adlam
+         * Internal code improvements
+
+        glib:
+         * Automatic handle of page's cropbox on annots. Issue #129
+         * Fix memory leak if poppler_document_new_from_file fails
+         * Minor speed optimization on poppler_page_get_annot_mapping
+
+         utils:
+         * pdfdetach: add 'savefile' option
+         * pdftoppm/pdftocairo: Fix more odd/even mismatch
+
+        qt5:
+         * Fix loading from iodevice
+
+Release 0.85.0:
+        core:
+         * Fix case unsensitive search for Deseret and Osage. Issue #853
+         * Fix crash in unicodeToAscii7
+         * CairoOutputDev: make initialisation thread-safe
+         * Fix crash on broken files. Issues #869, #870
+         * Internal code improvements
+
+        utils:
+         * pdftoppm/pdftocairo: Fix -e/-o printing the wrong pages. Issue #873
+         * pdftohtml: Fix issue with the font size sometimes being huge
+
+        qt5:
+         * Fix FormField::name encoding
+         * Accept UTF-16 uiNames for form fields
+         * Fix search for "complex" characters
+         * Allow to load document from QIODevice
+
+        glib:
+         * make the frontend initialization thread safe.
+
 Release 0.84.0:
         core:
          * Fix crash when converting from Unicode to ASCII-7
@@ -84,7 +225,7 @@ Release 0.80.0:
         glib:
          * Make print scaling getter visible
          * Make Duplex/NumCopies/PrintPageRange preference available in API
-         * Implement Movie API
+         * Complement Movie API
 
         utils:
          * pdftotext: Add -nodiag flag to remove diagonal text on output

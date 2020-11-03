@@ -1,6 +1,6 @@
 project(poppler)
 
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
@@ -36,8 +36,8 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "84")
-set(POPPLER_MICRO_VERSION "0")
+set(POPPLER_MINOR_VERSION "90")
+set(POPPLER_MICRO_VERSION "1")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 set (CMAKE_CXX_STANDARD 14)
@@ -47,6 +47,7 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
 option(BUILD_GTK_TESTS "Whether to compile the GTK+ test programs." ON)
 option(BUILD_QT5_TESTS "Whether to compile the Qt5 test programs." ON)
+option(BUILD_QT6_TESTS "Whether to compile the Qt6 test programs." ON)
 option(BUILD_CPP_TESTS "Whether to compile the CPP test programs." ON)
 option(ENABLE_SPLASH "Build the Splash graphics backend." ON)
 option(ENABLE_UTILS "Compile poppler command line utils." ON)
@@ -55,6 +56,7 @@ option(ENABLE_GLIB "Compile poppler glib wrapper." ON)
 option(ENABLE_GOBJECT_INTROSPECTION "Whether to generate GObject introspection." ON)
 option(ENABLE_GTK_DOC "Whether to generate glib API documentation." OFF)
 option(ENABLE_QT5 "Compile poppler qt5 wrapper." ON)
+option(ENABLE_QT6 "Compile poppler qt6 wrapper." ON)
 set(ENABLE_LIBOPENJPEG "openjpeg2" CACHE STRING "Use libopenjpeg for JPX streams. Possible values: openjpeg2, unmaintained, none. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no JPX decoder at all. Default: openjpeg2")
 set(ENABLE_CMS "lcms2" CACHE STRING "Use color management system. Possible values: lcms2, none. 'none' disables color management system.")
 set(ENABLE_DCTDECODER "libjpeg" CACHE STRING "Use libjpeg for DCT streams. Possible values: libjpeg, unmaintained, none. will use libjpeg if available or fail if not. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no DCT decoder at all. Default: libjpeg")
@@ -63,6 +65,7 @@ option(ENABLE_ZLIB "Build with zlib." ON)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
+option(RUN_GPERF_IF_PRESENT "Run gperf if it is found" ON)
 if(WIN32)
   option(ENABLE_RELOCATABLE "Do not hardcode the poppler library location (on Windows)." ON)
 else()
@@ -148,7 +151,7 @@ else()
 endif()
 
 if (ENABLE_QT5)
-  find_package(Qt5Core)
+  find_package(Qt5Core 5.5)  # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when increasing this
   find_package(Qt5Gui)
   find_package(Qt5Xml)
   find_package(Qt5Widgets)
@@ -156,6 +159,14 @@ if (ENABLE_QT5)
   if (NOT (Qt5Core_FOUND AND Qt5Gui_FOUND AND Qt5Xml_FOUND AND Qt5Widgets_FOUND AND Qt5Test_FOUND))
     message("-- Package Qt5Core or Qt5Gui or Qt5Xml or Qt5Widgets or Qt5Test not found")
     set(ENABLE_QT5 OFF)
+  endif()
+endif()
+
+if (ENABLE_QT6)
+  find_package(Qt6 COMPONENTS Core Gui Xml Widgets Test QUIET)
+  if (NOT (Qt6Core_FOUND AND Qt6Gui_FOUND AND Qt6Xml_FOUND AND Qt6Widgets_FOUND AND Qt6Test_FOUND))
+    message("-- Package Qt6Core or Qt6Gui or Qt6Xml or Qt6Widgets or Qt6Test not found")
+    set(ENABLE_QT6 OFF)
   endif()
 endif()
 
@@ -319,6 +330,8 @@ include(ConfigureChecks.cmake)
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h)
 
+find_program(GPERF gperf)
+
 set(poppler_SRCS
   goo/gbase64.cc
   goo/gbasename.cc
@@ -342,8 +355,6 @@ set(poppler_SRCS
   fofi/FoFiIdentifier.cc
   poppler/Annot.cc
   poppler/Array.cc
-  poppler/BuiltinFont.cc
-  poppler/BuiltinFontTables.cc
   poppler/CachedFile.cc
   poppler/Catalog.cc
   poppler/CharCodeToUnicode.cc
@@ -364,6 +375,7 @@ set(poppler_SRCS
   poppler/Hints.cc
   poppler/JArithmeticDecoder.cc
   poppler/JBIG2Stream.cc
+  poppler/JSInfo.cc
   poppler/Lexer.cc
   poppler/Link.cc
   poppler/Linearization.cc
@@ -403,6 +415,7 @@ set(poppler_SRCS
   poppler/Movie.cc
   poppler/Rendition.cc
   poppler/CertificateInfo.cc
+  poppler/BBoxOutputDev.cc
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
 if(ENABLE_SPLASH)
@@ -452,7 +465,11 @@ if(ENABLE_LIBCURL)
     poppler/CurlCachedFile.cc
     poppler/CurlPDFDocBuilder.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
+  else()
+    set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
+  endif()
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
@@ -491,13 +508,49 @@ if(TIFF_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${TIFF_LIBRARIES})
 endif()
 
+if (GPERF AND RUN_GPERF_IF_PRESENT)
+    macro(ADD_GPERF_FILE input)
+        add_custom_command(OUTPUT poppler/${input}.c
+                       COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
+                       COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       COMMAND clang-format -i ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c || true
+                       DEPENDS poppler/${input}.gperf
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+        set(poppler_SRCS ${poppler_SRCS}
+            poppler/${input}.c
+        )
+    endmacro()
+else()
+    macro(ADD_GPERF_FILE input)
+        set(poppler_SRCS ${poppler_SRCS}
+            poppler/${input}.pregenerated.c
+        )
+    endmacro()
+endif()
+
+ADD_GPERF_FILE(CourierWidths)
+ADD_GPERF_FILE(CourierBoldWidths)
+ADD_GPERF_FILE(CourierBoldObliqueWidths)
+ADD_GPERF_FILE(CourierObliqueWidths)
+ADD_GPERF_FILE(HelveticaWidths)
+ADD_GPERF_FILE(HelveticaBoldWidths)
+ADD_GPERF_FILE(HelveticaBoldObliqueWidths)
+ADD_GPERF_FILE(HelveticaObliqueWidths)
+ADD_GPERF_FILE(SymbolWidths)
+ADD_GPERF_FILE(TimesBoldWidths)
+ADD_GPERF_FILE(TimesBoldItalicWidths)
+ADD_GPERF_FILE(TimesItalicWidths)
+ADD_GPERF_FILE(TimesRomanWidths)
+ADD_GPERF_FILE(ZapfDingbatsWidths)
+
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 94.0.0 SOVERSION 94)
+set_target_properties(poppler PROPERTIES VERSION 101.0.0 SOVERSION 101)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -512,8 +565,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
     poppler/Annot.h
     poppler/Array.h
-    poppler/BuiltinFont.h
-    poppler/BuiltinFontTables.h
     poppler/CachedFile.h
     poppler/Catalog.h
     poppler/CharCodeToUnicode.h
@@ -535,6 +586,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/Hints.h
     poppler/JArithmeticDecoder.h
     poppler/JBIG2Stream.h
+    poppler/JSInfo.h
     poppler/Lexer.h
     poppler/Link.h
     poppler/Linearization.h
@@ -573,7 +625,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/ViewerPreferences.h
     poppler/XRef.h
     poppler/CharTypes.h
-    poppler/CompactFontTables.h
     poppler/ErrorCodes.h
     poppler/NameToUnicodeTable.h
     poppler/PSOutputDev.h
@@ -581,6 +632,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/SecurityHandler.h
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
+    poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
@@ -682,6 +734,9 @@ add_subdirectory(test)
 if(ENABLE_QT5)
   add_subdirectory(qt5)
 endif()
+if(ENABLE_QT6)
+  add_subdirectory(qt6)
+endif()
 if(ENABLE_CPP)
   add_subdirectory(cpp)
 endif()
@@ -725,6 +780,7 @@ show_end_message("font configuration" ${font_configuration})
 show_end_message_yesno("splash output" ENABLE_SPLASH)
 show_end_message_yesno("cairo output" CAIRO_FOUND)
 show_end_message_yesno("qt5 wrapper" ENABLE_QT5)
+show_end_message_yesno("qt6 wrapper" ENABLE_QT6)
 show_end_message_yesno("glib wrapper" ENABLE_GLIB)
 show_end_message_yesno("  introspection" INTROSPECTION_FOUND)
 show_end_message_yesno("  gtk-doc" ENABLE_GTK_DOC)
