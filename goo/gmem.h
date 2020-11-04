@@ -59,14 +59,9 @@ inline void *gmalloc_checkoverflow(size_t size)
 }
 
 /// Same as free
-<<<<<<< HEAD
-inline POPPLER_LIB_EXPORT void gfree(void *p) {
-  std::free(p);
-=======
-inline void gfree(void *p)
+inline POPPLER_LIB_EXPORT void gfree(void *p)
 {
     std::free(p);
->>>>>>> vendor
 }
 
 /// Same as realloc, but prints error message and exits if realloc() returns NULL.
