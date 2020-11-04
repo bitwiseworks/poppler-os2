@@ -59,13 +59,15 @@ namespace Poppler {
 
     POPPLER_QT4_EXPORT QString UnicodeParsedString(const GooString *s1);
 
+    POPPLER_QT4_EXPORT QString UnicodeParsedString(const std::string& s1);
+
     POPPLER_QT4_EXPORT GooString *QStringToUnicodeGooString(const QString &s);
 
     POPPLER_QT4_EXPORT GooString *QStringToGooString(const QString &s);
 
     GooString *QDateTimeToUnicodeGooString(const QDateTime &dt);
 
-    void qt4ErrorFunction(int pos, char *msg, va_list args);
+    void qt4ErrorFunction(ErrorCategory /*category*/, Goffset pos, const char *msg);
 
     class LinkDestinationData
     {
@@ -81,9 +83,10 @@ namespace Poppler {
             bool externalDest;
     };
 
-    class DocumentData {
+    class DocumentData : private GlobalParamsIniter {
     public:
-	DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword)
+	DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword) :
+	GlobalParamsIniter(qt4ErrorFunction)
 	    {
 		init();
 		m_filePath = filePath;	
@@ -102,7 +105,8 @@ namespace Poppler {
 		delete userPassword;
 	    }
 	
-	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword)
+	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword) :
+	GlobalParamsIniter(qt4ErrorFunction)
 	    {
 		fileContents = data;
 		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), Object(objNull));
@@ -148,7 +152,10 @@ namespace Poppler {
 	QPointer<OptContentModel> m_optContentModel;
 	QColor paperColor;
 	int m_hints;
-	static int count;
+#ifdef USE_CMS
+	GfxLCMSProfilePtr m_sRGBProfile;
+	GfxLCMSProfilePtr m_displayProfile;
+#endif
     };
 
     class FontInfoData

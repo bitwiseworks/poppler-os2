@@ -57,8 +57,6 @@
 
 namespace Poppler {
 
-  int DocumentData::count = 0;
-
   Document *Document::load(const QString &filePath, const QByteArray &ownerPassword,
 			   const QByteArray &userPassword)
     {
@@ -633,7 +631,16 @@ namespace Poppler {
     void Document::setColorDisplayProfile(void* outputProfileA)
     {
 #if defined(USE_CMS)
-        GfxColorSpace::setDisplayProfile((cmsHPROFILE)outputProfileA);
+        if (m_doc->m_sRGBProfile && m_doc->m_sRGBProfile.get() == outputProfileA) {
+            // Catch the special case that the user passes the sRGB profile
+            m_doc->m_displayProfile = m_doc->m_sRGBProfile;
+            return;
+        }
+        if (m_doc->m_displayProfile && m_doc->m_displayProfile.get() == outputProfileA) {
+            // Catch the special case that the user passes the display profile
+            return;
+        }
+        m_doc->m_displayProfile = make_GfxLCMSProfilePtr(outputProfileA);
 #else
         Q_UNUSED(outputProfileA);
 #endif
@@ -642,9 +649,8 @@ namespace Poppler {
     void Document::setColorDisplayProfileName(const QString &name)
     {
 #if defined(USE_CMS)
-        GooString *profileName = QStringToGooString( name );
-        GfxColorSpace::setDisplayProfileName(profileName);
-        delete profileName;
+        void* rawprofile = cmsOpenProfileFromFile(name.toLocal8Bit().constData(),"r");
+        m_doc->m_displayProfile = make_GfxLCMSProfilePtr(rawprofile);
 #else
         Q_UNUSED(name);
 #endif
@@ -653,7 +659,10 @@ namespace Poppler {
     void* Document::colorRgbProfile() const
     {
 #if defined(USE_CMS)
-        return (void*)GfxColorSpace::getRGBProfile();
+        if (!m_doc->m_sRGBProfile) {
+            m_doc->m_sRGBProfile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
+        }
+        return m_doc->m_sRGBProfile.get();
 #else
         return NULL;
 #endif
@@ -662,7 +671,7 @@ namespace Poppler {
     void* Document::colorDisplayProfile() const
     {
 #if defined(USE_CMS)
-       return (void*)GfxColorSpace::getDisplayProfile();
+       return m_doc->m_displayProfile.get();
 #else
        return NULL;
 #endif

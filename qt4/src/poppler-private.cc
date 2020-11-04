@@ -49,15 +49,13 @@ namespace Debug {
 
 }
 
-    static UnicodeMap *utf8Map = 0;
-
     void setDebugErrorFunction(PopplerDebugFunc function, const QVariant &closure)
     {
         Debug::debugFunction = function ? function : Debug::qDebugDebugFunction;
         Debug::debugClosure = closure;
     }
 
-    static void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg)
+    void qt4ErrorFunction(ErrorCategory /*category*/, Goffset pos, const char *msg)
     {
         QString emsg;
 
@@ -74,12 +72,7 @@ namespace Debug {
     }
 
     QString unicodeToQString(const Unicode* u, int len) {
-        if (!utf8Map)
-        {
-                GooString enc("UTF-8");
-                utf8Map = globalParams->getUnicodeMap(&enc);
-                utf8Map->incRefCnt();
-        }
+        const UnicodeMap *utf8Map = globalParams->getUtf8Map();
 
         // ignore the last character if it is 0x0
         if ((len > 0) && (u[len - 1] == 0))
@@ -99,34 +92,25 @@ namespace Debug {
     }
 
     QString UnicodeParsedString(const GooString *s1) {
-        if ( !s1 || s1->getLength() == 0 )
+        return (s1) ? UnicodeParsedString(s1->toStr()) : QString();
+    }
+
+    QString UnicodeParsedString(const std::string& s1) {
+        if ( s1.empty() )
             return QString();
 
-        const char *cString;
-        int stringLength;
-        bool deleteCString;
-        if ( ( s1->getChar(0) & 0xff ) == 0xfe && ( s1->getLength() > 1 && ( s1->getChar(1) & 0xff ) == 0xff ) )
+        if ( GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1) )
         {
-            cString = s1->c_str();
-            stringLength = s1->getLength();
-            deleteCString = false;
+            return QString::fromUtf16(reinterpret_cast<const ushort *>(s1.c_str()), s1.size() / 2);
         }
         else
         {
-            cString = pdfDocEncodingToUTF16(s1, &stringLength);
-            deleteCString = true;
-        }
-
-        QString result;
-        // i = 2 to skip the unicode marker
-        for ( int i = 2; i < stringLength; i += 2 )
-        {
-            const Unicode u = ( ( cString[i] & 0xff ) << 8 ) | ( cString[i+1] & 0xff );
-            result += QChar( u );
-        }
-        if (deleteCString)
+            int stringLength;
+            const char *cString = pdfDocEncodingToUTF16(s1, &stringLength);
+            auto result = QString::fromUtf16(reinterpret_cast<const ushort *>(cString), stringLength / 2);
             delete[] cString;
-        return result;
+            return result;
+        }
     }
 
     GooString *QStringToUnicodeGooString(const QString &s) {
@@ -221,7 +205,7 @@ namespace Debug {
             case actionURI:
             {
                 const LinkURI * u = static_cast< const LinkURI * >( a );
-                e->setAttribute( "DestinationURI", u->getURI()->c_str() );
+                e->setAttribute( "DestinationURI", u->getURI().c_str() );
             }
             default: ;
         }
@@ -233,13 +217,6 @@ namespace Debug {
         delete (OptContentModel *)m_optContentModel;
         delete doc;
         delete m_fontInfoIterator;
-    
-        count --;
-        if ( count == 0 )
-        {
-            utf8Map = nullptr;
-            globalParams.reset();
-        }
       }
     
     void DocumentData::init()
@@ -249,14 +226,6 @@ namespace Debug {
         paperColor = Qt::white;
         m_hints = 0;
         m_optContentModel = 0;
-      
-        if ( count == 0 )
-        {
-            utf8Map = nullptr;
-            globalParams = std::make_unique<GlobalParams>();
-            setErrorCallback(qt4ErrorFunction, nullptr);
-        }
-        count ++;
     }
 
 

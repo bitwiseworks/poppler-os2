@@ -789,7 +789,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
         case Annotation::PageInvisibleAction: actionType = Annot::actionPageInvisible; break;
     }
 
-    ::LinkAction *linkAction = nullptr;
+    std::unique_ptr<::LinkAction> linkAction = nullptr;
     if ( pdfAnnot->getType() == Annot::typeScreen )
         linkAction = static_cast<AnnotScreen*>( pdfAnnot )->getAdditionalAction( actionType );
     else
@@ -798,7 +798,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
     Link *link = nullptr;
 
     if ( linkAction )
-        link = PageData::convertLinkActionToLink( linkAction, parentDoc, QRectF() );
+        link = PageData::convertLinkActionToLink( linkAction.get(), parentDoc, QRectF() );
 
     return link;
 }

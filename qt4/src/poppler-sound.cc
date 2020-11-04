@@ -75,8 +75,7 @@ QString SoundObject::url() const
 	if ( m_soundData->m_type != SoundObject::External )
 		return QString();
 
-	const GooString * goo = m_soundData->m_soundObj->getFileName();
-	return goo ? QString( goo->c_str() ) : QString();
+	return QString( m_soundData->m_soundObj->getFileName().c_str() );
 }
 
 QByteArray SoundObject::data() const

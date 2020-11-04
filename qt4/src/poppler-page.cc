@@ -110,30 +110,30 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
     case actionNamed:
     {
-      const char * name = ((LinkNamed *)a)->getName()->c_str();
-      if ( !strcmp( name, "NextPage" ) )
+      const std::string& name = ((LinkNamed *)a)->getName();
+      if ( name == "NextPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PageNext );
-      else if ( !strcmp( name, "PrevPage" ) )
+      else if ( name == "PrevPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PagePrev );
-      else if ( !strcmp( name, "FirstPage" ) )
+      else if ( name == "FirstPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PageFirst );
-      else if ( !strcmp( name, "LastPage" ) )
+      else if ( name == "LastPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PageLast );
-      else if ( !strcmp( name, "GoBack" ) )
+      else if ( name == "GoBack" )
         popplerLink = new LinkAction( linkArea, LinkAction::HistoryBack );
-      else if ( !strcmp( name, "GoForward" ) )
+      else if ( name == "GoForward" )
         popplerLink = new LinkAction( linkArea, LinkAction::HistoryForward );
-      else if ( !strcmp( name, "Quit" ) )
+      else if ( name == "Quit" )
         popplerLink = new LinkAction( linkArea, LinkAction::Quit );
-      else if ( !strcmp( name, "GoToPage" ) )
+      else if ( name == "GoToPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::GoToPage );
-      else if ( !strcmp( name, "Find" ) )
+      else if ( name == "Find" )
         popplerLink = new LinkAction( linkArea, LinkAction::Find );
-      else if ( !strcmp( name, "FullScreen" ) )
+      else if ( name == "FullScreen" )
         popplerLink = new LinkAction( linkArea, LinkAction::Presentation );
-      else if ( !strcmp( name, "Print" ) )
+      else if ( name == "Print" )
         popplerLink = new LinkAction( linkArea, LinkAction::Print );
-      else if ( !strcmp( name, "Close" ) )
+      else if ( name == "Close" )
       {
         // acroread closes the document always, doesnt care whether 
         // its presentation mode or not
@@ -149,7 +149,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
     case actionURI:
     {
-      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI()->c_str() );
+      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI().c_str() );
     }
     break;
 
@@ -362,6 +362,10 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false,
                                         m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
 
+#ifdef USE_CMS
+      splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
+#endif
+
       splash_output.startDoc(m_page->parentDoc->doc);
 
       m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres,
@@ -442,6 +446,11 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
       painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
       ArthurOutputDev arthur_output(painter);
       arthur_output.startDoc(m_page->parentDoc->doc->getXRef());
+
+#ifdef USE_CMS
+      arthur_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
+#endif
+
       m_page->parentDoc->doc->displayPageSlice(&arthur_output,
                                                m_page->index + 1,
                                                xres,
@@ -671,12 +680,11 @@ Link *Page::action( PageAction act ) const
     Dict *dict = o.getDict();
     const char *key = act == Page::Opening ? "O" : "C";
     Object o2 = dict->lookup((char*)key);
-    ::LinkAction *lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
+    std::unique_ptr<::LinkAction> lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
     Link *popplerLink = NULL;
     if (lact != NULL)
     {
-      popplerLink = m_page->convertLinkActionToLink(lact, QRectF());
-      delete lact;
+      popplerLink = m_page->convertLinkActionToLink(lact.get(), QRectF());
     }
     return popplerLink;
   }

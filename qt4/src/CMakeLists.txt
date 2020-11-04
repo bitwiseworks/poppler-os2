@@ -48,6 +48,9 @@ if(OS2)
         TARGET_SHORT poppq4)
 endif()
 
+if(USE_CMS)
+    target_link_libraries(poppler-qt4 poppler ${LCMS2_LIBRARIES})
+endif()
 install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
