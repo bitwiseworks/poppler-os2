@@ -42,11 +42,8 @@ extern bool unicodeIsAlphabeticPresentationForm(Unicode c);
 
 extern Unicode unicodeToUpper(Unicode c);
 
-extern POPPLER_LIB_EXPORT Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
-				     int *out_len, int **indices);
+extern POPPLER_LIB_EXPORT Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices);
 
-extern POPPLER_LIB_EXPORT Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
-				     int *out_len, int **indices,
-				     bool reverseRTL);
+extern POPPLER_LIB_EXPORT Unicode *unicodeNormalizeNFKC(const Unicode *in, int len, int *out_len, int **indices, bool reverseRTL);
 
 #endif

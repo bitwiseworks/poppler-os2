@@ -27,14 +27,14 @@
 // SplashFontFileID
 //------------------------------------------------------------------------
 
-class POPPLER_LIB_EXPORT SplashFontFileID {
+class POPPLER_LIB_EXPORT SplashFontFileID
+{
 public:
-
-  SplashFontFileID();
-  virtual ~SplashFontFileID();
-  SplashFontFileID(const SplashFontFileID &) = delete;
-  SplashFontFileID& operator=(const SplashFontFileID &) = delete;
-  virtual bool matches(SplashFontFileID *id) = 0;
+    SplashFontFileID();
+    virtual ~SplashFontFileID();
+    SplashFontFileID(const SplashFontFileID &) = delete;
+    SplashFontFileID &operator=(const SplashFontFileID &) = delete;
+    virtual bool matches(SplashFontFileID *id) = 0;
 };
 
 #endif

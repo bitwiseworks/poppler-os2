@@ -32,8 +32,7 @@ POPPLER_LIB_EXPORT time_t timegm(struct tm *tm);
 #endif
 
 #ifndef HAVE_STRTOK_R
-char * strtok_r (char *s, const char *delim, char **save_ptr);
+char *strtok_r(char *s, const char *delim, char **save_ptr);
 #endif
 
 #endif // GLIBC_H
-

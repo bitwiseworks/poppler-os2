@@ -53,6 +53,7 @@ poppler_page_free_image_mapping
 poppler_page_free_link_mapping
 poppler_page_free_text_attributes
 poppler_page_get_annot_mapping
+poppler_page_get_bounding_box
 poppler_page_get_crop_box
 poppler_page_get_duration
 poppler_page_get_form_field_mapping
@@ -149,7 +150,10 @@ PopplerPDFSubtype
 PopplerPSFile
 PopplerPageLayout
 PopplerPageMode
+PopplerPageRange
 PopplerPermissions
+PopplerPrintDuplex
+PopplerPrintScaling
 PopplerViewerPreferences
 poppler_document_create_dests_tree
 poppler_document_find_dest
@@ -183,12 +187,14 @@ poppler_document_get_producer
 poppler_document_get_subject
 poppler_document_get_title
 poppler_document_has_attachments
+poppler_document_has_javascript
 poppler_document_is_linearized
 poppler_document_new_from_bytes
 poppler_document_new_from_data
 poppler_document_new_from_file
 poppler_document_new_from_gfile
 poppler_document_new_from_stream
+poppler_document_reset_form
 poppler_document_save
 poppler_document_save_a_copy
 poppler_document_set_author
@@ -287,6 +293,7 @@ PopplerActionUri
 PopplerActionNamed
 PopplerActionMovie
 PopplerActionRendition
+PopplerActionResetForm
 PopplerActionOCGState
 PopplerActionJavascript
 PopplerActionType
@@ -362,6 +369,7 @@ poppler_form_field_choice_toggle_item
 poppler_form_field_choice_unselect_all
 poppler_form_field_get_action
 poppler_form_field_get_additional_action
+poppler_form_field_get_alternate_ui_name
 poppler_form_field_get_field_type
 poppler_form_field_get_font_size
 poppler_form_field_get_id
@@ -584,6 +592,7 @@ poppler_media_get_type
 <TITLE>Poppler Movie</TITLE>
 PopplerMovie
 PopplerMoviePlayMode
+poppler_movie_get_aspect
 poppler_movie_get_duration
 poppler_movie_get_filename
 poppler_movie_get_play_mode
@@ -591,9 +600,9 @@ poppler_movie_get_rate
 poppler_movie_get_rotation_angle
 poppler_movie_get_start
 poppler_movie_get_volume
+poppler_movie_is_synchronous
 poppler_movie_need_poster
 poppler_movie_show_controls
-poppler_movie_is_synchronous
 
 <SUBSECTION Standard>
 POPPLER_MOVIE
@@ -770,6 +779,9 @@ poppler_get_version
 <SUBSECTION Standard>
 POPPLER_TYPE_BACKEND
 poppler_backend_get_type
+
+<SUBSECTION Private>
+POPPLER_PUBLIC
 </SECTION>
 
 <SECTION>

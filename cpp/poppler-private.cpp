@@ -5,6 +5,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017-2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2020 Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +41,7 @@ static void stderr_debug_function(const std::string &msg, void * /*data*/)
 debug_func detail::user_debug_function = stderr_debug_function;
 void *detail::debug_closure = nullptr;
 
-void detail::error_function(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg)
+void detail::error_function(ErrorCategory /*category*/, Goffset pos, const char *msg)
 {
     std::ostringstream oss;
     if (pos >= 0) {
@@ -74,8 +75,7 @@ ustring detail::unicode_GooString_to_ustring(const GooString *str)
     ustring::value_type u;
     if (is_unicode) {
         while (i < len) {
-            u = is_unicodeLE ? ((data[i + 1] & 0xff) << 8) | (data[i] & 0xff)
-                             : ((data[i] & 0xff) << 8) | (data[i + 1] & 0xff);
+            u = is_unicodeLE ? ((data[i + 1] & 0xff) << 8) | (data[i] & 0xff) : ((data[i] & 0xff) << 8) | (data[i + 1] & 0xff);
             i += 2;
             ret[ret_index++] = u;
         }
@@ -101,7 +101,7 @@ ustring detail::unicode_to_ustring(const Unicode *u, int length)
     return str;
 }
 
-GooString* detail::ustring_to_unicode_GooString(const ustring &str)
+GooString *detail::ustring_to_unicode_GooString(const ustring &str)
 {
     const size_t len = str.size() * 2 + 2;
     const ustring::value_type *me = str.data();

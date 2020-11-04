@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="poppler-Poppler-Page.html" title="PopplerPage">
 <link rel="next" href="PopplerAttachment.html" title="PopplerAttachment">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -125,6 +125,10 @@
 </tr>
 <tr>
 <td class="datatype_keyword">struct</td>
+<td class="function_name"><a class="link" href="PopplerAction.html#PopplerActionResetForm" title="struct PopplerActionResetForm">PopplerActionResetForm</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">struct</td>
 <td class="function_name"><a class="link" href="PopplerAction.html#PopplerActionOCGState" title="struct PopplerActionOCGState">PopplerActionOCGState</a></td>
 </tr>
 <tr>
@@ -159,6 +163,11 @@
 <pre class="screen">    <a href="/usr/share/gtk-doc/html/gobject/gobject-Boxed-Types.html">GBoxed</a>
     <span class="lineart">├──</span> PopplerAction
     <span class="lineart">╰──</span> PopplerDest
+    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">├──</span> PopplerActionLayerAction
+    <span class="lineart">├──</span> PopplerActionMovieOperation
+    <span class="lineart">├──</span> PopplerActionType
+    <span class="lineart">╰──</span> PopplerDestType
 </pre>
 </div>
 <div class="refsect1">
@@ -283,18 +292,18 @@ poppler_dest_free (<em class="parameter"><code><a class="link" href="PopplerActi
 <div class="refsect2">
 <a name="PopplerDest-struct"></a><h3>PopplerDest</h3>
 <pre class="programlisting">typedef struct {
-	PopplerDestType type;
+    PopplerDestType type;
 
-	int page_num;
-	double left;
-	double bottom;
-	double right;
-	double top;
-	double zoom;
-	gchar *named_dest;
-	guint change_left : 1;
-	guint change_top : 1;
-	guint change_zoom : 1;
+    int page_num;
+    double left;
+    double bottom;
+    double right;
+    double top;
+    double zoom;
+    gchar *named_dest;
+    guint change_left : 1;
+    guint change_top : 1;
+    guint change_zoom : 1;
 } PopplerDest;
 </pre>
 <p>Data structure for holding a destination</p>
@@ -379,8 +388,8 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionAny"></a><h3>struct PopplerActionAny</h3>
 <pre class="programlisting">struct PopplerActionAny {
-	PopplerActionType type;
-	gchar *title;
+    PopplerActionType type;
+    gchar *title;
 };
 </pre>
 </div>
@@ -388,10 +397,10 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionGotoDest"></a><h3>struct PopplerActionGotoDest</h3>
 <pre class="programlisting">struct PopplerActionGotoDest {
-	PopplerActionType type;
-	gchar *title;
+    PopplerActionType type;
+    gchar *title;
 
-	PopplerDest *dest;
+    PopplerDest *dest;
 };
 </pre>
 </div>
@@ -399,11 +408,11 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionGotoRemote"></a><h3>struct PopplerActionGotoRemote</h3>
 <pre class="programlisting">struct PopplerActionGotoRemote {
-	PopplerActionType type;
-	gchar *title;
+    PopplerActionType type;
+    gchar *title;
 
-	gchar *file_name;
-	PopplerDest *dest;
+    gchar *file_name;
+    PopplerDest *dest;
 };
 </pre>
 </div>
@@ -411,11 +420,11 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionLaunch"></a><h3>struct PopplerActionLaunch</h3>
 <pre class="programlisting">struct PopplerActionLaunch {
-	PopplerActionType type;
-	gchar *title;
+    PopplerActionType type;
+    gchar *title;
 
-	gchar *file_name;
-	gchar *params;
+    gchar *file_name;
+    gchar *params;
 };
 </pre>
 </div>
@@ -423,10 +432,10 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionUri"></a><h3>struct PopplerActionUri</h3>
 <pre class="programlisting">struct PopplerActionUri {
-	PopplerActionType type;
-	gchar *title;
+    PopplerActionType type;
+    gchar *title;
 
-	char *uri;
+    char *uri;
 };
 </pre>
 </div>
@@ -434,10 +443,10 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionNamed"></a><h3>struct PopplerActionNamed</h3>
 <pre class="programlisting">struct PopplerActionNamed {
-	PopplerActionType type;
-	gchar *title;
+    PopplerActionType type;
+    gchar *title;
 
-	gchar *named_dest;
+    gchar *named_dest;
 };
 </pre>
 </div>
@@ -445,11 +454,11 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionMovie"></a><h3>struct PopplerActionMovie</h3>
 <pre class="programlisting">struct PopplerActionMovie {
-        PopplerActionType           type;
-        gchar                      *title;
+    PopplerActionType type;
+    gchar *title;
 
-        PopplerActionMovieOperation operation;
-	PopplerMovie               *movie;
+    PopplerActionMovieOperation operation;
+    PopplerMovie *movie;
 };
 </pre>
 </div>
@@ -457,11 +466,23 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionRendition"></a><h3>struct PopplerActionRendition</h3>
 <pre class="programlisting">struct PopplerActionRendition {
-	PopplerActionType type;
-	gchar            *title;
+    PopplerActionType type;
+    gchar *title;
 
-	gint               op;
-	PopplerMedia      *media;
+    gint op;
+    PopplerMedia *media;
+};
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="PopplerActionResetForm"></a><h3>struct PopplerActionResetForm</h3>
+<pre class="programlisting">struct PopplerActionResetForm {
+    PopplerActionType type;
+    gchar *title;
+
+    GList *fields;
+    gboolean exclude;
 };
 </pre>
 </div>
@@ -469,10 +490,10 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionOCGState"></a><h3>struct PopplerActionOCGState</h3>
 <pre class="programlisting">struct PopplerActionOCGState {
-	PopplerActionType type;
-	gchar            *title;
+    PopplerActionType type;
+    gchar *title;
 
-	GList            *state_list;
+    GList *state_list;
 };
 </pre>
 </div>
@@ -480,10 +501,10 @@ is not in a form suitable to be displayed to the user.</p>
 <div class="refsect2">
 <a name="PopplerActionJavascript"></a><h3>struct PopplerActionJavascript</h3>
 <pre class="programlisting">struct PopplerActionJavascript {
-	PopplerActionType  type;
-	gchar 		  *title;
+    PopplerActionType type;
+    gchar *title;
 
-	gchar		  *script;
+    gchar *script;
 };
 </pre>
 </div>
@@ -574,6 +595,13 @@ is not in a form suitable to be displayed to the user.</p>
 <td class="enum_member_name"><p><a name="POPPLER-ACTION-JAVASCRIPT:CAPS"></a>POPPLER_ACTION_JAVASCRIPT</p></td>
 <td class="enum_member_description">
 <p>Javascript. Since 0.18</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="POPPLER-ACTION-RESET-FORM:CAPS"></a>POPPLER_ACTION_RESET_FORM</p></td>
+<td class="enum_member_description">
+<p>resets form. Since 0.90</p>
 </td>
 <td class="enum_member_annotations"> </td>
 </tr>
@@ -735,8 +763,8 @@ bounding box within the window</p>
 <div class="refsect2">
 <a name="PopplerActionLayer"></a><h3>PopplerActionLayer</h3>
 <pre class="programlisting">typedef struct {
-	PopplerActionLayerAction action;
-	GList *layers;
+    PopplerActionLayerAction action;
+    GList *layers;
 } PopplerActionLayer;
 </pre>
 <p>Action to perform over a list of layers</p>
@@ -805,6 +833,6 @@ bounding box within the window</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.32.1</div>
 </body>
 </html>

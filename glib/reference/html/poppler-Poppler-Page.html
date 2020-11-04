@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerDocument.html" title="PopplerDocument">
 <link rel="next" href="PopplerAction.html" title="PopplerAction">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -207,6 +207,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-annot-mapping" title="poppler_page_get_annot_mapping ()">poppler_page_get_annot_mapping</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-get-bounding-box" title="poppler_page_get_bounding_box ()">poppler_page_get_bounding_box</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -659,6 +667,14 @@
     <span class="lineart">├──</span> PopplerQuadrilateral
     <span class="lineart">├──</span> PopplerRectangle
     <span class="lineart">╰──</span> PopplerTextAttributes
+    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
+    <span class="lineart">├──</span> PopplerPageTransitionAlignment
+    <span class="lineart">├──</span> PopplerPageTransitionDirection
+    <span class="lineart">├──</span> PopplerPageTransitionType
+    <span class="lineart">╰──</span> PopplerSelectionStyle
+    <a href="/usr/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GFlags</a>
+    <span class="lineart">├──</span> PopplerFindFlags
+    <span class="lineart">╰──</span> PopplerPrintFlags
     <a href="../gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
     <span class="lineart">╰──</span> PopplerPage
 </pre>
@@ -1188,6 +1204,13 @@ poppler_page_get_annot_mapping (<em class="parameter"><code><a class="link" href
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>. </p>
 <p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAnnotMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-page-get-bounding-box"></a><h3>poppler_page_get_bounding_box ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+poppler_page_get_bounding_box (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
+                               <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rect</code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -2574,8 +2597,8 @@ poppler_text_attributes_new (<em class="parameter"><code><span class="type">void
 <div class="refsect2">
 <a name="PopplerAnnotMapping-struct"></a><h3>PopplerAnnotMapping</h3>
 <pre class="programlisting">typedef struct {
-  PopplerRectangle area;
-  PopplerAnnot *annot;
+    PopplerRectangle area;
+    PopplerAnnot *annot;
 } PopplerAnnotMapping;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a> structure represents the location
@@ -2663,8 +2686,8 @@ option will be ignored if the search term is not pure ascii. Since 0.73.</p>
 <div class="refsect2">
 <a name="PopplerFormFieldMapping-struct"></a><h3>PopplerFormFieldMapping</h3>
 <pre class="programlisting">typedef struct {
-  PopplerRectangle area;
-  PopplerFormField *field;
+    PopplerRectangle area;
+    PopplerFormField *field;
 } PopplerFormFieldMapping;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a> structure represents the location
@@ -2697,9 +2720,8 @@ of <em class="parameter"><code>field</code></em>
 <div class="refsect2">
 <a name="PopplerImageMapping-struct"></a><h3>PopplerImageMapping</h3>
 <pre class="programlisting">typedef struct {
-  PopplerRectangle area;
-  gint image_id;
-
+    PopplerRectangle area;
+    gint image_id;
 } PopplerImageMapping;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a> structure represents the location
@@ -2731,8 +2753,8 @@ of an image on the page</p>
 <div class="refsect2">
 <a name="PopplerLinkMapping-struct"></a><h3>PopplerLinkMapping</h3>
 <pre class="programlisting">typedef struct {
-  PopplerRectangle area;
-  PopplerAction *action;
+    PopplerRectangle area;
+    PopplerAction *action;
 } PopplerLinkMapping;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a> structure represents the location
@@ -2770,14 +2792,14 @@ of <em class="parameter"><code>action</code></em>
 <div class="refsect2">
 <a name="PopplerPageTransition-struct"></a><h3>PopplerPageTransition</h3>
 <pre class="programlisting">typedef struct {
-  PopplerPageTransitionType type;
-  PopplerPageTransitionAlignment alignment;
-  PopplerPageTransitionDirection direction;
-  gint duration;
-  gint angle;
-  gdouble scale;
-  gboolean rectangular;
-  gdouble duration_real;
+    PopplerPageTransitionType type;
+    PopplerPageTransitionAlignment alignment;
+    PopplerPageTransitionDirection direction;
+    gint duration;
+    gint angle;
+    gdouble scale;
+    gboolean rectangular;
+    gdouble duration_real;
 } PopplerPageTransition;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerPageTransition"><span class="type">PopplerPageTransition</span></a> structures describes a visual transition
@@ -3017,8 +3039,8 @@ sweeps across the page in a wide band moving from one side of the screen to the 
 <div class="refsect2">
 <a name="PopplerPoint-struct"></a><h3>PopplerPoint</h3>
 <pre class="programlisting">typedef struct {
-  gdouble x;
-  gdouble y;
+    gdouble x;
+    gdouble y;
 } PopplerPoint;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerPoint"><span class="type">PopplerPoint</span></a> is used to describe a location point on a page</p>
@@ -3095,10 +3117,10 @@ sweeps across the page in a wide band moving from one side of the screen to the 
 <div class="refsect2">
 <a name="PopplerQuadrilateral-struct"></a><h3>PopplerQuadrilateral</h3>
 <pre class="programlisting">typedef struct {
-  PopplerPoint p1;
-  PopplerPoint p2;
-  PopplerPoint p3;
-  PopplerPoint p4;
+    PopplerPoint p1;
+    PopplerPoint p2;
+    PopplerPoint p3;
+    PopplerPoint p4;
 } PopplerQuadrilateral;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerQuadrilateral"><span class="type">PopplerQuadrilateral</span></a> is used to describe rectangle-like polygon
@@ -3141,10 +3163,10 @@ sweeps across the page in a wide band moving from one side of the screen to the 
 <div class="refsect2">
 <a name="PopplerRectangle-struct"></a><h3>PopplerRectangle</h3>
 <pre class="programlisting">typedef struct {
-  gdouble x1;
-  gdouble y1;
-  gdouble x2;
-  gdouble y2;
+    gdouble x1;
+    gdouble y1;
+    gdouble x2;
+    gdouble y2;
 } PopplerRectangle;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> is used to describe
@@ -3224,13 +3246,13 @@ locations on a page and bounding boxes</p>
 <div class="refsect2">
 <a name="PopplerTextAttributes-struct"></a><h3>PopplerTextAttributes</h3>
 <pre class="programlisting">typedef struct {
-  gchar *font_name;
-  gdouble font_size;
-  gboolean is_underlined;
-  PopplerColor color;
+    gchar *font_name;
+    gdouble font_size;
+    gboolean is_underlined;
+    PopplerColor color;
 
-  gint start_index;
-  gint end_index;
+    gint start_index;
+    gint end_index;
 } PopplerTextAttributes;
 </pre>
 <p>A <a class="link" href="poppler-Poppler-Page.html#PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a> is used to describe text attributes of a range of text</p>
@@ -3292,6 +3314,6 @@ locations on a page and bounding boxes</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.32.1</div>
 </body>
 </html>

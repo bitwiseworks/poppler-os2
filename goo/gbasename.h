@@ -19,6 +19,6 @@
 #include "poppler-config.h"
 #include <string>
 
-POPPLER_LIB_EXPORT std::string gbasename(const char* filename);
+POPPLER_LIB_EXPORT std::string gbasename(const char *filename);
 
 #endif // ndef GBASENAME_H
