@@ -83,7 +83,7 @@ enum EndOfLineKind
 // TextFontInfo
 //------------------------------------------------------------------------
 
-class TextFontInfo
+class POPPLER_LIB_EXPORT TextFontInfo
 {
 public:
     TextFontInfo(const GfxState *state);

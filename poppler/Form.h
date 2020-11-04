@@ -567,7 +567,7 @@ protected:
 // FormFieldSignature
 //------------------------------------------------------------------------
 
-class FormFieldSignature : public FormField
+class POPPLER_LIB_EXPORT FormFieldSignature : public FormField
 {
 public:
     FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);

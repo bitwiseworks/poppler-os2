@@ -218,7 +218,7 @@ private:
     const char *popplerDataDir;
 };
 
-class GlobalParamsIniter
+class POPPLER_LIB_EXPORT GlobalParamsIniter
 {
 public:
     GlobalParamsIniter(ErrorCallback errorCallback);

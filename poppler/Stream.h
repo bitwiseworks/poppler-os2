@@ -340,7 +340,7 @@ protected:
 // BaseInputStream
 //------------------------------------------------------------------------
 
-class BaseSeekInputStream : public BaseStream
+class POPPLER_LIB_EXPORT BaseSeekInputStream : public BaseStream
 {
 public:
     // This enum is used to tell the seek() method how it must reposition

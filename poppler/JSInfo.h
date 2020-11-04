@@ -27,7 +27,7 @@
 
 class PDFDoc;
 
-class JSInfo
+class POPPLER_LIB_EXPORT JSInfo
 {
 public:
     // Constructor.

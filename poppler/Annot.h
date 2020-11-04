@@ -201,7 +201,7 @@ private:
 class POPPLER_LIB_EXPORT AnnotQuadrilaterals
 {
 public:
-    class AnnotQuadrilateral
+    class POPPLER_LIB_EXPORT AnnotQuadrilateral
     {
     public:
         AnnotQuadrilateral();

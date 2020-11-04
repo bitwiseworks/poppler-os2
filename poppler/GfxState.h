@@ -216,7 +216,7 @@ enum GfxColorSpaceMode
 typedef std::shared_ptr<void> GfxLCMSProfilePtr;
 
 #ifdef USE_CMS
-GfxLCMSProfilePtr make_GfxLCMSProfilePtr(void *profile);
+POPPLER_LIB_EXPORT GfxLCMSProfilePtr make_GfxLCMSProfilePtr(void *profile);
 #endif
 
 // wrapper of cmsHTRANSFORM to copy
