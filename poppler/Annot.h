@@ -982,7 +982,7 @@ private:
 // AnnotLink
 //------------------------------------------------------------------------
 
-class POPPLER_PRIVAT_EXPORT AnnotLink : public Annot
+class POPPLER_PRIVATE_EXPORT AnnotLink : public Annot
 {
 public:
     enum AnnotLinkEffect
@@ -1614,7 +1614,7 @@ public:
         int nInstances;
     };
 
-    class POPPLER_PRIVAT_EXPORT Content;
+    class POPPLER_PRIVATE_EXPORT Content;
 
     class POPPLER_PRIVATE_EXPORT Asset
     {
