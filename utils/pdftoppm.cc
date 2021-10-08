@@ -45,7 +45,7 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__OS2__)
 #    include <fcntl.h> // for O_BINARY
 #    include <io.h> // for _setmode
 #endif
@@ -317,6 +317,8 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
     } else {
 #if defined(_WIN32) || defined(__CYGWIN__)
         _setmode(fileno(stdout), O_BINARY);
+#elif defined(__OS2__)
+        setmode(fileno(stdout), O_BINARY);
 #endif
 
         if (png) {

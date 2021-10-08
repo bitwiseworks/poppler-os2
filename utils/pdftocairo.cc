@@ -51,7 +51,7 @@
 #include <cmath>
 #include <cstring>
 #include <fcntl.h>
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__OS2__)
 #    include <io.h> // for _setmode
 #endif
 #include "parseargs.h"
@@ -394,6 +394,8 @@ static void writePageImage(GooString *filename)
     if (filename->cmp("fd://0") == 0) {
 #if defined(_WIN32) || defined(__CYGWIN__)
         _setmode(fileno(stdout), O_BINARY);
+#elif defined(__OS2__)
+        setmode(fileno(stdout), O_BINARY);
 #endif
         file = stdout;
     } else
@@ -565,6 +567,8 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
             if (outputFileName->cmp("fd://0") == 0) {
 #if defined(_WIN32) || defined(__CYGWIN__)
                 _setmode(fileno(stdout), O_BINARY);
+#elif defined(__OS2__)
+                setmode(fileno(stdout), O_BINARY);
 #endif
                 output_file = stdout;
             } else {
