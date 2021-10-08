@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, 2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +32,7 @@ class TestStrings : public QObject
     Q_OBJECT
 
 public:
-    TestStrings(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestStrings(QObject *parent = nullptr) : QObject(parent) { }
 
 private slots:
     void initTestCase();
@@ -114,6 +115,15 @@ void TestStrings::check_unicodeToQString_data()
         u[2] = 0x0;
         QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2 + 0") << u << l << QStringLiteral("封面");
     }
+    {
+        const int l = 4;
+        Unicode *u = new Unicode[l];
+        u[0] = 0x5c01;
+        u[1] = 0x9762;
+        u[2] = 0x0;
+        u[3] = 0x0;
+        QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2 + two 0") << u << l << QStringLiteral("封面");
+    }
 }
 
 void TestStrings::check_unicodeToQString()
@@ -180,9 +190,14 @@ void TestStrings::check_QStringToUnicodeGooString()
     QFETCH(QByteArray, result);
 
     GooString *goo = Poppler::QStringToUnicodeGooString(string);
-    QVERIFY(goo->hasUnicodeMarker());
-    QCOMPARE(goo->getLength(), string.length() * 2 + 2);
-    QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
+    if (string.isEmpty()) {
+        QVERIFY(goo->toStr().empty());
+        QCOMPARE(goo->getLength(), 0);
+    } else {
+        QVERIFY(goo->hasUnicodeMarker());
+        QCOMPARE(goo->getLength(), string.length() * 2 + 2);
+        QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
+    }
 
     delete goo;
 }

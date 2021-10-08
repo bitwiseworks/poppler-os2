@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2011, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Rainer Keller <class321@gmx.de>
 // Copyright (C) 2008 Timothy Lee <timothy.lee@siriushk.com>
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
@@ -25,6 +25,7 @@
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
 // Copyright (C) 2018 Andreas Gruenbacher <agruenba@redhat.com>
+// Copyright (C) 2020 mrbax <12640-mrbax@users.noreply.gitlab.freedesktop.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -227,10 +228,10 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str, int wi
     }
 
     const double *mat = state->getCTM();
-    double width2 = mat[0] + mat[2];
-    double height2 = mat[1] + mat[3];
-    double xppi = fabs(width * 72.0 / width2) + 0.5;
-    double yppi = fabs(height * 72.0 / height2) + 0.5;
+    double width2 = sqrt(mat[0] * mat[0] + mat[1] * mat[1]);
+    double height2 = sqrt(mat[2] * mat[2] + mat[3] * mat[3]);
+    double xppi = fabs(width * 72.0 / width2);
+    double yppi = fabs(height * 72.0 / height2);
     if (xppi < 1.0)
         printf("%5.3f ", xppi);
     else
@@ -372,6 +373,16 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         }
     }
 
+    int pixelSize = sizeof(unsigned int);
+    if (format == imgRGB48)
+        pixelSize = 2 * sizeof(unsigned int);
+
+    row = (unsigned char *)gmallocn_checkoverflow(width, pixelSize);
+    if (!row) {
+        error(errIO, -1, "Image data for '{0:s}' is too big. {1:d} width with {2:d} bytes per pixel", fileName, width, pixelSize);
+        return;
+    }
+
     if (format != imgMonochrome) {
         // initialize stream
         imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(), colorMap->getBits());
@@ -380,12 +391,6 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
         // initialize stream
         str->reset();
     }
-
-    int pixelSize = sizeof(unsigned int);
-    if (format == imgRGB48)
-        pixelSize = 2 * sizeof(unsigned int);
-
-    row = (unsigned char *)gmallocn(width, pixelSize);
 
     // PDF masks use 0 = draw current color, 1 = leave unchanged.
     // We invert this to provide the standard interpretation of alpha
@@ -657,8 +662,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str, int w
         embedStr->restore();
 }
 
-bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str, const double *pmat, int paintType, int tilingType, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                       double xStep, double yStep)
+bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     return true;
     // do nothing -- this avoids the potentially slow loop in Gfx.cc

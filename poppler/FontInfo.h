@@ -3,12 +3,12 @@
 // FontInfo.h
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2011, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -28,13 +28,14 @@
 #define FONT_INFO_H
 
 #include "Object.h"
+#include "poppler_private_export.h"
 
 #include <unordered_set>
 
 class GfxFont;
 class PDFDoc;
 
-class FontInfo
+class POPPLER_PRIVATE_EXPORT FontInfo
 {
 public:
     enum Type
@@ -65,7 +66,7 @@ public:
     const GooString *getName() const { return name; };
     const GooString *getSubstituteName() const { return substituteName; };
     const GooString *getFile() const { return file; };
-    const GooString *getEncoding() const { return encoding; };
+    const std::string &getEncoding() const { return encoding; };
     Type getType() const { return type; };
     bool getEmbedded() const { return emb; };
     bool getSubset() const { return subset; };
@@ -77,7 +78,7 @@ private:
     GooString *name;
     GooString *substituteName;
     GooString *file;
-    GooString *encoding;
+    std::string encoding;
     Type type;
     bool emb;
     bool subset;
@@ -86,11 +87,11 @@ private:
     Ref embRef;
 };
 
-class FontInfoScanner
+class POPPLER_PRIVATE_EXPORT FontInfoScanner
 {
 public:
     // Constructor.
-    FontInfoScanner(PDFDoc *doc, int firstPage = 0);
+    explicit FontInfoScanner(PDFDoc *doc, int firstPage = 0);
     // Destructor.
     ~FontInfoScanner();
 

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -24,6 +24,7 @@
 // Copyright (C) 2015, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -36,6 +37,7 @@
 #include "goo/GooString.h"
 #include "Object.h"
 #include "CharTypes.h"
+#include "poppler_private_export.h"
 
 class Dict;
 class CMap;
@@ -110,7 +112,7 @@ enum GfxFontLocType
     gfxFontLocResident // font resident in PS printer
 };
 
-class GfxFontLoc
+class POPPLER_PRIVATE_EXPORT GfxFontLoc
 {
 public:
     GfxFontLoc();
@@ -148,7 +150,7 @@ public:
 #define fontItalic (1 << 6)
 #define fontBold (1 << 18)
 
-class GfxFont
+class POPPLER_PRIVATE_EXPORT GfxFont
 {
 public:
     enum Stretch
@@ -211,6 +213,11 @@ public:
     // Get the original font name (ignornig any munging that might have
     // been done to map to a canonical Base-14 font name).
     const GooString *getName() const { return name; }
+
+    bool isSubset() const;
+
+    // Returns the original font name without the subset tag (if it has one)
+    std::string getNameWithoutSubsetTag() const;
 
     // Get font type.
     GfxFontType getType() const { return type; }
@@ -285,7 +292,7 @@ public:
     bool hasToUnicodeCMap() const { return hasToUnicode; }
 
     // Return the name of the encoding
-    GooString *getEncodingName() const { return encodingName; }
+    const std::string &getEncodingName() const { return encodingName; }
 
     // Return AGLFN names of ligatures in the Standard and Expert encodings
     // for use with fonts that are not compatible with the Standard 14 fonts.
@@ -320,14 +327,14 @@ protected:
     int refCnt;
     bool ok;
     bool hasToUnicode;
-    GooString *encodingName;
+    std::string encodingName;
 };
 
 //------------------------------------------------------------------------
 // Gfx8BitFont
 //------------------------------------------------------------------------
 
-class Gfx8BitFont : public GfxFont
+class POPPLER_PRIVATE_EXPORT Gfx8BitFont : public GfxFont
 {
 public:
     Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
@@ -387,7 +394,7 @@ private:
 // GfxCIDFont
 //------------------------------------------------------------------------
 
-class GfxCIDFont : public GfxFont
+class POPPLER_PRIVATE_EXPORT GfxCIDFont : public GfxFont
 {
 public:
     GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA, GfxFontType typeA, Ref embFontIDA, Dict *fontDict);

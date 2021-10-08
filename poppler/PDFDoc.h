@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -32,8 +32,10 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -43,10 +45,14 @@
 #ifndef PDFDOC_H
 #define PDFDOC_H
 
+#include <algorithm>
+#include <cstdio>
 #include <mutex>
 
 #include "poppler-config.h"
-#include <cstdio>
+
+#include "poppler_private_export.h"
+
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -117,22 +123,22 @@ enum PDFSubtypeConformance
 // PDFDoc
 //------------------------------------------------------------------------
 
-class PDFDoc
+class POPPLER_PRIVATE_EXPORT PDFDoc
 {
 public:
-    PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr);
+    explicit PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
 
 #ifdef _WIN32
-    PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr);
+    PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
 #endif
 
-    PDFDoc(BaseStream *strA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr);
+    explicit PDFDoc(BaseStream *strA, const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, void *guiDataA = nullptr, const std::function<void()> &xrefReconstructedCallback = {});
     ~PDFDoc();
 
     PDFDoc(const PDFDoc &) = delete;
     PDFDoc &operator=(const PDFDoc &) = delete;
 
-    static PDFDoc *ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
+    static std::unique_ptr<PDFDoc> ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
 
     // Was PDF document successfully opened?
     bool isOk() const { return ok; }
@@ -178,7 +184,7 @@ public:
 
     // Return the contents of the metadata stream, or nullptr if there is
     // no metadata.
-    const GooString *readMetadata() const { return catalog->readMetadata(); }
+    std::unique_ptr<GooString> readMetadata() const { return catalog->readMetadata(); }
 
     // Return the structure tree root object.
     const StructTreeRoot *getStructTreeRoot() const { return catalog->getStructTreeRoot(); }
@@ -238,10 +244,6 @@ public:
     Object getDocInfo() { return xref->getDocInfo(); }
     Object getDocInfoNF() { return xref->getDocInfoNF(); }
 
-    // Create and return the document's Info dictionary if none exists.
-    // Otherwise return the existing one.
-    Object createDocInfoIfNoneExists() { return xref->createDocInfoIfNoneExists(); }
-
     // Remove the document's Info dictionary and update the trailer dictionary.
     void removeDocInfo() { xref->removeDocInfo(); }
 
@@ -280,9 +282,19 @@ public:
     PDFSubtypePart getPDFSubtypePart() const { return pdfPart; }
     PDFSubtypeConformance getPDFSubtypeConformance() const { return pdfConformance; }
 
-    // Return the PDF version specified by the file.
-    int getPDFMajorVersion() const { return pdfMajorVersion; }
-    int getPDFMinorVersion() const { return pdfMinorVersion; }
+    // Return the PDF version specified by the file (either header or catalog).
+    int getPDFMajorVersion() const { return std::max(headerPdfMajorVersion, catalog->getPDFMajorVersion()); }
+    int getPDFMinorVersion() const
+    {
+        const int catalogMajorVersion = catalog->getPDFMajorVersion();
+        if (catalogMajorVersion > headerPdfMajorVersion) {
+            return catalog->getPDFMinorVersion();
+        } else if (headerPdfMajorVersion > catalogMajorVersion) {
+            return headerPdfMinorVersion;
+        } else {
+            return std::max(headerPdfMinorVersion, catalog->getPDFMinorVersion());
+        }
+    }
 
     // Return the PDF ID in the trailer dictionary (if any).
     bool getID(GooString *permanent_id, GooString *update_id) const;
@@ -318,6 +330,11 @@ public:
     // scans the PDF and returns whether it contains any javascript
     bool hasJavascript();
 
+    // Arguments signatureText and signatureTextLeft are UTF-16 big endian strings with BOM.
+    // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
+    bool sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft, double fontSize,
+              std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason = nullptr, const GooString *location = nullptr);
+
 private:
     // insert referenced objects in XRef
     void markDictionnary(Dict *dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict *> *alreadyMarkedDicts);
@@ -347,7 +364,7 @@ private:
 
     PDFDoc();
     void init();
-    bool setup(const GooString *ownerPassword, const GooString *userPassword);
+    bool setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback);
     bool checkFooter();
     void checkHeader();
     bool checkEncryption(const GooString *ownerPassword, const GooString *userPassword);
@@ -360,9 +377,6 @@ private:
     Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
     long long strToLongLong(const char *s);
 
-    // Mark the document's Info dictionary as modified.
-    void setDocInfoModified(Object *infoObj);
-
     const GooString *fileName;
 #ifdef _WIN32
     wchar_t *fileNameU;
@@ -370,8 +384,8 @@ private:
     GooFile *file;
     BaseStream *str;
     void *guiData;
-    int pdfMajorVersion;
-    int pdfMinorVersion;
+    int headerPdfMajorVersion;
+    int headerPdfMinorVersion;
     PDFSubtype pdfSubtype;
     PDFSubtypePart pdfPart;
     PDFSubtypeConformance pdfConformance;

@@ -1,5 +1,8 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2021, Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2021, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2021, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +39,7 @@ class PdfViewer : public QMainWindow
     friend class DocumentObserver;
 
 public:
-    PdfViewer(QWidget *parent = nullptr);
+    explicit PdfViewer(QWidget *parent = nullptr);
     ~PdfViewer() override;
 
     QSize sizeHint() const override;
@@ -56,8 +59,10 @@ private Q_SLOTS:
 private:
     void setPage(int page);
     int page() const;
+    void xrefReconstructedHandler();
 
     int m_currentPage;
+    bool xrefReconstructed;
 
     QAction *m_fileOpenAct;
     QAction *m_fileSaveCopyAct;
@@ -67,7 +72,7 @@ private:
 
     QList<DocumentObserver *> m_observers;
 
-    Poppler::Document *m_doc;
+    std::unique_ptr<Poppler::Document> m_doc;
 };
 
 #endif

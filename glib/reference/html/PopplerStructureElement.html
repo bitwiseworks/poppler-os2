@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="poppler-Poppler-Movie.html" title="PopplerMovie">
 <link rel="next" href="poppler-Poppler-Color.html" title="PopplerColor">
-<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -682,7 +682,7 @@ text form, which can be retrieved using this function.</p>
 <a name="poppler-structure-element-get-abbreviation.returns"></a><h4>Returns</h4>
 <p>Text of the expanded abbreviation if the
 element text is an abbreviation or acrony, <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -718,7 +718,7 @@ graphical elements which look like text when rendered.</p>
 <a name="poppler-structure-element-get-actual-text.returns"></a><h4>Returns</h4>
 <p>The actual text for the element, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 if not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -752,7 +752,7 @@ figures, to specify a textual description of the element.</p>
 <a name="poppler-structure-element-get-alt-text.returns"></a><h4>Returns</h4>
 <p>The alternate text representation for the
 element, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1116,7 +1116,7 @@ not needed anymore, be sure to call <a href="../glib/glib-Memory-Allocation.html
 <a name="poppler-structure-element-get-column-gaps.returns"></a><h4>Returns</h4>
 <p>Array containing the values for the column gaps, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the
 array is empty or the attribute is not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_values][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gdouble]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_values][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gdouble]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1156,7 +1156,7 @@ not needed anymore, be sure to call <a href="../glib/glib-Memory-Allocation.html
 <a name="poppler-structure-element-get-column-widths.returns"></a><h4>Returns</h4>
 <p>Array containing widths of the columns, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the attribute
 is not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_values][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gdouble]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_values][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gdouble]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1220,7 +1220,7 @@ not needed anymore, be sure to call <a href="../glib/glib-Memory-Allocation.html
 <a name="poppler-structure-element-get-form-description.returns"></a><h4>Returns</h4>
 <p>A string, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the attribute
 is not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1366,7 +1366,7 @@ poppler_structure_element_get_id (<em class="parameter"><code><a class="link" hr
 <a name="poppler-structure-element-get-id.returns"></a><h4>Returns</h4>
 <p>The identifier of the element (if
 defined), or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1451,7 +1451,7 @@ defined.</p>
 <div class="refsect3">
 <a name="poppler-structure-element-get-language.returns"></a><h4>Returns</h4>
 <p>language and country code, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1837,7 +1837,7 @@ The returned value must be freed using <a href="../glib/glib-String-Utility-Func
 <a name="poppler-structure-element-get-table-headers.returns"></a><h4>Returns</h4>
 <p>Zero-terminated array of strings with the table header names,
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the attribute is not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gchar*]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gchar*]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1965,7 +1965,7 @@ not needed anymore, be sure to call <a href="../glib/glib-Memory-Allocation.html
 <a name="poppler-structure-element-get-table-summary.returns"></a><h4>Returns</h4>
 <p>A string, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if the attribute
 is not defined. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -2003,7 +2003,7 @@ elements in the subtree (including the element itself).</p>
 <div class="refsect3">
 <a name="poppler-structure-element-get-text.returns"></a><h4>Returns</h4>
 <p>A string. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -2186,13 +2186,13 @@ obtain and free the text spans of an element:</p>
 5
 6
 7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="n">guint</span> <span class="n">i</span><span class="p">,</span> <span class="n">n_spans</span><span class="p">;</span>
-<span class="n">PopplerTextSpan</span> <span class="o">**</span><span class="n">text_spans</span> <span class="o">=</span>
-   <span class="n">poppler_structure_element_get_text_spans</span> <span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">n_spans</span><span class="p">);</span>
-<span class="cm">/* Use the text spans */</span>
-<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n_spans</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-   <span class="n">poppler_text_span_free</span> <span class="p">(</span><span class="n">text_spans</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
-<span class="n">g_free</span> <span class="p">(</span><span class="n">text_spans</span><span class="p">);</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">guint</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">n_spans</span><span class="p">;</span><span class="w"></span>
+<span class="n">PopplerTextSpan</span><span class="w"> </span><span class="o">**</span><span class="n">text_spans</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">   </span><span class="n">poppler_structure_element_get_text_spans</span><span class="w"> </span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n_spans</span><span class="p">);</span><span class="w"></span>
+<span class="cm">/* Use the text spans */</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_spans</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
+<span class="w">   </span><span class="n">poppler_text_span_free</span><span class="w"> </span><span class="p">(</span><span class="n">text_spans</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w"></span>
+<span class="n">g_free</span><span class="w"> </span><span class="p">(</span><span class="n">text_spans</span><span class="p">);</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -2224,7 +2224,7 @@ the returned array will be stored. </p></td>
 <div class="refsect3">
 <a name="poppler-structure-element-get-text-spans.returns"></a><h4>Returns</h4>
 <p>An array of <a class="link" href="poppler-Poppler-Text-Span.html#PopplerTextSpan"><span class="type">PopplerTextSpan</span></a> elements. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_text_spans][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextSpan]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_text_spans][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextSpan]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -2252,7 +2252,7 @@ poppler_structure_element_get_title (<em class="parameter"><code><a class="link"
 <div class="refsect3">
 <a name="poppler-structure-element-get-title.returns"></a><h4>Returns</h4>
 <p>The title of the element, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -2449,7 +2449,7 @@ returned value must be freed with <a class="link" href="PopplerStructureElement.
 <div class="refsect3">
 <a name="poppler-structure-element-iter-copy.returns"></a><h4>Returns</h4>
 <p>a new <a class="link" href="PopplerStructureElement.html#PopplerStructureElementIter"><span class="type">PopplerStructureElementIter</span></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -2534,7 +2534,7 @@ poppler_structure_element_iter_get_element
 <div class="refsect3">
 <a name="poppler-structure-element-iter-get-element.returns"></a><h4>Returns</h4>
 <p>a new <a class="link" href="PopplerStructureElement.html#PopplerStructureElementIter"><span class="type">PopplerStructureElementIter</span></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -2572,23 +2572,23 @@ a <a class="link" href="PopplerStructureElement.html" title="PopplerStructureEle
 15
 16
 17</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="k">static</span> <span class="kt">void</span>
-<span class="nf">walk_structure</span> <span class="p">(</span><span class="n">PopplerStructureElementIter</span> <span class="o">*</span><span class="n">iter</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">do</span> <span class="p">{</span>
-    <span class="cm">/* Get the element and do something with it */</span>
-    <span class="n">PopplerStructureElementIter</span> <span class="o">*</span><span class="n">child</span> <span class="o">=</span> <span class="n">poppler_structure_element_iter_get_child</span> <span class="p">(</span><span class="n">iter</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">child</span><span class="p">)</span>
-      <span class="n">walk_structure</span> <span class="p">(</span><span class="n">child</span><span class="p">);</span>
-    <span class="n">poppler_structure_element_iter_free</span> <span class="p">(</span><span class="n">child</span><span class="p">);</span>
-  <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">poppler_structure_element_iter_next</span> <span class="p">(</span><span class="n">iter</span><span class="p">));</span>
-<span class="p">}</span>
-<span class="p">...</span>
-<span class="p">{</span>
-  <span class="n">iter</span> <span class="o">=</span> <span class="n">poppler_structure_element_iter_new</span> <span class="p">(</span><span class="n">document</span><span class="p">);</span>
-  <span class="n">walk_structure</span> <span class="p">(</span><span class="n">iter</span><span class="p">);</span>
-  <span class="n">poppler_structure_element_iter_free</span> <span class="p">(</span><span class="n">iter</span><span class="p">);</span>
-<span class="p">}</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="nf">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">PopplerStructureElementIter</span><span class="w"> </span><span class="o">*</span><span class="n">iter</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* Get the element and do something with it */</span><span class="w"></span>
+<span class="w">    </span><span class="n">PopplerStructureElementIter</span><span class="w"> </span><span class="o">*</span><span class="n">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_structure_element_iter_get_child</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="w"></span>
+<span class="w">      </span><span class="n">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">poppler_structure_element_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">poppler_structure_element_iter_next</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="p">...</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_structure_element_iter_new</span><span class="w"> </span><span class="p">(</span><span class="n">document</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">poppler_structure_element_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -2613,7 +2613,7 @@ a <a class="link" href="PopplerStructureElement.html" title="PopplerStructureEle
 <a name="poppler-structure-element-iter-new.returns"></a><h4>Returns</h4>
 <p>a new <a class="link" href="PopplerStructureElement.html#PopplerStructureElementIter"><span class="type">PopplerStructureElementIter</span></a>, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if document
 doesn't have structure tree. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -3520,6 +3520,6 @@ enclosed in the subtree.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32.1</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>

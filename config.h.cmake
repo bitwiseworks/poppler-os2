@@ -82,12 +82,6 @@
 /* Define to 1 if you have the `mkstemp' function. */
 #cmakedefine HAVE_MKSTEMP 1
 
-/* Define to 1 if you have the `strcpy_s' function. */
-#cmakedefine HAVE_STRCPY_S 1
-
-/* Define to 1 if you have the `strcat_s' function. */
-#cmakedefine HAVE_STRCAT_S 1
-
 /* Defines if strtok_r is available on your system */
 #cmakedefine HAVE_STRTOK_R 1
 
@@ -96,9 +90,6 @@
 
 /* Define to 1 if you have the `popen' function. */
 #cmakedefine HAVE_POPEN 1
-
-/* Use splash for rendering. */
-#cmakedefine HAVE_SPLASH 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -116,9 +107,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine HAVE_UNISTD_H 1
-
-/* Define to 1 if you have the <codecvt> header file. */
-#cmakedefine HAVE_CODECVT
 
 /* Define to 1 if you have a big endian machine */
 #cmakedefine WORDS_BIGENDIAN 1
@@ -188,6 +176,8 @@
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #define popen _popen
 #define pclose _pclose
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */

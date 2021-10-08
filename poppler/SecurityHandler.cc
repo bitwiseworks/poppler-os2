@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
@@ -144,7 +144,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
     if (versionObj.isInt() && revisionObj.isInt() && permObj.isInt() && ownerKeyObj.isString() && userKeyObj.isString()) {
         encVersion = versionObj.getInt();
         encRevision = revisionObj.getInt();
-        if ((encRevision <= 4 && ownerKeyObj.getString()->getLength() == 32 && userKeyObj.getString()->getLength() == 32)
+        if ((encRevision <= 4 && ownerKeyObj.getString()->getLength() >= 1 && userKeyObj.getString()->getLength() >= 1)
             || ((encRevision == 5 || encRevision == 6) &&
                 // the spec says 48 bytes, but Acrobat pads them out longer
                 ownerKeyObj.getString()->getLength() >= 48 && userKeyObj.getString()->getLength() >= 48 && ownerEncObj.isString() && ownerEncObj.getString()->getLength() == 32 && userEncObj.isString()
@@ -242,8 +242,22 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA, Object *encryptDi
             } else if (!(encVersion == -1 && encRevision == -1)) {
                 error(errUnimplemented, -1, "Unsupported version/revision ({0:d}/{1:d}) of Standard security handler", encVersion, encRevision);
             }
+
+            if (encRevision <= 4) {
+                // Adobe apparently zero-pads the U value (and maybe the O value?)
+                // if it's short
+                while (ownerKey->getLength() < 32) {
+                    ownerKey->append((char)0x00);
+                }
+                while (userKey->getLength() < 32) {
+                    userKey->append((char)0x00);
+                }
+            }
         } else {
-            error(errSyntaxError, -1, "Invalid encryption key length");
+            error(errSyntaxError, -1,
+                  "Invalid encryption key length. version: {0:d} - revision: {1:d} - ownerKeyLength: {2:d} - userKeyLength: {3:d} - ownerEncIsString: {4:d} - ownerEncLength: {5:d} - userEncIsString: {6:d} - userEncLength: {7:d}",
+                  encVersion, encRevision, ownerKeyObj.getString()->getLength(), userKeyObj.getString()->getLength(), ownerEncObj.isString(), ownerEncObj.isString() ? ownerEncObj.getString()->getLength() : -1, userEncObj.isString(),
+                  userEncObj.isString() ? userEncObj.getString()->getLength() : -1);
         }
     } else {
         error(errSyntaxError, -1, "Weird encryption info");

@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -29,6 +29,9 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2021 RM <rm+git@arcsin.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,6 +42,7 @@
 #define CATALOG_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "Object.h"
 #include "Link.h"
 
@@ -62,7 +66,7 @@ class StructTreeRoot;
 // NameTree
 //------------------------------------------------------------------------
 
-class NameTree
+class POPPLER_PRIVATE_EXPORT NameTree
 {
 public:
     NameTree();
@@ -103,11 +107,11 @@ private:
 // Catalog
 //------------------------------------------------------------------------
 
-class Catalog
+class POPPLER_PRIVATE_EXPORT Catalog
 {
 public:
     // Constructor.
-    Catalog(PDFDoc *docA);
+    explicit Catalog(PDFDoc *docA);
 
     // Destructor.
     ~Catalog();
@@ -132,7 +136,7 @@ public:
 
     // Return the contents of the metadata stream, or NULL if there is
     // no metadata.
-    GooString *readMetadata();
+    std::unique_ptr<GooString> readMetadata();
 
     // Return the structure tree root object.
     StructTreeRoot *getStructTreeRoot();
@@ -201,10 +205,17 @@ public:
     bool indexToLabel(int index, GooString *label);
 
     Object *getOutline();
+    // returns the existing outline or new one if it doesn't exist
+    Object *getCreateOutline();
 
     Object *getAcroForm() { return &acroForm; }
+    void addFormToAcroForm(const Ref formRef);
+    void removeFormFromAcroForm(const Ref formRef);
 
     OCGs *getOptContentConfig() { return optContent; }
+
+    int getPDFMajorVersion() const { return catalogPdfMajorVersion; }
+    int getPDFMinorVersion() const { return catalogPdfMinorVersion; }
 
     enum FormType
     {
@@ -296,6 +307,9 @@ private:
     NameTree *getEmbeddedFileNameTree();
     NameTree *getJSNameTree();
     std::unique_ptr<LinkDest> createLinkDest(Object *obj);
+
+    int catalogPdfMajorVersion = -1;
+    int catalogPdfMinorVersion = -1;
 
     mutable std::recursive_mutex mutex;
 };

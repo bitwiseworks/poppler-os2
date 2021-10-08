@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -39,6 +39,7 @@
 
 #include <cassert>
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include <cstdio>
 #include "CharTypes.h"
 #include "UnicodeMap.h"
@@ -64,7 +65,7 @@ class SysFontList;
 //------------------------------------------------------------------------
 
 // The global parameters object.
-extern std::unique_ptr<GlobalParams> globalParams;
+extern std::unique_ptr<GlobalParams> POPPLER_PRIVATE_EXPORT globalParams;
 
 //------------------------------------------------------------------------
 
@@ -78,25 +79,11 @@ enum SysFontType
 
 //------------------------------------------------------------------------
 
-enum PSLevel
-{
-    psLevel1,
-    psLevel1Sep,
-    psLevel2,
-    psLevel2Sep,
-    psLevel3,
-    psLevel3Sep
-};
-
-//------------------------------------------------------------------------
-
-//------------------------------------------------------------------------
-
-class GlobalParams
+class POPPLER_PRIVATE_EXPORT GlobalParams
 {
 public:
     // Initialize the global parameters
-    GlobalParams(const char *customPopplerDataDir = nullptr);
+    explicit GlobalParams(const char *customPopplerDataDir = nullptr);
 
     ~GlobalParams();
 
@@ -126,7 +113,6 @@ public:
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
     bool getPSExpandSmaller();
     bool getPSShrinkLarger();
-    PSLevel getPSLevel();
     std::string getTextEncodingName() const;
     bool getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
@@ -135,7 +121,7 @@ public:
 
     CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-    CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
+    CMap *getCMap(const GooString *collection, const GooString *cMapName);
     const UnicodeMap *getTextEncoding();
 
     const UnicodeMap *getUtf8Map();
@@ -146,7 +132,6 @@ public:
     void addFontFile(const GooString *fontName, const GooString *path);
     void setPSExpandSmaller(bool expand);
     void setPSShrinkLarger(bool shrink);
-    void setPSLevel(PSLevel level);
     void setTextEncoding(const char *encodingName);
     void setOverprintPreview(bool overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
@@ -196,7 +181,6 @@ private:
     SysFontList *sysFonts; // system fonts
     bool psExpandSmaller; // expand smaller pages to fill paper
     bool psShrinkLarger; // shrink larger pages to fit paper
-    PSLevel psLevel; // PostScript level to generate
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
     bool overprintPreview; // enable overprint preview
@@ -218,10 +202,10 @@ private:
     const char *popplerDataDir;
 };
 
-class GlobalParamsIniter
+class POPPLER_PRIVATE_EXPORT GlobalParamsIniter
 {
 public:
-    GlobalParamsIniter(ErrorCallback errorCallback);
+    explicit GlobalParamsIniter(ErrorCallback errorCallback);
     ~GlobalParamsIniter();
 
     GlobalParamsIniter(const GlobalParamsIniter &) = delete;

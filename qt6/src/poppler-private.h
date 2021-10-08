@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012, 2017-2020 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017-2021 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -13,11 +13,14 @@
  * Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+ * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -45,7 +48,9 @@
 #include <QtCore/QPointer>
 #include <QtCore/QVector>
 
+#include <functional>
 #include <config.h>
+#include <poppler-config.h>
 #include <GfxState.h>
 #include <GlobalParams.h>
 #include <Form.h>
@@ -53,9 +58,7 @@
 #include <FontInfo.h>
 #include <OutputDev.h>
 #include <Error.h>
-#if defined(HAVE_SPLASH)
-#    include <SplashOutputDev.h>
-#endif
+#include <SplashOutputDev.h>
 
 #include "poppler-qt6.h"
 #include "poppler-embeddedfile-private.h"
@@ -63,7 +66,6 @@
 
 class LinkDest;
 class FormWidget;
-class OutlineItem;
 
 namespace Poppler {
 
@@ -76,6 +78,8 @@ POPPLER_QT6_EXPORT QString UnicodeParsedString(const std::string &s1);
 
 POPPLER_QT6_EXPORT GooString *QStringToUnicodeGooString(const QString &s);
 
+// Returns a big endian UTF-16 string with BOM or an empty string without BOM.
+// The caller owns the returned pointer.
 POPPLER_QT6_EXPORT GooString *QStringToGooString(const QString &s);
 
 GooString *QDateTimeToUnicodeGooString(const QDateTime &dt);
@@ -105,10 +109,10 @@ public:
         m_filePath = filePath;
 
 #ifdef _WIN32
-        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword);
+        doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #else
         GooString *fileName = new GooString(QFile::encodeName(filePath).constData());
-        doc = new PDFDoc(fileName, ownerPassword, userPassword);
+        doc = new PDFDoc(fileName, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #endif
 
         delete ownerPassword;
@@ -120,7 +124,7 @@ public:
         m_device = device;
         QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object(objNull));
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword);
+        doc = new PDFDoc(str, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
         delete ownerPassword;
         delete userPassword;
     }
@@ -131,7 +135,7 @@ public:
         fileContents = data;
         MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object(objNull));
         init();
-        doc = new PDFDoc(str, ownerPassword, userPassword);
+        doc = new PDFDoc(str, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
         delete ownerPassword;
         delete userPassword;
     }
@@ -142,8 +146,6 @@ public:
 
     DocumentData(const DocumentData &) = delete;
     DocumentData &operator=(const DocumentData &) = delete;
-
-    void addTocChildren(QDomDocument *docSyn, QDomNode *parent, const std::vector<::OutlineItem *> *items);
 
     void setPaperColor(const QColor &color) { paperColor = color; }
 
@@ -159,7 +161,14 @@ public:
         }
     }
 
-    static Document *checkDocument(DocumentData *doc);
+    /**
+     * a method that is being called whenever PDFDoc's XRef is reconstructed
+     * where we'll set xrefReconstructed flag and notify users of the
+     * reconstruction event
+     */
+    void noitfyXRefReconstructed();
+
+    static std::unique_ptr<Document> checkDocument(DocumentData *doc);
 
     PDFDoc *doc;
     QString m_filePath;
@@ -175,6 +184,9 @@ public:
     GfxLCMSProfilePtr m_sRGBProfile;
     GfxLCMSProfilePtr m_displayProfile;
 #endif
+    bool xrefReconstructed;
+    // notifies the user whenever the backend's PDFDoc XRef is reconstructed
+    std::function<void()> xrefReconstructedCallback;
 };
 
 class FontInfoData
@@ -187,7 +199,7 @@ public:
         type = FontInfo::unknown;
     }
 
-    FontInfoData(::FontInfo *fi)
+    explicit FontInfoData(::FontInfo *fi)
     {
         if (fi->getName())
             fontName = fi->getName()->c_str();

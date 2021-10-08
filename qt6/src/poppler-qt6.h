@@ -1,7 +1,7 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, 2017-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, 2017-2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
@@ -16,12 +16,18 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017, 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
- * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2018, 2021 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+ * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
+ * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +47,10 @@
 #ifndef __POPPLER_QT_H__
 #define __POPPLER_QT_H__
 
+#include <functional>
+#include <memory>
+#include <vector>
+
 #include "poppler-annotation.h"
 #include "poppler-link.h"
 #include "poppler-optcontent.h"
@@ -48,8 +58,8 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
+#include <QtCore/QIODevice>
 #include <QtCore/QSet>
-#include <QtXml/QDomDocument>
 #include "poppler-export.h"
 
 class EmbFile;
@@ -193,7 +203,7 @@ public:
     /**
        Create a new font information container.
     */
-    FontInfo(const FontInfoData &fid);
+    explicit FontInfo(const FontInfoData &fid);
     /// \endcond
 
     /**
@@ -274,13 +284,12 @@ class FontIteratorData;
 
    You can use it in the following way:
    \code
-Poppler::FontIterator* it = doc->newFontIterator();
+std::unique_ptr<Poppler::FontIterator> it = doc->newFontIterator();
 while (it->hasNext()) {
 QList<Poppler::FontInfo> fonts = it->next();
 // do something with the fonts
 }
-// after doing the job, the iterator must be freed
-delete it;
+// no need to free the iterator after doing the job
    \endcode
 */
 class POPPLER_QT6_EXPORT FontIterator
@@ -329,7 +338,7 @@ class POPPLER_QT6_EXPORT EmbeddedFile
 
 public:
     /// \cond PRIVATE
-    EmbeddedFile(EmbFile *embfile);
+    explicit EmbeddedFile(EmbFile *embfile);
     /// \endcond
 
     /**
@@ -395,7 +404,7 @@ public:
 
 private:
     Q_DISABLE_COPY(EmbeddedFile)
-    EmbeddedFile(EmbeddedFileData &dd);
+    explicit EmbeddedFile(EmbeddedFileData &dd);
 
     EmbeddedFileData *m_embeddedFile;
 };
@@ -668,7 +677,7 @@ rather unexpected results.
 
        \returns whether the painting succeeded
 
-       \note This method is only supported for Arthur
+       \note This method is only supported for the QPainterOutputDev
     */
     bool renderToPainter(QPainter *painter, double xres = 72.0, double yres = 72.0, int x = -1, int y = -1, int w = -1, int h = -1, Rotation rotate = Rotate0, PainterFlags flags = NoPainterFlags) const;
 
@@ -726,9 +735,12 @@ rather unexpected results.
         NoSearchFlags = 0x00000000,
         IgnoreCase = 0x00000001, ///< Case differences are ignored
         WholeWords = 0x00000002, ///< Only whole words are matched
-        IgnoreDiacritics = 0x00000004 ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored.
-                                      ///< This option will have no effect if the search term contains characters which
-                                      ///< are not pure ascii.
+        IgnoreDiacritics = 0x00000004, ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored.
+                                       ///< This option will have no effect if the search term contains characters which
+                                       ///< are not pure ascii.
+        AcrossLines = 0x00000008 ///< Allows to match on text spanning from end of a line to the next line.
+                                 ///< It won't match on text spanning more than two lines. Automatically ignores hyphen
+                                 ///< at end of line, and allows whitespace in search term to match on newline. \since 21.05.0
     };
     Q_DECLARE_FLAGS(SearchFlags, SearchFlag)
 
@@ -746,6 +758,9 @@ rather unexpected results.
 
     /**
        Returns a list of all occurrences of the specified text on the page.
+
+       if SearchFlags::AcrossLines is given in \param flags, then rects may just
+       be parts of the text itself if it's split between multiple lines.
 
        \param text the text to search
        \param flags the flags to consider during matching
@@ -766,12 +781,9 @@ rather unexpected results.
        up-to-down), the QList contains the text in the proper
        order.
 
-       \note The caller owns the text boxes and they should
-             be deleted when no longer required.
-
        \warning This method is not tested with Asian scripts
     */
-    QList<TextBox *> textList(Rotation rotate = Rotate0) const;
+    std::vector<std::unique_ptr<TextBox>> textList(Rotation rotate = Rotate0) const;
 
     /**
        Returns a list of text of the page
@@ -790,12 +802,9 @@ rather unexpected results.
        \param closure opaque structure that will be passed
        back to shouldAbortExtractionCallback.
 
-       \note The caller owns the text boxes and they should
-             be deleted when no longer required.
-
        \warning This method is not tested with Asian scripts
     */
-    QList<TextBox *> textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const;
+    std::vector<std::unique_ptr<TextBox>> textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const;
 
     /**
        \return The dimensions (cropbox) of the page, in points (i.e. 1/72th of an inch)
@@ -820,9 +829,9 @@ rather unexpected results.
     PageTransition *transition() const;
 
     /**
-      Gets the page action specified, or NULL if there is no action.
+      Gets the page action specified, or empty unique pointer if there is no action.
     **/
-    Link *action(PageAction act) const;
+    std::unique_ptr<Link> action(PageAction act) const;
 
     /**
        Types of orientations that are possible
@@ -848,17 +857,15 @@ rather unexpected results.
     /**
       Gets the links of the page
     */
-    QList<Link *> links() const;
+    std::vector<std::unique_ptr<Link>> links() const;
 
     /**
      Returns the annotations of the page
 
      \note If you call this method twice, you get different objects
            pointing to the same annotations (see Annotation).
-           The caller owns the returned objects and they should be deleted
-           when no longer required.
     */
-    QList<Annotation *> annotations() const;
+    std::vector<std::unique_ptr<Annotation>> annotations() const;
 
     /**
             Returns the annotations of the page
@@ -867,10 +874,8 @@ rather unexpected results.
 
             \note If you call this method twice, you get different objects
                   pointing to the same annotations (see Annotation).
-                  The caller owns the returned objects and they should be deleted
-                  when no longer required.
     */
-    QList<Annotation *> annotations(const QSet<Annotation::SubType> &subtypes) const;
+    std::vector<std::unique_ptr<Annotation>> annotations(const QSet<Annotation::SubType> &subtypes) const;
 
     /**
      Adds an annotation to the page
@@ -889,9 +894,8 @@ rather unexpected results.
 
     /**
      Returns the form fields on the page
-     The caller gets the ownership of the returned objects.
     */
-    QList<FormField *> formFields() const;
+    std::vector<std::unique_ptr<FormField>> formFields() const;
 
     /**
      Returns the page duration. That is the time, in seconds, that the page
@@ -990,7 +994,7 @@ public:
     QVector<OutlineItem> children() const;
 
 private:
-    OutlineItem(OutlineItemData *data);
+    explicit OutlineItem(OutlineItemData *data);
     OutlineItemData *m_data;
 };
 
@@ -1003,7 +1007,7 @@ private:
    \section ownership Ownership of the returned objects
 
    All the functions that returns class pointers create new object, and the
-   responsibility of those is given to the callee.
+   responsibility of those is given to the caller.
 
    The only exception is \link Poppler::Page::transition() Page::transition()\endlink.
 
@@ -1083,7 +1087,7 @@ public:
     enum RenderBackend
     {
         SplashBackend, ///< Splash backend
-        ArthurBackend ///< Arthur (Qt) backend
+        QPainterBackend ///< Qt backend
     };
 
     /**
@@ -1160,15 +1164,12 @@ public:
        \param userPassword the Latin1-encoded user ("open") password
        to use in loading the file
 
-       \return the loaded document, or NULL on error
-
-       \note The caller owns the pointer to Document, and this should
-       be deleted when no longer required.
+       \return the loaded document, or empty unique pointer on error
 
        \warning The returning document may be locked if a password is required
        to open the file, and one is not provided (as the userPassword).
     */
-    static Document *load(const QString &filePath, const QByteArray &ownerPassword = QByteArray(), const QByteArray &userPassword = QByteArray());
+    static std::unique_ptr<Document> load(const QString &filePath, const QByteArray &ownerPassword = QByteArray(), const QByteArray &userPassword = QByteArray());
 
     /**
        Load the document from a device
@@ -1179,12 +1180,7 @@ public:
        \param userPassword the Latin1-encoded user ("open") password
        to use in loading the file
 
-       \return the loaded document, or NULL on error
-
-       \note The caller owns the pointer to Document, and this should
-       be deleted when no longer required.
-
-       \note The ownership of the device stays with the caller.
+       \return the loaded document, or empty unique pointer on error
 
        \note if the file is on disk it is recommended to use the other load overload
        since it is less resource intensive
@@ -1192,7 +1188,7 @@ public:
        \warning The returning document may be locked if a password is required
        to open the file, and one is not provided (as the userPassword).
     */
-    static Document *load(QIODevice *device, const QByteArray &ownerPassword = QByteArray(), const QByteArray &userPassword = QByteArray());
+    static std::unique_ptr<Document> load(QIODevice *device, const QByteArray &ownerPassword = QByteArray(), const QByteArray &userPassword = QByteArray());
 
     /**
        Load the document from memory
@@ -1205,15 +1201,12 @@ public:
        \param userPassword the Latin1-encoded user ("open") password
        to use in loading the file
 
-       \return the loaded document, or NULL on error
-
-       \note The caller owns the pointer to Document, and this should
-       be deleted when no longer required.
+       \return the loaded document, or empty unique pointer on error
 
        \warning The returning document may be locked if a password is required
        to open the file, and one is not provided (as the userPassword).
     */
-    static Document *loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword = QByteArray(), const QByteArray &userPassword = QByteArray());
+    static std::unique_ptr<Document> loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword = QByteArray(), const QByteArray &userPassword = QByteArray());
 
     /**
        Get a specified Page
@@ -1221,13 +1214,16 @@ public:
        Note that this follows the PDF standard of being zero based - if you
        want the first page, then you need an index of zero.
 
-       The caller gets the ownership of the returned object.
-
-       This function can return nullptr if for some reason the page can't be properly parsed.
+       This function can return empty unique pointer if for some reason the page can't be properly parsed.
 
        \param index the page number index
+
+       \warning The Page object returned by this method internally stores a pointer
+       to the document that it was created from.  This pointer will go stale if you
+       delete the Document object.  Therefore the Document object needs to be kept alive
+       as long as you want to use the Page object.
     */
-    Page *page(int index) const;
+    std::unique_ptr<Page> page(int index) const;
 
     /**
        \overload
@@ -1241,7 +1237,7 @@ public:
 
        \param label the page label
     */
-    Page *page(const QString &label) const;
+    std::unique_ptr<Page> page(const QString &label) const;
 
     /**
        The number of pages in the document
@@ -1519,16 +1515,20 @@ QString subject = m_doc->info("Subject");
     */
     bool okToAssemble() const;
 
+    /** \brief The version specification of a pdf file */
+    struct PdfVersion
+    {
+        int major;
+        int minor;
+    };
+
     /**
        The version of the PDF specification that the document
        conforms to
 
-       \param major an optional pointer to a variable where store the
-       "major" number of the version
-       \param minor an optional pointer to a variable where store the
-       "minor" number of the version
+       \since 21.08
     */
-    void getPdfVersion(int *major, int *minor) const;
+    PdfVersion getPdfVersion() const;
 
     /**
        The fonts within the PDF document.
@@ -1549,14 +1549,11 @@ QString subject = m_doc->info("Subject");
        The new iterator can be used for reading the font information of the
        document, reading page by page.
 
-       The caller is responsible for the returned object, ie it should freed
-       it when no more useful.
-
        \param startPage the initial page from which start reading fonts
 
        \see fonts()
     */
-    FontIterator *newFontIterator(int startPage = 0) const;
+    std::unique_ptr<FontIterator> newFontIterator(int startPage = 0) const;
 
     /**
        The font data if the font is an embedded one.
@@ -1568,6 +1565,8 @@ QString subject = m_doc->info("Subject");
 
        \note there are two types of embedded document - this call
        only accesses documents that are embedded at the document level.
+
+       \note The ownership of the EmbeddedFile objects remain with the callee.
     */
     QList<EmbeddedFile *> embeddedFiles() const;
 
@@ -1575,31 +1574,6 @@ QString subject = m_doc->info("Subject");
        Whether there are any documents embedded in this PDF document.
     */
     bool hasEmbeddedFiles() const;
-
-    /**
-      Gets the table of contents (TOC) of the Document.
-
-      The caller is responsible for the returned object.
-
-      In the tree the tag name is the 'screen' name of the entry. A tag can have
-      attributes. Here follows the list of tag attributes with meaning:
-      - Destination: A string description of the referred destination
-      - DestinationName: A 'named reference' to the viewport
-      - ExternalFileName: A link to a external filename
-      - Open: A bool value that tells whether the subbranch of the item is open or not
-
-      Resolving the final destination for each item can be done in the following way:
-      - first, checking for 'Destination': if not empty, then a LinkDestination
-        can be constructed straight with it
-      - as second step, if the 'DestinationName' is not empty, then the destination
-        can be resolved using linkDestination()
-
-      Note also that if 'ExternalFileName' is not emtpy, then the destination refers
-      to that document (and not to the current one).
-
-      \returns the TOC, or NULL if the Document does not have one
-    */
-    QDomDocument *toc() const;
 
     /**
        Gets the outline of the document
@@ -1614,9 +1588,9 @@ QString subject = m_doc->info("Subject");
        \note this operation starts a search through the whole document
 
        \returns a new LinkDestination object if the named destination was
-       actually found, or NULL otherwise
+       actually found, or empty unique pointer otherwise
     */
-    LinkDestination *linkDestination(const QString &name);
+    std::unique_ptr<LinkDestination> linkDestination(const QString &name);
 
     /**
       Sets the paper color
@@ -1664,17 +1638,13 @@ QString subject = m_doc->info("Subject");
 
     /**
       Gets a new PS converter for this document.
-
-      The caller gets the ownership of the returned converter.
      */
-    PSConverter *psConverter() const;
+    std::unique_ptr<PSConverter> psConverter() const;
 
     /**
       Gets a new PDF converter for this document.
-
-      The caller gets the ownership of the returned converter.
      */
-    PDFConverter *pdfConverter() const;
+    std::unique_ptr<PDFConverter> pdfConverter() const;
 
     /**
       Gets the metadata stream contents
@@ -1736,7 +1706,22 @@ QString subject = m_doc->info("Subject");
      Prefer to use this over getting the signatures for all the pages of the document
      since there are documents with signatures that don't belong to a given page
     */
-    QVector<FormFieldSignature *> signatures() const;
+    std::vector<std::unique_ptr<FormFieldSignature>> signatures() const;
+
+    /**
+     Returns whether the document's XRef table has been reconstructed or not
+
+     \since 21.06
+    */
+    bool xrefWasReconstructed() const;
+
+    /**
+     Sets the document's XRef reconstruction callback, so whenever a XRef table
+     reconstruction happens the callback will get triggered.
+
+     \since 21.06
+    */
+    void setXRefReconstructedCallback(const std::function<void()> &callback);
 
     /**
        Destructor.
@@ -1748,7 +1733,7 @@ private:
 
     DocumentData *m_doc;
 
-    Document(DocumentData *dataA);
+    explicit Document(DocumentData *dataA);
 };
 
 class BaseConverterPrivate;
@@ -1799,7 +1784,7 @@ public:
 
 protected:
     /// \cond PRIVATE
-    BaseConverter(BaseConverterPrivate &dd);
+    explicit BaseConverter(BaseConverterPrivate &dd);
     Q_DECLARE_PRIVATE(BaseConverter)
     BaseConverterPrivate *d_ptr;
     /// \endcond
@@ -1935,7 +1920,7 @@ private:
     Q_DECLARE_PRIVATE(PSConverter)
     Q_DISABLE_COPY(PSConverter)
 
-    PSConverter(DocumentData *document);
+    explicit PSConverter(DocumentData *document);
 };
 
 /**
@@ -1969,13 +1954,142 @@ public:
      */
     PDFOptions pdfOptions() const;
 
+    /**
+     * Holds data for a new signature
+     *  - Common Name of cert to sign (aka nickname)
+     *  - password for the cert
+     *  - page where to add the signature
+     *  - rect for the signature annotation
+     *  - text that will be shown inside the rect
+     *  - font size and color
+     *  - border width and color
+     *  - background color
+     * \since 21.01
+     */
+    class POPPLER_QT6_EXPORT NewSignatureData
+    {
+    public:
+        NewSignatureData();
+        ~NewSignatureData();
+        NewSignatureData(const NewSignatureData &) = delete;
+        NewSignatureData &operator=(const NewSignatureData &) = delete;
+
+        QString certNickname() const;
+        void setCertNickname(const QString &certNickname);
+
+        QString password() const;
+        void setPassword(const QString &password);
+
+        int page() const;
+        void setPage(int page);
+
+        QRectF boundingRectangle() const;
+        void setBoundingRectangle(const QRectF &rect);
+
+        QString signatureText() const;
+        void setSignatureText(const QString &text);
+
+        /**
+         * If this text is not empty, the signature representation
+         * will split in two, with this text on the left and signatureText
+         * on the right
+         *
+         * \since 21.06
+         */
+        QString signatureLeftText() const;
+        void setSignatureLeftText(const QString &text);
+
+        /**
+         * Signature's property Reason.
+         *
+         * Default: an empty string.
+         *
+         * \since 21.10
+         */
+        QString reason() const;
+        void setReason(const QString &reason);
+
+        /**
+         * Signature's property Location.
+         *
+         * Default: an empty string.
+         *
+         * \since 21.10
+         */
+        QString location() const;
+        void setLocation(const QString &location);
+
+        /**
+         * Default: 10
+         */
+        double fontSize() const;
+        void setFontSize(double fontSize);
+
+        /**
+         * Default: 20
+         *
+         * \since 21.06
+         */
+        double leftFontSize() const;
+        void setLeftFontSize(double fontSize);
+
+        /**
+         * Default: red
+         */
+        QColor fontColor() const;
+        void setFontColor(const QColor &color);
+
+        /**
+         * Default: red
+         */
+        QColor borderColor() const;
+        void setBorderColor(const QColor &color);
+
+        /**
+         * border width in points
+         *
+         * Default: 1.5
+         *
+         * \since 21.05
+         */
+        double borderWidth() const;
+        void setBorderWidth(double width);
+
+        /**
+         * Default: QColor(240, 240, 240)
+         */
+        QColor backgroundColor() const;
+        void setBackgroundColor(const QColor &color);
+
+        /**
+         * Default: QUuid::createUuid().toString()
+         */
+        QString fieldPartialName() const;
+        void setFieldPartialName(const QString &name);
+
+    private:
+        struct NewSignatureDataPrivate;
+        NewSignatureDataPrivate *const d;
+    };
+
+    /**
+        Sign PDF at given Annotation / signature form
+
+        \param data new signature data
+
+        \return whether the signing succeeded
+
+        \since 21.01
+    */
+    bool sign(const NewSignatureData &data);
+
     bool convert() override;
 
 private:
     Q_DECLARE_PRIVATE(PDFConverter)
     Q_DISABLE_COPY(PDFConverter)
 
-    PDFConverter(DocumentData *document);
+    explicit PDFConverter(DocumentData *document);
 };
 
 /**
@@ -2024,8 +2138,10 @@ public:
         ALaw ///< A-law-encoded samples
     };
 
-    /// \cond PRIVATE
-    SoundObject(Sound *popplersound);
+    /** \cond PRIVATE
+      The caller keeps the ownership of the popplersound argument
+    */
+    explicit SoundObject(Sound *popplersound);
     /// \endcond
 
     ~SoundObject();
@@ -2132,7 +2248,7 @@ public:
 
 private:
     /// \cond PRIVATE
-    MovieObject(AnnotMovie *ann);
+    explicit MovieObject(AnnotMovie *ann);
     /// \endcond
 
     Q_DISABLE_COPY(MovieObject)

@@ -17,13 +17,13 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
-// Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018, 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -37,6 +37,7 @@
 #define TEXTOUTPUTDEV_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include <cstdio>
 #include "GfxFont.h"
 #include "GfxState.h"
@@ -83,10 +84,10 @@ enum EndOfLineKind
 // TextFontInfo
 //------------------------------------------------------------------------
 
-class TextFontInfo
+class POPPLER_PRIVATE_EXPORT TextFontInfo
 {
 public:
-    TextFontInfo(const GfxState *state);
+    explicit TextFontInfo(const GfxState *state);
     ~TextFontInfo();
 
     TextFontInfo(const TextFontInfo &) = delete;
@@ -133,7 +134,7 @@ private:
 // TextWord
 //------------------------------------------------------------------------
 
-class TextWord
+class POPPLER_PRIVATE_EXPORT TextWord
 {
 public:
     // Constructor.
@@ -232,6 +233,7 @@ private:
     bool spaceAfter; // set if there is a space between this
                      //   word and the next word on the line
     bool underlined;
+    bool invisible; // whether we are invisible (glyphless)
     TextWord *next; // next word in line
 
 #ifdef TEXTOUT_WORD_LIST
@@ -502,7 +504,7 @@ private:
 // TextWordList
 //------------------------------------------------------------------------
 
-class TextWordList
+class POPPLER_PRIVATE_EXPORT TextWordList
 {
 public:
     // Build a flat word list, in content stream order (if
@@ -550,11 +552,11 @@ private:
 // TextPage
 //------------------------------------------------------------------------
 
-class TextPage
+class POPPLER_PRIVATE_EXPORT TextPage
 {
 public:
     // Constructor.
-    TextPage(bool rawOrderA, bool discardDiagA = false);
+    explicit TextPage(bool rawOrderA, bool discardDiagA = false);
 
     TextPage(const TextPage &) = delete;
     TextPage &operator=(const TextPage &) = delete;
@@ -611,6 +613,20 @@ public:
     bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool ignoreDiacritics, bool backward, bool wholeWord, double *xMin, double *yMin, double *xMax,
                   double *yMax);
 
+    // Adds new parameter <matchAcrossLines>, which allows <s> to match on text
+    // spanning from end of a line to the next line. In that case, the rect for
+    // the part of match that falls on the next line will be stored in
+    // <continueMatch>, and if hyphenation (i.e. ignoring hyphen at end of line)
+    // was used while matching at the end of the line prior to <continueMatch>,
+    // then <ignoredHyphen> will be true, otherwise will be false.
+    // Only finding across two lines is supported, i.e. it won't match where <s>
+    // spans more than two lines.
+    //
+    // <matchAcrossLines> will be ignored if <backward> is true (as that
+    // combination has not been implemented yet).
+    bool findText(const Unicode *s, int len, bool startAtTop, bool stopAtBottom, bool startAtLast, bool stopAtLast, bool caseSensitive, bool ignoreDiacritics, bool matchAcrossLines, bool backward, bool wholeWord, double *xMin, double *yMin,
+                  double *xMax, double *yMax, PDFRectangle *continueMatch, bool *ignoredHyphen);
+
     // Get the text which is inside the specified rectangle.
     GooString *getText(double xMin, double yMin, double xMax, double yMax, EndOfLineKind textEOL) const;
 
@@ -654,6 +670,7 @@ private:
     void clear();
     void assignColumns(TextLineFrag *frags, int nFrags, bool rot) const;
     int dumpFragment(const Unicode *text, int len, const UnicodeMap *uMap, GooString *s) const;
+    void adjustRotation(TextLine *line, int start, int end, double *xMin, double *xMax, double *yMin, double *yMax);
 
     bool rawOrder; // keep text in content stream order
     bool discardDiag; // discard diagonal text
@@ -707,11 +724,11 @@ private:
 // ActualText
 //------------------------------------------------------------------------
 
-class ActualText
+class POPPLER_PRIVATE_EXPORT ActualText
 {
 public:
     // Create an ActualText
-    ActualText(TextPage *out);
+    explicit ActualText(TextPage *out);
     ~ActualText();
 
     ActualText(const ActualText &) = delete;
@@ -736,7 +753,7 @@ private:
 // TextOutputDev
 //------------------------------------------------------------------------
 
-class TextOutputDev : public OutputDev
+class POPPLER_PRIVATE_EXPORT TextOutputDev : public OutputDev
 {
 public:
     // Open a text output file.  If <fileName> is NULL, no file is

@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -36,6 +36,10 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2021 RM <rm+git@arcsin.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -126,6 +130,15 @@ Catalog::Catalog(PDFDoc *docA)
 
     // get the ViewerPreferences dictionary
     viewerPreferences = catDict.dictLookup("ViewerPreferences");
+
+    const Object version = catDict.dictLookup("Version");
+    if (version.isName()) {
+        const int res = sscanf(version.getName(), "%d.%d", &catalogPdfMajorVersion, &catalogPdfMinorVersion);
+        if (res != 2) {
+            catalogPdfMajorVersion = -1;
+            catalogPdfMinorVersion = -1;
+        }
+    }
 }
 
 Catalog::~Catalog()
@@ -153,7 +166,7 @@ Catalog::~Catalog()
     delete structTreeRoot;
 }
 
-GooString *Catalog::readMetadata()
+std::unique_ptr<GooString> Catalog::readMetadata()
 {
     catalogLocker();
     if (metadata.isNone()) {
@@ -167,14 +180,14 @@ GooString *Catalog::readMetadata()
     }
 
     if (!metadata.isStream()) {
-        return nullptr;
+        return {};
     }
     Object obj = metadata.streamGetDict()->lookup("Subtype");
     if (!obj.isName("XML")) {
         error(errSyntaxWarning, -1, "Unknown Metadata type: '{0:s}'", obj.isName() ? obj.getName() : "???");
     }
-    GooString *s = new GooString();
-    metadata.getStream()->fillGooString(s);
+    std::unique_ptr<GooString> s = std::make_unique<GooString>();
+    metadata.getStream()->fillGooString(s.get());
     metadata.streamClose();
     return s;
 }
@@ -938,6 +951,43 @@ unsigned int Catalog::getMarkInfo()
     return markInfo;
 }
 
+Object *Catalog::getCreateOutline()
+{
+
+    catalogLocker();
+    Object catDict = xref->getCatalog();
+
+    // If there is no Object in the outline variable,
+    // check if there is an Outline dict in the catalog
+    if (outline.isNone()) {
+        if (catDict.isDict()) {
+            Object outline_obj = catDict.dictLookup("Outlines");
+            if (outline_obj.isDict()) {
+                return &outline;
+            }
+        } else {
+            // catalog is not a dict, give up?
+            return &outline;
+        }
+    }
+
+    // If there is an Object in variable, make sure it's a dict
+    if (outline.isDict()) {
+        return &outline;
+    }
+
+    // setup an empty outline dict
+    outline = Object(new Dict(doc->getXRef()));
+    outline.dictSet("Type", Object(objName, "Outlines"));
+    outline.dictSet("Count", Object(0));
+
+    const Ref outlineRef = doc->getXRef()->addIndirectObject(&outline);
+    catDict.dictAdd("Outlines", Object(outlineRef));
+    xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+
+    return &outline;
+}
+
 Object *Catalog::getOutline()
 {
     catalogLocker();
@@ -999,6 +1049,65 @@ Form *Catalog::getForm()
     }
 
     return form;
+}
+
+void Catalog::addFormToAcroForm(const Ref formRef)
+{
+    catalogLocker();
+
+    Object catDict = xref->getCatalog();
+    Ref acroFormRef;
+    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+
+    if (!acroForm.isDict()) {
+        // none there yet, need to create a new fields dict
+        Object newForm = Object(new Dict(xref));
+        newForm.dictSet("SigFlags", Object(3));
+
+        Array *fieldArray = new Array(xref);
+        fieldArray->add(Object(formRef));
+        newForm.dictSet("Fields", Object(fieldArray));
+
+        Ref newRef = xref->addIndirectObject(&newForm);
+        catDict.dictSet("AcroForm", Object(newRef));
+        acroForm = catDict.getDict()->lookup("AcroForm");
+    } else {
+        // append to field array
+        Ref fieldRef;
+        Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+        fieldArray.getArray()->add(Object(formRef));
+    }
+
+    if (acroFormRef != Ref::INVALID()) {
+        xref->setModifiedObject(&acroForm, acroFormRef);
+    } else {
+        xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+    }
+}
+
+void Catalog::removeFormFromAcroForm(const Ref formRef)
+{
+    catalogLocker();
+
+    Object catDict = xref->getCatalog();
+    Ref acroFormRef;
+    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+
+    if (acroForm.isDict()) {
+        // remove from field array
+        Ref fieldRef;
+        Object fieldArrayO = acroForm.getDict()->lookup("Fields", &fieldRef);
+        Array *fieldArray = fieldArrayO.getArray();
+        for (int i = 0; i < fieldArray->getLength(); ++i) {
+            const Object &o = fieldArray->getNF(i);
+            if (o.isRef() && o.getRef() == formRef) {
+                fieldArray->remove(i);
+                break;
+            }
+        }
+
+        xref->setModifiedObject(&acroForm, acroFormRef);
+    }
 }
 
 ViewerPreferences *Catalog::getViewerPreferences()
@@ -1077,8 +1186,12 @@ std::unique_ptr<LinkAction> Catalog::getAdditionalAction(DocumentAdditionalActio
 {
     Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
     if (additionalActionsObject.isDict()) {
-        const char *key =
-                (type == actionCloseDocument ? "WC" : type == actionSaveDocumentStart ? "WS" : type == actionSaveDocumentFinish ? "DS" : type == actionPrintDocumentStart ? "WP" : type == actionPrintDocumentFinish ? "DP" : nullptr);
+        const char *key = (type == actionCloseDocument                 ? "WC"
+                                   : type == actionSaveDocumentStart   ? "WS"
+                                   : type == actionSaveDocumentFinish  ? "DS"
+                                   : type == actionPrintDocumentStart  ? "WP"
+                                   : type == actionPrintDocumentFinish ? "DP"
+                                                                       : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
         if (actionObject.isDict())

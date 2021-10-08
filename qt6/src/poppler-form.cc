@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -8,9 +8,13 @@
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
- * Copyright (C) 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2018, 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+ * Copyright (C) 2021 Theofilos Intzoglou <int.teo@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +33,19 @@
 
 #include "poppler-qt6.h"
 
+#include <config.h>
+
 #include <QtCore/QSizeF>
+#include <QUrl>
 
 #include <Form.h>
 #include <Object.h>
 #include <Link.h>
 #include <SignatureInfo.h>
 #include <CertificateInfo.h>
+#ifdef ENABLE_NSS3
+#    include <SignatureHandler.h>
+#endif
 
 #include "poppler-form.h"
 #include "poppler-page-private.h"
@@ -213,16 +223,16 @@ void FormField::setPrintable(bool value)
     m_formData->fm->getWidgetAnnotation()->setFlags(flags);
 }
 
-Link *FormField::activationAction() const
+std::unique_ptr<Link> FormField::activationAction() const
 {
-    Link *action = nullptr;
     if (::LinkAction *act = m_formData->fm->getActivationAction()) {
-        action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+        return PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
     }
-    return action;
+
+    return {};
 }
 
-Link *FormField::additionalAction(AdditionalActionType type) const
+std::unique_ptr<Link> FormField::additionalAction(AdditionalActionType type) const
 {
     Annot::FormAdditionalActionsType actionType = Annot::actionFieldModified;
     switch (type) {
@@ -240,27 +250,27 @@ Link *FormField::additionalAction(AdditionalActionType type) const
         break;
     }
 
-    Link *action = nullptr;
     if (std::unique_ptr<::LinkAction> act = m_formData->fm->getAdditionalAction(actionType)) {
-        action = PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
+        return PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
     }
-    return action;
+
+    return {};
 }
 
-Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
+std::unique_ptr<Link> FormField::additionalAction(Annotation::AdditionalActionType type) const
 {
     ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
     if (!w) {
-        return nullptr;
+        return {};
     }
 
     const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
-    Link *action = nullptr;
     if (std::unique_ptr<::LinkAction> act = w->getAdditionalAction(actionType)) {
-        action = PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
+        return PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
     }
-    return action;
+
+    return {};
 }
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w) : FormField(std::make_unique<FormFieldData>(doc, p, w)) { }
@@ -571,6 +581,7 @@ public:
 
     EntityInfo issuer_info;
     EntityInfo subject_info;
+    QString nick_name;
     QByteArray certificate_der;
     QByteArray serial_number;
     QByteArray public_key;
@@ -583,6 +594,11 @@ public:
     bool is_self_signed;
     bool is_null;
 };
+
+CertificateInfo::CertificateInfo() : d_ptr(new CertificateInfoPrivate())
+{
+    d_ptr->is_null = true;
+}
 
 CertificateInfo::CertificateInfo(CertificateInfoPrivate *priv) : d_ptr(priv) { }
 
@@ -648,6 +664,12 @@ QString CertificateInfo::subjectInfo(EntityInfoKey key) const
     default:
         return QString();
     }
+}
+
+QString CertificateInfo::nickName() const
+{
+    Q_D(const CertificateInfo);
+    return d->nick_name;
 }
 
 QDateTime CertificateInfo::validityStart() const
@@ -726,10 +748,25 @@ QByteArray CertificateInfo::certificateData() const
     return d->certificate_der;
 }
 
+bool CertificateInfo::checkPassword(const QString &password) const
+{
+#ifdef ENABLE_NSS3
+    Q_D(const CertificateInfo);
+    SignatureHandler sigHandler(d->nick_name.toUtf8().constData(), SEC_OID_SHA256);
+    unsigned char buffer[5];
+    memcpy(buffer, "test", 5);
+    sigHandler.updateHash(buffer, 5);
+    std::unique_ptr<GooString> tmpSignature = sigHandler.signDetached(password.toUtf8().constData());
+    return tmpSignature.get() != nullptr;
+#else
+    return false;
+#endif
+}
+
 class SignatureValidationInfoPrivate
 {
 public:
-    SignatureValidationInfoPrivate(CertificateInfo &&ci) : cert_info(ci) { }
+    explicit SignatureValidationInfoPrivate(CertificateInfo &&ci) : cert_info(ci) { }
 
     SignatureValidationInfo::SignatureStatus signature_status;
     SignatureValidationInfo::CertificateStatus certificate_status;
@@ -897,14 +934,8 @@ SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
     return validate(opt, QDateTime());
 }
 
-SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
+static CertificateInfoPrivate *createCertificateInfoPrivate(const X509CertificateInfo *ci)
 {
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
-    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
-
-    // get certificate info
-    const X509CertificateInfo *ci = si->getCertificateInfo();
     CertificateInfoPrivate *certPriv = new CertificateInfoPrivate;
     certPriv->is_null = true;
     if (ci) {
@@ -926,6 +957,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
         certPriv->subject_info.email_address = subjectInfo.email.c_str();
         certPriv->subject_info.org_name = subjectInfo.organization.c_str();
 
+        certPriv->nick_name = ci->getNickName().c_str();
+
         X509CertificateInfo::Validity certValidity = ci->getValidity();
         certPriv->validity_start = QDateTime::fromSecsSinceEpoch(certValidity.notBefore, Qt::UTC);
         certPriv->validity_end = QDateTime::fromSecsSinceEpoch(certValidity.notAfter, Qt::UTC);
@@ -940,6 +973,19 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
 
         certPriv->is_null = false;
     }
+
+    return certPriv;
+}
+
+SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
+{
+    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    const time_t validationTimeT = validationTime.isValid() ? validationTime.toSecsSinceEpoch() : -1;
+    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT, !(opt & ValidateWithoutOCSPRevocationCheck), opt & ValidateUseAIACertFetch);
+
+    // get certificate info
+    const X509CertificateInfo *ci = si->getCertificateInfo();
+    CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(ci);
 
     SignatureValidationInfoPrivate *priv = new SignatureValidationInfoPrivate(CertificateInfo(certPriv));
     switch (si->getSignatureValStatus()) {
@@ -993,8 +1039,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     priv->signer_name = si->getSignerName();
     priv->signer_subject_dn = si->getSubjectDN();
     priv->hash_algorithm = si->getHashAlgorithm();
-    priv->location = si->getLocation();
-    priv->reason = si->getReason();
+    priv->location = UnicodeParsedString(si->getLocation().toStr());
+    priv->reason = UnicodeParsedString(si->getReason().toStr());
 
     priv->signing_time = si->getSigningTime();
     const std::vector<Goffset> ranges = fws->getSignedRangeBounds();
@@ -1012,4 +1058,65 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     return SignatureValidationInfo(priv);
 }
 
+bool hasNSSSupport()
+{
+#ifdef ENABLE_NSS3
+    return true;
+#else
+    return false;
+#endif
+}
+
+QVector<CertificateInfo> getAvailableSigningCertificates()
+{
+    QVector<CertificateInfo> vReturnCerts;
+
+#ifdef ENABLE_NSS3
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = SignatureHandler::getAvailableSigningCertificates();
+
+    for (auto &cert : vCerts) {
+        CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(cert.get());
+        vReturnCerts.append(CertificateInfo(certPriv));
+    }
+#endif
+
+    return vReturnCerts;
+}
+
+QString POPPLER_QT6_EXPORT getNSSDir()
+{
+#ifdef ENABLE_NSS3
+    return QString::fromLocal8Bit(SignatureHandler::getNSSDir().c_str());
+#else
+    return QString();
+#endif
+}
+
+void setNSSDir(const QString &path)
+{
+#ifdef ENABLE_NSS3
+    if (path.isEmpty())
+        return;
+
+    GooString *goo = QStringToGooString(path);
+    SignatureHandler::setNSSDir(*goo);
+    delete goo;
+#else
+    (void)path;
+#endif
+}
+
+namespace {
+std::function<QString(const QString &)> nssPasswordCall;
+}
+
+void setNSSPasswordCallback(const std::function<char *(const char *)> &f)
+{
+#ifdef ENABLE_NSS3
+    SignatureHandler::setNSSPasswordCallback(f);
+#else
+    qWarning() << "setNSSPasswordCallback called but this poppler is built without NSS support";
+    (void)f;
+#endif
+}
 }

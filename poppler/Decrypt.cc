@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Matthias Franz <matthias@ktug.or.kr>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -370,7 +370,7 @@ int BaseCryptStream::getChar()
     return c;
 }
 
-bool BaseCryptStream::isBinary(bool last)
+bool BaseCryptStream::isBinary(bool last) const
 {
     return str->isBinary(last);
 }
@@ -1761,10 +1761,7 @@ static void revision6Hash(const GooString *inputPassword, unsigned char *K, cons
 
     int inputPasswordLength = inputPassword->getLength();
     int KLength = 32;
-    int userKeyLength = 0;
-    if (userKey) {
-        userKeyLength = 48;
-    }
+    const int userKeyLength = userKey ? 48 : 0;
     int sequenceLength;
     int totalLength;
     int rounds = 0;
@@ -1775,7 +1772,9 @@ static void revision6Hash(const GooString *inputPassword, unsigned char *K, cons
         // a.make the string K1
         memcpy(K1, inputPassword->c_str(), inputPasswordLength);
         memcpy(K1 + inputPasswordLength, K, KLength);
-        memcpy(K1 + inputPasswordLength + KLength, userKey, userKeyLength);
+        if (userKey) {
+            memcpy(K1 + inputPasswordLength + KLength, userKey, userKeyLength);
+        }
         for (int i = 1; i < 64; ++i) {
             memcpy(K1 + (i * sequenceLength), K1, sequenceLength);
         }

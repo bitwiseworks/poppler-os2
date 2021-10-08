@@ -33,16 +33,17 @@ set(poppler_qt6_SRCS
   poppler-page-transition.cc
   poppler-media.cc
   poppler-outline.cc
-  ArthurOutputDev.cc
+  QPainterOutputDev.cc
   poppler-version.cpp
 )
 add_library(poppler-qt6 ${poppler_qt6_SRCS})
-set_target_properties(poppler-qt6 PROPERTIES VERSION 1.0.0 SOVERSION 1)
+generate_export_header(poppler-qt6 BASE_NAME poppler-qt6 EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h")
+set_target_properties(poppler-qt6 PROPERTIES VERSION 3.1.0 SOVERSION 3)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_QT6_SOVERSION poppler-qt6 SOVERSION)
     set_target_properties(poppler-qt6 PROPERTIES SUFFIX "-${POPPLER_QT6_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
-target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui Qt6::Xml ${FREETYPE_LIBRARIES})
+target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui ${FREETYPE_LIBRARIES})
 if(MSVC)
 target_link_libraries(poppler-qt6 poppler ${poppler_LIBS})
 endif()
@@ -60,9 +61,9 @@ install(FILES
   poppler-annotation.h
   poppler-form.h
   poppler-optcontent.h
-  poppler-export.h
   poppler-page-transition.h
   poppler-media.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler-export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/qt6)
 

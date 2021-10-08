@@ -9,7 +9,7 @@
 // Copyright (C) 2010 Jürg Billeter <j@bitron.ch>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Brian Cameron <brian.cameron@oracle.com>
-// Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
@@ -19,6 +19,7 @@
 #define JPEGWRITER_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 
 #ifdef ENABLE_LIBJPEG
 
@@ -27,7 +28,7 @@
 
 struct JpegWriterPrivate;
 
-class JpegWriter : public ImgWriter
+class POPPLER_PRIVATE_EXPORT JpegWriter : public ImgWriter
 {
 public:
     /* RGB                 - 3 bytes/pixel
@@ -42,7 +43,7 @@ public:
     };
 
     JpegWriter(int quality, bool progressive, Format format = RGB);
-    JpegWriter(Format format = RGB);
+    explicit JpegWriter(Format format = RGB);
     ~JpegWriter() override;
 
     JpegWriter(const JpegWriter &other) = delete;

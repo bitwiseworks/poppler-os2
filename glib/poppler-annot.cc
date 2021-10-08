@@ -1627,7 +1627,7 @@ PopplerAnnotCalloutLine *poppler_annot_free_text_get_callout_line(PopplerAnnotFr
         callout->x2 = line->getX2();
         callout->y2 = line->getY2();
 
-        if ((multiline = static_cast<AnnotCalloutMultiLine *>(line))) {
+        if ((multiline = dynamic_cast<AnnotCalloutMultiLine *>(line))) {
             callout->multiline = TRUE;
             callout->x3 = multiline->getX3();
             callout->y3 = multiline->getY3();
@@ -1693,7 +1693,7 @@ gchar *poppler_annot_file_attachment_get_name(PopplerAnnotFileAttachment *popple
 }
 
 /* PopplerAnnotCalloutLine */
-POPPLER_DEFINE_BOXED_TYPE(PopplerAnnotCalloutLine, poppler_annot_callout_line, poppler_annot_callout_line_copy, poppler_annot_callout_line_free)
+G_DEFINE_BOXED_TYPE(PopplerAnnotCalloutLine, poppler_annot_callout_line, poppler_annot_callout_line_copy, poppler_annot_callout_line_free)
 
 /**
  * poppler_annot_callout_line_new:

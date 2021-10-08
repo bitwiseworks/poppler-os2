@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -22,9 +22,9 @@
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
-// Copyright (C) 2011, 2012, 2016 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011, 2012, 2016, 2020 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012, 2013, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
+// Copyright (C) 2012, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2013, 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
@@ -38,6 +38,8 @@
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -67,6 +69,8 @@
 #include "JBIG2Stream.h"
 #include "Stream-CCITT.h"
 #include "CachedFile.h"
+
+#include "splash/SplashBitmap.h"
 
 #ifdef ENABLE_LIBJPEG
 #    include "DCTStream.h"
@@ -138,9 +142,38 @@ char *Stream::getLine(char *buf, int size)
     return buf;
 }
 
+unsigned int Stream::discardChars(unsigned int n)
+{
+    unsigned char buf[4096];
+    unsigned int count, i, j;
+
+    count = 0;
+    while (count < n) {
+        if ((i = n - count) > sizeof(buf)) {
+            i = (unsigned int)sizeof(buf);
+        }
+        j = (unsigned int)doGetChars((int)i, buf);
+        count += j;
+        if (j != i) {
+            break;
+        }
+    }
+    return count;
+}
+
 GooString *Stream::getPSFilter(int psLevel, const char *indent)
 {
     return new GooString();
+}
+
+static Stream *wrapEOFStream(Stream *str)
+{
+    if (dynamic_cast<EOFStream *>(str)) {
+        // str is already a EOFStream, no need to wrap it in another EOFStream
+        return str;
+    } else {
+        return new EOFStream(str);
+    }
 }
 
 Stream *Stream::addFilters(Dict *dict, int recursion)
@@ -172,7 +205,7 @@ Stream *Stream::addFilters(Dict *dict, int recursion)
                 str = makeFilter(obj2.getName(), str, &params2, recursion);
             } else {
                 error(errSyntaxError, getPos(), "Bad filter name");
-                str = new EOFStream(str);
+                str = wrapEOFStream(str);
             }
         }
     } else if (!obj.isNull()) {
@@ -194,13 +227,14 @@ bool Stream::isEncrypted() const
 class BaseStreamStream : public Stream
 {
 public:
-    BaseStreamStream(Stream *strA) : str(strA) { }
+    explicit BaseStreamStream(Stream *strA) : str(strA) { }
+    ~BaseStreamStream() override;
 
     StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
     void reset() override { str->getBaseStream()->reset(); }
     int getChar() override { return str->getBaseStream()->getChar(); }
     int lookChar() override { return str->getBaseStream()->lookChar(); }
-    bool isBinary(bool last = true) override { return str->getBaseStream()->isBinary(); }
+    bool isBinary(bool last = true) const override { return str->getBaseStream()->isBinary(); }
     int getUnfilteredChar() override { return str->getBaseStream()->getUnfilteredChar(); }
     void unfilteredReset() override { str->getBaseStream()->unfilteredReset(); }
     Goffset getPos() override { return str->getBaseStream()->getPos(); }
@@ -213,6 +247,8 @@ public:
 private:
     std::unique_ptr<Stream> str;
 };
+
+BaseStreamStream::~BaseStreamStream() = default;
 
 Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int recursion, Dict *dict)
 {
@@ -311,7 +347,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         str = new DCTStream(str, colorXform, dict, recursion);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
 #endif
     } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
         pred = 1;
@@ -346,7 +382,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         str = new JPXStream(str);
 #else
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
 #endif
     } else if (!strcmp(name, "Crypt")) {
         if (str->getKind() == strCrypt) {
@@ -356,7 +392,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
         }
     } else {
         error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
-        str = new EOFStream(str);
+        str = wrapEOFStream(str);
     }
     return str;
 }
@@ -741,7 +777,7 @@ bool StreamPredictor::getNextLine()
     unsigned char upLeftBuf[gfxColorMaxComps * 2 + 1];
     int left, up, upLeft, p, pa, pb, pc;
     int c;
-    unsigned long inBuf, outBuf, bitMask;
+    unsigned long inBuf, outBuf;
     int inBits, outBits;
     int i, j, k, kk;
 
@@ -814,10 +850,13 @@ bool StreamPredictor::getNextLine()
     if (predictor == 2) {
         if (nBits == 1 && nComps == 1) {
             inBuf = predLine[pixBytes - 1];
-            for (i = pixBytes; i < rowBytes; i += 8) {
-                // 1-bit add is just xor
-                inBuf = (inBuf << 8) | predLine[i];
-                predLine[i] ^= inBuf >> nComps;
+            for (i = pixBytes; i < rowBytes; ++i) {
+                c = predLine[i] ^ inBuf;
+                c ^= c >> 1;
+                c ^= c >> 2;
+                c ^= c >> 4;
+                inBuf = (c & 1) << 7;
+                predLine[i] = c;
             }
         } else if (nBits == 8) {
             for (i = pixBytes; i < rowBytes; ++i) {
@@ -825,7 +864,7 @@ bool StreamPredictor::getNextLine()
             }
         } else {
             memset(upLeftBuf, 0, nComps + 1);
-            bitMask = (1 << nBits) - 1;
+            const unsigned long bitMask = (1 << nBits) - 1;
             inBuf = outBuf = 0;
             inBits = outBits = 0;
             j = k = pixBytes;
@@ -1057,6 +1096,13 @@ void CachedFileStream::moveStart(Goffset delta)
     bufPos = start;
 }
 
+MemStream::~MemStream() = default;
+
+AutoFreeMemStream::~AutoFreeMemStream()
+{
+    gfree(buf);
+}
+
 //------------------------------------------------------------------------
 // EmbedStream
 //------------------------------------------------------------------------
@@ -1069,6 +1115,7 @@ EmbedStream::EmbedStream(Stream *strA, Object &&dictA, bool limitedA, Goffset le
     reusable = reusableA;
     record = false;
     replay = false;
+    start = str->getPos();
     if (reusable) {
         bufData = (unsigned char *)gmalloc(16384);
         bufMax = 16384;
@@ -1083,13 +1130,32 @@ EmbedStream::~EmbedStream()
         gfree(bufData);
 }
 
+void EmbedStream::reset()
+{
+    if (str->getPos() != start) {
+        str->reset();
+        // Might be a FilterStream that does not support str->setPos(start)
+        while (str->getPos() < start) {
+            if (str->getChar() == EOF) {
+                break;
+            }
+        }
+        if (str->getPos() != start) {
+            error(errInternal, -1, "Failed to reset EmbedStream");
+        }
+    }
+    record = false;
+    replay = false;
+    bufPos = 0;
+}
+
 BaseStream *EmbedStream::copy()
 {
     error(errInternal, -1, "Called copy() on EmbedStream");
     return nullptr;
 }
 
-Stream *EmbedStream::makeSubStream(Goffset start, bool limitedA, Goffset lengthA, Object &&dictA)
+Stream *EmbedStream::makeSubStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
 {
     error(errInternal, -1, "Called makeSubStream() on EmbedStream");
     return nullptr;
@@ -1294,7 +1360,7 @@ GooString *ASCIIHexStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool ASCIIHexStream::isBinary(bool last)
+bool ASCIIHexStream::isBinary(bool last) const
 {
     return str->isBinary(false);
 }
@@ -1380,7 +1446,7 @@ GooString *ASCII85Stream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool ASCII85Stream::isBinary(bool last)
+bool ASCII85Stream::isBinary(bool last) const
 {
     return str->isBinary(false);
 }
@@ -1604,7 +1670,7 @@ GooString *LZWStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool LZWStream::isBinary(bool last)
+bool LZWStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -1667,7 +1733,7 @@ GooString *RunLengthStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool RunLengthStream::isBinary(bool last)
+bool RunLengthStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -1826,7 +1892,7 @@ inline void CCITTFaxStream::addPixelsNeg(int a1, int blackPixels)
         if (a1 < 0) {
             error(errSyntaxError, getPos(), "Invalid CCITTFax code");
             err = true;
-            a1 = 0;
+            a1 = columns;
         }
         while (a0i > 0 && a1 <= codingLine[a0i - 1]) {
             --a0i;
@@ -2491,7 +2557,7 @@ GooString *CCITTFaxStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool CCITTFaxStream::isBinary(bool last)
+bool CCITTFaxStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -3959,7 +4025,7 @@ GooString *DCTStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool DCTStream::isBinary(bool last)
+bool DCTStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4172,7 +4238,7 @@ GooString *FlateStream::getPSFilter(int psLevel, const char *indent)
     return s;
 }
 
-bool FlateStream::isBinary(bool last)
+bool FlateStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4566,7 +4632,7 @@ int BufStream::lookChar(int idx)
     return buf[idx];
 }
 
-bool BufStream::isBinary(bool last)
+bool BufStream::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -4608,7 +4674,7 @@ int FixedLengthEncoder::lookChar()
     return str->getChar();
 }
 
-bool FixedLengthEncoder::isBinary(bool last)
+bool FixedLengthEncoder::isBinary(bool last) const
 {
     return str->isBinary(true);
 }
@@ -5106,4 +5172,80 @@ bool RGBGrayEncoder::fillBuf()
     bufPtr = bufEnd = buf;
     *bufEnd++ = (char)i;
     return true;
+}
+
+//------------------------------------------------------------------------
+// SplashBitmapCMYKEncoder
+//------------------------------------------------------------------------
+
+SplashBitmapCMYKEncoder::SplashBitmapCMYKEncoder(SplashBitmap *bitmapA) : bitmap(bitmapA)
+{
+    width = (size_t)4 * bitmap->getWidth();
+    height = bitmap->getHeight();
+    buf.resize(width);
+    bufPtr = width;
+    curLine = height - 1;
+}
+
+SplashBitmapCMYKEncoder::~SplashBitmapCMYKEncoder() { }
+
+void SplashBitmapCMYKEncoder::reset()
+{
+    bufPtr = width;
+    curLine = height - 1;
+}
+
+int SplashBitmapCMYKEncoder::lookChar()
+{
+    if (bufPtr >= width && !fillBuf()) {
+        return EOF;
+    }
+    return buf[bufPtr];
+}
+
+int SplashBitmapCMYKEncoder::getChar()
+{
+    int ret = lookChar();
+    bufPtr++;
+    return ret;
+}
+
+bool SplashBitmapCMYKEncoder::fillBuf()
+{
+    if (curLine < 0) {
+        return false;
+    }
+
+    if (bufPtr < width) {
+        return true;
+    }
+
+    bitmap->getCMYKLine(curLine, &buf[0]);
+    bufPtr = 0;
+    curLine--;
+    return true;
+}
+
+Goffset SplashBitmapCMYKEncoder::getPos()
+{
+    return (height - 1 - curLine) * width + bufPtr;
+}
+
+void SplashBitmapCMYKEncoder::setPos(Goffset pos, int dir)
+{
+    // This code is mostly untested!
+    if (dir < 0) {
+        curLine = pos / width;
+    } else {
+        curLine = height - 1 - pos / width;
+    }
+
+    bufPtr = width;
+    fillBuf();
+
+    if (dir < 0) {
+        bufPtr = width - 1 - pos % width;
+    } else {
+        bufPtr = pos % width;
+    }
 }

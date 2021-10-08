@@ -8,34 +8,29 @@ class TestActualText : public QObject
 {
     Q_OBJECT
 public:
-    TestActualText(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestActualText(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkActualText1();
     void checkActualText2();
 
 private:
-    void checkActualText(Poppler::Document *doc);
+    void checkActualText(Poppler::Document &doc);
 };
 
-void TestActualText::checkActualText(Poppler::Document *doc)
+void TestActualText::checkActualText(Poppler::Document &doc)
 {
-    Poppler::Page *page = doc->page(0);
+    std::unique_ptr<Poppler::Page> page = doc.page(0);
     QVERIFY(page);
 
     QCOMPARE(page->text(QRectF()), QLatin1String("The slow brown fox jumps over the black dog."));
-
-    delete page;
 }
 
 void TestActualText::checkActualText1()
 {
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
     QVERIFY(doc);
 
-    checkActualText(doc);
-
-    delete doc;
+    checkActualText(*doc);
 }
 
 void TestActualText::checkActualText2()
@@ -43,13 +38,10 @@ void TestActualText::checkActualText2()
     QFile file(TESTDATADIR "/unittestcases/WithActualText.pdf");
     QVERIFY(file.open(QIODevice::ReadOnly));
 
-    Poppler::Document *doc;
-    doc = Poppler::Document::load(&file);
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(&file);
     QVERIFY(doc);
 
-    checkActualText(doc);
-
-    delete doc;
+    checkActualText(*doc);
 }
 
 QTEST_GUILESS_MAIN(TestActualText)

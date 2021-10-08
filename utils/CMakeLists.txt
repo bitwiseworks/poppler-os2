@@ -7,19 +7,18 @@ set(common_libs
   poppler
 )
 
-if (ENABLE_SPLASH)
-  # pdftoppm
-  set(pdftoppm_SOURCES ${common_srcs}
-    pdftoppm.cc
-  )
-  add_executable(pdftoppm ${pdftoppm_SOURCES})
-  target_link_libraries(pdftoppm ${common_libs})
-  if(LCMS2_FOUND)
-    target_link_libraries(pdftoppm ${LCMS2_LIBRARIES})
-  endif()
-  install(TARGETS pdftoppm DESTINATION bin)
-  install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-endif ()
+# pdftoppm
+set(pdftoppm_SOURCES ${common_srcs}
+  pdftoppm.cc
+  sanitychecks.cc
+)
+add_executable(pdftoppm ${pdftoppm_SOURCES})
+target_link_libraries(pdftoppm ${common_libs})
+if(LCMS2_FOUND)
+  target_link_libraries(pdftoppm ${LCMS2_LIBRARIES})
+endif()
+install(TARGETS pdftoppm DESTINATION bin)
+install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 if (HAVE_CAIRO)
   # pdftocairo
@@ -39,9 +38,6 @@ if (HAVE_CAIRO)
   add_definitions(${CAIRO_CFLAGS})
   add_executable(pdftocairo ${pdftocairo_SOURCES})
   target_link_libraries(pdftocairo ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES} ${common_libs})
-  if(LCMS_FOUND)
-    target_link_libraries(pdftocairo ${LCMS_LIBRARIES})
-  endif()
   if(CMAKE_USE_PTHREADS_INIT)
     target_link_libraries(pdftocairo Threads::Threads)
   endif()
@@ -114,9 +110,13 @@ endif ()
 # pdftops
 set(pdftops_SOURCES ${common_srcs}
   pdftops.cc
+  sanitychecks.cc
 )
 add_executable(pdftops ${pdftops_SOURCES})
 target_link_libraries(pdftops ${common_libs})
+if(LCMS2_FOUND)
+  target_link_libraries(pdftops ${LCMS2_LIBRARIES})
+endif()
 install(TARGETS pdftops DESTINATION bin)
 install(FILES pdftops.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 

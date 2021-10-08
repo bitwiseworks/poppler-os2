@@ -9,13 +9,13 @@ int main(int argc, char **argv)
 {
     QGuiApplication a(argc, argv); // QApplication required!
 
-    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-arthur") != 0) || argc > 3) {
+    if (argc < 2 || (argc == 3 && strcmp(argv[2], "-qpainter") != 0) || argc > 3) {
         // use argument as file name
-        qWarning() << "usage: test-render-to-file-qt6 filename [-arthur]";
+        qWarning() << "usage: test-render-to-file-qt6 filename [-qpainter]";
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(QFile::decodeName(argv[1]));
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(QFile::decodeName(argv[1]));
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
@@ -27,15 +27,14 @@ int main(int argc, char **argv)
     }
 
     if (doc->numPages() <= 0) {
-        delete doc;
         qDebug() << "Doc has no pages";
         return 0;
     }
 
     QString backendString;
-    if (argc == 3 && strcmp(argv[2], "-arthur") == 0) {
-        backendString = QStringLiteral("Arthur");
-        doc->setRenderBackend(Poppler::Document::ArthurBackend);
+    if (argc == 3 && strcmp(argv[2], "-qpainter") == 0) {
+        backendString = QStringLiteral("QPainter");
+        doc->setRenderBackend(Poppler::Document::QPainterBackend);
     } else {
         backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);
@@ -44,14 +43,13 @@ int main(int argc, char **argv)
     doc->setRenderHint(Poppler::Document::TextAntialiasing, true);
 
     for (int i = 0; i < doc->numPages(); ++i) {
-        Poppler::Page *page = doc->page(i);
+        std::unique_ptr<Poppler::Page> page = doc->page(i);
         if (page) {
             qDebug() << "Rendering page using" << backendString << "backend: " << i;
             QTime t = QTime::currentTime();
             QImage image = page->renderToImage();
             qDebug() << "Rendering took" << t.msecsTo(QTime::currentTime()) << "msecs";
             image.save(QStringLiteral("test-render-to-file%1.png").arg(i));
-            delete page;
         }
     }
 

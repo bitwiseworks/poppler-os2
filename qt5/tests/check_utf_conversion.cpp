@@ -14,7 +14,7 @@ class TestUTFConversion : public QObject
 {
     Q_OBJECT
 public:
-    TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testUTF_data();
     void testUTF();
@@ -99,6 +99,11 @@ void TestUTFConversion::testUTF()
     QVERIFY(compare(utf16String, s.utf16()));
     free(utf16String);
 
+    GooString gsUtf8(str);
+    std::unique_ptr<GooString> gsUtf16_a(utf8ToUtf16WithBom(gsUtf8));
+    std::unique_ptr<GooString> gsUtf16_b(Poppler::QStringToUnicodeGooString(s));
+    QCOMPARE(gsUtf16_a->cmp(gsUtf16_b.get()), 0);
+
     // UTF-16 to UTF-8
 
     len = utf16CountUtf8Bytes(s.utf16());
@@ -179,7 +184,7 @@ void TestUTFConversion::testUnicodeLittleEndian()
         QCOMPARE(UCS4fromLE[i], UCS4fromBE[i]);
     }
 
-    const QString expected = QStringLiteral("HI!☑");
+    const QString expected = QString::fromUtf8("HI!☑"); // clazy:exclude=qstring-allocations
 
     // Do some final verifications, checking the strings to be "HI!"
     QVERIFY(*UCS4fromLE == *UCS4fromBE);

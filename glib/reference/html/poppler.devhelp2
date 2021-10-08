@@ -47,12 +47,14 @@
     <keyword type="function" name="poppler_document_get_attachments ()" link="PopplerDocument.html#poppler-document-get-attachments"/>
     <keyword type="function" name="poppler_document_get_author ()" link="PopplerDocument.html#poppler-document-get-author" since="0.16"/>
     <keyword type="function" name="poppler_document_get_creation_date ()" link="PopplerDocument.html#poppler-document-get-creation-date" since="0.16"/>
+    <keyword type="function" name="poppler_document_get_creation_date_time ()" link="PopplerDocument.html#poppler-document-get-creation-date-time" since="20.09.0"/>
     <keyword type="function" name="poppler_document_get_creator ()" link="PopplerDocument.html#poppler-document-get-creator" since="0.16"/>
     <keyword type="function" name="poppler_document_get_form_field ()" link="PopplerDocument.html#poppler-document-get-form-field"/>
     <keyword type="function" name="poppler_document_get_id ()" link="PopplerDocument.html#poppler-document-get-id" since="0.16"/>
     <keyword type="function" name="poppler_document_get_keywords ()" link="PopplerDocument.html#poppler-document-get-keywords" since="0.16"/>
     <keyword type="function" name="poppler_document_get_metadata ()" link="PopplerDocument.html#poppler-document-get-metadata" since="0.16"/>
     <keyword type="function" name="poppler_document_get_modification_date ()" link="PopplerDocument.html#poppler-document-get-modification-date" since="0.16"/>
+    <keyword type="function" name="poppler_document_get_modification_date_time ()" link="PopplerDocument.html#poppler-document-get-modification-date-time" since="20.09.0"/>
     <keyword type="function" name="poppler_document_get_n_attachments ()" link="PopplerDocument.html#poppler-document-get-n-attachments" since="0.18"/>
     <keyword type="function" name="poppler_document_get_n_pages ()" link="PopplerDocument.html#poppler-document-get-n-pages"/>
     <keyword type="function" name="poppler_document_get_page ()" link="PopplerDocument.html#poppler-document-get-page"/>
@@ -77,7 +79,7 @@
     <keyword type="function" name="poppler_document_has_javascript ()" link="PopplerDocument.html#poppler-document-has-javascript" since="0.90"/>
     <keyword type="function" name="poppler_document_is_linearized ()" link="PopplerDocument.html#poppler-document-is-linearized" since="0.16"/>
     <keyword type="function" name="poppler_document_new_from_bytes ()" link="PopplerDocument.html#poppler-document-new-from-bytes" since="0.82"/>
-    <keyword type="function" name="poppler_document_new_from_data ()" link="PopplerDocument.html#poppler-document-new-from-data"/>
+    <keyword type="function" name="poppler_document_new_from_data ()" link="PopplerDocument.html#poppler-document-new-from-data" deprecated=""/>
     <keyword type="function" name="poppler_document_new_from_file ()" link="PopplerDocument.html#poppler-document-new-from-file"/>
     <keyword type="function" name="poppler_document_new_from_gfile ()" link="PopplerDocument.html#poppler-document-new-from-gfile" since="0.22"/>
     <keyword type="function" name="poppler_document_new_from_stream ()" link="PopplerDocument.html#poppler-document-new-from-stream" since="0.22"/>
@@ -86,9 +88,11 @@
     <keyword type="function" name="poppler_document_save_a_copy ()" link="PopplerDocument.html#poppler-document-save-a-copy"/>
     <keyword type="function" name="poppler_document_set_author ()" link="PopplerDocument.html#poppler-document-set-author" since="0.46"/>
     <keyword type="function" name="poppler_document_set_creation_date ()" link="PopplerDocument.html#poppler-document-set-creation-date" since="0.46"/>
+    <keyword type="function" name="poppler_document_set_creation_date_time ()" link="PopplerDocument.html#poppler-document-set-creation-date-time" since="20.09.0"/>
     <keyword type="function" name="poppler_document_set_creator ()" link="PopplerDocument.html#poppler-document-set-creator" since="0.46"/>
     <keyword type="function" name="poppler_document_set_keywords ()" link="PopplerDocument.html#poppler-document-set-keywords" since="0.46"/>
     <keyword type="function" name="poppler_document_set_modification_date ()" link="PopplerDocument.html#poppler-document-set-modification-date" since="0.46"/>
+    <keyword type="function" name="poppler_document_set_modification_date_time ()" link="PopplerDocument.html#poppler-document-set-modification-date-time" since="20.09.0"/>
     <keyword type="function" name="poppler_document_set_producer ()" link="PopplerDocument.html#poppler-document-set-producer" since="0.46"/>
     <keyword type="function" name="poppler_document_set_subject ()" link="PopplerDocument.html#poppler-document-set-subject" since="0.46"/>
     <keyword type="function" name="poppler_document_set_title ()" link="PopplerDocument.html#poppler-document-set-title" since="0.46"/>
@@ -143,6 +147,7 @@
     <keyword type="enum" name="enum PopplerViewerPreferences" link="PopplerDocument.html#PopplerViewerPreferences"/>
     <keyword type="property" name="The “author” property" link="PopplerDocument.html#PopplerDocument--author"/>
     <keyword type="property" name="The “creation-date” property" link="PopplerDocument.html#PopplerDocument--creation-date"/>
+    <keyword type="property" name="The “creation-datetime” property" link="PopplerDocument.html#PopplerDocument--creation-datetime"/>
     <keyword type="property" name="The “creator” property" link="PopplerDocument.html#PopplerDocument--creator"/>
     <keyword type="property" name="The “format” property" link="PopplerDocument.html#PopplerDocument--format"/>
     <keyword type="property" name="The “format-major” property" link="PopplerDocument.html#PopplerDocument--format-major"/>
@@ -151,6 +156,7 @@
     <keyword type="property" name="The “linearized” property" link="PopplerDocument.html#PopplerDocument--linearized"/>
     <keyword type="property" name="The “metadata” property" link="PopplerDocument.html#PopplerDocument--metadata"/>
     <keyword type="property" name="The “mod-date” property" link="PopplerDocument.html#PopplerDocument--mod-date"/>
+    <keyword type="property" name="The “mod-datetime” property" link="PopplerDocument.html#PopplerDocument--mod-datetime"/>
     <keyword type="property" name="The “page-layout” property" link="PopplerDocument.html#PopplerDocument--page-layout"/>
     <keyword type="property" name="The “page-mode” property" link="PopplerDocument.html#PopplerDocument--page-mode"/>
     <keyword type="property" name="The “permissions” property" link="PopplerDocument.html#PopplerDocument--permissions"/>
@@ -214,7 +220,7 @@
     <keyword type="function" name="poppler_page_render_for_printing_with_options ()" link="poppler-Poppler-Page.html#poppler-page-render-for-printing-with-options" since="0.16"/>
     <keyword type="function" name="poppler_page_render_selection ()" link="poppler-Poppler-Page.html#poppler-page-render-selection"/>
     <keyword type="function" name="poppler_page_render_to_ps ()" link="poppler-Poppler-Page.html#poppler-page-render-to-ps"/>
-    <keyword type="function" name="poppler_page_selection_region_free ()" link="poppler-Poppler-Page.html#poppler-page-selection-region-free" deprecated="0.16"/>
+    <keyword type="function" name="poppler_page_selection_region_free ()" link="poppler-Poppler-Page.html#poppler-page-selection-region-free" deprecated=""/>
     <keyword type="function" name="poppler_page_transition_copy ()" link="poppler-Poppler-Page.html#poppler-page-transition-copy"/>
     <keyword type="function" name="poppler_page_transition_free ()" link="poppler-Poppler-Page.html#poppler-page-transition-free"/>
     <keyword type="function" name="poppler_page_transition_new ()" link="poppler-Poppler-Page.html#poppler-page-transition-new"/>
@@ -225,6 +231,8 @@
     <keyword type="function" name="poppler_quadrilateral_free ()" link="poppler-Poppler-Page.html#poppler-quadrilateral-free" since="0.26"/>
     <keyword type="function" name="poppler_quadrilateral_new ()" link="poppler-Poppler-Page.html#poppler-quadrilateral-new" since="0.26"/>
     <keyword type="function" name="poppler_rectangle_copy ()" link="poppler-Poppler-Page.html#poppler-rectangle-copy"/>
+    <keyword type="function" name="poppler_rectangle_find_get_match_continued ()" link="poppler-Poppler-Page.html#poppler-rectangle-find-get-match-continued" since="21.05.0"/>
+    <keyword type="function" name="poppler_rectangle_find_get_ignored_hyphen ()" link="poppler-Poppler-Page.html#poppler-rectangle-find-get-ignored-hyphen" since="21.05.0"/>
     <keyword type="function" name="poppler_rectangle_free ()" link="poppler-Poppler-Page.html#poppler-rectangle-free"/>
     <keyword type="function" name="poppler_rectangle_new ()" link="poppler-Poppler-Page.html#poppler-rectangle-new"/>
     <keyword type="function" name="poppler_text_attributes_copy ()" link="poppler-Poppler-Page.html#poppler-text-attributes-copy" since="0.18"/>
@@ -259,17 +267,23 @@
     <keyword type="struct" name="struct PopplerActionLaunch" link="PopplerAction.html#PopplerActionLaunch"/>
     <keyword type="struct" name="struct PopplerActionUri" link="PopplerAction.html#PopplerActionUri"/>
     <keyword type="struct" name="struct PopplerActionNamed" link="PopplerAction.html#PopplerActionNamed"/>
-    <keyword type="struct" name="struct PopplerActionMovie" link="PopplerAction.html#PopplerActionMovie"/>
-    <keyword type="struct" name="struct PopplerActionRendition" link="PopplerAction.html#PopplerActionRendition"/>
-    <keyword type="struct" name="struct PopplerActionResetForm" link="PopplerAction.html#PopplerActionResetForm"/>
-    <keyword type="struct" name="struct PopplerActionOCGState" link="PopplerAction.html#PopplerActionOCGState"/>
-    <keyword type="struct" name="struct PopplerActionJavascript" link="PopplerAction.html#PopplerActionJavascript"/>
+    <keyword type="struct" name="struct PopplerActionMovie" link="PopplerAction.html#PopplerActionMovie" since="0.14"/>
+    <keyword type="struct" name="struct PopplerActionRendition" link="PopplerAction.html#PopplerActionRendition" since="0.14"/>
+    <keyword type="struct" name="struct PopplerActionResetForm" link="PopplerAction.html#PopplerActionResetForm" since="0.90"/>
+    <keyword type="struct" name="struct PopplerActionOCGState" link="PopplerAction.html#PopplerActionOCGState" since="0.14"/>
+    <keyword type="struct" name="struct PopplerActionJavascript" link="PopplerAction.html#PopplerActionJavascript" since="0.18"/>
     <keyword type="enum" name="enum PopplerActionType" link="PopplerAction.html#PopplerActionType"/>
     <keyword type="enum" name="enum PopplerDestType" link="PopplerAction.html#PopplerDestType"/>
     <keyword type="enum" name="enum PopplerActionMovieOperation" link="PopplerAction.html#PopplerActionMovieOperation" since="0.14"/>
     <keyword type="struct" name="PopplerActionLayer" link="PopplerAction.html#PopplerActionLayer"/>
     <keyword type="enum" name="enum PopplerActionLayerAction" link="PopplerAction.html#PopplerActionLayerAction" since="0.14"/>
     <keyword type="function" name="PopplerAttachmentSaveFunc ()" link="PopplerAttachment.html#PopplerAttachmentSaveFunc"/>
+    <keyword type="function" name="poppler_attachment_get_checksum ()" link="PopplerAttachment.html#poppler-attachment-get-checksum" since="20.09.0"/>
+    <keyword type="function" name="poppler_attachment_get_ctime ()" link="PopplerAttachment.html#poppler-attachment-get-ctime" since="20.09.0"/>
+    <keyword type="function" name="poppler_attachment_get_description ()" link="PopplerAttachment.html#poppler-attachment-get-description" since="20.09.0"/>
+    <keyword type="function" name="poppler_attachment_get_mtime ()" link="PopplerAttachment.html#poppler-attachment-get-mtime" since="20.09.0"/>
+    <keyword type="function" name="poppler_attachment_get_name ()" link="PopplerAttachment.html#poppler-attachment-get-name" since="20.09.0"/>
+    <keyword type="function" name="poppler_attachment_get_size ()" link="PopplerAttachment.html#poppler-attachment-get-size" since="20.09.0"/>
     <keyword type="function" name="poppler_attachment_save ()" link="PopplerAttachment.html#poppler-attachment-save"/>
     <keyword type="function" name="poppler_attachment_save_to_callback ()" link="PopplerAttachment.html#poppler-attachment-save-to-callback"/>
     <keyword type="struct" name="PopplerAttachment" link="PopplerAttachment.html#PopplerAttachment-struct"/>
@@ -404,8 +418,11 @@
     <keyword type="function" name="poppler_layer_show ()" link="poppler-Poppler-Layer.html#poppler-layer-show" since="0.12"/>
     <keyword type="struct" name="PopplerLayer" link="poppler-Poppler-Layer.html#PopplerLayer-struct"/>
     <keyword type="function" name="PopplerMediaSaveFunc ()" link="poppler-Poppler-Media.html#PopplerMediaSaveFunc" since="0.14"/>
+    <keyword type="function" name="poppler_media_get_auto_play ()" link="poppler-Poppler-Media.html#poppler-media-get-auto-play" since="20.04.0"/>
     <keyword type="function" name="poppler_media_get_filename ()" link="poppler-Poppler-Media.html#poppler-media-get-filename" since="0.14"/>
     <keyword type="function" name="poppler_media_get_mime_type ()" link="poppler-Poppler-Media.html#poppler-media-get-mime-type" since="0.14"/>
+    <keyword type="function" name="poppler_media_get_repeat_count ()" link="poppler-Poppler-Media.html#poppler-media-get-repeat-count" since="20.04.0"/>
+    <keyword type="function" name="poppler_media_get_show_controls ()" link="poppler-Poppler-Media.html#poppler-media-get-show-controls" since="20.04.0"/>
     <keyword type="function" name="poppler_media_is_embedded ()" link="poppler-Poppler-Media.html#poppler-media-is-embedded" since="0.14"/>
     <keyword type="function" name="poppler_media_save ()" link="poppler-Poppler-Media.html#poppler-media-save" since="0.14"/>
     <keyword type="function" name="poppler_media_save_to_callback ()" link="poppler-Poppler-Media.html#poppler-media-save-to-callback" since="0.14"/>
@@ -608,6 +625,7 @@
     <keyword type="constant" name="POPPLER_FIND_BACKWARDS" link="poppler-Poppler-Page.html#POPPLER-FIND-BACKWARDS:CAPS"/>
     <keyword type="constant" name="POPPLER_FIND_WHOLE_WORDS_ONLY" link="poppler-Poppler-Page.html#POPPLER-FIND-WHOLE-WORDS-ONLY:CAPS"/>
     <keyword type="constant" name="POPPLER_FIND_IGNORE_DIACRITICS" link="poppler-Poppler-Page.html#POPPLER-FIND-IGNORE-DIACRITICS:CAPS"/>
+    <keyword type="constant" name="POPPLER_FIND_MULTILINE" link="poppler-Poppler-Page.html#POPPLER-FIND-MULTILINE:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_TRANSITION_HORIZONTAL" link="poppler-Poppler-Page.html#POPPLER-PAGE-TRANSITION-HORIZONTAL:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_TRANSITION_VERTICAL" link="poppler-Poppler-Page.html#POPPLER-PAGE-TRANSITION-VERTICAL:CAPS"/>
     <keyword type="constant" name="POPPLER_PAGE_TRANSITION_INWARD" link="poppler-Poppler-Page.html#POPPLER-PAGE-TRANSITION-INWARD:CAPS"/>
@@ -905,8 +923,51 @@
     <keyword type="member" name="PopplerDest-struct.change-left" link="PopplerAction.html#PopplerDest-struct.change-left"/>
     <keyword type="member" name="PopplerDest-struct.change-top" link="PopplerAction.html#PopplerDest-struct.change-top"/>
     <keyword type="member" name="PopplerDest-struct.change-zoom" link="PopplerAction.html#PopplerDest-struct.change-zoom"/>
+    <keyword type="member" name="PopplerActionAny.type" link="PopplerAction.html#PopplerActionAny.type"/>
+    <keyword type="member" name="PopplerActionAny.title" link="PopplerAction.html#PopplerActionAny.title"/>
+    <keyword type="member" name="PopplerActionGotoDest.type" link="PopplerAction.html#PopplerActionGotoDest.type"/>
+    <keyword type="member" name="PopplerActionGotoDest.title" link="PopplerAction.html#PopplerActionGotoDest.title"/>
+    <keyword type="member" name="PopplerActionGotoDest.dest" link="PopplerAction.html#PopplerActionGotoDest.dest"/>
+    <keyword type="member" name="PopplerActionGotoRemote.type" link="PopplerAction.html#PopplerActionGotoRemote.type"/>
+    <keyword type="member" name="PopplerActionGotoRemote.title" link="PopplerAction.html#PopplerActionGotoRemote.title"/>
+    <keyword type="member" name="PopplerActionGotoRemote.file-name" link="PopplerAction.html#PopplerActionGotoRemote.file-name"/>
+    <keyword type="member" name="PopplerActionGotoRemote.dest" link="PopplerAction.html#PopplerActionGotoRemote.dest"/>
+    <keyword type="member" name="PopplerActionLaunch.type" link="PopplerAction.html#PopplerActionLaunch.type"/>
+    <keyword type="member" name="PopplerActionLaunch.title" link="PopplerAction.html#PopplerActionLaunch.title"/>
+    <keyword type="member" name="PopplerActionLaunch.file-name" link="PopplerAction.html#PopplerActionLaunch.file-name"/>
+    <keyword type="member" name="PopplerActionLaunch.params" link="PopplerAction.html#PopplerActionLaunch.params"/>
+    <keyword type="member" name="PopplerActionUri.type" link="PopplerAction.html#PopplerActionUri.type"/>
+    <keyword type="member" name="PopplerActionUri.title" link="PopplerAction.html#PopplerActionUri.title"/>
+    <keyword type="member" name="PopplerActionUri.uri" link="PopplerAction.html#PopplerActionUri.uri"/>
+    <keyword type="member" name="PopplerActionNamed.type" link="PopplerAction.html#PopplerActionNamed.type"/>
+    <keyword type="member" name="PopplerActionNamed.title" link="PopplerAction.html#PopplerActionNamed.title"/>
+    <keyword type="member" name="PopplerActionNamed.named-dest" link="PopplerAction.html#PopplerActionNamed.named-dest"/>
+    <keyword type="member" name="PopplerActionMovie.type" link="PopplerAction.html#PopplerActionMovie.type"/>
+    <keyword type="member" name="PopplerActionMovie.title" link="PopplerAction.html#PopplerActionMovie.title"/>
+    <keyword type="member" name="PopplerActionMovie.operation" link="PopplerAction.html#PopplerActionMovie.operation"/>
+    <keyword type="member" name="PopplerActionMovie.movie" link="PopplerAction.html#PopplerActionMovie.movie"/>
+    <keyword type="member" name="PopplerActionRendition.type" link="PopplerAction.html#PopplerActionRendition.type"/>
+    <keyword type="member" name="PopplerActionRendition.title" link="PopplerAction.html#PopplerActionRendition.title"/>
+    <keyword type="member" name="PopplerActionRendition.op" link="PopplerAction.html#PopplerActionRendition.op"/>
+    <keyword type="member" name="PopplerActionRendition.media" link="PopplerAction.html#PopplerActionRendition.media"/>
+    <keyword type="member" name="PopplerActionResetForm.type" link="PopplerAction.html#PopplerActionResetForm.type"/>
+    <keyword type="member" name="PopplerActionResetForm.title" link="PopplerAction.html#PopplerActionResetForm.title"/>
+    <keyword type="member" name="PopplerActionResetForm.fields" link="PopplerAction.html#PopplerActionResetForm.fields"/>
+    <keyword type="member" name="PopplerActionResetForm.exclude" link="PopplerAction.html#PopplerActionResetForm.exclude"/>
+    <keyword type="member" name="PopplerActionOCGState.type" link="PopplerAction.html#PopplerActionOCGState.type"/>
+    <keyword type="member" name="PopplerActionOCGState.title" link="PopplerAction.html#PopplerActionOCGState.title"/>
+    <keyword type="member" name="PopplerActionOCGState.state-list" link="PopplerAction.html#PopplerActionOCGState.state-list"/>
+    <keyword type="member" name="PopplerActionJavascript.type" link="PopplerAction.html#PopplerActionJavascript.type"/>
+    <keyword type="member" name="PopplerActionJavascript.title" link="PopplerAction.html#PopplerActionJavascript.title"/>
+    <keyword type="member" name="PopplerActionJavascript.script" link="PopplerAction.html#PopplerActionJavascript.script"/>
     <keyword type="member" name="PopplerActionLayer.action" link="PopplerAction.html#PopplerActionLayer.action"/>
     <keyword type="member" name="PopplerActionLayer.layers" link="PopplerAction.html#PopplerActionLayer.layers"/>
+    <keyword type="member" name="PopplerAttachment-struct.name" link="PopplerAttachment.html#PopplerAttachment-struct.name"/>
+    <keyword type="member" name="PopplerAttachment-struct.description" link="PopplerAttachment.html#PopplerAttachment-struct.description"/>
+    <keyword type="member" name="PopplerAttachment-struct.size" link="PopplerAttachment.html#PopplerAttachment-struct.size"/>
+    <keyword type="member" name="PopplerAttachment-struct.mtime" link="PopplerAttachment.html#PopplerAttachment-struct.mtime"/>
+    <keyword type="member" name="PopplerAttachment-struct.ctime" link="PopplerAttachment.html#PopplerAttachment-struct.ctime"/>
+    <keyword type="member" name="PopplerAttachment-struct.checksum" link="PopplerAttachment.html#PopplerAttachment-struct.checksum"/>
     <keyword type="member" name="PopplerColor-struct.red" link="poppler-Poppler-Color.html#PopplerColor-struct.red"/>
     <keyword type="member" name="PopplerColor-struct.green" link="poppler-Poppler-Color.html#PopplerColor-struct.green"/>
     <keyword type="member" name="PopplerColor-struct.blue" link="poppler-Poppler-Color.html#PopplerColor-struct.blue"/>

@@ -11,7 +11,7 @@ class PDFDisplay : public QWidget // picture display widget
 {
     Q_OBJECT
 public:
-    PDFDisplay(Poppler::Document *d, QWidget *parent = nullptr);
+    explicit PDFDisplay(std::unique_ptr<Poppler::Document> &&d, QWidget *parent = nullptr);
     ~PDFDisplay() override;
 
 protected:
@@ -22,12 +22,12 @@ private:
     void display();
     int m_currentPage;
     QImage image;
-    Poppler::Document *doc;
+    std::unique_ptr<Poppler::Document> doc;
 };
 
-PDFDisplay::PDFDisplay(Poppler::Document *d, QWidget *parent) : QWidget(parent)
+PDFDisplay::PDFDisplay(std::unique_ptr<Poppler::Document> &&d, QWidget *parent) : QWidget(parent)
 {
-    doc = d;
+    doc = std::move(d);
     m_currentPage = 0;
     display();
 }
@@ -35,22 +35,18 @@ PDFDisplay::PDFDisplay(Poppler::Document *d, QWidget *parent) : QWidget(parent)
 void PDFDisplay::display()
 {
     if (doc) {
-        Poppler::Page *page = doc->page(m_currentPage);
+        std::unique_ptr<Poppler::Page> page = doc->page(m_currentPage);
         if (page) {
             qDebug() << "Displaying page: " << m_currentPage;
             image = page->renderToImage();
             update();
-            delete page;
         }
     } else {
         qWarning() << "doc not loaded";
     }
 }
 
-PDFDisplay::~PDFDisplay()
-{
-    delete doc;
-}
+PDFDisplay::~PDFDisplay() { }
 
 void PDFDisplay::paintEvent(QPaintEvent *e)
 {
@@ -88,16 +84,15 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    Poppler::Document *doc = Poppler::Document::load(argv[2], argv[1]);
+    std::unique_ptr<Poppler::Document> doc = Poppler::Document::load(argv[2], argv[1]);
     if (!doc) {
         qWarning() << "doc not loaded";
         exit(1);
     }
 
     // output some meta-data
-    int major = 0, minor = 0;
-    doc->getPdfVersion(&major, &minor);
-    qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(major).arg(minor));
+    auto pdfVersion = doc->getPdfVersion();
+    qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(pdfVersion.major).arg(pdfVersion.minor));
     qDebug() << "          Title: " << doc->info(QStringLiteral("Title"));
     qDebug() << "        Subject: " << doc->info(QStringLiteral("Subject"));
     qDebug() << "         Author: " << doc->info(QStringLiteral("Author"));
@@ -119,10 +114,10 @@ int main(int argc, char **argv)
         fontNameList += font.name();
     qDebug() << "          Fonts: " << fontNameList.join(QStringLiteral(", "));
 
-    Poppler::Page *page = doc->page(0);
+    std::unique_ptr<Poppler::Page> page = doc->page(0);
     qDebug() << "    Page 1 size: " << page->pageSize().width() / 72 << "inches x " << page->pageSize().height() / 72 << "inches";
 
-    PDFDisplay test(doc); // create picture display
+    PDFDisplay test(std::move(doc)); // create picture display
     test.setWindowTitle(QStringLiteral("Poppler-Qt6 Test"));
     test.show(); // show it
 

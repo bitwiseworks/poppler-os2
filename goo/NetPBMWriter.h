@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Brian Cameron <brian.cameron@oracle.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -16,6 +16,7 @@
 #define NETPBMWRITER_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 
 #include "ImgWriter.h"
 
@@ -24,7 +25,7 @@
 //   http://netpbm.sourceforge.net/doc/pbm.html
 //   http://netpbm.sourceforge.net/doc/ppm.html
 
-class NetPBMWriter : public ImgWriter
+class POPPLER_PRIVATE_EXPORT NetPBMWriter : public ImgWriter
 {
 public:
     /* RGB        - 3 bytes/pixel
@@ -36,7 +37,7 @@ public:
         MONOCHROME
     };
 
-    NetPBMWriter(Format formatA = RGB);
+    explicit NetPBMWriter(Format formatA = RGB);
     ~NetPBMWriter() override {};
 
     bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;

@@ -20,7 +20,9 @@ and writes one PPM file for each page,
 .IR PPM-root - number .ppm,
 where
 .I number
-is the page number.
+is the page number.  If
+.I PDF-file
+is \'-', it reads the PDF file from stdin.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -96,6 +98,18 @@ Generate a grayscale PGM file (instead of a color PPM file).
 If poppler is compiled with colour management support, this option sets the display profile
 to the ICC profile stored in displayprofilefile.
 .TP
+.BI \-defaultgrayprofile " defaultgrayprofilefile"
+If poppler is compiled with colour management support, this option sets the DefaultGray color space
+to the ICC profile stored in defaultgrayprofilefile.
+.TP
+.BI \-defaultrgbprofile " defaultrgbprofilefile"
+If poppler is compiled with colour management support, this option sets the DefaultRGB color space
+to the ICC profile stored in defaultrgbprofilefile.
+.TP
+.BI \-defaultcmykprofile " defaultcmykprofilefile"
+If poppler is compiled with colour management support, this option sets the DefaultCMYK color space
+to the ICC profile stored in defaultcmykprofilefile.
+.TP
 .B \-png
 Generates a PNG file instead a PPM file.
 .TP
@@ -144,6 +158,12 @@ Specify the user password for the PDF file.
 .TP
 .B \-q
 Don't print any messages or errors.
+.TP
+.B \-progress
+Print progress info as each page is generated.  Three space-separated
+fields are printed to STDERR: the number of the current page, the number
+of the last page that will be generated, and the path to the file
+written to.
 .TP
 .BI \-sep " char"
 Specify single character separator between name and page number, default - .

@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -51,24 +51,6 @@ SplashPath::SplashPath()
     curSubpath = 0;
     hints = nullptr;
     hintsLength = hintsSize = 0;
-}
-
-SplashPath::SplashPath(SplashPath *path)
-{
-    length = path->length;
-    size = path->size;
-    pts = (SplashPathPoint *)gmallocn(size, sizeof(SplashPathPoint));
-    flags = (unsigned char *)gmallocn(size, sizeof(unsigned char));
-    memcpy(pts, path->pts, length * sizeof(SplashPathPoint));
-    memcpy(flags, path->flags, length * sizeof(unsigned char));
-    curSubpath = path->curSubpath;
-    if (path->hints) {
-        hintsLength = hintsSize = path->hintsLength;
-        hints = (SplashPathHint *)gmallocn(hintsSize, sizeof(SplashPathHint));
-        memcpy(hints, path->hints, hintsLength * sizeof(SplashPathHint));
-    } else {
-        hints = nullptr;
-    }
 }
 
 SplashPath::SplashPath(SplashPath &&path) noexcept
@@ -196,7 +178,10 @@ SplashError SplashPath::close(bool force)
         return splashErrNoCurPt;
     }
     if (force || curSubpath == length - 1 || pts[length - 1].x != pts[curSubpath].x || pts[length - 1].y != pts[curSubpath].y) {
-        lineTo(pts[curSubpath].x, pts[curSubpath].y);
+        const auto lineToStatus = lineTo(pts[curSubpath].x, pts[curSubpath].y);
+        if (lineToStatus != splashOk) {
+            return lineToStatus;
+        }
     }
     flags[curSubpath] |= splashPathClosed;
     flags[length - 1] |= splashPathClosed;
@@ -208,7 +193,10 @@ void SplashPath::addStrokeAdjustHint(int ctrl0, int ctrl1, int firstPt, int last
 {
     if (hintsLength == hintsSize) {
         hintsSize = hintsLength ? 2 * hintsLength : 8;
-        hints = (SplashPathHint *)greallocn(hints, hintsSize, sizeof(SplashPathHint));
+        hints = (SplashPathHint *)greallocn_checkoverflow(hints, hintsSize, sizeof(SplashPathHint));
+    }
+    if (unlikely(!hints)) {
+        return;
     }
     hints[hintsLength].ctrl0 = ctrl0;
     hints[hintsLength].ctrl1 = ctrl1;
