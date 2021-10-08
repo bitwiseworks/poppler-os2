@@ -1,8 +1,10 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2019, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2020, 2021, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2021, Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +46,8 @@
 #include <QMenuBar>
 #include <QMessageBox>
 
+#include <functional>
+
 PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
 {
     setWindowTitle(tr("Poppler-Qt6 Demo"));
@@ -51,14 +55,14 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, &PdfViewer::slotOpenFile);
-    m_fileOpenAct->setShortcut(Qt::CTRL + Qt::Key_O);
+    m_fileOpenAct->setShortcut(Qt::CTRL | Qt::Key_O);
     fileMenu->addSeparator();
     m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, &PdfViewer::slotSaveCopy);
-    m_fileSaveCopyAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+    m_fileSaveCopyAct->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_S);
     m_fileSaveCopyAct->setEnabled(false);
     fileMenu->addSeparator();
     QAction *act = fileMenu->addAction(tr("&Quit"), qApp, &QApplication::closeAllWindows);
-    act->setShortcut(Qt::CTRL + Qt::Key_Q);
+    act->setShortcut(Qt::CTRL | Qt::Key_Q);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
 
@@ -77,7 +81,7 @@ PdfViewer::PdfViewer(QWidget *parent) : QMainWindow(parent), m_currentPage(0), m
     act->setChecked(true);
     act->setData(QVariant::fromValue(0));
     m_settingsRenderBackendGrp->addAction(act);
-    act = settingsRenderMenu->addAction(tr("Arthur"));
+    act = settingsRenderMenu->addAction(tr("QPainter"));
     act->setCheckable(true);
     act->setData(QVariant::fromValue(1));
     m_settingsRenderBackendGrp->addAction(act);
@@ -167,7 +171,9 @@ QSize PdfViewer::sizeHint() const
 
 void PdfViewer::loadDocument(const QString &file)
 {
-    Poppler::Document *newdoc = Poppler::Document::load(file);
+    // resetting xrefReconstructed each time we load new document
+    xrefReconstructed = false;
+    std::unique_ptr<Poppler::Document> newdoc = Poppler::Document::load(file);
     if (!newdoc) {
         QMessageBox msgbox(QMessageBox::Critical, tr("Open Error"), tr("Cannot open:\n") + file, QMessageBox::Ok, this);
         msgbox.exec();
@@ -178,7 +184,6 @@ void PdfViewer::loadDocument(const QString &file)
         bool ok = true;
         QString password = QInputDialog::getText(this, tr("Document Password"), tr("Please insert the password of the document:"), QLineEdit::Password, QString(), &ok);
         if (!ok) {
-            delete newdoc;
             return;
         }
         newdoc->unlock(password.toLatin1(), password.toLatin1());
@@ -186,11 +191,18 @@ void PdfViewer::loadDocument(const QString &file)
 
     closeDocument();
 
-    m_doc = newdoc;
+    m_doc = std::move(newdoc);
 
     m_doc->setRenderHint(Poppler::Document::TextAntialiasing, m_settingsTextAAAct->isChecked());
     m_doc->setRenderHint(Poppler::Document::Antialiasing, m_settingsGfxAAAct->isChecked());
     m_doc->setRenderBackend((Poppler::Document::RenderBackend)m_settingsRenderBackendGrp->checkedAction()->data().toInt());
+    if (m_doc->xrefWasReconstructed()) {
+        xrefReconstructedHandler();
+    } else {
+        std::function<void()> cb = [this]() { xrefReconstructedHandler(); };
+
+        m_doc->setXRefReconstructedCallback(cb);
+    }
 
     Q_FOREACH (DocumentObserver *obs, m_observers) {
         obs->documentLoaded();
@@ -211,10 +223,19 @@ void PdfViewer::closeDocument()
     }
 
     m_currentPage = 0;
-    delete m_doc;
     m_doc = nullptr;
 
     m_fileSaveCopyAct->setEnabled(false);
+}
+
+void PdfViewer::xrefReconstructedHandler()
+{
+    if (!xrefReconstructed) {
+        QMessageBox msgbox(QMessageBox::Critical, tr("File may be corrupted"), tr("The PDF may be broken but we're still showing something, contents may not be correct"), QMessageBox::Ok, this);
+        msgbox.exec();
+
+        xrefReconstructed = true;
+    }
 }
 
 void PdfViewer::slotOpenFile()
@@ -238,13 +259,12 @@ void PdfViewer::slotSaveCopy()
         return;
     }
 
-    Poppler::PDFConverter *converter = m_doc->pdfConverter();
+    std::unique_ptr<Poppler::PDFConverter> converter = m_doc->pdfConverter();
     converter->setOutputFileName(fileName);
     converter->setPDFOptions(converter->pdfOptions() & ~Poppler::PDFConverter::WithChanges);
     if (!converter->convert()) {
         QMessageBox msgbox(QMessageBox::Critical, tr("Save Error"), tr("Cannot export to:\n%1").arg(fileName), QMessageBox::Ok, this);
     }
-    delete converter;
 }
 
 void PdfViewer::slotAbout()

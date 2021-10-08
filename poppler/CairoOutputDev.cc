@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2012, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -34,6 +34,7 @@
 // Copyright (C) 2019, 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021 Uli Schlachter <psychon@znc.in>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -178,6 +179,10 @@ CairoOutputDev::~CairoOutputDev()
 {
     if (fontEngine_owner && fontEngine) {
         delete fontEngine;
+    }
+    if (textClipPath) {
+        cairo_path_destroy(textClipPath);
+        textClipPath = nullptr;
     }
 
     if (cairo)
@@ -885,8 +890,7 @@ void CairoOutputDev::eoFill(GfxState *state)
     }
 }
 
-bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str, const double *pmat, int paintType, int /*tilingType*/, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                       double xStep, double yStep)
+bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
     Gfx *gfx;
@@ -902,6 +906,11 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
     StrokePathClip *strokePathTmp;
     bool adjusted_stroke_width_tmp;
     cairo_pattern_t *maskTmp;
+    const double *bbox = tPat->getBBox();
+    const double *pmat = tPat->getMatrix();
+    const int paintType = tPat->getPaintType();
+    Dict *resDict = tPat->getResDict();
+    Object *str = tPat->getContentStream();
 
     width = bbox[2] - bbox[0];
     height = bbox[3] - bbox[1];
@@ -2993,6 +3002,7 @@ private:
     bool imageError;
 
 public:
+    ~RescaleDrawImage() override;
     cairo_surface_t *getSourceImage(Stream *str, int widthA, int height, int scaledWidth, int scaledHeight, bool printing, GfxImageColorMap *colorMapA, const int *maskColorsA)
     {
         cairo_surface_t *image = nullptr;
@@ -3149,6 +3159,8 @@ public:
         }
     }
 };
+
+RescaleDrawImage::~RescaleDrawImage() = default;
 
 void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int widthA, int heightA, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg)
 {

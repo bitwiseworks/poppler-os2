@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -34,7 +34,7 @@
 // Copyright (C) 2015 Li Junling <lijunling@sina.com>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
-// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2016, 2020 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2017 Fredrik Fornwall <fredrik@fornwall.net>
 // Copyright (C) 2018 Ben Timby <btimby@gmail.com>
@@ -44,6 +44,12 @@
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright (C) 2020 Adam Sampson <ats@offog.org>
+// Copyright (C) 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 RM <rm+git@arcsin.org>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -133,7 +139,7 @@ PDFDoc::PDFDoc()
     init();
 }
 
-PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA)
+PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
 {
 #ifdef _WIN32
     int n, i;
@@ -173,11 +179,11 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword, const
     // create stream
     str = new FileStream(file, 0, false, file->size(), Object(objNull));
 
-    ok = setup(ownerPassword, userPassword);
+    ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
 #ifdef _WIN32
-PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA)
+PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
 {
     OSVERSIONINFO version;
     int i;
@@ -214,11 +220,11 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword, Go
     // create stream
     str = new FileStream(file, 0, false, file->size(), Object(objNull));
 
-    ok = setup(ownerPassword, userPassword);
+    ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA)
+PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString *userPassword, void *guiDataA, const std::function<void()> &xrefReconstructedCallback)
 {
 #ifdef _WIN32
     int n, i;
@@ -243,21 +249,23 @@ PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword, const GooString
 #endif
     }
     str = strA;
-    ok = setup(ownerPassword, userPassword);
+    ok = setup(ownerPassword, userPassword, xrefReconstructedCallback);
 }
 
-bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword)
+bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword, const std::function<void()> &xrefReconstructedCallback)
 {
     pdfdocLocker();
 
     if (str->getLength() <= 0) {
         error(errSyntaxError, -1, "Document stream is empty");
+        errCode = errDamaged;
         return false;
     }
 
     str->setPos(0, -1);
     if (str->getPos() < 0) {
         error(errSyntaxError, -1, "Document base stream is not seekable");
+        errCode = errFileIO;
         return false;
     }
 
@@ -273,12 +281,12 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
     bool wasReconstructed = false;
 
     // read xref table
-    xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed);
+    xref = new XRef(str, getStartXRef(), getMainXRefEntriesOffset(), &wasReconstructed, false, xrefReconstructedCallback);
     if (!xref->isOk()) {
         if (wasReconstructed) {
             delete xref;
             startXRefPos = -1;
-            xref = new XRef(str, getStartXRef(true), getMainXRefEntriesOffset(true), &wasReconstructed);
+            xref = new XRef(str, getStartXRef(true), getMainXRefEntriesOffset(true), &wasReconstructed, false, xrefReconstructedCallback);
         }
         if (!xref->isOk()) {
             error(errSyntaxError, -1, "Couldn't read xref table");
@@ -300,7 +308,7 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
             // try one more time to construct the Catalog, maybe the problem is damaged XRef
             delete catalog;
             delete xref;
-            xref = new XRef(str, 0, 0, nullptr, true);
+            xref = new XRef(str, 0, 0, nullptr, true, xrefReconstructedCallback);
             catalog = new Catalog(this);
         }
 
@@ -404,8 +412,8 @@ void PDFDoc::checkHeader()
     int i;
     int bytesRead;
 
-    pdfMajorVersion = 0;
-    pdfMinorVersion = 0;
+    headerPdfMajorVersion = 0;
+    headerPdfMinorVersion = 0;
 
     // read up to headerSearchSize bytes from the beginning of the document
     for (i = 0; i < headerSearchSize; ++i) {
@@ -434,7 +442,7 @@ void PDFDoc::checkHeader()
         error(errSyntaxWarning, -1, "May not be a PDF file (continuing anyway)");
         return;
     }
-    sscanf(p, "%d.%d", &pdfMajorVersion, &pdfMinorVersion);
+    sscanf(p, "%d.%d", &headerPdfMajorVersion, &headerPdfMinorVersion);
     // We don't do the version check. Don't add it back in.
 }
 
@@ -732,12 +740,6 @@ bool PDFDoc::isLinearized(bool tryingToReconstruct)
     }
 }
 
-void PDFDoc::setDocInfoModified(Object *infoObj)
-{
-    Object infoObjRef = getDocInfoNF();
-    xref->setModifiedObject(infoObj, infoObjRef.getRef());
-}
-
 void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
 {
     bool removeEntry = !value || value->getLength() == 0 || value->hasJustUnicodeMarker();
@@ -751,7 +753,8 @@ void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
         return;
     }
 
-    infoObj = createDocInfoIfNoneExists();
+    Ref infoObjRef;
+    infoObj = xref->createDocInfoIfNeeded(&infoObjRef);
     if (removeEntry) {
         infoObj.dictSet(key, Object(objNull));
     } else {
@@ -762,7 +765,7 @@ void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
         // Info dictionary is empty. Remove it altogether.
         removeDocInfo();
     } else {
-        setDocInfoModified(&infoObj);
+        xref->setModifiedObject(&infoObj, infoObjRef);
     }
 }
 
@@ -1369,6 +1372,15 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
     case objString:
         writeString(obj->getString(), outStr, fileKey, encAlgorithm, keyLength, ref);
         break;
+    case objHexString: {
+        const GooString *s = obj->getHexString();
+        outStr->printf("<");
+        for (int i = 0; i < s->getLength(); i++) {
+            outStr->printf("%02x", s->getChar(i) & 0xff);
+        }
+        outStr->printf("> ");
+        break;
+    }
     case objName: {
         GooString name(obj->getName());
         GooString *nameToPrint = name.sanitizedName(false /* non ps mode */);
@@ -1923,19 +1935,20 @@ Outline *PDFDoc::getOutline()
     if (!outline) {
         pdfdocLocker();
         // read outline
-        outline = new Outline(catalog->getOutline(), xref);
+        outline = new Outline(catalog->getOutline(), xref, this);
     }
 
     return outline;
 }
 
-PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
+std::unique_ptr<PDFDoc> PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
 {
+    // We cannot call std::make_unique here because the PDFDoc constructor is private
     PDFDoc *doc = new PDFDoc();
     doc->errCode = errorCode;
     doc->fileName = fileNameA;
 
-    return doc;
+    return std::unique_ptr<PDFDoc>(doc);
 }
 
 long long PDFDoc::strToLongLong(const char *s)
@@ -2106,4 +2119,75 @@ bool PDFDoc::hasJavascript()
     JSInfo jsInfo(this);
     jsInfo.scanJS(getNumPages(), true);
     return jsInfo.containsJS();
+}
+
+bool PDFDoc::sign(const char *saveFilename, const char *certNickname, const char *password, GooString *partialFieldName, int page, const PDFRectangle &rect, const GooString &signatureText, const GooString &signatureTextLeft,
+                  double fontSize, std::unique_ptr<AnnotColor> &&fontColor, double borderWidth, std::unique_ptr<AnnotColor> &&borderColor, std::unique_ptr<AnnotColor> &&backgroundColor, const GooString *reason, const GooString *location)
+{
+    ::Page *destPage = getPage(page);
+
+    const DefaultAppearance da { { objName, "SigFont" }, fontSize, std::move(fontColor) };
+
+    Object annotObj = Object(new Dict(getXRef()));
+    annotObj.dictSet("Type", Object(objName, "Annot"));
+    annotObj.dictSet("Subtype", Object(objName, "Widget"));
+    annotObj.dictSet("FT", Object(objName, "Sig"));
+    annotObj.dictSet("T", Object(partialFieldName));
+    Array *rectArray = new Array(getXRef());
+    rectArray->add(Object(rect.x1));
+    rectArray->add(Object(rect.y1));
+    rectArray->add(Object(rect.x2));
+    rectArray->add(Object(rect.y2));
+    annotObj.dictSet("Rect", Object(rectArray));
+
+    GooString *daStr = da.toAppearanceString();
+    annotObj.dictSet("DA", Object(daStr));
+
+    const Ref ref = getXRef()->addIndirectObject(&annotObj);
+    catalog->addFormToAcroForm(ref);
+
+    std::unique_ptr<::FormFieldSignature> field = std::make_unique<::FormFieldSignature>(this, Object(annotObj.getDict()), ref, nullptr, nullptr);
+
+    field->setCustomAppearanceContent(signatureText);
+    field->setCustomAppearanceLeftContent(signatureTextLeft);
+
+    Object refObj(ref);
+    AnnotWidget *signatureAnnot = new AnnotWidget(this, &annotObj, &refObj, field.get());
+    signatureAnnot->setFlags(signatureAnnot->getFlags() | Annot::flagPrint | Annot::flagLocked | Annot::flagNoRotate);
+    Dict dummy(getXRef());
+    auto appearCharacs = std::make_unique<AnnotAppearanceCharacs>(&dummy);
+    appearCharacs->setBorderColor(std::move(borderColor));
+    appearCharacs->setBackColor(std::move(backgroundColor));
+    signatureAnnot->setAppearCharacs(std::move(appearCharacs));
+
+    signatureAnnot->generateFieldAppearance();
+    signatureAnnot->updateAppearanceStream();
+
+    FormWidget *formWidget = field->getWidget(field->getNumWidgets() - 1);
+    formWidget->setWidgetAnnotation(signatureAnnot);
+
+    destPage->addAnnot(signatureAnnot);
+
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
+    border->setWidth(borderWidth);
+    signatureAnnot->setBorder(std::move(border));
+
+    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
+    if (fws) {
+        const bool res = fws->signDocument(saveFilename, certNickname, "SHA256", password, reason, location);
+
+        // Now remove the signature stuff in case the user wants to continue editing stuff
+        // So the document object is clean
+        const Object &vRefObj = annotObj.dictLookupNF("V");
+        if (vRefObj.isRef()) {
+            getXRef()->removeIndirectObject(vRefObj.getRef());
+        }
+        destPage->removeAnnot(signatureAnnot);
+        catalog->removeFormFromAcroForm(ref);
+        getXRef()->removeIndirectObject(ref);
+
+        return res;
+    }
+
+    return false;
 }

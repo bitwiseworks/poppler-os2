@@ -11,7 +11,7 @@ class TestStrokeOpacity : public QObject
 {
     Q_OBJECT
 public:
-    TestStrokeOpacity(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestStrokeOpacity(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkStrokeOpacity_data();
     void checkStrokeOpacity();
@@ -22,7 +22,7 @@ void TestStrokeOpacity::checkStrokeOpacity_data()
     QTest::addColumn<int>("backendType");
 
     QTest::newRow("splash") << (int)Poppler::Document::SplashBackend;
-    QTest::newRow("qpainter") << (int)Poppler::Document::ArthurBackend;
+    QTest::newRow("qpainter") << (int)Poppler::Document::QPainterBackend;
 }
 
 void TestStrokeOpacity::checkStrokeOpacity()

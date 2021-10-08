@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
 // Copyright (C) 2009, 2011, 2012, 2014-2016, 2020 William Bader <williambader@hotmail.com>
@@ -25,7 +25,9 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -54,6 +56,11 @@
 #include "PSOutputDev.h"
 #include "Error.h"
 #include "Win32Console.h"
+#include "sanitychecks.h"
+
+#ifdef USE_CMS
+#    include <lcms2.h>
+#endif
 
 static bool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight)
 {
@@ -117,6 +124,19 @@ static bool quiet = false;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool overprint = false;
+static GooString processcolorformatname;
+static SplashColorMode processcolorformat;
+static bool processcolorformatspecified = false;
+#ifdef USE_CMS
+static GooString processcolorprofilename;
+static GfxLCMSProfilePtr processcolorprofile;
+static GooString defaultgrayprofilename;
+static GfxLCMSProfilePtr defaultgrayprofile;
+static GooString defaultrgbprofilename;
+static GfxLCMSProfilePtr defaultrgbprofile;
+static GooString defaultcmykprofilename;
+static GfxLCMSProfilePtr defaultcmykprofile;
+#endif
 
 static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to print" },
                                    { "-l", argInt, &lastPage, 0, "last page to print" },
@@ -141,6 +161,13 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-passfonts", argFlag, &fontPassthrough, 0, "don't substitute missing fonts" },
                                    { "-aaRaster", argString, rasterAntialiasStr, sizeof(rasterAntialiasStr), "enable anti-aliasing on rasterization: yes, no" },
                                    { "-rasterize", argString, forceRasterizeStr, sizeof(forceRasterizeStr), "control rasterization: always, never, whenneeded" },
+                                   { "-processcolorformat", argGooString, &processcolorformatname, 0, "color format that is used during rasterization and transparency reduction: MONO8, RGB8, CMYK8" },
+#ifdef USE_CMS
+                                   { "-processcolorprofile", argGooString, &processcolorprofilename, 0, "ICC color profile to use as the process color profile during rasterization and transparency reduction" },
+                                   { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
+                                   { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
+                                   { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
+#endif
                                    { "-optimizecolorspace", argFlag, &optimizeColorSpace, 0, "convert gray RGB images to gray color space" },
                                    { "-passlevel1customcolor", argFlag, &passLevel1CustomColor, 0, "pass custom color in level1sep" },
                                    { "-preload", argFlag, &preload, 0, "preload images and forms" },
@@ -154,7 +181,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-duplex", argFlag, &duplex, 0, "enable duplex printing" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
                                    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
-                                   { "-overprint", argFlag, &overprint, 0, "enable overprint" },
+                                   { "-overprint", argFlag, &overprint, 0, "enable overprint emulation during rasterization" },
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
@@ -165,7 +192,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
+    std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
     GooString *psFileName;
     PSLevel level;
@@ -176,6 +203,9 @@ int main(int argc, char *argv[])
     int exitCode;
     bool rasterAntialias = false;
     std::vector<int> pages;
+#ifdef USE_CMS
+    cmsColorSpaceSignature profilecolorspace;
+#endif
 
     Win32Console win32Console(&argc, &argv);
     exitCode = 99;
@@ -247,12 +277,97 @@ int main(int argc, char *argv[])
     if (noShrink) {
         globalParams->setPSShrinkLarger(false);
     }
-    if (level1 || level1Sep || level2 || level2Sep || level3 || level3Sep) {
-        globalParams->setPSLevel(level);
-    }
     if (quiet) {
         globalParams->setErrQuiet(quiet);
     }
+
+    if (!processcolorformatname.toStr().empty()) {
+        if (processcolorformatname.toStr() == "MONO8") {
+            processcolorformat = splashModeMono8;
+            processcolorformatspecified = true;
+        } else if (processcolorformatname.toStr() == "CMYK8") {
+            processcolorformat = splashModeCMYK8;
+            processcolorformatspecified = true;
+        } else if (processcolorformatname.toStr() == "RGB8") {
+            processcolorformat = splashModeRGB8;
+            processcolorformatspecified = true;
+        } else {
+            fprintf(stderr, "Error: Unknown process color format \"%s\".\n", processcolorformatname.c_str());
+            goto err1;
+        }
+    }
+
+#ifdef USE_CMS
+    if (!processcolorprofilename.toStr().empty()) {
+        processcolorprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(processcolorprofilename.c_str(), "r"));
+        if (!processcolorprofile) {
+            fprintf(stderr, "Error: Could not open the ICC profile \"%s\".\n", processcolorprofilename.c_str());
+            goto err1;
+        }
+        if (!cmsIsIntentSupported(processcolorprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(processcolorprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_OUTPUT)
+            && !cmsIsIntentSupported(processcolorprofile.get(), INTENT_SATURATION, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(processcolorprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
+            fprintf(stderr, "Error: ICC profile \"%s\" is not an output profile.\n", processcolorprofilename.c_str());
+            goto err1;
+        }
+        profilecolorspace = cmsGetColorSpace(processcolorprofile.get());
+        if (profilecolorspace == cmsSigCmykData) {
+            if (!processcolorformatspecified) {
+                processcolorformat = splashModeCMYK8;
+                processcolorformatspecified = true;
+            } else if (processcolorformat != splashModeCMYK8) {
+                fprintf(stderr, "Error: Supplied ICC profile \"%s\" is a CMYK profile, but process color format is not CMYK8.\n", processcolorprofilename.c_str());
+                goto err1;
+            }
+        } else if (profilecolorspace == cmsSigGrayData) {
+            if (!processcolorformatspecified) {
+                processcolorformat = splashModeMono8;
+                processcolorformatspecified = true;
+            } else if (processcolorformat != splashModeMono8) {
+                fprintf(stderr, "Error: Supplied ICC profile \"%s\" is a monochrome profile, but process color format is not monochrome.\n", processcolorprofilename.c_str());
+                goto err1;
+            }
+        } else if (profilecolorspace == cmsSigRgbData) {
+            if (!processcolorformatspecified) {
+                processcolorformat = splashModeRGB8;
+                processcolorformatspecified = true;
+            } else if (processcolorformat != splashModeRGB8) {
+                fprintf(stderr, "Error: Supplied ICC profile \"%s\" is a RGB profile, but process color format is not RGB.\n", processcolorprofilename.c_str());
+                goto err1;
+            }
+        }
+    }
+#endif
+
+    if (processcolorformatspecified) {
+        if (level1 && processcolorformat != splashModeMono8) {
+            fprintf(stderr, "Error: Setting -level1 requires -processcolorformat MONO8");
+            goto err1;
+        } else if ((level1Sep || level2Sep || level3Sep || overprint) && processcolorformat != splashModeCMYK8) {
+            fprintf(stderr, "Error: Setting -level1sep/-level2sep/-level3sep/-overprint requires -processcolorformat CMYK8");
+            goto err1;
+        }
+    }
+
+#ifdef USE_CMS
+    if (!defaultgrayprofilename.toStr().empty()) {
+        defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
+        if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
+            goto err1;
+        }
+    }
+    if (!defaultrgbprofilename.toStr().empty()) {
+        defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
+        if (!checkICCProfile(defaultrgbprofile, defaultrgbprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigRgbData)) {
+            goto err1;
+        }
+    }
+    if (!defaultcmykprofilename.toStr().empty()) {
+        defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
+        if (!checkICCProfile(defaultcmykprofile, defaultcmykprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigCmykData)) {
+            goto err1;
+        }
+    }
+#endif
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
@@ -331,7 +446,8 @@ int main(int argc, char *argv[])
     }
 
     // write PostScript file
-    psOut = new PSOutputDev(psFileName->c_str(), doc, nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex);
+    psOut = new PSOutputDev(psFileName->c_str(), doc.get(), nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
+                            /*imgURXA*/ 0, /*imgURYA*/ 0, psRasterizeWhenNeeded, /*manualCtrlA*/ false, /*customCodeCbkA*/ nullptr, /*customCodeCbkDataA*/ nullptr, level);
     if (noCenter) {
         psOut->setPSCenter(false);
     }
@@ -359,6 +475,14 @@ int main(int argc, char *argv[])
     if (splashResolution > 0) {
         psOut->setRasterResolution(splashResolution);
     }
+    if (processcolorformatspecified)
+        psOut->setProcessColorFormat(processcolorformat);
+#ifdef USE_CMS
+    psOut->setDisplayProfile(processcolorprofile);
+    psOut->setDefaultGrayProfile(defaultgrayprofile);
+    psOut->setDefaultRGBProfile(defaultrgbprofile);
+    psOut->setDefaultCMYKProfile(defaultcmykprofile);
+#endif
     psOut->setEmbedType1(!noEmbedT1Fonts);
     psOut->setEmbedTrueType(!noEmbedTTFonts);
     psOut->setEmbedCIDPostScript(!noEmbedCIDPSFonts);
@@ -390,7 +514,6 @@ int main(int argc, char *argv[])
 err2:
     delete psFileName;
 err1:
-    delete doc;
     delete fileName;
 err0:
 

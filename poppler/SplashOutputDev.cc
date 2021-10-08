@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -37,7 +37,7 @@
 // Copyright (C) 2015 Tamas Szekeres <szekerest@gmail.com>
 // Copyright (C) 2015 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2016 Takahiro Hashimoto <kenya888.en@gmail.com>
-// Copyright (C) 2017 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2017, 2021 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -1068,15 +1068,17 @@ static const SplashBlendFunc splashOutBlendFuncs[] = { nullptr,
 class SplashOutFontFileID : public SplashFontFileID
 {
 public:
-    SplashOutFontFileID(const Ref *rA) { r = *rA; }
+    explicit SplashOutFontFileID(const Ref *rA) { r = *rA; }
 
-    ~SplashOutFontFileID() override { }
+    ~SplashOutFontFileID() override;
 
     bool matches(SplashFontFileID *id) override { return ((SplashOutFontFileID *)id)->r == r; }
 
 private:
     Ref r;
 };
+
+SplashOutFontFileID::~SplashOutFontFileID() = default;
 
 //------------------------------------------------------------------------
 // T3FontCache
@@ -2715,6 +2717,10 @@ void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMa
 {
     double bbox[4] = { 0, 0, 1, 1 }; // dummy
 
+    if (!transpGroupStack) {
+        return;
+    }
+
     /* transfer mask to alpha channel! */
     // memcpy(maskBitmap->getAlphaPtr(), maskBitmap->getDataPtr(), bitmap->getRowSize() * bitmap->getHeight());
     // memset(maskBitmap->getDataPtr(), 0, bitmap->getRowSize() * bitmap->getHeight());
@@ -3268,22 +3274,26 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
         switch (colorMode) {
         case splashModeMono1:
         case splashModeMono8:
-            imgData.lookup = (SplashColorPtr)gmalloc(n);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getGray(&pix, &gray);
-                imgData.lookup[i] = colToByte(gray);
+            imgData.lookup = (SplashColorPtr)gmalloc_checkoverflow(n);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getGray(&pix, &gray);
+                    imgData.lookup[i] = colToByte(gray);
+                }
             }
             break;
         case splashModeRGB8:
         case splashModeBGR8:
-            imgData.lookup = (SplashColorPtr)gmallocn(n, 3);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getRGB(&pix, &rgb);
-                imgData.lookup[3 * i] = colToByte(rgb.r);
-                imgData.lookup[3 * i + 1] = colToByte(rgb.g);
-                imgData.lookup[3 * i + 2] = colToByte(rgb.b);
+            imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 3);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getRGB(&pix, &rgb);
+                    imgData.lookup[3 * i] = colToByte(rgb.r);
+                    imgData.lookup[3 * i + 1] = colToByte(rgb.g);
+                    imgData.lookup[3 * i + 2] = colToByte(rgb.b);
+                }
             }
             break;
         case splashModeXBGR8:
@@ -3301,32 +3311,36 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
             break;
         case splashModeCMYK8:
             grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
-            imgData.lookup = (SplashColorPtr)gmallocn(n, 4);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getCMYK(&pix, &cmyk);
-                if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
-                    grayIndexed = false;
+            imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 4);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getCMYK(&pix, &cmyk);
+                    if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
+                        grayIndexed = false;
+                    }
+                    imgData.lookup[4 * i] = colToByte(cmyk.c);
+                    imgData.lookup[4 * i + 1] = colToByte(cmyk.m);
+                    imgData.lookup[4 * i + 2] = colToByte(cmyk.y);
+                    imgData.lookup[4 * i + 3] = colToByte(cmyk.k);
                 }
-                imgData.lookup[4 * i] = colToByte(cmyk.c);
-                imgData.lookup[4 * i + 1] = colToByte(cmyk.m);
-                imgData.lookup[4 * i + 2] = colToByte(cmyk.y);
-                imgData.lookup[4 * i + 3] = colToByte(cmyk.k);
             }
             break;
         case splashModeDeviceN8:
             colorMap->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
             grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
-            imgData.lookup = (SplashColorPtr)gmallocn(n, SPOT_NCOMPS + 4);
-            for (i = 0; i < n; ++i) {
-                pix = (unsigned char)i;
-                colorMap->getCMYK(&pix, &cmyk);
-                if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
-                    grayIndexed = false;
+            imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, SPOT_NCOMPS + 4);
+            if (likely(imgData.lookup != nullptr)) {
+                for (i = 0; i < n; ++i) {
+                    pix = (unsigned char)i;
+                    colorMap->getCMYK(&pix, &cmyk);
+                    if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
+                        grayIndexed = false;
+                    }
+                    colorMap->getDeviceN(&pix, &deviceN);
+                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                        imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
                 }
-                colorMap->getDeviceN(&pix, &deviceN);
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
-                    imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
             }
             break;
         }
@@ -4182,11 +4196,9 @@ void SplashOutputDev::setFreeTypeHinting(bool enable, bool enableSlightHintingA)
     enableSlightHinting = enableSlightHintingA;
 }
 
-bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, Object *str, const double *ptm, int paintType, int /*tilingType*/, Dict *resDict, const double *mat, const double *bbox, int x0, int y0, int x1, int y1,
-                                        double xStep, double yStep)
+bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep)
 {
     PDFRectangle box;
-    Gfx *gfx;
     Splash *formerSplash = splash;
     SplashBitmap *formerBitmap = bitmap;
     double width, height;
@@ -4198,6 +4210,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     double savedCTM[6];
     double kx, ky, sx, sy;
     bool retValue = false;
+    const double *bbox = tPat->getBBox();
+    const double *ptm = tPat->getMatrix();
+    const int paintType = tPat->getPaintType();
+    Dict *resDict = tPat->getResDict();
 
     width = bbox[2] - bbox[0];
     height = bbox[3] - bbox[1];
@@ -4232,10 +4248,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     result_height = (int)ceil(fabs(ky * height * (y1 - y0)));
     kx = state->getHDPI() / 72.0;
     ky = state->getVDPI() / 72.0;
-    m1.m[0] = (ptm[0] == 0) ? fabs(ptm[2]) * kx : fabs(ptm[0]) * kx;
+    m1.m[0] = std::max(fabs(ptm[0]), fabs(ptm[2])) * kx;
     m1.m[1] = 0;
     m1.m[2] = 0;
-    m1.m[3] = (ptm[3] == 0) ? fabs(ptm[1]) * ky : fabs(ptm[3]) * ky;
+    m1.m[3] = std::max(fabs(ptm[1]), fabs(ptm[3])) * ky;
     m1.m[4] = 0;
     m1.m[5] = 0;
     m1.transform(width, height, &kx, &ky);
@@ -4305,7 +4321,33 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     m1.m[4] = -kx;
     m1.m[5] = -ky;
 
-    bitmap = new SplashBitmap(surface_width, surface_height, 1, (paintType == 1) ? colorMode : splashModeMono8, true);
+    box.x1 = bbox[0];
+    box.y1 = bbox[1];
+    box.x2 = bbox[2];
+    box.y2 = bbox[3];
+    std::unique_ptr<Gfx> gfx = std::make_unique<Gfx>(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
+    // set pattern transformation matrix
+    gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+    if (splashAbs(matc[1]) > splashAbs(matc[0])) {
+        kx = -matc[1];
+        ky = matc[2] - (matc[0] * matc[3]) / matc[1];
+    } else {
+        kx = matc[0];
+        ky = matc[3] - (matc[1] * matc[2]) / matc[0];
+    }
+    result_width = surface_width * repeatX;
+    result_height = surface_height * repeatY;
+    kx = result_width / (fabs(kx) + 1);
+    ky = result_height / (fabs(ky) + 1);
+    state->concatCTM(kx, 0, 0, ky, 0, 0);
+    ctm = state->getCTM();
+    matc[0] = ctm[0];
+    matc[1] = ctm[1];
+    matc[2] = ctm[2];
+    matc[3] = ctm[3];
+
+    const bool doFastBlit = matc[0] > 0 && matc[1] == 0 && matc[2] == 0 && matc[3] > 0;
+    bitmap = new SplashBitmap(surface_width, surface_height, 1, (paintType == 1 || doFastBlit) ? colorMode : splashModeMono8, true);
     if (bitmap->getDataPtr() == nullptr) {
         SplashBitmap *tBitmap = bitmap;
         bitmap = formerBitmap;
@@ -4314,6 +4356,8 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         return false;
     }
     splash = new Splash(bitmap, true);
+    updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+
     if (paintType == 2) {
         SplashColor clearColor;
         clearColor[0] = (colorMode == splashModeCMYK8 || colorMode == splashModeDeviceN8) ? 0x00 : 0xFF;
@@ -4323,18 +4367,16 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     }
     splash->setThinLineMode(formerSplash->getThinLineMode());
     splash->setMinLineWidth(s_minLineWidth);
-
-    box.x1 = bbox[0];
-    box.y1 = bbox[1];
-    box.x2 = bbox[2];
-    box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
-    // set pattern transformation matrix
-    gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
-    updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
-    gfx->display(str);
+    if (doFastBlit) {
+        // drawImage would colorize the greyscale pattern in tilingBitmapSrc buffer accessor while tiling.
+        // blitImage can't, it has no buffer accessor. We instead colorize the pattern prototype in advance.
+        splash->setFillPattern(formerSplash->getFillPattern()->copy());
+        splash->setStrokePattern(formerSplash->getStrokePattern()->copy());
+    }
+    gfx->display(tPat->getContentStream());
     delete splash;
     splash = formerSplash;
+
     TilingSplashOutBitmap imgData;
     imgData.bitmap = bitmap;
     imgData.paintType = paintType;
@@ -4345,26 +4387,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     imgData.repeatY = repeatY;
     SplashBitmap *tBitmap = bitmap;
     bitmap = formerBitmap;
-    result_width = tBitmap->getWidth() * imgData.repeatX;
-    result_height = tBitmap->getHeight() * imgData.repeatY;
-
-    if (splashAbs(matc[1]) > splashAbs(matc[0])) {
-        kx = -matc[1];
-        ky = matc[2] - (matc[0] * matc[3]) / matc[1];
-    } else {
-        kx = matc[0];
-        ky = matc[3] - (matc[1] * matc[2]) / matc[0];
-    }
-    kx = result_width / (fabs(kx) + 1);
-    ky = result_height / (fabs(ky) + 1);
-    state->concatCTM(kx, 0, 0, ky, 0, 0);
-    ctm = state->getCTM();
-    matc[0] = ctm[0];
-    matc[1] = ctm[1];
-    matc[2] = ctm[2];
-    matc[3] = ctm[3];
-    bool minorAxisZero = matc[1] == 0 && matc[2] == 0;
-    if (matc[0] > 0 && minorAxisZero && matc[3] > 0) {
+    if (doFastBlit) {
         // draw the tiles
         for (int y = 0; y < imgData.repeatY; ++y) {
             for (int x = 0; x < imgData.repeatX; ++x) {
@@ -4378,7 +4401,6 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == splashOk;
     }
     delete tBitmap;
-    delete gfx;
     return retValue;
 }
 

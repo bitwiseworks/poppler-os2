@@ -24,7 +24,9 @@ to
 .IR file.txt .
 If 
 .I text-file
-is \'-', the text is sent to stdout.
+is \'-', the text is sent to stdout.  If
+.I PDF-file
+is \'-', it reads the PDF file from stdin.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -79,6 +81,9 @@ word in the file.
 .B \-bbox-layout
 Generate an XHTML file containing bounding box information for each
 block, line, and word in the file.
+.TP
+.B \-cropbox
+Use the crop box rather than the media box with \-bbox and \-bbox-layout.
 .TP
 .BI \-enc " encoding-name"
 Sets the encoding to use for text output. This defaults to "UTF-8".

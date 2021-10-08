@@ -28,6 +28,10 @@
 #include "poppler-config.h"
 #include "FoFiBase.h"
 
+#include "poppler_private_export.h"
+
+#include <set>
+
 class GooString;
 
 //------------------------------------------------------------------------
@@ -147,7 +151,7 @@ struct Type1CEexecBuf
 // FoFiType1C
 //------------------------------------------------------------------------
 
-class POPPLER_LIB_EXPORT FoFiType1C : public FoFiBase
+class POPPLER_PRIVATE_EXPORT FoFiType1C : public FoFiBase
 {
 public:
     // Create a FoFiType1C object from a memory buffer.
@@ -208,7 +212,7 @@ public:
 private:
     FoFiType1C(const char *fileA, int lenA, bool freeFileDataA);
     void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName, int offset, int nBytes, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict);
-    void cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top);
+    void cvtGlyph(int offset, int nBytes, GooString *charBuf, const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict, bool top, std::set<int> &offsetBeingParsed);
     void cvtGlyphWidth(bool useOp, GooString *charBuf, const Type1CPrivateDict *pDict);
     void cvtNum(double x, bool isFP, GooString *charBuf) const;
     void eexecWrite(Type1CEexecBuf *eb, const char *s) const;

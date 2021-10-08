@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011, 2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -29,10 +29,14 @@
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
-// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019-2021 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 <corentinf@free.fr>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
 // Copyright (C) 2019 Sébastien Berthier <s.berthier@bee-buzziness.com>
+// Copyright (C) 2020 Stéfan van der Walt <sjvdwalt@gmail.com>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2021 Diogo Kollross <diogoko@gmail.com>
+// Copyright (C) 2021 Peter Williams <peter@newton.cx>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -41,9 +45,9 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 #    include <fcntl.h> // for O_BINARY
-#    include <io.h> // for setmode
+#    include <io.h> // for _setmode
 #endif
 #include <cstdio>
 #include <cmath>
@@ -56,9 +60,11 @@
 #include "PDFDocFactory.h"
 #include "splash/SplashBitmap.h"
 #include "splash/Splash.h"
+#include "splash/SplashErrorCodes.h"
 #include "SplashOutputDev.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
+#include "sanitychecks.h"
 
 // Uncomment to build pdftoppm with pthreads
 // You may also have to change the buildsystem to
@@ -100,6 +106,12 @@ static bool gray = false;
 #ifdef USE_CMS
 static GooString displayprofilename;
 static GfxLCMSProfilePtr displayprofile;
+static GooString defaultgrayprofilename;
+static GfxLCMSProfilePtr defaultgrayprofile;
+static GooString defaultrgbprofilename;
+static GfxLCMSProfilePtr defaultrgbprofile;
+static GooString defaultcmykprofilename;
+static GfxLCMSProfilePtr defaultcmykprofile;
 #endif
 static char sep[2] = "-";
 static bool forceNum = false;
@@ -127,6 +139,7 @@ static SplashThinLineMode thinLineMode = splashThinLineDefault;
 static int numberOfJobs = 1;
 #endif // UTILS_USE_PTHREADS
 static bool quiet = false;
+static bool progress = false;
 static bool printVersion = false;
 static bool printHelp = false;
 
@@ -156,6 +169,9 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-gray", argFlag, &gray, 0, "generate a grayscale PGM file" },
 #ifdef USE_CMS
                                    { "-displayprofile", argGooString, &displayprofilename, 0, "ICC color profile to use as the display profile" },
+                                   { "-defaultgrayprofile", argGooString, &defaultgrayprofilename, 0, "ICC color profile to use as the DefaultGray color space" },
+                                   { "-defaultrgbprofile", argGooString, &defaultrgbprofilename, 0, "ICC color profile to use as the DefaultRGB color space" },
+                                   { "-defaultcmykprofile", argGooString, &defaultcmykprofilename, 0, "ICC color profile to use as the DefaultCMYK color space" },
 #endif
                                    { "-sep", argString, sep, sizeof(sep), "single character separator between name and page number, default - " },
                                    { "-forcenum", argFlag, &forceNum, 0, "force page number even if there is only one page " },
@@ -186,12 +202,15 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
 #endif // UTILS_USE_PTHREADS
 
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
+                                   { "-progress", argFlag, &progress, 0, "print progress info" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },
                                    { "-help", argFlag, &printHelp, 0, "print usage information" },
                                    { "--help", argFlag, &printHelp, 0, "print usage information" },
                                    { "-?", argFlag, &printHelp, 0, "print usage information" },
                                    {} };
+
+static constexpr int kOtherError = 99;
 
 static bool needToRotate(int angle)
 {
@@ -278,20 +297,26 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
     params.tiffCompression.Set(TiffCompressionStr);
 
     if (ppmFile != nullptr) {
+        SplashError e;
+
         if (png) {
-            bitmap->writeImgFile(splashFormatPng, ppmFile, x_resolution, y_resolution);
+            e = bitmap->writeImgFile(splashFormatPng, ppmFile, x_resolution, y_resolution);
         } else if (jpeg) {
-            bitmap->writeImgFile(splashFormatJpeg, ppmFile, x_resolution, y_resolution, &params);
+            e = bitmap->writeImgFile(splashFormatJpeg, ppmFile, x_resolution, y_resolution, &params);
         } else if (jpegcmyk) {
-            bitmap->writeImgFile(splashFormatJpegCMYK, ppmFile, x_resolution, y_resolution, &params);
+            e = bitmap->writeImgFile(splashFormatJpegCMYK, ppmFile, x_resolution, y_resolution, &params);
         } else if (tiff) {
-            bitmap->writeImgFile(splashFormatTiff, ppmFile, x_resolution, y_resolution, &params);
+            e = bitmap->writeImgFile(splashFormatTiff, ppmFile, x_resolution, y_resolution, &params);
         } else {
-            bitmap->writePNMFile(ppmFile);
+            e = bitmap->writePNMFile(ppmFile);
+        }
+        if (e != splashOk) {
+            fprintf(stderr, "Could not write image to %s; exiting\n", ppmFile);
+            exit(EXIT_FAILURE);
         }
     } else {
-#ifdef _WIN32
-        setmode(fileno(stdout), O_BINARY);
+#if defined(_WIN32) || defined(__CYGWIN__)
+        _setmode(fileno(stdout), O_BINARY);
 #endif
 
         if (png) {
@@ -303,6 +328,10 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
         } else {
             bitmap->writePNMFile(stdout);
         }
+    }
+
+    if (progress) {
+        fprintf(stderr, "%d %d %s\n", pg, lastPage, ppmFile != nullptr ? ppmFile : "");
     }
 }
 
@@ -345,10 +374,13 @@ static void processPageJobs()
         splashOut->setEnableFreeType(enableFreeType);
 #    ifdef USE_CMS
         splashOut->setDisplayProfile(displayprofile);
+        splashOut->setDefaultGrayProfile(defaultgrayprofile);
+        splashOut->setDefaultRGBProfile(defaultrgbprofile);
+        splashOut->setDefaultCMYKProfile(defaultcmykprofile);
 #    endif
         splashOut->startDoc(pageJob.doc);
 
-        savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
+        savePageSlice(pageJob.doc, splashOut, pageJob.pg, param_x, param_y, param_w, param_h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
 
         delete splashOut;
         delete[] pageJob.ppmFile;
@@ -359,7 +391,6 @@ static void processPageJobs()
 
 int main(int argc, char *argv[])
 {
-    PDFDoc *doc;
     GooString *fileName = nullptr;
     char *ppmRoot = nullptr;
     char *ppmFile;
@@ -371,15 +402,13 @@ int main(int argc, char *argv[])
     pthread_t *jobs;
 #endif // UTILS_USE_PTHREADS
     bool ok;
-    int exitCode;
     int pg, pg_num_len;
     double pg_w, pg_h;
 #ifdef USE_CMS
-    cmsColorSpaceSignature displayprofilecolorspace;
+    cmsColorSpaceSignature profilecolorspace;
 #endif
 
     Win32Console win32Console(&argc, &argv);
-    exitCode = 99;
 
     // parse args
     ok = parseArgs(argDesc, &argc, argv);
@@ -397,9 +426,11 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdftoppm", "[PDF-file [PPM-file-prefix]]", argDesc);
         }
-        if (printVersion || printHelp)
-            exitCode = 0;
-        goto err0;
+        if (printVersion || printHelp) {
+            return 0;
+        } else {
+            return kOtherError;
+        }
     }
     if (argc > 1)
         fileName = new GooString(argv[1]);
@@ -462,7 +493,7 @@ int main(int argc, char *argv[])
         delete fileName;
         fileName = new GooString("fd://0");
     }
-    doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
+    std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW));
     delete fileName;
 
     if (userPW) {
@@ -472,8 +503,7 @@ int main(int argc, char *argv[])
         delete ownerPW;
     }
     if (!doc->isOk()) {
-        exitCode = 1;
-        goto err1;
+        return 1;
     }
 
     // get page range
@@ -485,7 +515,7 @@ int main(int argc, char *argv[])
         lastPage = doc->getNumPages();
     if (lastPage < firstPage) {
         fprintf(stderr, "Wrong page range given: the first page (%d) can not be after the last page (%d).\n", firstPage, lastPage);
-        goto err1;
+        return kOtherError;
     }
 
     // If our page range selection and document size indicate we're only
@@ -493,7 +523,7 @@ int main(int argc, char *argv[])
     // filter out that single page.
     if (firstPage == lastPage && ((printOnlyEven && firstPage % 2 == 1) || (printOnlyOdd && firstPage % 2 == 0))) {
         fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
-        goto err1;
+        return kOtherError;
     }
 
     if (singleFile && firstPage < lastPage) {
@@ -518,26 +548,47 @@ int main(int argc, char *argv[])
         displayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(displayprofilename.c_str(), "r"));
         if (!displayprofile) {
             fprintf(stderr, "Could not open the ICC profile \"%s\".\n", displayprofilename.c_str());
-            goto err1;
+            return kOtherError;
         }
         if (!cmsIsIntentSupported(displayprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(displayprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_OUTPUT)
             && !cmsIsIntentSupported(displayprofile.get(), INTENT_SATURATION, LCMS_USED_AS_OUTPUT) && !cmsIsIntentSupported(displayprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
             fprintf(stderr, "ICC profile \"%s\" is not an output profile.\n", displayprofilename.c_str());
-            goto err1;
+            return kOtherError;
         }
-        displayprofilecolorspace = cmsGetColorSpace(displayprofile.get());
+        profilecolorspace = cmsGetColorSpace(displayprofile.get());
+        // Note: In contrast to pdftops we do not fail if a non-matching ICC profile is supplied.
+        //       Doing so would be pretentious, since SplashOutputDev by default assumes sRGB, even for
+        //       the CMYK and Mono cases.
         if (jpegcmyk || overprint) {
-            if (displayprofilecolorspace != cmsSigCmykData) {
+            if (profilecolorspace != cmsSigCmykData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a CMYK profile.\n", displayprofilename.c_str());
             }
         } else if (mono || gray) {
-            if (displayprofilecolorspace != cmsSigGrayData) {
+            if (profilecolorspace != cmsSigGrayData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a monochrome profile.\n", displayprofilename.c_str());
             }
         } else {
-            if (displayprofilecolorspace != cmsSigRgbData) {
+            if (profilecolorspace != cmsSigRgbData) {
                 fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a RGB profile.\n", displayprofilename.c_str());
             }
+        }
+    }
+    if (!defaultgrayprofilename.toStr().empty()) {
+        defaultgrayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultgrayprofilename.c_str(), "r"));
+        if (!checkICCProfile(defaultgrayprofile, defaultgrayprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigGrayData)) {
+            return kOtherError;
+        }
+    }
+    if (!defaultrgbprofilename.toStr().empty()) {
+        defaultrgbprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultrgbprofilename.c_str(), "r"));
+        if (!checkICCProfile(defaultrgbprofile, defaultrgbprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigRgbData)) {
+            return kOtherError;
+        }
+    }
+    if (!defaultcmykprofilename.toStr().empty()) {
+        defaultcmykprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(defaultcmykprofilename.c_str(), "r"));
+        if (!checkICCProfile(defaultcmykprofile, defaultcmykprofilename.c_str(), LCMS_USED_AS_INPUT, cmsSigCmykData)) {
+            return kOtherError;
         }
     }
 #endif
@@ -551,8 +602,11 @@ int main(int argc, char *argv[])
     splashOut->setEnableFreeType(enableFreeType);
 #    ifdef USE_CMS
     splashOut->setDisplayProfile(displayprofile);
+    splashOut->setDefaultGrayProfile(defaultgrayprofile);
+    splashOut->setDefaultRGBProfile(defaultrgbprofile);
+    splashOut->setDefaultCMYKProfile(defaultcmykprofile);
 #    endif
-    splashOut->startDoc(doc);
+    splashOut->startDoc(doc.get());
 
 #endif // UTILS_USE_PTHREADS
 
@@ -575,23 +629,41 @@ int main(int argc, char *argv[])
         if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
             std::swap(pg_w, pg_h);
 
+        // Handle requests for specific image size
         if (scaleTo != 0) {
-            resolution = (72.0 * scaleTo) / (pg_w > pg_h ? pg_w : pg_h);
+            if (pg_w > pg_h) {
+                resolution = (72.0 * scaleTo) / pg_w;
+                pg_w = scaleTo;
+                pg_h = pg_h * (resolution / 72.0);
+            } else {
+                resolution = (72.0 * scaleTo) / pg_h;
+                pg_h = scaleTo;
+                pg_w = pg_w * (resolution / 72.0);
+            }
             x_resolution = y_resolution = resolution;
         } else {
             if (x_scaleTo > 0) {
                 x_resolution = (72.0 * x_scaleTo) / pg_w;
+                pg_w = x_scaleTo;
                 if (y_scaleTo == -1)
                     y_resolution = x_resolution;
             }
+
             if (y_scaleTo > 0) {
                 y_resolution = (72.0 * y_scaleTo) / pg_h;
+                pg_h = y_scaleTo;
                 if (x_scaleTo == -1)
                     x_resolution = y_resolution;
             }
+
+            // No specific image size requested---compute the size from the resolution
+            if (x_scaleTo <= 0) {
+                pg_w = pg_w * (x_resolution / 72.0);
+            }
+            if (y_scaleTo <= 0) {
+                pg_h = pg_h * (y_resolution / 72.0);
+            }
         }
-        pg_w = pg_w * (x_resolution / 72.0);
-        pg_h = pg_h * (y_resolution / 72.0);
 
         if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
             std::swap(pg_w, pg_h);
@@ -610,13 +682,13 @@ int main(int argc, char *argv[])
         }
 #ifndef UTILS_USE_PTHREADS
         // process job in main thread
-        savePageSlice(doc, splashOut, pg, param_x, param_y, param_w, param_h, pg_w, pg_h, ppmFile);
+        savePageSlice(doc.get(), splashOut, pg, param_x, param_y, param_w, param_h, pg_w, pg_h, ppmFile);
 
         delete[] ppmFile;
 #else
 
         // queue job for worker threads
-        PageJob pageJob = { .doc = doc,
+        PageJob pageJob = { .doc = doc.get(),
                             .pg = pg,
 
                             .pg_w = pg_w,
@@ -655,12 +727,5 @@ int main(int argc, char *argv[])
 
 #endif // UTILS_USE_PTHREADS
 
-    exitCode = 0;
-
-    // clean up
-err1:
-    delete doc;
-err0:
-
-    return exitCode;
+    return 0;
 }

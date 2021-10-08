@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="ch01.html" title="Poppler">
 <link rel="next" href="poppler-Poppler-Page.html" title="PopplerPage">
-<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -83,6 +83,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-GDateTime.html#GDateTime"><span class="returnvalue">GDateTime</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="PopplerDocument.html#poppler-document-get-creation-date-time" title="poppler_document_get_creation_date_time ()">poppler_document_get_creation_date_time</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
 </td>
 <td class="function_name">
@@ -127,6 +135,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="PopplerDocument.html#poppler-document-get-modification-date" title="poppler_document_get_modification_date ()">poppler_document_get_modification_date</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-GDateTime.html#GDateTime"><span class="returnvalue">GDateTime</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="PopplerDocument.html#poppler-document-get-modification-date-time" title="poppler_document_get_modification_date_time ()">poppler_document_get_modification_date_time</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -398,6 +414,14 @@
 <span class="returnvalue">void</span>
 </td>
 <td class="function_name">
+<a class="link" href="PopplerDocument.html#poppler-document-set-creation-date-time" title="poppler_document_set_creation_date_time ()">poppler_document_set_creation_date_time</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
 <a class="link" href="PopplerDocument.html#poppler-document-set-creator" title="poppler_document_set_creator ()">poppler_document_set_creator</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
@@ -415,6 +439,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="PopplerDocument.html#poppler-document-set-modification-date" title="poppler_document_set_modification_date ()">poppler_document_set_modification_date</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="PopplerDocument.html#poppler-document-set-modification-date-time" title="poppler_document_set_modification_date_time ()">poppler_document_set_modification_date_time</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -706,24 +738,30 @@
 <tbody>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--author" title="The “author” property">author</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
 <tr>
-<td class="property_type"><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a></td>
+<td class="property_type"><span class="type">int</span></td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--creation-date" title="The “creation-date” property">creation-date</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> *</td>
+<td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--creation-datetime" title="The “creation-datetime” property">creation-datetime</a></td>
+<td class="property_flags">Read / Write</td>
+</tr>
+<tr>
+<td class="property_type">
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--creator" title="The “creator” property">creator</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--format" title="The “format” property">format</a></td>
 <td class="property_flags">Read</td>
 </tr>
@@ -739,7 +777,7 @@
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--keywords" title="The “keywords” property">keywords</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
@@ -750,13 +788,19 @@
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--metadata" title="The “metadata” property">metadata</a></td>
 <td class="property_flags">Read</td>
 </tr>
 <tr>
-<td class="property_type"><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a></td>
+<td class="property_type"><span class="type">int</span></td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--mod-date" title="The “mod-date” property">mod-date</a></td>
+<td class="property_flags">Read / Write</td>
+</tr>
+<tr>
+<td class="property_type">
+<a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> *</td>
+<td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--mod-datetime" title="The “mod-datetime” property">mod-datetime</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
 <tr>
@@ -780,7 +824,7 @@
 <td class="property_flags">Read</td>
 </tr>
 <tr>
-<td class="property_type"><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a></td>
+<td class="property_type"><span class="type">int</span></td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--print-n-copies" title="The “print-n-copies” property">print-n-copies</a></td>
 <td class="property_flags">Read</td>
 </tr>
@@ -791,13 +835,13 @@
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--producer" title="The “producer” property">producer</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--subject" title="The “subject” property">subject</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
@@ -818,13 +862,13 @@
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--subtype-string" title="The “subtype-string” property">subtype-string</a></td>
 <td class="property_flags">Read</td>
 </tr>
 <tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="PopplerDocument.html#PopplerDocument--title" title="The “title” property">title</a></td>
 <td class="property_flags">Read / Write</td>
 </tr>
@@ -954,7 +998,7 @@
 <a name="poppler-document-create-dests-tree"></a><h3>poppler_document_create_dests_tree ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Balanced-Binary-Trees.html#GTree"><span class="returnvalue">GTree</span></a> *
 poppler_document_create_dests_tree (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);</pre>
-<p>Creates named destinations balanced binary tree in <em class="parameter"><code>document</code></em>
+<p>Creates a balanced binary tree of all named destinations in <em class="parameter"><code>document</code></em>
 </p>
 <p>The tree key is strings in the form returned by
 <a class="link" href="poppler-PDF-Utility-functions.html#poppler-named-dest-to-bytestring" title="poppler_named_dest_to_bytestring ()"><code class="function">poppler_named_dest_to_bytestring()</code></a> which constains a destination name.
@@ -978,7 +1022,7 @@ The return value must be freed with <a href="../glib/glib-Balanced-Binary-Trees.
 <div class="refsect3">
 <a name="poppler-document-create-dests-tree.returns"></a><h4>Returns</h4>
 <p>the <a href="../glib/glib-Balanced-Binary-Trees.html#GTree"><span class="type">GTree</span></a>, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-78.html#api-index-0.78">0.78</a></p>
 </div>
@@ -1025,7 +1069,7 @@ function.</p>
 <p>a new <a class="link" href="PopplerAction.html#PopplerDest"><span class="type">PopplerDest</span></a> destination, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if
 <em class="parameter"><code>link_name</code></em>
 is not a destination. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1054,7 +1098,7 @@ are unowned, and must be unreffed, and the list must be freed with
 <div class="refsect3">
 <a name="poppler-document-get-attachments.returns"></a><h4>Returns</h4>
 <p>a list of available attachments. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAttachment][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAttachment][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1112,6 +1156,35 @@ poppler_document_get_creation_date (<em class="parameter"><code><a class="link" 
 <p> the date the document was created, or -1</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-document-get-creation-date-time"></a><h3>poppler_document_get_creation_date_time ()</h3>
+<pre class="programlisting"><a href="../glib/glib-GDateTime.html#GDateTime"><span class="returnvalue">GDateTime</span></a> *
+poppler_document_get_creation_date_time
+                               (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);</pre>
+<p>Returns the date the document was created as a <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a></p>
+<div class="refsect3">
+<a name="poppler-document-get-creation-date-time.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>document</p></td>
+<td class="parameter_description"><p>A <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="poppler-document-get-creation-date-time.returns"></a><h4>Returns</h4>
+<p>the date the document was created, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
+</div>
+<p class="since">Since: 20.09.0</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1179,7 +1252,7 @@ poppler_document_get_form_field (<em class="parameter"><code><a class="link" hre
 <a name="poppler-document-get-form-field.returns"></a><h4>Returns</h4>
 <p>a new <a class="link" href="PopplerFormField.html" title="PopplerFormField"><span class="type">PopplerFormField</span></a> or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if
 not found. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1316,6 +1389,35 @@ poppler_document_get_modification_date
 <p> the date the document was most recently modified, or -1</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-document-get-modification-date-time"></a><h3>poppler_document_get_modification_date_time ()</h3>
+<pre class="programlisting"><a href="../glib/glib-GDateTime.html#GDateTime"><span class="returnvalue">GDateTime</span></a> *
+poppler_document_get_modification_date_time
+                               (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>);</pre>
+<p>Returns the date the document was most recently modified as a <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a></p>
+<div class="refsect3">
+<a name="poppler-document-get-modification-date-time.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>document</p></td>
+<td class="parameter_description"><p>A <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="poppler-document-get-modification-date-time.returns"></a><h4>Returns</h4>
+<p>the date the document was modified, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
+<p><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
+</div>
+<p class="since">Since: 20.09.0</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -1616,7 +1718,7 @@ poppler_document_get_pdf_subtype_string
 <p>a newly allocated string containing
 the PDF subtype version of <em class="parameter"><code>document</code></em>
 , or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-70.html#api-index-0.70">0.70</a></p>
 </div>
@@ -1627,6 +1729,11 @@ the PDF subtype version of <em class="parameter"><code>document</code></em>
 poppler_document_get_pdf_version (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *major_version</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> *minor_version</code></em>);</pre>
+<p>Updates values referenced by <em class="parameter"><code>major_version</code></em>
+ &amp; <em class="parameter"><code>minor_version</code></em>
+ with the
+major and minor PDF versions of <em class="parameter"><code>document</code></em>
+.</p>
 <div class="refsect3">
 <a name="poppler-document-get-pdf-version.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1644,19 +1751,15 @@ poppler_document_get_pdf_version (<em class="parameter"><code><a class="link" hr
 <tr>
 <td class="parameter_name"><p>major_version</p></td>
 <td class="parameter_description"><p>return location for the PDF major version number. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>minor_version</p></td>
 <td class="parameter_description"><p>return location for the PDF minor version number. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
-</div>
-<div class="refsect3">
-<a name="poppler-document-get-pdf-version.returns"></a><h4>Returns</h4>
-<p> the major and minor PDF version numbers</p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
@@ -1785,8 +1888,8 @@ poppler_document_get_print_page_ranges
                                (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
                                 <em class="parameter"><code><span class="type">int</span> *n_ranges</code></em>);</pre>
 <p>Returns the suggested page ranges to print in the form of array
-of <span class="type">PopplerPageRanges</span> and number of ranges.
-NULL pointer means that the document does not specify page ranges
+of <a class="link" href="PopplerDocument.html#PopplerPageRange" title="PopplerPageRange"><span class="type">PopplerPageRange</span></a>s and number of ranges.
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> pointer means that the document does not specify page ranges
 for printing.</p>
 <div class="refsect3">
 <a name="poppler-document-get-print-page-ranges.parameters"></a><h4>Parameters</h4>
@@ -1813,9 +1916,9 @@ for printing.</p>
 <div class="refsect3">
 <a name="poppler-document-get-print-page-ranges.returns"></a><h4>Returns</h4>
 <p>an array
-of <span class="type">PopplerPageRanges</span> or NULL. Free the array when
+of <a class="link" href="PopplerDocument.html#PopplerPageRange" title="PopplerPageRange"><span class="type">PopplerPageRange</span></a>s or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. Free the array when
 it is no longer needed. </p>
-<p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_ranges][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_ranges][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-80.html#api-index-0.80">0.80</a></p>
 </div>
@@ -2061,7 +2164,7 @@ those in the <a class="link" href="poppler-Error-handling.html#POPPLER-ERROR:CAP
 <div class="refsect3">
 <a name="poppler-document-new-from-bytes.returns"></a><h4>Returns</h4>
 <p>a newly created <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-82.html#api-index-0.82">0.82</a></p>
 </div>
@@ -2073,13 +2176,21 @@ poppler_document_new_from_data (<em class="parameter"><code><span class="type">c
                                 <em class="parameter"><code><span class="type">int</span> length</code></em>,
                                 <em class="parameter"><code>const <span class="type">char</span> *password</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">poppler_document_new_from_data</code> has been deprecated since version 0.82 and should not be used in newly-written code.</p>
+<p>This requires directly managing <em class="parameter"><code>length</code></em>
+ and <em class="parameter"><code>data</code></em>
+.
+Use <a class="link" href="PopplerDocument.html#poppler-document-new-from-bytes" title="poppler_document_new_from_bytes ()"><code class="function">poppler_document_new_from_bytes()</code></a> instead.</p>
+</div>
 <p>Creates a new <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>.  If <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> is returned, then <em class="parameter"><code>error</code></em>
  will be
 set. Possible errors include those in the <a class="link" href="poppler-Error-handling.html#POPPLER-ERROR:CAPS" title="POPPLER_ERROR"><span class="type">POPPLER_ERROR</span></a> and <a href="../glib/glib-File-Utilities.html#G-FILE-ERROR:CAPS"><span class="type">G_FILE_ERROR</span></a>
 domains.</p>
 <p>Note that <em class="parameter"><code>data</code></em>
- must remain valid for as long as the returned document exists.
-Prefer using <a class="link" href="PopplerDocument.html#poppler-document-new-from-bytes" title="poppler_document_new_from_bytes ()"><code class="function">poppler_document_new_from_bytes()</code></a>.</p>
+ is not copied nor is a new reference to it created.
+It must remain valid and cannot be destroyed as long as the returned
+document exists.</p>
 <div class="refsect3">
 <a name="poppler-document-new-from-data.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2102,12 +2213,12 @@ Prefer using <a class="link" href="PopplerDocument.html#poppler-document-new-fro
 <tr>
 <td class="parameter_name"><p>password</p></td>
 <td class="parameter_description"><p>password to unlock the file with, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>Return location for an error, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -2207,7 +2318,7 @@ domains.</p>
 <div class="refsect3">
 <a name="poppler-document-new-from-gfile.returns"></a><h4>Returns</h4>
 <p>a new <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-22.html#api-index-0.22">0.22</a></p>
 </div>
@@ -2266,7 +2377,7 @@ and <a href="../gio/gio-GIOError.html#G-IO-ERROR:CAPS"><span class="type">G_IO_E
 <div class="refsect3">
 <a name="poppler-document-new-from-stream.returns"></a><h4>Returns</h4>
 <p>a new <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a>, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-22.html#api-index-0.22">0.22</a></p>
 </div>
@@ -2296,7 +2407,7 @@ if fields is empty.</p>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
-<td class="parameter_name"><p>fields</p></td>
+<td class="parameter_name"><p>fields (element-type utf8) (nullable)</p></td>
 <td class="parameter_description"><p>list of fields to reset</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
@@ -2471,6 +2582,40 @@ entry is removed from the document's Info dictionary.</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="poppler-document-set-creation-date-time"></a><h3>poppler_document_set_creation_date_time ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+poppler_document_set_creation_date_time
+                               (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> *creation_datetime</code></em>);</pre>
+<p>Sets the document's creation date. If <em class="parameter"><code>creation_datetime</code></em>
+ is <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>,
+CreationDate entry is removed from the document's Info dictionary.</p>
+<div class="refsect3">
+<a name="poppler-document-set-creation-date-time.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>document</p></td>
+<td class="parameter_description"><p>A <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>creation_datetime</p></td>
+<td class="parameter_description"><p>A new creation <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: 20.09.0</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="poppler-document-set-creator"></a><h3>poppler_document_set_creator ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_document_set_creator (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
@@ -2568,6 +2713,40 @@ entry is removed from the document's Info dictionary.</p>
 </table></div>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-46.html#api-index-0.46">0.46</a></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-document-set-modification-date-time"></a><h3>poppler_document_set_modification_date_time ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+poppler_document_set_modification_date_time
+                               (<em class="parameter"><code><a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a> *document</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> *modification_datetime</code></em>);</pre>
+<p>Sets the document's modification date. If <em class="parameter"><code>modification_datetime</code></em>
+ is <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>,
+ModDate entry is removed from the document's Info dictionary.</p>
+<div class="refsect3">
+<a name="poppler-document-set-modification-date-time.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>document</p></td>
+<td class="parameter_description"><p>A <a class="link" href="PopplerDocument.html" title="PopplerDocument"><span class="type">PopplerDocument</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>modification_datetime</p></td>
+<td class="parameter_description"><p>A new modification <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p class="since">Since: 20.09.0</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -2728,16 +2907,16 @@ point to the first font scanned.</p>
 8
 9
 10</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="n">font_info</span> <span class="o">=</span> <span class="n">poppler_font_info_new</span> <span class="p">(</span><span class="n">document</span><span class="p">);</span>
-<span class="k">while</span> <span class="p">(</span><span class="n">poppler_font_info_scan</span> <span class="p">(</span><span class="n">font_info</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fonts_iter</span><span class="p">))</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">fonts_iter</span><span class="p">)</span>
-                <span class="k">continue</span><span class="p">;</span> <span class="cm">/* No fonts found in these 20 pages */</span>
-        <span class="k">do</span> <span class="p">{</span>
-                <span class="cm">/* Do something with font iter */</span>
-                <span class="n">g_print</span> <span class="p">(</span><span class="s">&quot;Font Name: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">poppler_fonts_iter_get_name</span> <span class="p">(</span><span class="n">fonts_iter</span><span class="p">));</span>
-        <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">poppler_fonts_iter_next</span> <span class="p">(</span><span class="n">fonts_iter</span><span class="p">));</span>
-        <span class="n">poppler_fonts_iter_free</span> <span class="p">(</span><span class="n">fonts_iter</span><span class="p">);</span>
-<span class="p">}</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">font_info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_font_info_new</span><span class="w"> </span><span class="p">(</span><span class="n">document</span><span class="p">);</span><span class="w"></span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">poppler_font_info_scan</span><span class="w"> </span><span class="p">(</span><span class="n">font_info</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fonts_iter</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">fonts_iter</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="k">continue</span><span class="p">;</span><span class="w"> </span><span class="cm">/* No fonts found in these 20 pages */</span><span class="w"></span>
+<span class="w">        </span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="cm">/* Do something with font iter */</span><span class="w"></span>
+<span class="w">                </span><span class="n">g_print</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;Font Name: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">poppler_fonts_iter_get_name</span><span class="w"> </span><span class="p">(</span><span class="n">fonts_iter</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">poppler_fonts_iter_next</span><span class="w"> </span><span class="p">(</span><span class="n">fonts_iter</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="n">poppler_fonts_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">fonts_iter</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -3247,25 +3426,25 @@ displayed to the user — typically a <a class="link" href="PopplerAction.html#P
 17
 18
 19</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="k">static</span> <span class="kt">void</span>
-<span class="nf">walk_index</span> <span class="p">(</span><span class="n">PopplerIndexIter</span> <span class="o">*</span><span class="n">iter</span><span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">do</span>
-    <span class="p">{</span>
-      <span class="cm">/* Get the action and do something with it */</span>
-      <span class="n">PopplerIndexIter</span> <span class="o">*</span><span class="n">child</span> <span class="o">=</span> <span class="n">poppler_index_iter_get_child</span> <span class="p">(</span><span class="n">iter</span><span class="p">);</span>
-      <span class="k">if</span> <span class="p">(</span><span class="n">child</span><span class="p">)</span>
-        <span class="n">walk_index</span> <span class="p">(</span><span class="n">child</span><span class="p">);</span>
-      <span class="n">poppler_index_iter_free</span> <span class="p">(</span><span class="n">child</span><span class="p">);</span>
-    <span class="p">}</span>
-  <span class="k">while</span> <span class="p">(</span><span class="n">poppler_index_iter_next</span> <span class="p">(</span><span class="n">iter</span><span class="p">));</span>
-<span class="p">}</span>
-<span class="p">...</span>
-<span class="p">{</span>
-  <span class="n">iter</span> <span class="o">=</span> <span class="n">poppler_index_iter_new</span> <span class="p">(</span><span class="n">document</span><span class="p">);</span>
-  <span class="n">walk_index</span> <span class="p">(</span><span class="n">iter</span><span class="p">);</span>
-  <span class="n">poppler_index_iter_free</span> <span class="p">(</span><span class="n">iter</span><span class="p">);</span>
-<span class="p">}</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="nf">walk_index</span><span class="w"> </span><span class="p">(</span><span class="n">PopplerIndexIter</span><span class="w"> </span><span class="o">*</span><span class="n">iter</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="k">do</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="cm">/* Get the action and do something with it */</span><span class="w"></span>
+<span class="w">      </span><span class="n">PopplerIndexIter</span><span class="w"> </span><span class="o">*</span><span class="n">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_index_iter_get_child</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">walk_index</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span><span class="w"></span>
+<span class="w">      </span><span class="n">poppler_index_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">poppler_index_iter_next</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="p">...</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_index_iter_new</span><span class="w"> </span><span class="p">(</span><span class="n">document</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">walk_index</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">poppler_index_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -3429,7 +3608,7 @@ poppler_layers_iter_get_layer (<em class="parameter"><code><a class="link" href=
 <p>a new <a class="link" href="poppler-Poppler-Layer.html#PopplerLayer"><span class="type">PopplerLayer</span></a>, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if
 there isn't any layer associated with <em class="parameter"><code>iter</code></em>
 . </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-12.html#api-index-0.12">0.12</a></p>
 </div>
@@ -4426,7 +4605,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <a name="PopplerDocument.property-details"></a><h2>Property Details</h2>
 <div class="refsect2">
 <a name="PopplerDocument--author"></a><h3>The <code class="literal">“author”</code> property</h3>
-<pre class="programlisting">  “author”                   <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “author”                   <span class="type">char</span> *</pre>
 <p>The author of the document</p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
@@ -4435,8 +4614,13 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--creation-date"></a><h3>The <code class="literal">“creation-date”</code> property</h3>
-<pre class="programlisting">  “creation-date”            <a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a></pre>
+<pre class="programlisting">  “creation-date”            <span class="type">int</span></pre>
 <p>The date the document was created as seconds since the Epoch, or -1</p>
+<div class="warning">
+<p><code class="literal">PopplerDocument:creation-date</code> has been deprecated since version 20.09.0 and should not be used in newly-written code.</p>
+<p>This will overflow in 2038. Use creation-datetime
+instead.</p>
+</div>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
 <p>Allowed values: &gt;= -1</p>
@@ -4444,8 +4628,17 @@ bookmarks or thumbnail images). Since 0.18</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="PopplerDocument--creation-datetime"></a><h3>The <code class="literal">“creation-datetime”</code> property</h3>
+<pre class="programlisting">  “creation-datetime”        <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> *</pre>
+<p>The date and time the document was created.</p>
+<p>Owner: PopplerDocument</p>
+<p>Flags: Read / Write</p>
+<p class="since">Since: 20.09.0</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="PopplerDocument--creator"></a><h3>The <code class="literal">“creator”</code> property</h3>
-<pre class="programlisting">  “creator”                  <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “creator”                  <span class="type">char</span> *</pre>
 <p>The creator of the document. See also <a class="link" href="PopplerDocument.html#poppler-document-get-creator" title="poppler_document_get_creator ()"><code class="function">poppler_document_get_creator()</code></a></p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
@@ -4454,7 +4647,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--format"></a><h3>The <code class="literal">“format”</code> property</h3>
-<pre class="programlisting">  “format”                   <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “format”                   <span class="type">char</span> *</pre>
 <p>The PDF version as string. See also <a class="link" href="PopplerDocument.html#poppler-document-get-pdf-version-string" title="poppler_document_get_pdf_version_string ()"><code class="function">poppler_document_get_pdf_version_string()</code></a></p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read</p>
@@ -4481,7 +4674,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--keywords"></a><h3>The <code class="literal">“keywords”</code> property</h3>
-<pre class="programlisting">  “keywords”                 <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “keywords”                 <span class="type">char</span> *</pre>
 <p>The keywords associated to the document</p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
@@ -4499,7 +4692,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--metadata"></a><h3>The <code class="literal">“metadata”</code> property</h3>
-<pre class="programlisting">  “metadata”                 <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “metadata”                 <span class="type">char</span> *</pre>
 <p>Document metadata in XML format, or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read</p>
@@ -4508,12 +4701,25 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--mod-date"></a><h3>The <code class="literal">“mod-date”</code> property</h3>
-<pre class="programlisting">  “mod-date”                 <a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a></pre>
+<pre class="programlisting">  “mod-date”                 <span class="type">int</span></pre>
 <p>The date the document was most recently modified as seconds since the Epoch, or -1</p>
+<div class="warning">
+<p><code class="literal">PopplerDocument:mod-date</code> has been deprecated since version 20.09.0 and should not be used in newly-written code.</p>
+<p>This will overflow in 2038. Use mod-datetime instead.</p>
+</div>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
 <p>Allowed values: &gt;= -1</p>
 <p>Default value: -1</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="PopplerDocument--mod-datetime"></a><h3>The <code class="literal">“mod-datetime”</code> property</h3>
+<pre class="programlisting">  “mod-datetime”             <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> *</pre>
+<p>The <a href="../glib/glib-GDateTime.html#GDateTime"><span class="type">GDateTime</span></a> the document was most recently modified.</p>
+<p>Owner: PopplerDocument</p>
+<p>Flags: Read / Write</p>
+<p class="since">Since: 20.09.0</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -4555,7 +4761,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--print-n-copies"></a><h3>The <code class="literal">“print-n-copies”</code> property</h3>
-<pre class="programlisting">  “print-n-copies”           <a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a></pre>
+<pre class="programlisting">  “print-n-copies”           <span class="type">int</span></pre>
 <p>Suggested number of copies to be printed for this document</p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read</p>
@@ -4576,7 +4782,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--producer"></a><h3>The <code class="literal">“producer”</code> property</h3>
-<pre class="programlisting">  “producer”                 <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “producer”                 <span class="type">char</span> *</pre>
 <p>The producer of the document. See also <a class="link" href="PopplerDocument.html#poppler-document-get-producer" title="poppler_document_get_producer ()"><code class="function">poppler_document_get_producer()</code></a></p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
@@ -4585,7 +4791,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--subject"></a><h3>The <code class="literal">“subject”</code> property</h3>
-<pre class="programlisting">  “subject”                  <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “subject”                  <span class="type">char</span> *</pre>
 <p>The subject of the document</p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
@@ -4621,7 +4827,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--subtype-string"></a><h3>The <code class="literal">“subtype-string”</code> property</h3>
-<pre class="programlisting">  “subtype-string”           <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “subtype-string”           <span class="type">char</span> *</pre>
 <p>Document PDF subtype. See also <a class="link" href="PopplerDocument.html#poppler-document-get-pdf-subtype-string" title="poppler_document_get_pdf_subtype_string ()"><code class="function">poppler_document_get_pdf_subtype_string()</code></a></p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read</p>
@@ -4630,7 +4836,7 @@ bookmarks or thumbnail images). Since 0.18</p>
 <hr>
 <div class="refsect2">
 <a name="PopplerDocument--title"></a><h3>The <code class="literal">“title”</code> property</h3>
-<pre class="programlisting">  “title”                    <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “title”                    <span class="type">char</span> *</pre>
 <p>The document's title or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a></p>
 <p>Owner: PopplerDocument</p>
 <p>Flags: Read / Write</p>
@@ -4647,6 +4853,6 @@ bookmarks or thumbnail images). Since 0.18</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32.1</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>

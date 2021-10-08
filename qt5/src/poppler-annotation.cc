@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -11,6 +11,10 @@
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+ * Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+ * Copyright (C) 2021 Mahmoud Ahmed Khalil <mahmoudkhalil11@gmail.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -35,6 +39,7 @@
 #include <QtXml/QDomElement>
 #include <QtGui/QColor>
 #include <QtGui/QTransform>
+#include <QImage>
 
 // local includes
 #include "poppler-annotation.h"
@@ -52,6 +57,7 @@
 #include <Error.h>
 #include <FileSpec.h>
 #include <Link.h>
+#include <DateInfo.h>
 
 /* Almost all getters directly query the underlying poppler annotation, with
  * the exceptions of link, file attachment, sound, movie and screen annotations,
@@ -123,8 +129,70 @@ QDomElement AnnotationUtils::findChildElement(const QDomNode &parentNode, const 
 }
 // END AnnotationUtils implementation
 
+// BEGIN AnnotationAppearancePrivate implementation
+AnnotationAppearancePrivate::AnnotationAppearancePrivate(Annot *annot)
+{
+    if (annot) {
+        appearance = annot->getAppearance();
+    } else {
+        appearance.setToNull();
+    }
+}
+// END AnnotationAppearancePrivate implementation
+
+// BEGIN AnnotationAppearance implementation
+AnnotationAppearance::AnnotationAppearance(AnnotationAppearancePrivate *annotationAppearancePrivate) : d(annotationAppearancePrivate) { }
+
+AnnotationAppearance::~AnnotationAppearance()
+{
+    delete d;
+}
+// END AnnotationAppearance implementation
+
 // BEGIN Annotation implementation
 AnnotationPrivate::AnnotationPrivate() : flags(0), revisionScope(Annotation::Root), revisionType(Annotation::None), pdfAnnot(nullptr), pdfPage(nullptr), parentDoc(nullptr) { }
+
+void getRawDataFromQImage(const QImage &qimg, int bitsPerPixel, QByteArray *data, QByteArray *sMaskData)
+{
+    const int height = qimg.height();
+    const int width = qimg.width();
+
+    switch (bitsPerPixel) {
+    case 1:
+        for (int line = 0; line < height; line++) {
+            const char *lineData = reinterpret_cast<const char *>(qimg.scanLine(line));
+            for (int offset = 0; offset < (width + 7) / 8; offset++) {
+                data->append(lineData[offset]);
+            }
+        }
+        break;
+    case 8:
+    case 24:
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+        data->append((const char *)qimg.bits(), static_cast<int>(qimg.sizeInBytes()));
+#else
+        data->append((const char *)qimg.bits(), qimg.byteCount());
+#endif
+        break;
+    case 32:
+        for (int line = 0; line < height; line++) {
+            const QRgb *lineData = reinterpret_cast<const QRgb *>(qimg.scanLine(line));
+            for (int offset = 0; offset < width; offset++) {
+                char a = (char)qAlpha(lineData[offset]);
+                char r = (char)qRed(lineData[offset]);
+                char g = (char)qGreen(lineData[offset]);
+                char b = (char)qBlue(lineData[offset]);
+
+                data->append(r);
+                data->append(g);
+                data->append(b);
+
+                sMaskData->append(a);
+            }
+        }
+        break;
+    }
+}
 
 void AnnotationPrivate::addRevision(Annotation *ann, Annotation::RevScope scope, Annotation::RevType type)
 {
@@ -196,7 +264,7 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
 
 // Returns matrix to convert from user space coords (oriented according to the
 // specified rotation) to normalized coords
-void AnnotationPrivate::fillNormalizationMTX(double MTX[6], int pageRotation) const
+static void fillNormalizationMTX(::Page *pdfPage, double MTX[6], int pageRotation)
 {
     Q_ASSERT(pdfPage);
 
@@ -234,7 +302,7 @@ void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
 
     if (pageRotate == 0 || (pdfAnnot->getFlags() & Annot::flagNoRotate) == 0) {
         // Use the normalization matrix for this page's rotation
-        fillNormalizationMTX(MTX, pageRotate);
+        fillNormalizationMTX(pdfPage, MTX, pageRotate);
     } else {
         // Clients expect coordinates relative to this page's rotation, but
         // FixedRotation annotations internally use unrotated coordinates:
@@ -242,7 +310,7 @@ void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
         // top-left corner as rotation pivot
 
         double MTXnorm[6];
-        fillNormalizationMTX(MTXnorm, pageRotate);
+        fillNormalizationMTX(pdfPage, MTXnorm, pageRotate);
 
         QTransform transform(MTXnorm[0], MTXnorm[1], MTXnorm[2], MTXnorm[3], MTXnorm[4], MTXnorm[5]);
         transform.translate(+pdfAnnot->getXMin(), +pdfAnnot->getYMax());
@@ -293,14 +361,22 @@ QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
 // the transformation produced by fillTransformationMTX, but we can't use
 // fillTransformationMTX here because it relies on the native annotation
 // object's boundary rect to be already set up.
-PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
+PDFRectangle boundaryToPdfRectangle(::Page *pdfPage, const QRectF &r, int rFlags)
 {
     Q_ASSERT(pdfPage);
+
+    const double w = pdfPage->getCropWidth();
+    const double h = pdfPage->getCropHeight();
+
+    if (w == 0 || h == 0) {
+        // page is broken, there's nothing to transform
+        return {};
+    }
 
     const int pageRotate = pdfPage->getRotate();
 
     double MTX[6];
-    fillNormalizationMTX(MTX, pageRotate);
+    fillNormalizationMTX(pdfPage, MTX, pageRotate);
 
     double tl_x, tl_y, br_x, br_y, swp;
     XPDFReader::invTransform(MTX, r.topLeft(), tl_x, tl_y);
@@ -330,6 +406,11 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
         return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
     else // rotationFixUp == 270
         return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
+}
+
+PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
+{
+    return Poppler::boundaryToPdfRectangle(pdfPage, r, rFlags);
 }
 
 AnnotPath *AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) const
@@ -769,6 +850,10 @@ void AnnotationPrivate::addAnnotationToPage(::Page *pdfPage, DocumentData *doc, 
     // is private. Therefore, createNativeAnnot will never return 0
     Annot *nativeAnnot = ann->d_ptr->createNativeAnnot(pdfPage, doc);
     Q_ASSERT(nativeAnnot);
+
+    if (ann->d_ptr->annotationAppearance.isStream())
+        nativeAnnot->setNewAppearance(ann->d_ptr->annotationAppearance.copy());
+
     pdfPage->addAnnot(nativeAnnot);
 }
 
@@ -1014,10 +1099,20 @@ Annotation::Annotation(AnnotationPrivate &dd, const QDomNode &annNode) : d_ptr(&
         setContents(e.attribute(QStringLiteral("contents")));
     if (e.hasAttribute(QStringLiteral("uniqueName")))
         setUniqueName(e.attribute(QStringLiteral("uniqueName")));
-    if (e.hasAttribute(QStringLiteral("modifyDate")))
-        setModificationDate(QDateTime::fromString(e.attribute(QStringLiteral("modifyDate"))));
-    if (e.hasAttribute(QStringLiteral("creationDate")))
-        setCreationDate(QDateTime::fromString(e.attribute(QStringLiteral("creationDate"))));
+    if (e.hasAttribute(QStringLiteral("modifyDate"))) {
+        QDateTime dt = QDateTime::fromString(e.attribute(QStringLiteral("modifyDate")));
+        if (!dt.isValid()) {
+            dt = QDateTime::fromString(e.attribute(QStringLiteral("modifyDate")), Qt::ISODate);
+        }
+        setModificationDate(dt);
+    }
+    if (e.hasAttribute(QStringLiteral("creationDate"))) {
+        QDateTime dt = QDateTime::fromString(e.attribute(QStringLiteral("creationDate")));
+        if (!dt.isValid()) {
+            dt = QDateTime::fromString(e.attribute(QStringLiteral("creationDate")), Qt::ISODate);
+        }
+        setCreationDate(dt);
+    }
 
     // parse -other- attributes
     if (e.hasAttribute(QStringLiteral("flags")))
@@ -1342,15 +1437,16 @@ void Annotation::setModificationDate(const QDateTime &date)
         return;
     }
 
-#if 0 // TODO: Conversion routine is broken
-    if (d->pdfAnnot)
-    {
-        time_t t = date.toTime_t();
-        GooString *s = timeToDateString(&t);
-        d->pdfAnnot->setModified(s);
-        delete s;
+    if (d->pdfAnnot) {
+        if (date.isValid()) {
+            const time_t t = date.toSecsSinceEpoch();
+            GooString *s = timeToDateString(&t);
+            d->pdfAnnot->setModified(s);
+            delete s;
+        } else {
+            d->pdfAnnot->setModified(nullptr);
+        }
     }
-#endif
 }
 
 QDateTime Annotation::creationDate() const
@@ -1377,16 +1473,17 @@ void Annotation::setCreationDate(const QDateTime &date)
         return;
     }
 
-#if 0 // TODO: Conversion routine is broken
-    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
-    if (markupann)
-    {
-        time_t t = date.toTime_t();
-        GooString *s = timeToDateString(&t);
-        markupann->setDate(s);
-        delete s;
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup *>(d->pdfAnnot);
+    if (markupann) {
+        if (date.isValid()) {
+            const time_t t = date.toSecsSinceEpoch();
+            GooString *s = timeToDateString(&t);
+            markupann->setDate(s);
+            delete s;
+        } else {
+            markupann->setDate(nullptr);
+        }
     }
-#endif
 }
 
 static int fromPdfFlags(int flags)
@@ -1699,6 +1796,28 @@ QList<Annotation *> Annotation::revisions() const
         return QList<Annotation *>();
 
     return AnnotationPrivate::findAnnotations(d->pdfPage, d->parentDoc, QSet<Annotation::SubType>(), d->pdfAnnot->getId());
+}
+
+std::unique_ptr<AnnotationAppearance> Annotation::annotationAppearance() const
+{
+    Q_D(const Annotation);
+
+    return std::make_unique<AnnotationAppearance>(new AnnotationAppearancePrivate(d->pdfAnnot));
+}
+
+void Annotation::setAnnotationAppearance(const AnnotationAppearance &annotationAppearance)
+{
+    Q_D(Annotation);
+
+    if (!d->pdfAnnot) {
+        d->annotationAppearance = annotationAppearance.d->appearance.copy();
+        return;
+    }
+
+    // Moving the appearance object using std::move would result
+    // in the object being completed moved from the AnnotationAppearancePrivate
+    // class. So, we'll not be able to retrieve the stamp's original AP stream
+    d->pdfAnnot->setNewAppearance(annotationAppearance.d->appearance.copy());
 }
 
 // END Annotation implementation
@@ -3093,8 +3212,11 @@ public:
     Annotation *makeAlias() override;
     Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
+    AnnotStampImageHelper *convertQImageToAnnotStampImageHelper(const QImage &qimg);
+
     // data fields
     QString stampIconName;
+    QImage stampCustomImage;
 };
 
 StampAnnotationPrivate::StampAnnotationPrivate() : AnnotationPrivate(), stampIconName(QStringLiteral("Draft")) { }
@@ -3119,12 +3241,106 @@ Annot *StampAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData 
     // Set properties
     flushBaseAnnotationProperties();
     q->setStampIconName(stampIconName);
+    q->setStampCustomImage(stampCustomImage);
 
     delete q;
 
     stampIconName.clear(); // Free up memory
 
     return pdfAnnot;
+}
+
+AnnotStampImageHelper *StampAnnotationPrivate::convertQImageToAnnotStampImageHelper(const QImage &qimg)
+{
+    QImage convertedQImage = qimg;
+
+    QByteArray data;
+    QByteArray sMaskData;
+    const int width = convertedQImage.width();
+    const int height = convertedQImage.height();
+    int bitsPerComponent = 1;
+    ColorSpace colorSpace = ColorSpace::DeviceGray;
+
+    switch (convertedQImage.format()) {
+    case QImage::Format_MonoLSB:
+        if (!convertedQImage.allGray()) {
+            convertedQImage = convertedQImage.convertToFormat(QImage::Format_RGB888);
+
+            colorSpace = ColorSpace::DeviceRGB;
+            bitsPerComponent = 8;
+        } else {
+            convertedQImage = convertedQImage.convertToFormat(QImage::Format_Mono);
+        }
+        break;
+    case QImage::Format_Mono:
+        if (!convertedQImage.allGray()) {
+            convertedQImage = convertedQImage.convertToFormat(QImage::Format_RGB888);
+
+            colorSpace = ColorSpace::DeviceRGB;
+            bitsPerComponent = 8;
+        }
+        break;
+    case QImage::Format_RGB32:
+    case QImage::Format_ARGB32_Premultiplied:
+    case QImage::Format_ARGB8565_Premultiplied:
+    case QImage::Format_ARGB6666_Premultiplied:
+    case QImage::Format_ARGB8555_Premultiplied:
+    case QImage::Format_ARGB4444_Premultiplied:
+    case QImage::Format_Alpha8:
+        convertedQImage = convertedQImage.convertToFormat(QImage::Format_ARGB32);
+        colorSpace = ColorSpace::DeviceRGB;
+        bitsPerComponent = 8;
+        break;
+    case QImage::Format_RGBA8888:
+    case QImage::Format_RGBA8888_Premultiplied:
+    case QImage::Format_RGBX8888:
+    case QImage::Format_ARGB32:
+        colorSpace = ColorSpace::DeviceRGB;
+        bitsPerComponent = 8;
+        break;
+    case QImage::Format_Grayscale8:
+        bitsPerComponent = 8;
+        break;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+    case QImage::Format_Grayscale16:
+        convertedQImage = convertedQImage.convertToFormat(QImage::Format_Grayscale8);
+
+        colorSpace = ColorSpace::DeviceGray;
+        bitsPerComponent = 8;
+        break;
+#endif
+    case QImage::Format_RGB16:
+    case QImage::Format_RGB666:
+    case QImage::Format_RGB555:
+    case QImage::Format_RGB444:
+        convertedQImage = convertedQImage.convertToFormat(QImage::Format_RGB888);
+        colorSpace = ColorSpace::DeviceRGB;
+        bitsPerComponent = 8;
+        break;
+    case QImage::Format_RGB888:
+        colorSpace = ColorSpace::DeviceRGB;
+        bitsPerComponent = 8;
+        break;
+    default:
+        convertedQImage = convertedQImage.convertToFormat(QImage::Format_ARGB32);
+
+        colorSpace = ColorSpace::DeviceRGB;
+        bitsPerComponent = 8;
+        break;
+    }
+
+    getRawDataFromQImage(convertedQImage, convertedQImage.depth(), &data, &sMaskData);
+
+    AnnotStampImageHelper *annotImg;
+
+    if (sMaskData.count() > 0) {
+        AnnotStampImageHelper sMask(parentDoc->doc, width, height, ColorSpace::DeviceGray, 8, sMaskData.data(), sMaskData.count());
+        annotImg = new AnnotStampImageHelper(parentDoc->doc, width, height, colorSpace, bitsPerComponent, data.data(), data.count(), sMask.getRef());
+    } else {
+        annotImg = new AnnotStampImageHelper(parentDoc->doc, width, height, colorSpace, bitsPerComponent, data.data(), data.count());
+    }
+
+    return annotImg;
 }
 
 StampAnnotation::StampAnnotation() : Annotation(*new StampAnnotationPrivate()) { }
@@ -3195,6 +3411,24 @@ void StampAnnotation::setStampIconName(const QString &name)
     QByteArray encoded = name.toLatin1();
     GooString s(encoded.constData());
     stampann->setIcon(&s);
+}
+
+void StampAnnotation::setStampCustomImage(const QImage &image)
+{
+    if (image.isNull()) {
+        return;
+    }
+
+    Q_D(StampAnnotation);
+
+    if (!d->pdfAnnot) {
+        d->stampCustomImage = QImage(image);
+        return;
+    }
+
+    AnnotStamp *stampann = static_cast<AnnotStamp *>(d->pdfAnnot);
+    AnnotStampImageHelper *annotCustomImage = d->convertQImageToAnnotStampImageHelper(image);
+    stampann->setCustomImage(annotCustomImage);
 }
 
 /** InkAnnotation [Annotation] */
@@ -4504,11 +4738,7 @@ class RichMediaAnnotationPrivate : public AnnotationPrivate
 public:
     RichMediaAnnotationPrivate() : settings(nullptr), content(nullptr) { }
 
-    ~RichMediaAnnotationPrivate() override
-    {
-        delete settings;
-        delete content;
-    }
+    ~RichMediaAnnotationPrivate() override;
 
     Annotation *makeAlias() override { return new RichMediaAnnotation(*this); }
 
@@ -4523,6 +4753,12 @@ public:
     RichMediaAnnotation::Settings *settings;
     RichMediaAnnotation::Content *content;
 };
+
+RichMediaAnnotationPrivate::~RichMediaAnnotationPrivate()
+{
+    delete settings;
+    delete content;
+}
 
 RichMediaAnnotation::RichMediaAnnotation() : Annotation(*new RichMediaAnnotationPrivate()) { }
 

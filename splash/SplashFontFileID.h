@@ -21,13 +21,13 @@
 #ifndef SPLASHFONTFILEID_H
 #define SPLASHFONTFILEID_H
 
-#include "poppler-config.h"
+#include "poppler_private_export.h"
 
 //------------------------------------------------------------------------
 // SplashFontFileID
 //------------------------------------------------------------------------
 
-class POPPLER_LIB_EXPORT SplashFontFileID
+class POPPLER_PRIVATE_EXPORT SplashFontFileID
 {
 public:
     SplashFontFileID();

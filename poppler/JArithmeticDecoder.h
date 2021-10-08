@@ -15,8 +15,9 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2020 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,7 +36,7 @@ class Stream;
 class JArithmeticDecoderStats
 {
 public:
-    JArithmeticDecoderStats(int contextSizeA);
+    explicit JArithmeticDecoderStats(int contextSizeA);
     ~JArithmeticDecoderStats();
     JArithmeticDecoderStats(const JArithmeticDecoderStats &) = delete;
     JArithmeticDecoderStats &operator=(const JArithmeticDecoderStats &) = delete;
@@ -44,6 +45,7 @@ public:
     int getContextSize() { return contextSize; }
     void copyFrom(JArithmeticDecoderStats *stats);
     void setEntry(unsigned int cx, int i, int mps);
+    bool isValid() const { return cxTab != nullptr; }
 
 private:
     unsigned char *cxTab; // cxTab[cx] = (i[cx] << 1) + mps[cx]

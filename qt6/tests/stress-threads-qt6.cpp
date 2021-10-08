@@ -21,32 +21,31 @@ class SillyThread : public QThread
 {
     Q_OBJECT
 public:
-    SillyThread(Poppler::Document *document, QObject *parent = nullptr);
+    explicit SillyThread(Poppler::Document *document, QObject *parent = nullptr);
 
     void run() override;
 
 private:
     Poppler::Document *m_document;
-    QVector<Poppler::Page *> m_pages;
+    std::vector<std::unique_ptr<Poppler::Page>> m_pages;
 };
 
 class CrazyThread : public QThread
 {
     Q_OBJECT
 public:
-    CrazyThread(uint seed, Poppler::Document *document, QMutex *annotationMutex, QObject *parent = nullptr);
+    CrazyThread(Poppler::Document *document, QMutex *annotationMutex, QObject *parent = nullptr);
 
     void run() override;
 
 private:
-    uint m_seed;
     Poppler::Document *m_document;
     QMutex *m_annotationMutex;
 };
 
-static Poppler::Page *loadPage(Poppler::Document *document, int index)
+static std::unique_ptr<Poppler::Page> loadPage(Poppler::Document *document, int index)
 {
-    Poppler::Page *page = document->page(index);
+    std::unique_ptr<Poppler::Page> page = document->page(index);
 
     if (page == nullptr) {
         qDebug() << "!Document::page";
@@ -57,7 +56,7 @@ static Poppler::Page *loadPage(Poppler::Document *document, int index)
     return page;
 }
 
-static Poppler::Page *loadRandomPage(Poppler::Document *document)
+static std::unique_ptr<Poppler::Page> loadRandomPage(Poppler::Document *document)
 {
     return loadPage(document, QRandomGenerator::global()->bounded(document->numPages()));
 }
@@ -67,14 +66,14 @@ SillyThread::SillyThread(Poppler::Document *document, QObject *parent) : QThread
     m_pages.reserve(m_document->numPages());
 
     for (int index = 0; index < m_document->numPages(); ++index) {
-        m_pages.append(loadPage(m_document, index));
+        m_pages.push_back(loadPage(m_document, index));
     }
 }
 
 void SillyThread::run()
 {
     forever {
-        foreach (Poppler::Page *page, m_pages) {
+        for (std::unique_ptr<Poppler::Page> &page : m_pages) {
             QImage image = page->renderToImage();
 
             if (image.isNull()) {
@@ -86,11 +85,11 @@ void SillyThread::run()
     }
 }
 
-CrazyThread::CrazyThread(uint seed, Poppler::Document *document, QMutex *annotationMutex, QObject *parent) : QThread(parent), m_seed(seed), m_document(document), m_annotationMutex(annotationMutex) { }
+CrazyThread::CrazyThread(Poppler::Document *document, QMutex *annotationMutex, QObject *parent) : QThread(parent), m_document(document), m_annotationMutex(annotationMutex) { }
 
 void CrazyThread::run()
 {
-    typedef QScopedPointer<Poppler::Page> PagePointer;
+    typedef std::unique_ptr<Poppler::Page> PagePointer;
 
     forever {
         if (QRandomGenerator::global()->bounded(2) == 0) {
@@ -110,9 +109,7 @@ void CrazyThread::run()
 
             PagePointer page(loadRandomPage(m_document));
 
-            QList<Poppler::Link *> links = page->links();
-
-            qDeleteAll(links);
+            std::vector<std::unique_ptr<Poppler::Link>> links = page->links();
         }
 
         if (QRandomGenerator::global()->bounded(2) == 0) {
@@ -120,9 +117,7 @@ void CrazyThread::run()
 
             PagePointer page(loadRandomPage(m_document));
 
-            QList<Poppler::FormField *> formFields = page->formFields();
-
-            qDeleteAll(formFields);
+            std::vector<std::unique_ptr<Poppler::FormField>> formFields = page->formFields();
         }
 
         if (QRandomGenerator::global()->bounded(2) == 0) {
@@ -177,21 +172,21 @@ void CrazyThread::run()
             for (int index = 0; index < m_document->numPages(); ++index) {
                 PagePointer page(loadPage(m_document, index));
 
-                QList<Poppler::Annotation *> annotations = page->annotations();
+                std::vector<std::unique_ptr<Poppler::Annotation>> annotations = page->annotations();
 
-                if (!annotations.isEmpty()) {
+                if (!annotations.empty()) {
                     qDebug() << "modify annotation...";
 
-                    annotations.at(QRandomGenerator::global()->bounded(annotations.size()))->setBoundary(QRectF(0.5, 0.5, 0.25, 0.25));
-                    annotations.at(QRandomGenerator::global()->bounded(annotations.size()))->setAuthor(QStringLiteral("foo"));
-                    annotations.at(QRandomGenerator::global()->bounded(annotations.size()))->setContents(QStringLiteral("bar"));
-                    annotations.at(QRandomGenerator::global()->bounded(annotations.size()))->setCreationDate(QDateTime::currentDateTime());
-                    annotations.at(QRandomGenerator::global()->bounded(annotations.size()))->setModificationDate(QDateTime::currentDateTime());
+                    // size is now a qsizetype which confuses bounded(), pretend we will never have that many annotations anyway
+                    const quint32 annotationsSize = annotations.size();
+                    annotations.at(QRandomGenerator::global()->bounded(annotationsSize))->setBoundary(QRectF(0.5, 0.5, 0.25, 0.25));
+                    annotations.at(QRandomGenerator::global()->bounded(annotationsSize))->setAuthor(QStringLiteral("foo"));
+                    annotations.at(QRandomGenerator::global()->bounded(annotationsSize))->setContents(QStringLiteral("bar"));
+                    annotations.at(QRandomGenerator::global()->bounded(annotationsSize))->setCreationDate(QDateTime::currentDateTime());
+                    annotations.at(QRandomGenerator::global()->bounded(annotationsSize))->setModificationDate(QDateTime::currentDateTime());
                 }
 
-                qDeleteAll(annotations);
-
-                if (!annotations.isEmpty()) {
+                if (!annotations.empty()) {
                     break;
                 }
             }
@@ -203,17 +198,18 @@ void CrazyThread::run()
             for (int index = 0; index < m_document->numPages(); ++index) {
                 PagePointer page(loadPage(m_document, index));
 
-                QList<Poppler::Annotation *> annotations = page->annotations();
+                std::vector<std::unique_ptr<Poppler::Annotation>> annotations = page->annotations();
 
-                if (!annotations.isEmpty()) {
+                if (!annotations.empty()) {
                     qDebug() << "remove annotation...";
 
-                    page->removeAnnotation(annotations.takeAt(QRandomGenerator::global()->bounded(annotations.size())));
+                    // size is now a qsizetype which confuses bounded(), pretend we will never have that many annotations anyway
+                    const quint32 annotationsSize = annotations.size();
+                    page->removeAnnotation(annotations[QRandomGenerator::global()->bounded(annotationsSize)].get());
+                    annotations.erase(annotations.begin() + QRandomGenerator::global()->bounded(annotationsSize));
                 }
 
-                qDeleteAll(annotations);
-
-                if (!annotations.isEmpty()) {
+                if (!annotations.empty()) {
                     break;
                 }
             }
@@ -241,7 +237,7 @@ int main(int argc, char **argv)
 
     for (int argi = 4; argi < argc; ++argi) {
         const QString file = QFile::decodeName(argv[argi]);
-        Poppler::Document *document = Poppler::Document::load(file);
+        std::unique_ptr<Poppler::Document> document = Poppler::Document::load(file);
 
         if (document == nullptr) {
             qDebug() << "Could not load" << file;
@@ -254,13 +250,13 @@ int main(int argc, char **argv)
         }
 
         for (int i = 0; i < sillyCount; ++i) {
-            (new SillyThread(document))->start();
+            (new SillyThread(document.get()))->start();
         }
 
         QMutex *annotationMutex = new QMutex();
 
         for (int i = 0; i < crazyCount; ++i) {
-            (new CrazyThread(QRandomGenerator::global()->generate(), document, annotationMutex))->start();
+            (new CrazyThread(document.get(), annotationMutex))->start();
         }
     }
 

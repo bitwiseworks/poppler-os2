@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -44,6 +44,7 @@
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018-2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Eddie Kohler <ekohler@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -189,7 +190,7 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu *_fonts) :
         yMax = y - descent * fontSize;
         GfxRGB rgb;
         state->getFillRGB(&rgb);
-        HtmlFont hfont = HtmlFont(font, static_cast<int>(fontSize), rgb);
+        HtmlFont hfont = HtmlFont(font, static_cast<int>(fontSize), rgb, state->getFillOpacity());
         if (isMatRotOrSkew(state->getTextMat())) {
             double normalizedMatrix[4];
             memcpy(normalizedMatrix, state->getTextMat(), sizeof(normalizedMatrix));
@@ -818,7 +819,7 @@ int HtmlPage::dumpComplexHeaders(FILE *const file, FILE *&pageFile, int page)
         }
 
         if (!pageFile) {
-            error(errIO, -1, "Couldn't open html file '{0:t}'", pageFileName.c_str());
+            error(errIO, -1, "Couldn't open html file '{0:s}'", pageFileName.c_str());
             return 1;
         }
 
@@ -1731,7 +1732,6 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const std::vector<OutlineI
             fputs("\n", output);
             newHtmlOutlineLevel(output, item->getKids(), level + 1);
         }
-        item->close();
         fputs("</li>\n", output);
     }
     fputs("</ul>\n", output);
@@ -1757,7 +1757,6 @@ void HtmlOutputDev::newXmlOutlineLevel(FILE *output, const std::vector<OutlineIt
         if (item->hasKids() && item->getKids()) {
             newXmlOutlineLevel(output, item->getKids());
         }
-        item->close();
     }
 
     fputs("</outline>\n", output);

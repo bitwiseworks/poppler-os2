@@ -17,6 +17,7 @@
 // Copyright (C) 2007-2010, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2021 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -30,6 +31,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include "poppler_private_export.h"
 
 #include "GooCheckedOps.h"
 
@@ -59,7 +61,7 @@ inline void *gmalloc_checkoverflow(size_t size)
 }
 
 /// Same as free
-inline POPPLER_LIB_EXPORT void gfree(void *p)
+inline POPPLER_PRIVATE_EXPORT void gfree(void *p)
 {
     std::free(p);
 }
@@ -169,7 +171,13 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false,
         std::abort();
     }
 
-    return grealloc(p, bytes, checkoverflow);
+    if (void *q = grealloc(p, bytes, checkoverflow)) {
+        return q;
+    }
+    if (free_p) {
+        gfree(p);
+    }
+    return nullptr;
 }
 
 inline void *greallocn_checkoverflow(void *p, int count, int size)

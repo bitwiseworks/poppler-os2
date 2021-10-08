@@ -12,6 +12,10 @@ extractor (version 3.03)
 prints the contents of the \'Info' dictionary (plus some other useful
 information) from a Portable Document Format (PDF) file.
 .PP
+If
+.I PDF-file
+is \'-', it reads the PDF file from stdin.
+.PP
 The \'Info' dictionary contains the following values:
 .PP
 .RS
@@ -42,7 +46,19 @@ modification date
 In addition, the following information is printed:
 .PP
 .RS
+custom metadata (yes/no)
+.RE
+.RS
+metadata stream (yes/no)
+.RE
+.RS
 tagged (yes/no)
+.RE
+.RS
+userproperties (yes/no)
+.RE
+.RS
+suspects (yes/no)
 .RE
 .RS
 form (AcroForm / XFA / none)
@@ -94,6 +110,9 @@ TrimBox, and ArtBox.
 .B \-meta
 Prints document-level metadata.  (This is the "Metadata" stream from
 the PDF file's Catalog object.)
+.TP
+.B \-custom
+Prints custom and standard metadata.
 .TP
 .B \-js
 Prints all JavaScript in the PDF.

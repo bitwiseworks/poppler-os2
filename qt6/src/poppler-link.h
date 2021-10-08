@@ -1,11 +1,11 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, 2016, 2018, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, 2018, 2019, 2021, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -90,8 +90,8 @@ public:
     };
 
     /// \cond PRIVATE
-    LinkDestination(const LinkDestinationData &data);
-    LinkDestination(const QString &description);
+    explicit LinkDestination(const LinkDestinationData &data);
+    explicit LinkDestination(const QString &description);
     /// \endcond
     /**
      * Copy constructor.
@@ -178,7 +178,7 @@ class POPPLER_QT6_EXPORT Link
 {
 public:
     /// \cond PRIVATE
-    Link(const QRectF &linkArea);
+    explicit Link(const QRectF &linkArea);
     /// \endcond
 
     /**
@@ -221,12 +221,14 @@ public:
 
     /**
      * Get the next links to be activated / executed after this link.
+     *
+     * \note The caller does not get ownership of the returned objects.
      */
     QVector<Link *> nextLinks() const;
 
 protected:
     /// \cond PRIVATE
-    Link(LinkPrivate &dd);
+    explicit Link(LinkPrivate &dd);
     Q_DECLARE_PRIVATE(Link)
     LinkPrivate *d_ptr;
     /// \endcond
@@ -607,7 +609,7 @@ public:
     /**
      * Create a new OCGState link. This is only used by Poppler::Page.
      */
-    LinkOCGState(LinkOCGStatePrivate *ocgp);
+    explicit LinkOCGState(LinkOCGStatePrivate *ocgp);
     /**
      * Destructor.
      */
@@ -629,7 +631,7 @@ public:
     /**
      * Create a new Hide link. This is only used by Poppler::Page.
      */
-    LinkHide(LinkHidePrivate *lhidep);
+    explicit LinkHide(LinkHidePrivate *lhidep);
     /**
      * Destructor.
      */

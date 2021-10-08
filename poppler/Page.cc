@@ -31,7 +31,7 @@
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -372,7 +372,7 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
         return;
 
     /* Look for standalone annots, identified by being: 1) of type Widget
-     * 2) of subtype Button 3) not referenced from the Catalog's Form Field array */
+     * 2) not referenced from the Catalog's Form Field array */
     for (int i = 0; i < numAnnots; ++i) {
         Annot *annot = annotations->getAnnot(i);
 
@@ -386,7 +386,9 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form)
         std::set<int> parents;
         FormField *field = Form::createFieldFromDict(annot->getAnnotObj().copy(), annot->getDoc(), r, nullptr, &parents);
 
-        if (field && field->getType() == formButton && field->getNumWidgets() == 1) {
+        if (field && field->getNumWidgets() == 1) {
+
+            static_cast<AnnotWidget *>(annot)->setField(field);
 
             field->setStandAlone(true);
             FormWidget *formWidget = field->getWidget(0);
@@ -505,9 +507,9 @@ Links *Page::getLinks()
     return new Links(getAnnots());
 }
 
-FormPageWidgets *Page::getFormWidgets()
+std::unique_ptr<FormPageWidgets> Page::getFormWidgets()
 {
-    FormPageWidgets *frmPageWidgets = new FormPageWidgets(getAnnots(), num, doc->getCatalog()->getForm());
+    auto frmPageWidgets = std::make_unique<FormPageWidgets>(getAnnots(), num, doc->getCatalog()->getForm());
     frmPageWidgets->addWidgets(standaloneFields, num);
 
     return frmPageWidgets;

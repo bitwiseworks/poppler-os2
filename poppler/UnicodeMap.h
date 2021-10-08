@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
@@ -29,6 +29,7 @@
 #define UNICODEMAP_H
 
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "CharTypes.h"
 
 #include <atomic>
@@ -56,7 +57,7 @@ struct UnicodeMapExt;
 
 //------------------------------------------------------------------------
 
-class POPPLER_LIB_EXPORT UnicodeMap
+class POPPLER_PRIVATE_EXPORT UnicodeMap
 {
 public:
     // Create the UnicodeMap specified by <encodingName>.  Sets the
@@ -95,7 +96,7 @@ public:
     int mapUnicode(Unicode u, char *buf, int bufSize) const;
 
 private:
-    UnicodeMap(const std::string &encodingNameA);
+    explicit UnicodeMap(const std::string &encodingNameA);
 
     std::string encodingName;
     UnicodeMapKind kind;

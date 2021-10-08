@@ -7,6 +7,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
 // Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 //========================================================================
 
@@ -17,6 +18,7 @@
 #include <memory>
 #include <ctime>
 #include "goo/GooString.h"
+#include "poppler_private_export.h"
 
 enum CertificateKeyUsageExtension
 {
@@ -39,7 +41,7 @@ enum PublicKeyType
     OTHERKEY
 };
 
-class POPPLER_LIB_EXPORT X509CertificateInfo
+class POPPLER_PRIVATE_EXPORT X509CertificateInfo
 {
 public:
     X509CertificateInfo();
@@ -91,6 +93,7 @@ public:
     /* GETTERS */
     int getVersion() const;
     const GooString &getSerialNumber() const;
+    const GooString &getNickName() const;
     const EntityInfo &getIssuerInfo() const;
     const Validity &getValidity() const;
     const EntityInfo &getSubjectInfo() const;
@@ -102,6 +105,7 @@ public:
     /* SETTERS */
     void setVersion(int);
     void setSerialNumber(const GooString &);
+    void setNickName(const GooString &);
     void setIssuerInfo(EntityInfo &&);
     void setValidity(Validity);
     void setSubjectInfo(EntityInfo &&);
@@ -117,6 +121,7 @@ private:
     Validity cert_validity;
     GooString cert_serial;
     GooString cert_der;
+    GooString cert_nick;
     unsigned int ku_extensions;
     int cert_version;
     bool is_self_signed;

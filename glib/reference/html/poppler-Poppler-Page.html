@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="Poppler">
 <link rel="prev" href="PopplerDocument.html" title="PopplerDocument">
 <link rel="next" href="PopplerAction.html" title="PopplerAction">
-<meta name="generator" content="GTK-Doc V1.32.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -243,7 +243,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<span class="returnvalue">cairo_surface_t</span> *
 </td>
 <td class="function_name">
 <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-image" title="poppler_page_get_image ()">poppler_page_get_image</a> <span class="c_punctuation">()</span>
@@ -283,7 +283,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../cairo/cairo-Regions.html#cairo-region-t"><span class="returnvalue">cairo_region_t</span></a> *
+<span class="returnvalue">cairo_region_t</span> *
 </td>
 <td class="function_name">
 <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-selected-region" title="poppler_page_get_selected_region ()">poppler_page_get_selected_region</a> <span class="c_punctuation">()</span>
@@ -363,7 +363,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<span class="returnvalue">cairo_surface_t</span> *
 </td>
 <td class="function_name">
 <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-thumbnail" title="poppler_page_get_thumbnail ()">poppler_page_get_thumbnail</a> <span class="c_punctuation">()</span>
@@ -523,6 +523,22 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-find-get-match-continued" title="poppler_rectangle_find_get_match_continued ()">poppler_rectangle_find_get_match_continued</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-find-get-ignored-hyphen" title="poppler_rectangle_find_get_ignored_hyphen ()">poppler_rectangle_find_get_ignored_hyphen</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <span class="returnvalue">void</span>
 </td>
 <td class="function_name">
@@ -574,7 +590,7 @@
 </colgroup>
 <tbody><tr>
 <td class="property_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<span class="type">char</span> *</td>
 <td class="property_name"><a class="link" href="poppler-Poppler-Page.html#PopplerPage--label" title="The “label” property">label</a></td>
 <td class="property_flags">Read</td>
 </tr></tbody>
@@ -1001,7 +1017,7 @@ The coordinates are in PDF points.</p>
 <div class="refsect3">
 <a name="poppler-page-find-text.returns"></a><h4>Returns</h4>
 <p>a <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>,. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1016,6 +1032,19 @@ poppler_page_find_text_with_options (<em class="parameter"><code><a class="link"
  with the given <a class="link" href="poppler-Poppler-Page.html#PopplerFindFlags" title="enum PopplerFindFlags"><span class="type">PopplerFindFlags</span></a> options and
 returns a <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of rectangles for each occurrence of the text on the page.
 The coordinates are in PDF points.</p>
+<p>When <a class="link" href="poppler-Poppler-Page.html#POPPLER-FIND-MULTILINE:CAPS"><code class="literal">POPPLER_FIND_MULTILINE</code></a> is passed in <em class="parameter"><code>options</code></em>
+, matches may span more than
+one line. In this case, the returned list will contain one <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>
+for each part of a match. The function <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-find-get-match-continued" title="poppler_rectangle_find_get_match_continued ()"><code class="function">poppler_rectangle_find_get_match_continued()</code></a>
+will return <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for all rectangles belonging to the same match, except for
+the last one. If a hyphen was ignored at the end of the part of the match,
+<a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-find-get-ignored-hyphen" title="poppler_rectangle_find_get_ignored_hyphen ()"><code class="function">poppler_rectangle_find_get_ignored_hyphen()</code></a> will return <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> for that
+rectangle.</p>
+<p>Note that currently matches spanning more than two lines are not found.
+(This limitation may be lifted in a future version.)</p>
+<p>Note also that currently finding multi-line matches backwards is not
+implemented; if you pass <a class="link" href="poppler-Poppler-Page.html#POPPLER-FIND-BACKWARDS:CAPS"><code class="literal">POPPLER_FIND_BACKWARDS</code></a> and <a class="link" href="poppler-Poppler-Page.html#POPPLER-FIND-MULTILINE:CAPS"><code class="literal">POPPLER_FIND_MULTILINE</code></a>
+together, <a class="link" href="poppler-Poppler-Page.html#POPPLER-FIND-MULTILINE:CAPS"><code class="literal">POPPLER_FIND_MULTILINE</code></a> will be ignored.</p>
 <div class="refsect3">
 <a name="poppler-page-find-text-with-options.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1045,8 +1074,9 @@ The coordinates are in PDF points.</p>
 </div>
 <div class="refsect3">
 <a name="poppler-page-find-text-with-options.returns"></a><h4>Returns</h4>
-<p>a <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>,. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p>a newly allocated list
+of newly allocated <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>. Free with <a href="../glib/glib-Doubly-Linked-Lists.html#g-list-free-full"><code class="function">g_list_free_full()</code></a> using <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-free" title="poppler_rectangle_free ()"><code class="function">poppler_rectangle_free()</code></a>. </p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-22.html#api-index-0.22">0.22</a></p>
 </div>
@@ -1202,7 +1232,7 @@ poppler_page_get_annot_mapping (<em class="parameter"><code><a class="link" href
 <div class="refsect3">
 <a name="poppler-page-get-annot-mapping.returns"></a><h4>Returns</h4>
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerAnnotMapping"><span class="type">PopplerAnnotMapping</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAnnotMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerAnnotMapping][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1298,13 +1328,13 @@ with <a class="link" href="poppler-Poppler-Page.html#poppler-page-free-form-fiel
 <div class="refsect3">
 <a name="poppler-page-get-form-field-mapping.returns"></a><h4>Returns</h4>
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerFormFieldMapping"><span class="type">PopplerFormFieldMapping</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerFormFieldMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerFormFieldMapping][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-image"></a><h3>poppler_page_get_image ()</h3>
-<pre class="programlisting"><a href="../cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<pre class="programlisting"><span class="returnvalue">cairo_surface_t</span> *
 poppler_page_get_image (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> image_id</code></em>);</pre>
 <p>Returns a cairo surface for the image of the <em class="parameter"><code>page</code></em>
@@ -1363,7 +1393,7 @@ with <a class="link" href="poppler-Poppler-Page.html#poppler-page-free-image-map
 <div class="refsect3">
 <a name="poppler-page-get-image-mapping.returns"></a><h4>Returns</h4>
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerImageMapping"><span class="type">PopplerImageMapping</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerImageMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerImageMapping][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1453,20 +1483,20 @@ with <a class="link" href="poppler-Poppler-Page.html#poppler-page-free-link-mapp
 <div class="refsect3">
 <a name="poppler-page-get-link-mapping.returns"></a><h4>Returns</h4>
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerLinkMapping"><span class="type">PopplerLinkMapping</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerLinkMapping][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerLinkMapping][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-selected-region"></a><h3>poppler_page_get_selected_region ()</h3>
-<pre class="programlisting"><a href="../cairo/cairo-Regions.html#cairo-region-t"><span class="returnvalue">cairo_region_t</span></a> *
+<pre class="programlisting"><span class="returnvalue">cairo_region_t</span> *
 poppler_page_get_selected_region (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> scale</code></em>,
                                   <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
                                   <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>);</pre>
 <p>Returns a region containing the area that would be rendered by
 <a class="link" href="poppler-Poppler-Page.html#poppler-page-render-selection" title="poppler_page_render_selection ()"><code class="function">poppler_page_render_selection()</code></a>.
-The returned region must be freed with <a href="../cairo/cairo-Regions.html#cairo-region-destroy"><code class="function">cairo_region_destroy()</code></a></p>
+The returned region must be freed with <code class="function">cairo_region_destroy()</code></p>
 <div class="refsect3">
 <a name="poppler-page-get-selected-region.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1502,7 +1532,7 @@ The returned region must be freed with <a href="../cairo/cairo-Regions.html#cair
 <div class="refsect3">
 <a name="poppler-page-get-selected-region.returns"></a><h4>Returns</h4>
 <p>a cairo_region_t. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-16.html#api-index-0.16">0.16</a></p>
 </div>
@@ -1600,7 +1630,7 @@ poppler_page_get_selection_region (<em class="parameter"><code><a class="link" h
 <div class="refsect3">
 <a name="poppler-page-get-selection-region.returns"></a><h4>Returns</h4>
 <p>a <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerRectangle][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1700,7 +1730,7 @@ to which text attributes apply.</p>
 <div class="refsect3">
 <a name="poppler-page-get-text-attributes.returns"></a><h4>Returns</h4>
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-18.html#api-index-0.18">0.18</a></p>
 </div>
@@ -1742,7 +1772,7 @@ to which text attributes apply.</p>
 <div class="refsect3">
 <a name="poppler-page-get-text-attributes-for-area.returns"></a><h4>Returns</h4>
 <p>A <a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> of <a class="link" href="poppler-Poppler-Page.html#PopplerTextAttributes"><span class="type">PopplerTextAttributes</span></a>. </p>
-<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> PopplerTextAttributes][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 <p class="since">Since: <a class="link" href="api-index-0-26.html#api-index-0.26">0.26</a></p>
 </div>
@@ -1812,7 +1842,7 @@ This array must be freed with <a href="../glib/glib-Memory-Allocation.html#g-fre
 <tr>
 <td class="parameter_name"><p>rectangles</p></td>
 <td class="parameter_description"><p>return location for an array of <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_rectangles][<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_rectangles][<acronym title="The caller owns the data container, but not the data inside it."><span class="acronym">transfer container</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>n_rectangles</p></td>
@@ -1863,7 +1893,7 @@ This array must be freed with <a href="../glib/glib-Memory-Allocation.html#g-fre
 <tr>
 <td class="parameter_name"><p>rectangles</p></td>
 <td class="parameter_description"><p>return location for an array of <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_rectangles][<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=n_rectangles][<acronym title="The caller owns the data container, but not the data inside it."><span class="acronym">transfer container</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>n_rectangles</p></td>
@@ -1882,7 +1912,7 @@ This array must be freed with <a href="../glib/glib-Memory-Allocation.html#g-fre
 <hr>
 <div class="refsect2">
 <a name="poppler-page-get-thumbnail"></a><h3>poppler_page_get_thumbnail ()</h3>
-<pre class="programlisting"><a href="../cairo/cairo-cairo-surface-t.html#cairo-surface-t"><span class="returnvalue">cairo_surface_t</span></a> *
+<pre class="programlisting"><span class="returnvalue">cairo_surface_t</span> *
 poppler_page_get_thumbnail (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>);</pre>
 <p>Get the embedded thumbnail for the specified page.  If the document
 doesn't have an embedded thumbnail for the page, this function
@@ -2020,7 +2050,7 @@ poppler_page_remove_annot (<em class="parameter"><code><a class="link" href="pop
 <a name="poppler-page-render"></a><h3>poppler_page_render ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_page_render (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                     <em class="parameter"><code><a href="../cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);</pre>
+                     <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>);</pre>
 <p>Render the page to the given cairo context. This function
 is for rendering a page that will be displayed. If you want
 to render a page that will be printed use
@@ -2055,7 +2085,7 @@ rendering to a printer.</p>
 <a name="poppler-page-render-for-printing"></a><h3>poppler_page_render_for_printing ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_page_render_for_printing (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                  <em class="parameter"><code><a href="../cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>);</pre>
+                                  <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>);</pre>
 <p>Render the page to the given cairo context for printing with
 <a class="link" href="poppler-Poppler-Page.html#POPPLER-PRINT-ALL:CAPS"><span class="type">POPPLER_PRINT_ALL</span></a> flags selected.  If you want a different set of flags,
 use <a class="link" href="poppler-Poppler-Page.html#poppler-page-render-for-printing-with-options" title="poppler_page_render_for_printing_with_options ()"><code class="function">poppler_page_render_for_printing_with_options()</code></a>.</p>
@@ -2112,7 +2142,7 @@ things get rendered differently between screens and printers:</p>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_page_render_for_printing_with_options
                                (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                                <em class="parameter"><code><a href="../cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
+                                <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>,
                                 <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPrintFlags" title="enum PopplerPrintFlags"><span class="type">PopplerPrintFlags</span></a> options</code></em>);</pre>
 <p>Render the page to the given cairo context for printing
 with the specified options</p>
@@ -2152,7 +2182,7 @@ differences between rendering to the screen and rendering to a printer.</p>
 <a name="poppler-page-render-selection"></a><h3>poppler_page_render_selection ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_page_render_selection (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerPage"><span class="type">PopplerPage</span></a> *page</code></em>,
-                               <em class="parameter"><code><a href="../cairo/cairo-cairo-t.html#cairo-t"><span class="type">cairo_t</span></a> *cairo</code></em>,
+                               <em class="parameter"><code><span class="type">cairo_t</span> *cairo</code></em>,
                                <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *selection</code></em>,
                                <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *old_selection</code></em>,
                                <em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerSelectionStyle" title="enum PopplerSelectionStyle"><span class="type">PopplerSelectionStyle</span></a> style</code></em>,
@@ -2254,7 +2284,13 @@ poppler_page_render_to_ps (<em class="parameter"><code><a class="link" href="pop
 <a name="poppler-page-selection-region-free"></a><h3>poppler_page_selection_region_free ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_page_selection_region_free (<em class="parameter"><code><a href="../glib/glib-Doubly-Linked-Lists.html#GList"><span class="type">GList</span></a> *region</code></em>);</pre>
-<div class="warning"><p><code class="literal">poppler_page_selection_region_free</code> has been deprecated since version 0.16 and should not be used in newly-written code.</p></div>
+<div class="warning">
+<p><code class="literal">poppler_page_selection_region_free</code> has been deprecated since version 0.16 and should not be used in newly-written code.</p>
+<p>Use only to free deprecated regions created by
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-get-selection-region" title="poppler_page_get_selection_region ()"><code class="function">poppler_page_get_selection_region()</code></a>. Regions created by
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-get-selected-region" title="poppler_page_get_selected_region ()"><code class="function">poppler_page_get_selected_region()</code></a> should be freed with
+<code class="function">cairo_region_destroy()</code> instead.</p>
+</div>
 <p>Frees <em class="parameter"><code>region</code></em>
 </p>
 <div class="refsect3">
@@ -2472,7 +2508,10 @@ poppler_quadrilateral_new (<em class="parameter"><code><span class="type">void</
 <pre class="programlisting"><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="returnvalue">PopplerRectangle</span></a> *
 poppler_rectangle_copy (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rectangle</code></em>);</pre>
 <p>Creates a copy of <em class="parameter"><code>rectangle</code></em>
-</p>
+.</p>
+<p>Note that you must only use this function on an allocated PopplerRectangle, as
+returned by <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-new" title="poppler_rectangle_new ()"><code class="function">poppler_rectangle_new()</code></a>, <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-copy" title="poppler_rectangle_copy ()"><code class="function">poppler_rectangle_copy()</code></a>, or the list elements
+returned from <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text" title="poppler_page_find_text ()"><code class="function">poppler_page_find_text()</code></a> or <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text-with-options" title="poppler_page_find_text_with_options ()"><code class="function">poppler_page_find_text_with_options()</code></a>.</p>
 <div class="refsect3">
 <a name="poppler-rectangle-copy.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2496,10 +2535,86 @@ poppler_rectangle_copy (<em class="parameter"><code><a class="link" href="popple
 </div>
 <hr>
 <div class="refsect2">
+<a name="poppler-rectangle-find-get-match-continued"></a><h3>poppler_rectangle_find_get_match_continued ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+poppler_rectangle_find_get_match_continued
+                               (<em class="parameter"><code>const <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rectangle</code></em>);</pre>
+<p>When using <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text-with-options" title="poppler_page_find_text_with_options ()"><code class="function">poppler_page_find_text_with_options()</code></a> with the
+<a class="link" href="poppler-Poppler-Page.html#POPPLER-FIND-MULTILINE:CAPS"><code class="literal">POPPLER_FIND_MULTILINE</code></a> flag, a match may span more than one line
+and thus consist of more than one rectangle. Every rectangle belonging
+to the same match will return <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> from this function, except for
+the last rectangle, where this function will return <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
+<p>Note that you must only call this function on a <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>
+returned in the list from <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text" title="poppler_page_find_text ()"><code class="function">poppler_page_find_text()</code></a> or
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text-with-options" title="poppler_page_find_text_with_options ()"><code class="function">poppler_page_find_text_with_options()</code></a>.</p>
+<div class="refsect3">
+<a name="poppler-rectangle-find-get-match-continued.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>rectangle</p></td>
+<td class="parameter_description"><p>a <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="poppler-rectangle-find-get-match-continued.returns"></a><h4>Returns</h4>
+<p> whether there are more rectangles belonging to the same match</p>
+</div>
+<p class="since">Since: 21.05.0</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="poppler-rectangle-find-get-ignored-hyphen"></a><h3>poppler_rectangle_find_get_ignored_hyphen ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+poppler_rectangle_find_get_ignored_hyphen
+                               (<em class="parameter"><code>const <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rectangle</code></em>);</pre>
+<p>When using <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text-with-options" title="poppler_page_find_text_with_options ()"><code class="function">poppler_page_find_text_with_options()</code></a> with the
+<a class="link" href="poppler-Poppler-Page.html#POPPLER-FIND-MULTILINE:CAPS"><code class="literal">POPPLER_FIND_MULTILINE</code></a> flag, a match may span more than one line,
+and may have been formed by ignoring a hyphen at the end of the line.
+When this happens at the end of the line corresponding to <em class="parameter"><code>rectangle</code></em>
+,
+this function returns <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> (and then <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-find-get-match-continued" title="poppler_rectangle_find_get_match_continued ()"><code class="function">poppler_rectangle_find_get_match_continued()</code></a>
+will also return <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>); otherwise it returns <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>.</p>
+<p>Note that you must only call this function on a <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>
+returned in the list from <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text" title="poppler_page_find_text ()"><code class="function">poppler_page_find_text()</code></a> or
+<a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text-with-options" title="poppler_page_find_text_with_options ()"><code class="function">poppler_page_find_text_with_options()</code></a>.</p>
+<div class="refsect3">
+<a name="poppler-rectangle-find-get-ignored-hyphen.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>rectangle</p></td>
+<td class="parameter_description"><p>a <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a></p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="poppler-rectangle-find-get-ignored-hyphen.returns"></a><h4>Returns</h4>
+<p> whether a hyphen was ignored at the end of the line corresponding to <em class="parameter"><code>rectangle</code></em>
+.</p>
+</div>
+<p class="since">Since: 21.05.0</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="poppler-rectangle-free"></a><h3>poppler_rectangle_free ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 poppler_rectangle_free (<em class="parameter"><code><a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a> *rectangle</code></em>);</pre>
-<p>Frees the given <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a></p>
+<p>Frees the given <a class="link" href="poppler-Poppler-Page.html#PopplerRectangle"><span class="type">PopplerRectangle</span></a>.</p>
+<p>Note that you must only use this function on an allocated PopplerRectangle, as
+returned by <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-new" title="poppler_rectangle_new ()"><code class="function">poppler_rectangle_new()</code></a>, <a class="link" href="poppler-Poppler-Page.html#poppler-rectangle-copy" title="poppler_rectangle_copy ()"><code class="function">poppler_rectangle_copy()</code></a>, or the list elements
+returned from <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text" title="poppler_page_find_text ()"><code class="function">poppler_page_find_text()</code></a> or <a class="link" href="poppler-Poppler-Page.html#poppler-page-find-text-with-options" title="poppler_page_find_text_with_options ()"><code class="function">poppler_page_find_text_with_options()</code></a>.</p>
 <div class="refsect3">
 <a name="poppler-rectangle-free.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -2674,6 +2789,16 @@ of <em class="parameter"><code>annot</code></em>
 <p>do diacritics insensitive search,
 i.e. ignore accents, umlauts, diaeresis,etc. while matching. This
 option will be ignored if the search term is not pure ascii. Since 0.73.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="POPPLER-FIND-MULTILINE:CAPS"></a>POPPLER_FIND_MULTILINE</p></td>
+<td class="enum_member_description">
+<p>allows to match on text spanning from
+end of a line to the next line. (Currently it won't match on text spanning
+more than two lines.) Automatically ignores hyphen at end of line, and
+allows whitespace in search term to match on newline char. Since: 21.05.0.</p>
 </td>
 <td class="enum_member_annotations"> </td>
 </tr>
@@ -3305,7 +3430,7 @@ locations on a page and bounding boxes</p>
 <a name="poppler-Poppler-Page.property-details"></a><h2>Property Details</h2>
 <div class="refsect2">
 <a name="PopplerPage--label"></a><h3>The <code class="literal">“label”</code> property</h3>
-<pre class="programlisting">  “label”                    <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “label”                    <span class="type">char</span> *</pre>
 <p>The label of the page or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. See also <a class="link" href="poppler-Poppler-Page.html#poppler-page-get-label" title="poppler_page_get_label ()"><code class="function">poppler_page_get_label()</code></a></p>
 <p>Owner: PopplerPage</p>
 <p>Flags: Read</p>
@@ -3314,6 +3439,6 @@ locations on a page and bounding boxes</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32.1</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>

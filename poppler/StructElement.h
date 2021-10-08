@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
@@ -18,6 +18,7 @@
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
 #include "Object.h"
+#include "poppler_private_export.h"
 #include <vector>
 #include <set>
 
@@ -26,7 +27,7 @@ class Dict;
 class StructElement;
 class StructTreeRoot;
 
-class POPPLER_LIB_EXPORT Attribute
+class POPPLER_PRIVATE_EXPORT Attribute
 {
 public:
     enum Type
@@ -161,7 +162,7 @@ private:
     friend class StructElement;
 };
 
-class POPPLER_LIB_EXPORT StructElement
+class POPPLER_PRIVATE_EXPORT StructElement
 {
 public:
     enum Type
@@ -370,8 +371,8 @@ private:
             Ref ref;
         };
 
-        ContentData(int mcidA) : mcid(mcidA) { }
-        ContentData(const Ref r) { ref = r; }
+        explicit ContentData(int mcidA) : mcid(mcidA) { }
+        explicit ContentData(const Ref r) { ref = r; }
     };
 
     // Common data

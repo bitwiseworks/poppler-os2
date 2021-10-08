@@ -16,7 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2012, 2014-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -1132,6 +1132,8 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     bool needVhea, needVmtx;
     int advance;
 
+    *maxUsedGlyph = -1;
+
     // construct the 'head' table, zero out the font checksum
     i = seekTable("head");
     if (i < 0 || i >= nTables) {
@@ -1182,12 +1184,17 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
     locaTable[nGlyphs].len = 0;
     std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
     pos = 0;
-    *maxUsedGlyph = -1;
     for (i = 0; i <= nGlyphs; ++i) {
         locaTable[i].newOffset = pos;
-        pos += locaTable[i].len;
-        if (pos & 3) {
-            pos += 4 - (pos & 3);
+
+        int newPos;
+        if (unlikely(checkedAdd(pos, locaTable[i].len, &newPos))) {
+            ok = false;
+        } else {
+            pos = newPos;
+            if (pos & 3) {
+                pos += 4 - (pos & 3);
+            }
         }
         if (locaTable[i].len > 0) {
             *maxUsedGlyph = i;
@@ -1294,12 +1301,21 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc, void *outputStream, const
             newTables[k].checksum = checksum;
             newTables[k].offset = pos;
             newTables[k].len = length;
-            pos += length;
-            if (pos & 3) {
-                pos += 4 - (length & 3);
+            int newPos;
+            if (unlikely(checkedAdd(pos, length, &newPos))) {
+                ok = false;
+            } else {
+                pos = newPos;
+                if (pos & 3) {
+                    pos += 4 - (length & 3);
+                }
             }
             ++k;
         }
+    }
+    if (unlikely(k < nNewTables)) {
+        error(errSyntaxWarning, -1, "unexpected number of tables");
+        nNewTables = k;
     }
 
     // construct the table directory
@@ -1529,6 +1545,7 @@ void FoFiTrueType::parse()
         tables = (TrueTypeTable *)greallocn_checkoverflow(tables, nTables, sizeof(TrueTypeTable));
     }
     if (!parsedOk || tables == nullptr) {
+        parsedOk = false;
         return;
     }
 

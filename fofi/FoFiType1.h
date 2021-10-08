@@ -25,12 +25,13 @@
 
 #include "poppler-config.h"
 #include "FoFiBase.h"
+#include "poppler_private_export.h"
 
 //------------------------------------------------------------------------
 // FoFiType1
 //------------------------------------------------------------------------
 
-class POPPLER_LIB_EXPORT FoFiType1 : public FoFiBase
+class POPPLER_PRIVATE_EXPORT FoFiType1 : public FoFiBase
 {
 public:
     // Create a FoFiType1 object from a memory buffer.

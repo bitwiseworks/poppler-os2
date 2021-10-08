@@ -13,7 +13,7 @@ class TestUTFConversion : public QObject
 {
     Q_OBJECT
 public:
-    TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
+    explicit TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testUTF_data();
     void testUTF();
@@ -96,6 +96,11 @@ void TestUTFConversion::testUTF()
     utf16String = utf8ToUtf16(str);
     QVERIFY(compare(utf16String, s.utf16()));
     free(utf16String);
+
+    GooString gsUtf8(str);
+    std::unique_ptr<GooString> gsUtf16_a(utf8ToUtf16WithBom(gsUtf8));
+    std::unique_ptr<GooString> gsUtf16_b(Poppler::QStringToUnicodeGooString(s));
+    QCOMPARE(gsUtf16_a->cmp(gsUtf16_b.get()), 0);
 
     // UTF-16 to UTF-8
 
