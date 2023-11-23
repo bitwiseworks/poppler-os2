@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015, 2018-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -37,6 +37,7 @@
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Diogo Kollross <diogoko@gmail.com>
 // Copyright (C) 2021 Peter Williams <peter@newton.cx>
+// Copyright (C) 2022 James Cloos <cloos@jhcloos.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -124,6 +125,7 @@ static int jpegQuality = -1;
 static bool jpegProgressive = false;
 static bool jpegOptimize = false;
 static bool overprint = false;
+static bool splashOverprintPreview = false;
 static char enableFreeTypeStr[16] = "";
 static bool enableFreeType = true;
 static char antialiasStr[16] = "";
@@ -225,7 +227,7 @@ static bool parseJpegOptions()
         const char *comma = strchr(nextOpt, ',');
         GooString opt;
         if (comma) {
-            opt.Set(nextOpt, comma - nextOpt);
+            opt.Set(nextOpt, static_cast<int>(comma - nextOpt));
             nextOpt = comma + 1;
         } else {
             opt.Set(nextOpt);
@@ -237,7 +239,7 @@ static bool parseJpegOptions()
             fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
             return false;
         }
-        int iequal = equal - opt.c_str();
+        const int iequal = static_cast<int>(equal - opt.c_str());
         GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
         opt.del(iequal, opt.getLength() - iequal);
         // here opt is "<optN>" and value is "<valN>"
@@ -280,10 +282,12 @@ static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data) { return !
 
 static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x, int y, int w, int h, double pg_w, double pg_h, char *ppmFile)
 {
-    if (w == 0)
+    if (w == 0) {
         w = (int)ceil(pg_w);
-    if (h == 0)
+    }
+    if (h == 0) {
         h = (int)ceil(pg_h);
+    }
     w = (x + w > pg_w ? (int)ceil(pg_w - x) : w);
     h = (y + h > pg_h ? (int)ceil(pg_h - y) : h);
     doc->displayPageSlice(splashOut, pg, x_resolution, y_resolution, 0, !useCropBox, false, false, x, y, w, h, nullptr, nullptr, annotDisplayDecideCbk, nullptr);
@@ -294,7 +298,7 @@ static void savePageSlice(PDFDoc *doc, SplashOutputDev *splashOut, int pg, int x
     params.jpegQuality = jpegQuality;
     params.jpegProgressive = jpegProgressive;
     params.jpegOptimize = jpegOptimize;
-    params.tiffCompression.Set(TiffCompressionStr);
+    params.tiffCompression = TiffCompressionStr;
 
     if (ppmFile != nullptr) {
         SplashError e;
@@ -368,7 +372,11 @@ static void processPageJobs()
         pthread_mutex_unlock(&pageJobMutex);
 
         // process the job
-        SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
+        SplashOutputDev *splashOut = new SplashOutputDev(mono                              ? splashModeMono1
+                                                                 : gray                    ? splashModeMono8
+                                                                 : (jpegcmyk || overprint) ? splashModeDeviceN8
+                                                                                           : splashModeRGB8,
+                                                         4, false, *pageJob.paperColor, true, thinLineMode, splashOverprintPreview);
         splashOut->setFontAntialias(fontAntialias);
         splashOut->setVectorAntialias(vectorAntialias);
         splashOut->setEnableFreeType(enableFreeType);
@@ -394,7 +402,7 @@ int main(int argc, char *argv[])
     GooString *fileName = nullptr;
     char *ppmRoot = nullptr;
     char *ppmFile;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     SplashColor paperColor;
 #ifndef UTILS_USE_PTHREADS
     SplashOutputDev *splashOut;
@@ -432,10 +440,12 @@ int main(int argc, char *argv[])
             return kOtherError;
         }
     }
-    if (argc > 1)
+    if (argc > 1) {
         fileName = new GooString(argv[1]);
-    if (argc == 3)
+    }
+    if (argc == 3) {
         ppmRoot = argv[2];
+    }
 
     if (antialiasStr[0]) {
         if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
@@ -449,8 +459,9 @@ int main(int argc, char *argv[])
     }
 
     if (jpegOpt.getLength() > 0) {
-        if (!jpeg)
+        if (!jpeg) {
             fprintf(stderr, "Warning: -jpegopt only valid with jpeg output.\n");
+        }
         parseJpegOptions();
     }
 
@@ -476,14 +487,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0]) {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0]) {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     if (fileName == nullptr) {
@@ -495,24 +502,20 @@ int main(int argc, char *argv[])
     }
     std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW));
     delete fileName;
-
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         return 1;
     }
 
     // get page range
-    if (firstPage < 1)
+    if (firstPage < 1) {
         firstPage = 1;
-    if (singleFile && lastPage < 1)
+    }
+    if (singleFile && lastPage < 1) {
         lastPage = firstPage;
-    if (lastPage < 1 || lastPage > doc->getNumPages())
+    }
+    if (lastPage < 1 || lastPage > doc->getNumPages()) {
         lastPage = doc->getNumPages();
+    }
     if (lastPage < firstPage) {
         fprintf(stderr, "Wrong page range given: the first page (%d) can not be after the last page (%d).\n", firstPage, lastPage);
         return kOtherError;
@@ -535,7 +538,7 @@ int main(int argc, char *argv[])
 
     // write PPM files
     if (jpegcmyk || overprint) {
-        globalParams->setOverprintPreview(true);
+        splashOverprintPreview = true;
         splashClearColor(paperColor);
     } else {
         paperColor[0] = 255;
@@ -595,7 +598,7 @@ int main(int argc, char *argv[])
 
 #ifndef UTILS_USE_PTHREADS
 
-    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode);
+    splashOut = new SplashOutputDev(mono ? splashModeMono1 : gray ? splashModeMono8 : (jpegcmyk || overprint) ? splashModeDeviceN8 : splashModeRGB8, 4, false, paperColor, true, thinLineMode, splashOverprintPreview);
 
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
@@ -610,14 +613,17 @@ int main(int argc, char *argv[])
 
 #endif // UTILS_USE_PTHREADS
 
-    if (sz != 0)
+    if (sz != 0) {
         param_w = param_h = sz;
+    }
     pg_num_len = numberOfCharacters(doc->getNumPages());
     for (pg = firstPage; pg <= lastPage; ++pg) {
-        if (printOnlyEven && pg % 2 == 1)
+        if (printOnlyEven && pg % 2 == 1) {
             continue;
-        if (printOnlyOdd && pg % 2 == 0)
+        }
+        if (printOnlyOdd && pg % 2 == 0) {
             continue;
+        }
         if (useCropBox) {
             pg_w = doc->getPageCropWidth(pg);
             pg_h = doc->getPageCropHeight(pg);
@@ -626,8 +632,9 @@ int main(int argc, char *argv[])
             pg_h = doc->getPageMediaHeight(pg);
         }
 
-        if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+        if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg))) {
             std::swap(pg_w, pg_h);
+        }
 
         // Handle requests for specific image size
         if (scaleTo != 0) {
@@ -645,28 +652,31 @@ int main(int argc, char *argv[])
             if (x_scaleTo > 0) {
                 x_resolution = (72.0 * x_scaleTo) / pg_w;
                 pg_w = x_scaleTo;
-                if (y_scaleTo == -1)
+                if (y_scaleTo == -1) {
                     y_resolution = x_resolution;
+                }
             }
 
             if (y_scaleTo > 0) {
                 y_resolution = (72.0 * y_scaleTo) / pg_h;
                 pg_h = y_scaleTo;
-                if (x_scaleTo == -1)
+                if (x_scaleTo == -1) {
                     x_resolution = y_resolution;
+                }
             }
 
             // No specific image size requested---compute the size from the resolution
             if (x_scaleTo <= 0) {
-                pg_w = pg_w * (x_resolution / 72.0);
+                pg_w = pg_w * x_resolution / 72.0;
             }
             if (y_scaleTo <= 0) {
-                pg_h = pg_h * (y_resolution / 72.0);
+                pg_h = pg_h * y_resolution / 72.0;
             }
         }
 
-        if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+        if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg))) {
             std::swap(pg_w, pg_h);
+        }
 
         if (ppmRoot != nullptr) {
             const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";

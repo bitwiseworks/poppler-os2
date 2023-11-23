@@ -14,13 +14,16 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2012, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,8 +58,9 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4_out)
         }
         len++;
     }
-    if (ucs4_out == nullptr)
+    if (ucs4_out == nullptr) {
         return len;
+    }
 
     u = (Unicode *)gmallocn(len, sizeof(Unicode));
     n = 0;
@@ -88,24 +92,24 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4_out)
     return len;
 }
 
-int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
+int TextStringToUCS4(const std::string &textStr, Unicode **ucs4)
 {
     int i, len;
     const char *s;
     Unicode *u;
     bool isUnicode, isUnicodeLE;
 
-    len = textStr->getLength();
-    s = textStr->c_str();
+    len = textStr.size();
+    s = textStr.c_str();
     if (len == 0) {
         *ucs4 = nullptr;
         return 0;
     }
 
-    if (textStr->hasUnicodeMarker()) {
+    if (GooString::hasUnicodeMarker(textStr)) {
         isUnicode = true;
         isUnicodeLE = false;
-    } else if (textStr->hasUnicodeMarkerLE()) {
+    } else if (GooString::hasUnicodeMarkerLE(textStr)) {
         isUnicode = false;
         isUnicodeLE = true;
     } else {
@@ -119,10 +123,11 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
         if (len > 0) {
             utf16 = new Unicode[len];
             for (i = 0; i < len; i++) {
-                if (isUnicode)
+                if (isUnicode) {
                     utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
-                else // UnicodeLE
+                } else { // UnicodeLE
                     utf16[i] = (s[3 + i * 2] & 0xff) << 8 | (s[2 + i * 2] & 0xff);
+                }
             }
             len = UTF16toUCS4(utf16, len, &u);
             delete[] utf16;
@@ -236,8 +241,9 @@ int utf8CountUCS4(const char *utf8)
         }
         utf8++;
     }
-    if (state != UTF8_ACCEPT && state != UTF8_REJECT)
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
         count++; // replace with REPLACEMENT_CHAR
+    }
 
     return count;
 }
@@ -260,8 +266,9 @@ int utf8ToUCS4(const char *utf8, Unicode **ucs4_out)
         }
         utf8++;
     }
-    if (state != UTF8_ACCEPT && state != UTF8_REJECT)
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
         u[n] = REPLACEMENT_CHAR; // invalid byte for this position
+    }
 
     *ucs4_out = u;
     return len;
@@ -280,20 +287,22 @@ int utf8CountUtf16CodeUnits(const char *utf8)
     while (*utf8) {
         decodeUtf8(&state, &codepoint, *utf8);
         if (state == UTF8_ACCEPT) {
-            if (codepoint < 0x10000)
+            if (codepoint < 0x10000) {
                 count++;
-            else if (codepoint <= UCS4_MAX)
+            } else if (codepoint <= UCS4_MAX) {
                 count += 2;
-            else
+            } else {
                 count++; // replace with REPLACEMENT_CHAR
+            }
         } else if (state == UTF8_REJECT) {
             count++; // replace with REPLACEMENT_CHAR
             state = 0;
         }
         utf8++;
     }
-    if (state != UTF8_ACCEPT && state != UTF8_REJECT)
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
         count++; // replace with REPLACEMENT_CHAR
+    }
 
     return count;
 }
@@ -340,8 +349,9 @@ int utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8)
         *p++ = REPLACEMENT_CHAR;
         nOut++;
     }
-    if (nOut > maxUtf16 - 1)
+    if (nOut > maxUtf16 - 1) {
         nOut = maxUtf16 - 1;
+    }
     utf16[nOut] = 0;
     return nOut;
 }
@@ -349,19 +359,22 @@ int utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8)
 // Allocate utf16 string and convert utf8 into it.
 uint16_t *utf8ToUtf16(const char *utf8, int *len)
 {
+    if (isUtf8WithBom(utf8)) {
+        utf8 += 3;
+    }
     int n = utf8CountUtf16CodeUnits(utf8);
-    if (len)
+    if (len) {
         *len = n;
+    }
     uint16_t *utf16 = (uint16_t *)gmallocn(n + 1, sizeof(uint16_t));
-    utf8ToUtf16(utf8, utf16);
+    utf8ToUtf16(utf8, utf16, n + 1, INT_MAX);
     return utf16;
 }
 
-GooString *utf8ToUtf16WithBom(const GooString &utf8)
+std::string utf8ToUtf16WithBom(const std::string &utf8)
 {
-    GooString *result = new GooString();
-    if (utf8.toStr().empty()) {
-        return result;
+    if (utf8.empty()) {
+        return {};
     }
     int tmp_length; // Number of UTF-16 symbols.
     char *tmp_str = (char *)utf8ToUtf16(utf8.c_str(), &tmp_length);
@@ -371,8 +384,8 @@ GooString *utf8ToUtf16WithBom(const GooString &utf8)
     }
 #endif
 
-    result->prependUnicodeMarker();
-    result->append(tmp_str, tmp_length * 2);
+    std::string result(unicodeByteOrderMark);
+    result.append(tmp_str, tmp_length * 2);
     gfree(tmp_str);
     return result;
 }
@@ -419,24 +432,26 @@ int utf16CountUtf8Bytes(const uint16_t *utf16)
     while (*utf16) {
         decodeUtf16(&state, &codepoint, *utf16);
         if (state == UTF16_ACCEPT) {
-            if (codepoint < 0x80)
+            if (codepoint < 0x80) {
                 count++;
-            else if (codepoint < 0x800)
+            } else if (codepoint < 0x800) {
                 count += 2;
-            else if (codepoint < 0x10000)
+            } else if (codepoint < 0x10000) {
                 count += 3;
-            else if (codepoint <= UCS4_MAX)
+            } else if (codepoint <= UCS4_MAX) {
                 count += 4;
-            else
+            } else {
                 count += 3; // replace with REPLACEMENT_CHAR
+            }
         } else if (state == UTF16_REJECT) {
             count += 3; // replace with REPLACEMENT_CHAR
             state = 0;
         }
         utf16++;
     }
-    if (state != UTF8_ACCEPT && state != UTF8_REJECT)
+    if (state != UTF8_ACCEPT && state != UTF8_REJECT) {
         count++; // replace with REPLACEMENT_CHAR
+    }
 
     return count;
 }
@@ -480,8 +495,9 @@ int utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16)
         nOut += count;
         nOut++;
     }
-    if (nOut > maxUtf8 - 1)
+    if (nOut > maxUtf8 - 1) {
         nOut = maxUtf8 - 1;
+    }
     utf8[nOut] = 0;
     return nOut;
 }
@@ -490,8 +506,9 @@ int utf16ToUtf8(const uint16_t *utf16, char *utf8, int maxUtf8, int maxUtf16)
 char *utf16ToUtf8(const uint16_t *utf16, int *len)
 {
     int n = utf16CountUtf8Bytes(utf16);
-    if (len)
+    if (len) {
         *len = n;
+    }
     char *utf8 = (char *)gmalloc(n + 1);
     utf16ToUtf8(utf16, utf8);
     return utf8;
@@ -509,13 +526,14 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
     }
 
     if (indices) {
-        if (!in_idx)
+        if (!in_idx) {
             indices = nullptr;
-        else
+        } else {
             idx = (int *)gmallocn(len * 8 + 1, sizeof(int));
+        }
     }
 
-    GooString gstr;
+    std::string str;
 
     char buf[8]; // 8 is enough for mapping an unicode char to a string
     int i, n, k;
@@ -528,17 +546,50 @@ void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_le
             buf[0] = 31;
             n = 1;
         }
-        gstr.append(buf, n);
+        str.append(buf, n);
         if (indices) {
-            for (; n > 0; n--)
+            for (; n > 0; n--) {
                 idx[k++] = in_idx[i];
+            }
         }
     }
 
-    *out_len = TextStringToUCS4(&gstr, ucs4_out);
+    *out_len = TextStringToUCS4(str, ucs4_out);
 
     if (indices) {
         idx[k] = in_idx[len];
         *indices = idx;
     }
+}
+
+// Convert a PDF Text String to UTF-8
+//   textStr    - PDF text string
+//   returns UTF-8 string.
+std::string TextStringToUtf8(const std::string &textStr)
+{
+    int i, len;
+    const char *s;
+    char *utf8;
+
+    len = textStr.size();
+    s = textStr.c_str();
+    if (GooString::hasUnicodeMarker(textStr)) {
+        uint16_t *utf16;
+        len = len / 2 - 1;
+        utf16 = new uint16_t[len];
+        for (i = 0; i < len; i++) {
+            utf16[i] = (s[2 + i * 2] & 0xff) << 8 | (s[3 + i * 2] & 0xff);
+        }
+        utf8 = utf16ToUtf8(utf16, &len);
+        delete[] utf16;
+    } else {
+        utf8 = (char *)gmalloc(len + 1);
+        for (i = 0; i < len; i++) {
+            utf8[i] = pdfDocEncoding[s[i] & 0xff];
+        }
+        utf8[i] = 0;
+    }
+    std::string utf8_string(utf8);
+    gfree(utf8);
+    return utf8_string;
 }

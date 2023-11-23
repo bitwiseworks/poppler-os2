@@ -1,5 +1,6 @@
 /* poppler.h: glib interface to poppler
  * Copyright (C) 2004, Red Hat, Inc.
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +47,8 @@ typedef enum
     POPPLER_ERROR_ENCRYPTED,
     POPPLER_ERROR_OPEN_FILE,
     POPPLER_ERROR_BAD_CATALOG,
-    POPPLER_ERROR_DAMAGED
+    POPPLER_ERROR_DAMAGED,
+    POPPLER_ERROR_SIGNING
 } PopplerError;
 
 /**
@@ -217,6 +219,10 @@ typedef struct _PopplerStructureElement PopplerStructureElement;
 typedef struct _PopplerStructureElementIter PopplerStructureElementIter;
 typedef struct _PopplerTextSpan PopplerTextSpan;
 typedef struct _PopplerPageRange PopplerPageRange;
+typedef struct _PopplerSignatureInfo PopplerSignatureInfo;
+typedef struct _PopplerAnnotStamp PopplerAnnotStamp;
+typedef struct _PopplerCertificateInfo PopplerCertificateInfo;
+typedef struct _PopplerSigningData PopplerSigningData;
 
 /**
  * PopplerBackend:

@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010-2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2013, 2017-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -26,6 +26,8 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -94,6 +96,13 @@ struct XRefEntry
             flags &= ~mask;
         }
     }
+};
+
+// How to compress the a added stream
+enum class StreamCompression
+{
+    None, /* No compression */
+    Compress, /* Compresses the stream */
 };
 
 class POPPLER_PRIVATE_EXPORT XRef
@@ -204,10 +213,16 @@ public:
 
     // Write access
     void setModifiedObject(const Object *o, Ref r);
-    Ref addIndirectObject(const Object *o);
+    Ref addIndirectObject(const Object &o);
     void removeIndirectObject(Ref r);
-    void add(int num, int gen, Goffset offs, bool used);
+    bool add(int num, int gen, Goffset offs, bool used);
     void add(Ref ref, Goffset offs, bool used);
+    // Adds a stream object using AutoFreeMemStream.
+    // The function takes ownership over dict and buffer.
+    // The buffer should be created using gmalloc().
+    // Returns ref to a new object.
+    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize, StreamCompression compression = StreamCompression::None);
+    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize, StreamCompression compression = StreamCompression::None);
 
     // Output XRef table to stream
     void writeTableToFile(OutStream *outStr, bool writeAllEntries);

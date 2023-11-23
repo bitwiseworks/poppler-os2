@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2007 Carlos Garcia Campos  <carlosgc@gnome.org>
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
+ * Copyright (C) 2021 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,8 +50,9 @@ typedef struct
 
 static void pgd_forms_free(PgdFormsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->doc) {
         g_object_unref(demo->doc);
@@ -106,8 +109,9 @@ static void pgd_form_field_view_add_choice_items(GtkGrid *table, PopplerFormFiel
         gtk_text_buffer_insert_at_cursor(buffer, "\n", strlen("\n"));
         g_free(item);
 
-        if (poppler_form_field_choice_is_item_selected(field, i))
+        if (poppler_form_field_choice_is_item_selected(field, i)) {
             *selected = i;
+        }
     }
 
     gtk_container_add(GTK_CONTAINER(swindow), textview);
@@ -126,14 +130,16 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
     GEnumValue *enum_value;
     gchar *text;
     gint row = 0;
+    PopplerSignatureInfo *psig_info;
 
     table = gtk_bin_get_child(GTK_BIN(field_view));
     if (table) {
         gtk_container_remove(GTK_CONTAINER(field_view), table);
     }
 
-    if (!field)
+    if (!field) {
         return;
+    }
 
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
@@ -266,7 +272,21 @@ static void pgd_form_field_view_set_field(GtkWidget *field_view, PopplerFormFiel
         pgd_table_add_property(GTK_GRID(table), "<b>Contents:</b>", text, &row);
         g_free(text);
     } break;
-    case POPPLER_FORM_FIELD_SIGNATURE:
+    case POPPLER_FORM_FIELD_SIGNATURE: {
+        const gchar *signer_name;
+
+        psig_info = poppler_form_field_signature_validate_sync(
+                field, POPPLER_SIGNATURE_VALIDATION_FLAG_VALIDATE_CERTIFICATE | POPPLER_SIGNATURE_VALIDATION_FLAG_WITHOUT_OCSP_REVOCATION_CHECK | POPPLER_SIGNATURE_VALIDATION_FLAG_USE_AIA_CERTIFICATE_FETCH, NULL, NULL);
+        signer_name = poppler_signature_info_get_signer_name(psig_info);
+        pgd_table_add_property(GTK_GRID(table), "<b>Signer Name:</b>", signer_name ? signer_name : "Signers name found", &row);
+        text = g_date_time_format(poppler_signature_info_get_local_signing_time(psig_info), "%b %d %Y %H:%M:%S");
+        pgd_table_add_property(GTK_GRID(table), "<b>Signing Time:</b>", text, &row);
+        pgd_table_add_property(GTK_GRID(table), "<b>Signature Val Status:</b>", poppler_signature_info_get_signature_status(psig_info) == POPPLER_SIGNATURE_VALID ? "Signature is Valid" : "Signature is Invalid", &row);
+        pgd_table_add_property(GTK_GRID(table), "<b>Certificate Val Status:</b>", poppler_signature_info_get_certificate_status(psig_info) == POPPLER_CERTIFICATE_TRUSTED ? "Certificate is Trusted" : "Certificate cannot be Trusted", &row);
+
+        poppler_signature_info_free(psig_info);
+        g_free(text);
+    } break;
     case POPPLER_FORM_FIELD_UNKNOWN:
         break;
     default:
@@ -307,8 +327,9 @@ static void pgd_forms_get_form_fields(GtkWidget *button, PgdFormsDemo *demo)
     pgd_form_field_view_set_field(demo->field_view, NULL);
 
     page = poppler_document_get_page(demo->doc, demo->page);
-    if (!page)
+    if (!page) {
         return;
+    }
 
     timer = g_timer_new();
     mapping = poppler_page_get_form_field_mapping(page);

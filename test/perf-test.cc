@@ -1,6 +1,6 @@
 /* Copyright Krzysztof Kowalczyk 2006-2007
    Copyright Hib Eris <hib@hiberis.nl> 2008, 2013
-   Copyright 2018, 2020 Albert Astals Cid <aacid@kde.org> 2018
+   Copyright 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org> 2018
    Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    Copyright 2020 Adam Reichold <adam.reichold@t-online.de>
    License: GPLv2 */
@@ -35,7 +35,7 @@
 // before it's tested. This is desired if a file is on a slow drive.
 // Currently copying only works on Windows.
 // Not enabled by default.
-//#define COPY_FILE 1
+// #define COPY_FILE 1
 
 #include <cassert>
 #include <cstdio>
@@ -205,8 +205,9 @@ static void memzero(void *data, size_t len)
 static void *zmalloc(size_t len)
 {
     void *data = malloc(len);
-    if (data)
+    if (data) {
         memzero(data, len);
+    }
     return data;
 }
 
@@ -221,18 +222,23 @@ static char *str_cat4(const char *str1, const char *str2, const char *str3, cons
     size_t str3_len = 0;
     size_t str4_len = 0;
 
-    if (str1)
+    if (str1) {
         str1_len = strlen(str1);
-    if (str2)
+    }
+    if (str2) {
         str2_len = strlen(str2);
-    if (str3)
+    }
+    if (str3) {
         str3_len = strlen(str3);
-    if (str4)
+    }
+    if (str4) {
         str4_len = strlen(str4);
+    }
 
     str = (char *)zmalloc(str1_len + str2_len + str3_len + str4_len + 1);
-    if (!str)
+    if (!str) {
         return nullptr;
+    }
 
     tmp = str;
     if (str1) {
@@ -260,23 +266,29 @@ static char *str_dup(const char *str)
 
 static bool str_eq(const char *str1, const char *str2)
 {
-    if (!str1 && !str2)
+    if (!str1 && !str2) {
         return true;
-    if (!str1 || !str2)
+    }
+    if (!str1 || !str2) {
         return false;
-    if (0 == strcmp(str1, str2))
+    }
+    if (0 == strcmp(str1, str2)) {
         return true;
+    }
     return false;
 }
 
 static bool str_ieq(const char *str1, const char *str2)
 {
-    if (!str1 && !str2)
+    if (!str1 && !str2) {
         return true;
-    if (!str1 || !str2)
+    }
+    if (!str1 || !str2) {
         return false;
-    if (0 == strcasecmp(str1, str2))
+    }
+    if (0 == strcasecmp(str1, str2)) {
         return true;
+    }
     return false;
 }
 
@@ -285,15 +297,18 @@ static bool str_endswith(const char *txt, const char *end)
     size_t end_len;
     size_t txt_len;
 
-    if (!txt || !end)
+    if (!txt || !end) {
         return false;
+    }
 
     txt_len = strlen(txt);
     end_len = strlen(end);
-    if (end_len > txt_len)
+    if (end_len > txt_len) {
         return false;
-    if (str_eq(txt + txt_len - end_len, end))
+    }
+    if (str_eq(txt + txt_len - end_len, end)) {
         return true;
+    }
     return false;
 }
 
@@ -312,15 +327,16 @@ static void sleep_milliseconds(int milliseconds)
     tv.tv_nsec = (long)nanosecs;
     while (true) {
         int rval = nanosleep(&tv, &tv);
-        if (rval == 0)
+        if (rval == 0) {
             /* Completed the entire sleep time; all done. */
             return;
-        else if (errno == EINTR)
+        } else if (errno == EINTR) {
             /* Interrupted by a signal. Try again. */
             continue;
-        else
+        } else {
             /* Some other error; bail out. */
             return;
+        }
     }
     return;
 #endif
@@ -382,12 +398,8 @@ PdfEnginePoppler::~PdfEnginePoppler()
 bool PdfEnginePoppler::load(const char *fileName)
 {
     setFileName(fileName);
-    /* note: don't delete fileNameStr since PDFDoc takes ownership and deletes them itself */
-    GooString *fileNameStr = new GooString(fileName);
-    if (!fileNameStr)
-        return false;
 
-    _pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, nullptr);
+    _pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName));
     if (!_pdfDoc->isOk()) {
         return false;
     }
@@ -400,8 +412,9 @@ SplashOutputDev *PdfEnginePoppler::outputDevice()
     if (!_outputDev) {
         bool bitmapTopDown = true;
         _outputDev = new SplashOutputDev(gSplashColorMode, 4, false, gBgColor, bitmapTopDown);
-        if (_outputDev)
+        if (_outputDev) {
             _outputDev->startDoc(_pdfDoc);
+        }
     }
     return _outputDev;
 }
@@ -409,8 +422,9 @@ SplashOutputDev *PdfEnginePoppler::outputDevice()
 SplashBitmap *PdfEnginePoppler::renderBitmap(int pageNo, double zoomReal, int rotation)
 {
     assert(outputDevice());
-    if (!outputDevice())
+    if (!outputDevice()) {
         return nullptr;
+    }
 
     double hDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
     double vDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
@@ -428,8 +442,9 @@ static int StrList_Len(StrList **root)
     int len = 0;
     StrList *cur;
     assert(root);
-    if (!root)
+    if (!root) {
         return 0;
+    }
     cur = *root;
     while (cur) {
         ++len;
@@ -442,12 +457,14 @@ static int StrList_InsertAndOwn(StrList **root, char *txt)
 {
     StrList *el;
     assert(root && txt);
-    if (!root || !txt)
+    if (!root || !txt) {
         return false;
+    }
 
     el = (StrList *)malloc(sizeof(StrList));
-    if (!el)
+    if (!el) {
         return false;
+    }
     el->str = txt;
     el->next = *root;
     *root = el;
@@ -459,11 +476,13 @@ static int StrList_Insert(StrList **root, char *txt)
     char *txtDup;
 
     assert(root && txt);
-    if (!root || !txt)
+    if (!root || !txt) {
         return false;
+    }
     txtDup = str_dup(txt);
-    if (!txtDup)
+    if (!txtDup) {
         return false;
+    }
 
     if (!StrList_InsertAndOwn(root, txtDup)) {
         free((void *)txtDup);
@@ -474,8 +493,9 @@ static int StrList_Insert(StrList **root, char *txt)
 
 static void StrList_FreeElement(StrList *el)
 {
-    if (!el)
+    if (!el) {
         return;
+    }
     free((void *)el->str);
     free((void *)el);
 }
@@ -485,8 +505,9 @@ static void StrList_Destroy(StrList **root)
     StrList *cur;
     StrList *next;
 
-    if (!root)
+    if (!root) {
         return;
+    }
     cur = *root;
     while (cur) {
         next = cur->next;
@@ -578,22 +599,23 @@ static void PrintUsageAndExit(int argc, char **argv)
 
 static bool ShowPreview()
 {
-    if (gfPreview || gfSlowPreview)
+    if (gfPreview || gfSlowPreview) {
         return true;
+    }
     return false;
 }
 
 static void RenderPdfAsText(const char *fileName)
 {
-    GooString *fileNameStr = nullptr;
     PDFDoc *pdfDoc = nullptr;
     GooString *txt = nullptr;
     int pageCount;
     double timeInMs;
 
     assert(fileName);
-    if (!fileName)
+    if (!fileName) {
         return;
+    }
 
     LogInfo("started: %s\n", fileName);
 
@@ -604,12 +626,7 @@ static void RenderPdfAsText(const char *fileName)
     }
 
     GooTimer msTimer;
-    /* note: don't delete fileNameStr since PDFDoc takes ownership and deletes them itself */
-    fileNameStr = new GooString(fileName);
-    if (!fileNameStr)
-        goto Exit;
-
-    pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, nullptr);
+    pdfDoc = new PDFDoc(std::make_unique<GooString>(fileName));
     if (!pdfDoc->isOk()) {
         error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}\n", fileName);
         goto Exit;
@@ -623,8 +640,9 @@ static void RenderPdfAsText(const char *fileName)
     LogInfo("page count: %d\n", pageCount);
 
     for (int curPage = 1; curPage <= pageCount; curPage++) {
-        if ((gPageNo != PAGE_NO_NOT_GIVEN) && (gPageNo != curPage))
+        if ((gPageNo != PAGE_NO_NOT_GIVEN) && (gPageNo != curPage)) {
             continue;
+        }
 
         msTimer.start();
         int rotate = 0;
@@ -635,8 +653,9 @@ static void RenderPdfAsText(const char *fileName)
         txt = textOut->getText(0.0, 0.0, 10000.0, 10000.0);
         msTimer.stop();
         timeInMs = msTimer.getElapsed();
-        if (gfTimings)
+        if (gfTimings) {
             LogInfo("page %d: %.2f ms\n", curPage, timeInMs);
+        }
         printf("%s\n", txt->c_str());
         delete txt;
         txt = nullptr;
@@ -683,12 +702,14 @@ static void RenderPdf(const char *fileName)
     pageCount = engineSplash->pageCount();
 
     LogInfo("page count: %d\n", pageCount);
-    if (gfLoadOnly)
+    if (gfLoadOnly) {
         goto Error;
+    }
 
     for (int curPage = 1; curPage <= pageCount; curPage++) {
-        if ((gPageNo != PAGE_NO_NOT_GIVEN) && (gPageNo != curPage))
+        if ((gPageNo != PAGE_NO_NOT_GIVEN) && (gPageNo != curPage)) {
             continue;
+        }
 
         SplashBitmap *bmpSplash = nullptr;
 
@@ -697,16 +718,18 @@ static void RenderPdf(const char *fileName)
         msRenderTimer.stop();
         timeInMs = msRenderTimer.getElapsed();
         if (gfTimings) {
-            if (!bmpSplash)
+            if (!bmpSplash) {
                 LogInfo("page splash %d: failed to render\n", curPage);
-            else
+            } else {
                 LogInfo("page splash %d (%dx%d): %.2f ms\n", curPage, bmpSplash->getWidth(), bmpSplash->getHeight(), timeInMs);
+            }
         }
 
         if (ShowPreview()) {
             PreviewBitmapSplash(bmpSplash);
-            if (gfSlowPreview)
+            if (gfSlowPreview) {
                 sleep_milliseconds(SLOW_PREVIEW_TIME);
+            }
         }
         delete bmpSplash;
     }
@@ -733,24 +756,28 @@ static bool ParseInteger(const char *start, const char *end, int *intOut)
 
     assert(start && end && intOut);
     assert(end >= start);
-    if (!start || !end || !intOut || (start > end))
+    if (!start || !end || !intOut || (start > end)) {
         return false;
+    }
 
     digitsCount = 0;
     tmp = start;
     while (tmp <= end) {
         if (isspace(*tmp)) {
             /* do nothing, we allow whitespace */
-        } else if (!isdigit(*tmp))
+        } else if (!isdigit(*tmp)) {
             return false;
+        }
         numBuf[digitsCount] = *tmp;
         ++digitsCount;
-        if (digitsCount == dimof(numBuf) - 3) /* -3 to be safe */
+        if (digitsCount == dimof(numBuf) - 3) { /* -3 to be safe */
             return false;
+        }
         ++tmp;
     }
-    if (0 == digitsCount)
+    if (0 == digitsCount) {
         return false;
+    }
     numBuf[digitsCount] = 0;
     *intOut = atoi(numBuf);
     return true;
@@ -766,21 +793,27 @@ static bool ParseResolutionString(const char *resolutionString, int *resolutionX
     assert(resolutionString);
     assert(resolutionXOut);
     assert(resolutionYOut);
-    if (!resolutionString || !resolutionXOut || !resolutionYOut)
+    if (!resolutionString || !resolutionXOut || !resolutionYOut) {
         return false;
+    }
     *resolutionXOut = 0;
     *resolutionYOut = 0;
     posOfX = strchr(resolutionString, 'X');
-    if (!posOfX)
+    if (!posOfX) {
         posOfX = strchr(resolutionString, 'x');
-    if (!posOfX)
+    }
+    if (!posOfX) {
         return false;
-    if (posOfX == resolutionString)
+    }
+    if (posOfX == resolutionString) {
         return false;
-    if (!ParseInteger(resolutionString, posOfX - 1, resolutionXOut))
+    }
+    if (!ParseInteger(resolutionString, posOfX - 1, resolutionXOut)) {
         return false;
-    if (!ParseInteger(posOfX + 1, resolutionString + strlen(resolutionString) - 1, resolutionYOut))
+    }
+    if (!ParseInteger(posOfX + 1, resolutionString + strlen(resolutionString) - 1, resolutionYOut)) {
         return false;
+    }
     return true;
 }
 
@@ -788,8 +821,9 @@ static void ParseCommandLine(int argc, char **argv)
 {
     char *arg;
 
-    if (argc < 2)
+    if (argc < 2) {
         PrintUsageAndExit(argc, argv);
+    }
 
     for (int i = 1; i < argc; i++) {
         arg = argv[i];
@@ -799,18 +833,21 @@ static void ParseCommandLine(int argc, char **argv)
                 gfTimings = true;
             } else if (str_ieq(arg, RESOLUTION_ARG)) {
                 ++i;
-                if (i == argc)
+                if (i == argc) {
                     PrintUsageAndExit(argc, argv); /* expect a file name after that */
-                if (!ParseResolutionString(argv[i], &gResolutionX, &gResolutionY))
+                }
+                if (!ParseResolutionString(argv[i], &gResolutionX, &gResolutionY)) {
                     PrintUsageAndExit(argc, argv);
+                }
                 gfForceResolution = true;
             } else if (str_ieq(arg, RECURSIVE_ARG)) {
                 gfRecursive = true;
             } else if (str_ieq(arg, OUT_ARG)) {
                 /* expect a file name after that */
                 ++i;
-                if (i == argc)
+                if (i == argc) {
                     PrintUsageAndExit(argc, argv);
+                }
                 gOutFileName = str_dup(argv[i]);
             } else if (str_ieq(arg, PREVIEW_ARG)) {
                 gfPreview = true;
@@ -823,11 +860,13 @@ static void ParseCommandLine(int argc, char **argv)
             } else if (str_ieq(arg, PAGE_ARG)) {
                 /* expect an integer after that */
                 ++i;
-                if (i == argc)
+                if (i == argc) {
                     PrintUsageAndExit(argc, argv);
+                }
                 gPageNo = atoi(argv[i]);
-                if (gPageNo < 1)
+                if (gPageNo < 1) {
                     PrintUsageAndExit(argc, argv);
+                }
             } else {
                 /* unknown option */
                 PrintUsageAndExit(argc, argv);
@@ -842,8 +881,9 @@ static void ParseCommandLine(int argc, char **argv)
 
 static bool IsPdfFileName(char *path)
 {
-    if (str_endswith(path, ".pdf"))
+    if (str_endswith(path, ".pdf")) {
         return true;
+    }
     return false;
 }
 
@@ -853,8 +893,9 @@ static bool IsPdfFileName(char *path)
 static void RenderCmdLineArg(char *cmdLineArg)
 {
     assert(cmdLineArg);
-    if (!cmdLineArg)
+    if (!cmdLineArg) {
         return;
+    }
     if (IsPdfFileName(cmdLineArg)) {
         RenderFile(cmdLineArg);
     } else {
@@ -866,14 +907,16 @@ int main(int argc, char **argv)
 {
     setErrorCallback(my_error);
     ParseCommandLine(argc, argv);
-    if (0 == StrList_Len(&gArgsListRoot))
+    if (0 == StrList_Len(&gArgsListRoot)) {
         PrintUsageAndExit(argc, argv);
+    }
     assert(gArgsListRoot);
 
     SplashColorsInit();
     globalParams = std::make_unique<GlobalParams>();
-    if (!globalParams)
+    if (!globalParams) {
         return 1;
+    }
     globalParams->setErrQuiet(false);
 
     FILE *outFile = nullptr;
@@ -884,13 +927,15 @@ int main(int argc, char **argv)
             return 1;
         }
         gOutFile = outFile;
-    } else
+    } else {
         gOutFile = stdout;
+    }
 
-    if (gOutFileName)
+    if (gOutFileName) {
         gErrFile = outFile;
-    else
+    } else {
         gErrFile = stderr;
+    }
 
     PreviewBitmapInit();
 
@@ -899,8 +944,9 @@ int main(int argc, char **argv)
         RenderCmdLineArg(curr->str);
         curr = curr->next;
     }
-    if (outFile)
+    if (outFile) {
         fclose(outFile);
+    }
     PreviewBitmapDestroy();
     StrList_Destroy(&gArgsListRoot);
     free(gOutFileName);

@@ -11,6 +11,7 @@
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+ * Copyright (C) 2023 Shivodit Gill <shivodit.gill@gmail.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -41,6 +42,15 @@
 #include <Outline.h>
 #include <PDFDocEncoding.h>
 #include <UnicodeMap.h>
+
+#ifdef ANDROID
+#    include <QtCore/QString>
+#    include <QtCore/QDir>
+#    include <QtCore/QFile>
+#    include <QtCore/QFileInfo>
+#    include <QtCore/QStandardPaths>
+#    include <QtCore/QDirIterator>
+#endif
 
 namespace Poppler {
 
@@ -101,8 +111,9 @@ QString UnicodeParsedString(const GooString *s1)
 
 QString UnicodeParsedString(const std::string &s1)
 {
-    if (s1.empty())
+    if (s1.empty()) {
         return QString();
+    }
 
     if (GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1)) {
         return QString::fromUtf16(reinterpret_cast<const char16_t *>(s1.c_str()), s1.size() / 2);
@@ -137,8 +148,9 @@ GooString *QStringToGooString(const QString &s)
 {
     int len = s.length();
     char *cstring = (char *)gmallocn(s.length(), sizeof(char));
-    for (int i = 0; i < len; ++i)
+    for (int i = 0; i < len; ++i) {
         cstring[i] = s.at(i).unicode();
+    }
     GooString *ret = new GooString(cstring, len);
     gfree(cstring);
     return ret;
@@ -196,6 +208,29 @@ void DocumentData::init()
     m_optContentModel = nullptr;
     xrefReconstructed = false;
     xrefReconstructedCallback = {};
+
+#ifdef ANDROID
+    // Copy fonts from android apk to the app's storage dir, and
+    // set the font directory path
+    QString assetsFontDir = QStringLiteral("assets:/share/fonts");
+    QString fontsdir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QStringLiteral("/fonts");
+    QDir fontPath = QDir(fontsdir);
+
+    if (fontPath.mkpath(fontPath.absolutePath())) {
+        GlobalParams::setFontDir(fontPath.absolutePath().toStdString());
+        QDirIterator iterator(assetsFontDir, QDir::NoFilter, QDirIterator::Subdirectories);
+
+        while (iterator.hasNext()) {
+            iterator.next();
+            QFileInfo fontFileInfo = iterator.fileInfo();
+            QString fontFilePath = assetsFontDir + QStringLiteral("/") + fontFileInfo.fileName();
+            QString destPath = fontPath.absolutePath() + QStringLiteral("/") + fontFileInfo.fileName();
+            QFile::copy(fontFilePath, destPath);
+        }
+    } else {
+        GlobalParams::setFontDir("");
+    }
+#endif
 }
 
 void DocumentData::noitfyXRefReconstructed()

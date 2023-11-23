@@ -1,7 +1,7 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, 2017-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, 2017-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
@@ -28,6 +28,8 @@
  * Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>.
  * Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
  * Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+ * Copyright (C) 2022 Martin <martinbts@gmx.net>
+ * Copyright (C) 2023 Kevin Ottens <kevin.ottens@enioka.com>. Work sponsored by De Bortoli Wines
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +95,7 @@ struct OutlineItemData;
 
     \since 0.16
 */
-typedef void (*PopplerDebugFunc)(const QString & /*message*/, const QVariant & /*closure*/);
+using PopplerDebugFunc = void (*)(const QString & /*message*/, const QVariant & /*closure*/);
 
 /**
     Set a new debug/error output function.
@@ -536,7 +538,7 @@ public:
 
         \since 0.62
     */
-    typedef void (*RenderToImagePartialUpdateFunc)(const QImage & /*image*/, const QVariant & /*closure*/);
+    using RenderToImagePartialUpdateFunc = void (*)(const QImage & /*image*/, const QVariant & /*closure*/);
 
     /**
         Partial Update query renderToImage callback.
@@ -546,7 +548,7 @@ public:
 
         \since 0.62
     */
-    typedef bool (*ShouldRenderToImagePartialQueryFunc)(const QVariant & /*closure*/);
+    using ShouldRenderToImagePartialQueryFunc = bool (*)(const QVariant & /*closure*/);
 
     /**
        Render the page to a QImage using the current
@@ -607,7 +609,7 @@ public:
 
         \since 0.63
     */
-    typedef bool (*ShouldAbortQueryFunc)(const QVariant & /*closure*/);
+    using ShouldAbortQueryFunc = bool (*)(const QVariant & /*closure*/);
 
     /**
 Render the page to a QImage using the current
@@ -2037,7 +2039,8 @@ public:
         StrictMargins = 0x00000002,
         ForceRasterization = 0x00000004,
         PrintToEPS = 0x00000008, ///< Output EPS instead of PS \since 0.20
-        HideAnnotations = 0x00000010 ///< Don't print annotations \since 0.20
+        HideAnnotations = 0x00000010, ///< Don't print annotations \since 0.20
+        ForceOverprintPreview = 0x00000020 ///< Force rasterized overprint preview during conversion \since 23.09
     };
     Q_DECLARE_FLAGS(PSOptions, PSOption)
 
@@ -2107,6 +2110,16 @@ public:
       Defaults to false.
     */
     void setStrictMargins(bool strictMargins);
+
+    /**
+      Defines if the page will be rasterized to an image with overprint
+      preview enabled before printing.
+
+      Defaults to false
+
+      \since 23.09
+    */
+    void setForceOverprintPreview(bool forceOverprintPreview);
 
     /** Defines if the page will be rasterized to an image before printing. Defaults to false */
     void setForceRasterize(bool forceRasterize);
@@ -2290,6 +2303,37 @@ public:
          */
         QString fieldPartialName() const;
         void setFieldPartialName(const QString &name);
+
+        /**
+         * Document owner password (needed if the document that is being signed is password protected)
+         *
+         * Default: no password
+         *
+         * \since 22.02
+         */
+        QByteArray documentOwnerPassword() const;
+        void setDocumentOwnerPassword(const QByteArray &password);
+
+        /**
+         * Document user password (needed if the document that is being signed is password protected)
+         *
+         * Default: no password
+         *
+         * \since 22.02
+         */
+        QByteArray documentUserPassword() const;
+        void setDocumentUserPassword(const QByteArray &password);
+
+        /**
+         * Filesystem path to an image file to be used as background
+         * image for the signature annotation widget.
+         *
+         * Default: empty
+         *
+         * \since 22.02
+         */
+        QString imagePath() const;
+        void setImagePath(const QString &path);
 
     private:
         struct NewSignatureDataPrivate;

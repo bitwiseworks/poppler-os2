@@ -2186,13 +2186,13 @@ obtain and free the text spans of an element:</p>
 5
 6
 7</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="n">guint</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">n_spans</span><span class="p">;</span><span class="w"></span>
-<span class="n">PopplerTextSpan</span><span class="w"> </span><span class="o">**</span><span class="n">text_spans</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
-<span class="w">   </span><span class="n">poppler_structure_element_get_text_spans</span><span class="w"> </span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n_spans</span><span class="p">);</span><span class="w"></span>
-<span class="cm">/* Use the text spans */</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_spans</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span>
-<span class="w">   </span><span class="n">poppler_text_span_free</span><span class="w"> </span><span class="p">(</span><span class="n">text_spans</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w"></span>
-<span class="n">g_free</span><span class="w"> </span><span class="p">(</span><span class="n">text_spans</span><span class="p">);</span><span class="w"></span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">guint</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">n_spans</span><span class="p">;</span>
+<span class="n">PopplerTextSpan</span><span class="w"> </span><span class="o">**</span><span class="n">text_spans</span><span class="w"> </span><span class="o">=</span>
+<span class="w">   </span><span class="n">poppler_structure_element_get_text_spans</span><span class="w"> </span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">n_spans</span><span class="p">);</span>
+<span class="cm">/* Use the text spans */</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n_spans</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">   </span><span class="n">poppler_text_span_free</span><span class="w"> </span><span class="p">(</span><span class="n">text_spans</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="n">g_free</span><span class="w"> </span><span class="p">(</span><span class="n">text_spans</span><span class="p">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -2546,7 +2546,7 @@ poppler_structure_element_iter_new (<em class="parameter"><code><a class="link" 
 <p>Returns the root <a class="link" href="PopplerStructureElement.html#PopplerStructureElementIter"><span class="type">PopplerStructureElementIter</span></a> for <em class="parameter"><code>document</code></em>
 , or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. The
 returned value must be freed with <a class="link" href="PopplerStructureElement.html#poppler-structure-element-iter-free" title="poppler_structure_element_iter_free ()"><code class="function">poppler_structure_element_iter_free()</code></a>.</p>
-<p>Documents may have an associated structure tree &amp;mdashmostly, Tagged-PDF
+<p>Documents may have an associated structure tree —mostly, Tagged-PDF
 compliant documents— which can be used to obtain information about
 the document structure and its contents. Each node in the tree contains
 a <a class="link" href="PopplerStructureElement.html" title="PopplerStructureElement"><span class="type">PopplerStructureElement</span></a>.</p>
@@ -2572,23 +2572,23 @@ a <a class="link" href="PopplerStructureElement.html" title="PopplerStructureEle
 15
 16
 17</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="nf">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">PopplerStructureElementIter</span><span class="w"> </span><span class="o">*</span><span class="n">iter</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="cm">/* Get the element and do something with it */</span><span class="w"></span>
-<span class="w">    </span><span class="n">PopplerStructureElementIter</span><span class="w"> </span><span class="o">*</span><span class="n">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_structure_element_iter_get_child</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="w"></span>
-<span class="w">      </span><span class="n">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">poppler_structure_element_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">poppler_structure_element_iter_next</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">));</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-<span class="p">...</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_structure_element_iter_new</span><span class="w"> </span><span class="p">(</span><span class="n">document</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="n">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
-<span class="w">  </span><span class="n">poppler_structure_element_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="k">static</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">PopplerStructureElementIter</span><span class="w"> </span><span class="o">*</span><span class="n">iter</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="k">do</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="cm">/* Get the element and do something with it */</span>
+<span class="w">    </span><span class="n">PopplerStructureElementIter</span><span class="w"> </span><span class="o">*</span><span class="n">child</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_structure_element_iter_get_child</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+<span class="w">      </span><span class="n">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span>
+<span class="w">    </span><span class="n">poppler_structure_element_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">child</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">poppler_structure_element_iter_next</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="p">...</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poppler_structure_element_iter_new</span><span class="w"> </span><span class="p">(</span><span class="n">document</span><span class="p">);</span>
+<span class="w">  </span><span class="n">walk_structure</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span>
+<span class="w">  </span><span class="n">poppler_structure_element_iter_free</span><span class="w"> </span><span class="p">(</span><span class="n">iter</span><span class="p">);</span>
+<span class="p">}</span></pre></td>
       </tr>
     </tbody>
   </table>

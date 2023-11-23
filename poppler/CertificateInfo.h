@@ -8,6 +8,7 @@
 // Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
 //
 //========================================================================
 
@@ -40,6 +41,22 @@ enum PublicKeyType
     OTHERKEY
 };
 
+/** A signing key can be located in different places
+ sometimes. For the user, it might be easier to pick
+ the key located on a card if it has some visual
+ indicator that it is somehow removable.
+
+ \note a keylocation for a certificate without a private
+ key (cannot be used for signing) will likely be "Unknown"
+ */
+enum class KeyLocation
+{
+    Unknown, /** We don't know the location */
+    Other, /** We know the location, but it is somehow not covered by this enum */
+    Computer, /** The key is on this computer */
+    HardwareToken /** The key is on a dedicated hardware token, either a smartcard or a dedicated usb token (e.g. gnuk, nitrokey or yubikey) */
+};
+
 class POPPLER_PRIVATE_EXPORT X509CertificateInfo
 {
 public:
@@ -51,26 +68,26 @@ public:
 
     struct PublicKeyInfo
     {
-        PublicKeyInfo();
+        PublicKeyInfo() = default;
 
-        PublicKeyInfo(PublicKeyInfo &&) noexcept;
-        PublicKeyInfo &operator=(PublicKeyInfo &&) noexcept;
+        PublicKeyInfo(PublicKeyInfo &&) noexcept = default;
+        PublicKeyInfo &operator=(PublicKeyInfo &&) noexcept = default;
 
         PublicKeyInfo(const PublicKeyInfo &) = delete;
         PublicKeyInfo &operator=(const PublicKeyInfo &) = delete;
 
         GooString publicKey;
-        PublicKeyType publicKeyType;
-        unsigned int publicKeyStrength; // in bits
+        PublicKeyType publicKeyType = OTHERKEY;
+        unsigned int publicKeyStrength = 0; // in bits
     };
 
     struct EntityInfo
     {
-        EntityInfo();
-        ~EntityInfo();
+        EntityInfo() = default;
+        ~EntityInfo() = default;
 
-        EntityInfo(EntityInfo &&) noexcept;
-        EntityInfo &operator=(EntityInfo &&) noexcept;
+        EntityInfo(EntityInfo &&) noexcept = default;
+        EntityInfo &operator=(EntityInfo &&) noexcept = default;
 
         EntityInfo(const EntityInfo &) = delete;
         EntityInfo &operator=(const EntityInfo &) = delete;
@@ -100,6 +117,7 @@ public:
     unsigned int getKeyUsageExtensions() const;
     const GooString &getCertificateDER() const;
     bool getIsSelfSigned() const;
+    KeyLocation getKeyLocation() const;
 
     /* SETTERS */
     void setVersion(int);
@@ -112,6 +130,7 @@ public:
     void setKeyUsageExtensions(unsigned int);
     void setCertificateDER(const GooString &);
     void setIsSelfSigned(bool);
+    void setKeyLocation(KeyLocation location);
 
 private:
     EntityInfo issuer_info;
@@ -124,6 +143,7 @@ private:
     unsigned int ku_extensions;
     int cert_version;
     bool is_self_signed;
+    KeyLocation keyLocation;
 };
 
 #endif

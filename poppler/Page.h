@@ -20,9 +20,9 @@
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017, 2018, 2020, 2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013, 2017, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
@@ -181,12 +181,12 @@ public:
     // Get annotations array.
     Object getAnnotsObject(XRef *xrefA = nullptr) { return annotsObj.fetch(xrefA ? xrefA : xref); }
     // Add a new annotation to the page
-    void addAnnot(Annot *annot);
+    bool addAnnot(Annot *annot);
     // Remove an existing annotation from the page
     void removeAnnot(Annot *annot);
 
     // Return a list of links.
-    Links *getLinks();
+    std::unique_ptr<Links> getLinks();
 
     // Return a list of annots. It will be valid until the page is destroyed
     Annots *getAnnots(XRef *xrefA = nullptr);
@@ -242,6 +242,10 @@ public:
 
     bool hasStandaloneFields() const { return !standaloneFields.empty(); }
 
+    // Get the integer key of the page's entry in the structural parent tree.
+    // Returns -1 if the page dict does not contain a StructParents key.
+    int getStructParents() const { return structParents; }
+
 private:
     // replace xref
     void replaceXRef(XRef *xrefA);
@@ -249,7 +253,7 @@ private:
     PDFDoc *doc;
     XRef *xref; // the xref table for this PDF file
     Object pageObj; // page dictionary
-    Ref pageRef; // page reference
+    const Ref pageRef; // page reference
     int num; // page number
     PageAttrs *attrs; // page attributes
     Annots *annots; // annotations
@@ -259,6 +263,7 @@ private:
     Object trans; // page transition
     Object actions; // page additional actions
     double duration; // page duration
+    int structParents; // integer key of page in structure parent tree
     bool ok; // true if page is valid
     mutable std::recursive_mutex mutex;
     // standalone widgets are special FormWidget's inside a Page that *are not*

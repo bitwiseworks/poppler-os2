@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014, 2017-2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017-2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -15,6 +15,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2022 crt <chluo@cse.cuhk.edu.hk>
 //
 //========================================================================
 
@@ -105,16 +106,21 @@ static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     }
 }
 
-static void doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffset)
+static bool doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffset)
 {
     Object srcFields = srcFormDict->lookup("Fields");
     Object mergeFields = mergeFormDict->lookup("Fields");
     if (srcFields.isArray() && mergeFields.isArray()) {
         for (int i = 0; i < mergeFields.arrayGetLength(); i++) {
             const Object &value = mergeFields.arrayGetNF(i);
+            if (!value.isRef()) {
+                error(errSyntaxError, -1, "Fields object is not a Ref.");
+                return false;
+            }
             srcFields.arrayAdd(Object({ value.getRef().num + numOffset, value.getRef().gen }));
         }
     }
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -133,7 +139,7 @@ int main(int argc, char *argv[])
     OutStream *outStr;
     int i;
     int j, rootNum;
-    std::vector<PDFDoc *> docs;
+    std::vector<std::unique_ptr<PDFDoc>> docs;
     int majorVersion = 0;
     int minorVersion = 0;
     char *fileName = argv[argc - 1];
@@ -154,10 +160,8 @@ int main(int argc, char *argv[])
     globalParams = std::make_unique<GlobalParams>();
 
     for (i = 1; i < argc - 1; i++) {
-        GooString *gfileName = new GooString(argv[i]);
-        PDFDoc *doc = new PDFDoc(gfileName, nullptr, nullptr, nullptr);
+        std::unique_ptr<PDFDoc> doc = std::make_unique<PDFDoc>(std::make_unique<GooString>(argv[i]));
         if (doc->isOk() && !doc->isEncrypted() && doc->getXRef()->getCatalog().isDict()) {
-            docs.push_back(doc);
             if (doc->getPDFMajorVersion() > majorVersion) {
                 majorVersion = doc->getPDFMajorVersion();
                 minorVersion = doc->getPDFMinorVersion();
@@ -166,6 +170,7 @@ int main(int argc, char *argv[])
                     minorVersion = doc->getPDFMinorVersion();
                 }
             }
+            docs.push_back(std::move(doc));
         } else if (doc->isOk()) {
             if (doc->isEncrypted()) {
                 error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
@@ -198,6 +203,14 @@ int main(int argc, char *argv[])
     Object ocObj;
     if (docs.size() >= 1) {
         Object catObj = docs[0]->getXRef()->getCatalog();
+        if (!catObj.isDict()) {
+            fclose(f);
+            delete yRef;
+            delete countRef;
+            delete outStr;
+            error(errSyntaxError, -1, "XRef's Catalog is not a dictionary.");
+            return -1;
+        }
         Dict *catDict = catObj.getDict();
         intents = catDict->lookup("OutputIntents");
         afObj = catDict->lookupNF("AcroForm").copy();
@@ -276,9 +289,17 @@ int main(int argc, char *argv[])
             }
 
             const PDFRectangle *cropBox = nullptr;
-            if (docs[i]->getCatalog()->getPage(j)->isCropped())
+            if (docs[i]->getCatalog()->getPage(j)->isCropped()) {
                 cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
-            docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
+            }
+            if (!docs[i]->replacePageDict(j, docs[i]->getCatalog()->getPage(j)->getRotate(), docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox)) {
+                fclose(f);
+                delete yRef;
+                delete countRef;
+                delete outStr;
+                error(errSyntaxError, -1, "PDFDoc::replacePageDict failed.");
+                return -1;
+            }
             Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
             Object page = docs[i]->getXRef()->fetch(*refPage);
             Dict *pageDict = page.getDict();
@@ -295,20 +316,34 @@ int main(int argc, char *argv[])
             }
         }
         Object pageCatObj = docs[i]->getXRef()->getCatalog();
+        if (!pageCatObj.isDict()) {
+            fclose(f);
+            delete yRef;
+            delete countRef;
+            delete outStr;
+            error(errSyntaxError, -1, "XRef's Catalog is not a dictionary.");
+            return -1;
+        }
         Dict *pageCatDict = pageCatObj.getDict();
         Object pageNames = pageCatDict->lookup("Names");
         if (!pageNames.isNull() && pageNames.isDict()) {
             if (!names.isDict()) {
                 names = Object(new Dict(yRef));
             }
-            doMergeNameDict(docs[i], yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
+            doMergeNameDict(docs[i].get(), yRef, countRef, 0, 0, names.getDict(), pageNames.getDict(), numOffset);
         }
         Object pageForm = pageCatDict->lookup("AcroForm");
         if (i > 0 && !pageForm.isNull() && pageForm.isDict()) {
             if (afObj.isNull()) {
                 afObj = pageCatDict->lookupNF("AcroForm").copy();
             } else if (afObj.isDict()) {
-                doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset);
+                if (!doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset)) {
+                    fclose(f);
+                    delete yRef;
+                    delete countRef;
+                    delete outStr;
+                    return -1;
+                }
             }
         }
         objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, true);
@@ -351,8 +386,9 @@ int main(int argc, char *argv[])
     yRef->add(rootNum + 1, 0, outStr->getPos(), true);
     outStr->printf("%d 0 obj\n", rootNum + 1);
     outStr->printf("<< /Type /Pages /Kids [");
-    for (j = 0; j < (int)pages.size(); j++)
+    for (j = 0; j < (int)pages.size(); j++) {
         outStr->printf(" %d 0 R", rootNum + j + 2);
+    }
     outStr->printf(" ] /Count %zd >>\nendobj\n", pages.size());
     objectsCount++;
 
@@ -362,8 +398,9 @@ int main(int argc, char *argv[])
         outStr->printf("<< ");
         Dict *pageDict = pages[i].getDict();
         for (j = 0; j < pageDict->getLength(); j++) {
-            if (j > 0)
+            if (j > 0) {
                 outStr->printf(" ");
+            }
             const char *key = pageDict->getKey(j);
             Object value = pageDict->getValNF(j).copy();
             if (strcmp(key, "Parent") == 0) {
@@ -390,7 +427,5 @@ int main(int argc, char *argv[])
     fclose(f);
     delete yRef;
     delete countRef;
-    for (i = 0; i < (int)docs.size(); i++)
-        delete docs[i];
     return 0;
 }

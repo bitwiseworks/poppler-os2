@@ -1,12 +1,7 @@
-include_directories(
-  ${GTK3_INCLUDE_DIRS}
-)
-
 macro(POPPLER_ADD_TESTCASE exe arg1)
   add_test(${exe}-${arg1} ${EXE} ${EXECUTABLE_OUTPUT_PATH}/poppler-check-bb ${TESTDATADIR}/unittestcases/${arg1} ${ARGN})
 endmacro(POPPLER_ADD_TESTCASE)
 
-add_definitions(${GTK3_CFLAGS_OTHER})
 add_definitions(-DTESTDATADIR=\"${TESTDATADIR}\")
 
 set(poppler_check_text_SRCS
@@ -24,7 +19,7 @@ target_link_libraries(poppler-check-text poppler-glib PkgConfig::GTK3)
 target_link_libraries(poppler-check-bb poppler-glib PkgConfig::GTK3)
 
 poppler_add_testcase(poppler-check-bb shapes+attachments.pdf 42.5 42.5 557.5 557.5)
-poppler_add_testcase(poppler-check-bb orientation.pdf 34 34 83.74 49 793 34 808 97.19 488.02 793 561 808 34 503.61 49 56)
+poppler_add_testcase(poppler-check-bb orientation.pdf 34 34 83.74 49 793 34 808 97.19 488.02 793 561 808 34 503.61 49 561)
 poppler_add_testcase(poppler-check-bb xr01.pdf 148.71 126.35 308.11 704.57)
 poppler_add_testcase(poppler-check-bb xr02.pdf 133.77 124.81 308.11 704.57 133.77 124.80 308.11 704.57)
 poppler_add_testcase(poppler-check-bb russian.pdf 71.5 76.81 197.69 131.09)
@@ -54,7 +49,7 @@ macro(GLIB_ADD_FUZZER exe)
     ${ARGN}
   )
   poppler_add_test(${exe} BUILD_GTK_TESTS ${${test_name}_SOURCES})
-  target_link_libraries(${exe} poppler-glib ${GTK3_LIBRARIES})
+  target_link_libraries(${exe} poppler-glib PkgConfig::GTK3)
 endmacro(GLIB_ADD_FUZZER)
 
 if(ENABLE_FUZZER)

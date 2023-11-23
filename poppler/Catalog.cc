@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -40,6 +40,7 @@
 // Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2021 RM <rm+git@arcsin.org>
+// Copyright (C) 2023 Ilaï Deutel <idtl@google.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -71,7 +72,7 @@
 // Catalog
 //------------------------------------------------------------------------
 
-#define catalogLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
+#define catalogLocker() const std::scoped_lock locker(mutex)
 
 Catalog::Catalog(PDFDoc *docA)
 {
@@ -79,7 +80,6 @@ Catalog::Catalog(PDFDoc *docA)
     doc = docA;
     xref = doc->getXRef();
     numPages = -1;
-    baseURI = nullptr;
     pageLabelInfo = nullptr;
     form = nullptr;
     optContent = nullptr;
@@ -104,14 +104,14 @@ Catalog::Catalog(PDFDoc *docA)
         return;
     }
     // get the AcroForm dictionary
-    acroForm = catDict.dictLookup("AcroForm");
+    acroForm = catDict.getDict()->lookup("AcroForm");
 
     // read base URI
     Object obj = catDict.getDict()->lookupEnsureEncryptedIfNeeded("URI");
     if (obj.isDict()) {
         Object obj2 = obj.getDict()->lookupEnsureEncryptedIfNeeded("Base");
         if (obj2.isString()) {
-            baseURI = obj2.getString()->copy();
+            baseURI = obj2.getString()->toStr();
         }
     }
 
@@ -156,9 +156,6 @@ Catalog::~Catalog()
     delete destNameTree;
     delete embeddedFileNameTree;
     delete jsNameTree;
-    if (baseURI) {
-        delete baseURI;
-    }
     delete pageLabelInfo;
     delete form;
     delete optContent;
@@ -194,8 +191,9 @@ std::unique_ptr<GooString> Catalog::readMetadata()
 
 Page *Catalog::getPage(int i)
 {
-    if (i < 1)
+    if (i < 1) {
         return nullptr;
+    }
 
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
@@ -209,8 +207,9 @@ Page *Catalog::getPage(int i)
 
 Ref *Catalog::getPageRef(int i)
 {
-    if (i < 1)
+    if (i < 1) {
         return nullptr;
+    }
 
     catalogLocker();
     if (std::size_t(i) > pages.size()) {
@@ -264,11 +263,13 @@ bool Catalog::cachePageTree(int page)
 
     while (true) {
 
-        if (std::size_t(page) <= pages.size())
+        if (std::size_t(page) <= pages.size()) {
             return true;
+        }
 
-        if (pagesList->empty())
+        if (pagesList->empty()) {
             return false;
+        }
 
         Object kids = pagesList->back().dictLookup("Kids");
         if (!kids.isArray()) {
@@ -283,8 +284,9 @@ bool Catalog::cachePageTree(int page)
             delete attrsList->back();
             attrsList->pop_back();
             kidsIdxList->pop_back();
-            if (!kidsIdxList->empty())
+            if (!kidsIdxList->empty()) {
                 kidsIdxList->back()++;
+            }
             continue;
         }
 
@@ -348,8 +350,9 @@ int Catalog::findPage(const Ref pageRef)
 
     for (i = 0; i < getNumPages(); ++i) {
         Ref *ref = getPageRef(i + 1);
-        if (ref != nullptr && *ref == pageRef)
+        if (ref != nullptr && *ref == pageRef) {
             return i + 1;
+        }
     }
     return 0;
 }
@@ -374,10 +377,11 @@ std::unique_ptr<LinkDest> Catalog::createLinkDest(Object *obj)
         dest = std::make_unique<LinkDest>(obj->getArray());
     } else if (obj->isDict()) {
         Object obj2 = obj->dictLookup("D");
-        if (obj2.isArray())
+        if (obj2.isArray()) {
             dest = std::make_unique<LinkDest>(obj2.getArray());
-        else
+        } else {
             error(errSyntaxWarning, -1, "Bad named destination value");
+        }
     } else {
         error(errSyntaxWarning, -1, "Bad named destination value");
     }
@@ -432,29 +436,28 @@ std::unique_ptr<LinkDest> Catalog::getDestNameTreeDest(int i)
     return createLinkDest(&obj);
 }
 
-FileSpec *Catalog::embeddedFile(int i)
+std::unique_ptr<FileSpec> Catalog::embeddedFile(int i)
 {
     catalogLocker();
     Object *obj = getEmbeddedFileNameTree()->getValue(i);
-    FileSpec *embeddedFile = nullptr;
     if (obj->isRef()) {
         Object fsDict = obj->fetch(xref);
-        embeddedFile = new FileSpec(&fsDict);
+        return std::make_unique<FileSpec>(&fsDict);
     } else if (obj->isDict()) {
-        embeddedFile = new FileSpec(obj);
+        return std::make_unique<FileSpec>(obj);
     } else {
         Object null;
-        embeddedFile = new FileSpec(&null);
+        return std::make_unique<FileSpec>(&null);
     }
-    return embeddedFile;
 }
 
 bool Catalog::hasEmbeddedFile(const std::string &fileName)
 {
     NameTree *ef = getEmbeddedFileNameTree();
     for (int i = 0; i < ef->numEntries(); ++i) {
-        if (fileName == ef->getName(i)->toStr())
+        if (fileName == ef->getName(i)->toStr()) {
             return true;
+        }
     }
     return false;
 }
@@ -463,8 +466,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
 {
     catalogLocker();
 
-    Object fileSpecObj = FileSpec::newFileSpecObject(xref, file, fileName);
-    const Ref fileSpecRef = xref->addIndirectObject(&fileSpecObj);
+    const Ref fileSpecRef = xref->addIndirectObject(FileSpec::newFileSpecObject(xref, file, fileName));
 
     Object catDict = xref->getCatalog();
     Ref namesObjRef;
@@ -482,7 +484,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
 
     // We create a new EmbeddedFiles nametree, this replaces the existing one (if any), but it's not a problem
     Object embeddedFilesObj = Object(new Dict(xref));
-    const Ref embeddedFilesRef = xref->addIndirectObject(&embeddedFilesObj);
+    const Ref embeddedFilesRef = xref->addIndirectObject(embeddedFilesObj);
 
     Array *embeddedFilesNamesArray = new Array(xref);
 
@@ -490,7 +492,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
     NameTree *ef = getEmbeddedFileNameTree();
     bool fileAlreadyAdded = false;
     for (int i = 0; i < ef->numEntries(); ++i) {
-        GooString *efNameI = ef->getName(i);
+        const GooString *efNameI = ef->getName(i);
 
         // we need to add the file if it has not been added yet and the name is smaller or equal lexicographically
         // than the current item
@@ -579,18 +581,19 @@ Catalog::PageMode Catalog::getPageMode()
 
         Object obj = catDict.dictLookup("PageMode");
         if (obj.isName()) {
-            if (obj.isName("UseNone"))
+            if (obj.isName("UseNone")) {
                 pageMode = pageModeNone;
-            else if (obj.isName("UseOutlines"))
+            } else if (obj.isName("UseOutlines")) {
                 pageMode = pageModeOutlines;
-            else if (obj.isName("UseThumbs"))
+            } else if (obj.isName("UseThumbs")) {
                 pageMode = pageModeThumbs;
-            else if (obj.isName("FullScreen"))
+            } else if (obj.isName("FullScreen")) {
                 pageMode = pageModeFullScreen;
-            else if (obj.isName("UseOC"))
+            } else if (obj.isName("UseOC")) {
                 pageMode = pageModeOC;
-            else if (obj.isName("UseAttachments"))
+            } else if (obj.isName("UseAttachments")) {
                 pageMode = pageModeAttach;
+            }
         }
     }
     return pageMode;
@@ -613,18 +616,24 @@ Catalog::PageLayout Catalog::getPageLayout()
         pageLayout = pageLayoutNone;
         Object obj = catDict.dictLookup("PageLayout");
         if (obj.isName()) {
-            if (obj.isName("SinglePage"))
+            if (obj.isName("SinglePage")) {
                 pageLayout = pageLayoutSinglePage;
-            if (obj.isName("OneColumn"))
+            }
+            if (obj.isName("OneColumn")) {
                 pageLayout = pageLayoutOneColumn;
-            if (obj.isName("TwoColumnLeft"))
+            }
+            if (obj.isName("TwoColumnLeft")) {
                 pageLayout = pageLayoutTwoColumnLeft;
-            if (obj.isName("TwoColumnRight"))
+            }
+            if (obj.isName("TwoColumnRight")) {
                 pageLayout = pageLayoutTwoColumnRight;
-            if (obj.isName("TwoPageLeft"))
+            }
+            if (obj.isName("TwoPageLeft")) {
                 pageLayout = pageLayoutTwoPageLeft;
-            if (obj.isName("TwoPageRight"))
+            }
+            if (obj.isName("TwoPageRight")) {
                 pageLayout = pageLayoutTwoPageRight;
+            }
         }
     }
     return pageLayout;
@@ -641,8 +650,9 @@ NameTree::~NameTree()
 {
     int i;
 
-    for (i = 0; i < length; i++)
+    for (i = 0; i < length; i++) {
         delete entries[i];
+    }
 
     gfree(entries);
 }
@@ -653,8 +663,9 @@ NameTree::Entry::Entry(Array *array, int index)
         Object aux = array->get(index);
         if (aux.isString()) {
             name.append(aux.getString());
-        } else
+        } else {
             error(errSyntaxError, -1, "Invalid page tree");
+        }
     }
     value = array->getNF(index + 1).copy();
 }
@@ -687,17 +698,18 @@ int NameTree::Entry::cmpEntry(const void *voidEntry, const void *voidOtherEntry)
 void NameTree::init(XRef *xrefA, Object *tree)
 {
     xref = xrefA;
-    std::set<int> seen;
+    RefRecursionChecker seen;
     parse(tree, seen);
     if (entries && length > 0) {
         qsort(entries, length, sizeof(Entry *), Entry::cmpEntry);
     }
 }
 
-void NameTree::parse(const Object *tree, std::set<int> &seen)
+void NameTree::parse(const Object *tree, RefRecursionChecker &seen)
 {
-    if (!tree->isDict())
+    if (!tree->isDict()) {
         return;
+    }
 
     // leaf node
     Object names = tree->dictLookup("Names");
@@ -713,27 +725,20 @@ void NameTree::parse(const Object *tree, std::set<int> &seen)
     // root or intermediate node
     Ref ref;
     const Object kids = tree->getDict()->lookup("Kids", &ref);
-    if (ref != Ref::INVALID()) {
-        const int numObj = ref.num;
-        if (seen.find(numObj) != seen.end()) {
-            error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
-            return;
-        }
-        seen.insert(numObj);
+    if (!seen.insert(ref)) {
+        error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", ref.num);
+        return;
     }
     if (kids.isArray()) {
         for (int i = 0; i < kids.arrayGetLength(); ++i) {
             const Object kid = kids.getArray()->get(i, &ref);
-            if (ref != Ref::INVALID()) {
-                const int numObj = ref.num;
-                if (seen.find(numObj) != seen.end()) {
-                    error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
-                    continue;
-                }
-                seen.insert(numObj);
+            if (!seen.insert(ref)) {
+                error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", ref.num);
+                continue;
             }
-            if (kid.isDict())
+            if (kid.isDict()) {
                 parse(&kid, seen);
+            }
         }
     }
 }
@@ -768,7 +773,7 @@ Object *NameTree::getValue(int index)
     }
 }
 
-GooString *NameTree::getName(int index)
+const GooString *NameTree::getName(int index) const
 {
     if (index < length) {
         return &entries[index]->name;
@@ -783,16 +788,19 @@ bool Catalog::labelToIndex(GooString *label, int *index)
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
-        if (!pli->labelToIndex(label, index))
+        if (!pli->labelToIndex(label, index)) {
             return false;
+        }
     } else {
         *index = strtol(label->c_str(), &end, 10) - 1;
-        if (*end != '\0')
+        if (*end != '\0') {
             return false;
+        }
     }
 
-    if (*index < 0 || *index >= getNumPages())
+    if (*index < 0 || *index >= getNumPages()) {
         return false;
+    }
 
     return true;
 }
@@ -801,8 +809,9 @@ bool Catalog::indexToLabel(int index, GooString *label)
 {
     char buffer[32];
 
-    if (index < 0 || index >= getNumPages())
+    if (index < 0 || index >= getNumPages()) {
         return false;
+    }
 
     PageLabelInfo *pli = getPageLabelInfo();
     if (pli != nullptr) {
@@ -859,7 +868,13 @@ int Catalog::getNumPages()
                 numPages = 0;
             }
         } else {
-            numPages = (int)obj.getNum();
+            if (obj.isInt()) {
+                numPages = obj.getInt();
+            } else if (obj.isInt64()) {
+                numPages = obj.getInt64();
+            } else {
+                numPages = obj.getNum();
+            }
             if (numPages <= 0) {
                 error(errSyntaxError, -1, "Invalid page count {0:d}", numPages);
                 numPages = 0;
@@ -931,16 +946,18 @@ unsigned int Catalog::getMarkInfo()
                 }
 
                 value = markInfoDict.dictLookup("Suspects");
-                if (value.isBool() && value.getBool())
+                if (value.isBool() && value.getBool()) {
                     markInfo |= markInfoSuspects;
-                else if (!value.isNull())
+                } else if (!value.isNull()) {
                     error(errSyntaxError, -1, "Suspects object is wrong type ({0:s})", value.getTypeName());
+                }
 
                 value = markInfoDict.dictLookup("UserProperties");
-                if (value.isBool() && value.getBool())
+                if (value.isBool() && value.getBool()) {
                     markInfo |= markInfoUserProperties;
-                else if (!value.isNull())
+                } else if (!value.isNull()) {
                     error(errSyntaxError, -1, "UserProperties object is wrong type ({0:s})", value.getTypeName());
+                }
             } else if (!markInfoDict.isNull()) {
                 error(errSyntaxError, -1, "MarkInfo object is wrong type ({0:s})", markInfoDict.getTypeName());
             }
@@ -981,7 +998,7 @@ Object *Catalog::getCreateOutline()
     outline.dictSet("Type", Object(objName, "Outlines"));
     outline.dictSet("Count", Object(0));
 
-    const Ref outlineRef = doc->getXRef()->addIndirectObject(&outline);
+    const Ref outlineRef = doc->getXRef()->addIndirectObject(outline);
     catDict.dictAdd("Outlines", Object(outlineRef));
     xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
 
@@ -1037,12 +1054,37 @@ Catalog::FormType Catalog::getFormType()
     return res;
 }
 
+Form *Catalog::getCreateForm()
+{
+    catalogLocker();
+    if (!form) {
+
+        Object catDict = xref->getCatalog();
+        if (!catDict.isDict()) {
+            error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
+            return nullptr;
+        }
+
+        if (!acroForm.isDict()) {
+            acroForm = Object(new Dict(xref));
+            acroForm.dictSet("Fields", Object(new Array(xref)));
+
+            const Ref newFormRef = xref->addIndirectObject(acroForm);
+            catDict.dictSet("AcroForm", Object(newFormRef));
+
+            xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+        }
+    }
+
+    return getForm();
+}
+
 Form *Catalog::getForm()
 {
     catalogLocker();
     if (!form) {
         if (acroForm.isDict()) {
-            form = new Form(doc, &acroForm);
+            form = new Form(doc);
             // perform form-related loading after all widgets have been loaded
             form->postWidgetsLoad();
         }
@@ -1055,28 +1097,23 @@ void Catalog::addFormToAcroForm(const Ref formRef)
 {
     catalogLocker();
 
+    if (!acroForm.isDict()) {
+        getCreateForm();
+    }
+
+    // append to field array
+    Ref fieldRef;
+    Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+    fieldArray.getArray()->add(Object(formRef));
+
+    setAcroFormModified();
+}
+
+void Catalog::setAcroFormModified()
+{
     Object catDict = xref->getCatalog();
     Ref acroFormRef;
-    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
-
-    if (!acroForm.isDict()) {
-        // none there yet, need to create a new fields dict
-        Object newForm = Object(new Dict(xref));
-        newForm.dictSet("SigFlags", Object(3));
-
-        Array *fieldArray = new Array(xref);
-        fieldArray->add(Object(formRef));
-        newForm.dictSet("Fields", Object(fieldArray));
-
-        Ref newRef = xref->addIndirectObject(&newForm);
-        catDict.dictSet("AcroForm", Object(newRef));
-        acroForm = catDict.getDict()->lookup("AcroForm");
-    } else {
-        // append to field array
-        Ref fieldRef;
-        Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
-        fieldArray.getArray()->add(Object(formRef));
-    }
+    catDict.getDict()->lookup("AcroForm", &acroFormRef);
 
     if (acroFormRef != Ref::INVALID()) {
         xref->setModifiedObject(&acroForm, acroFormRef);
@@ -1090,9 +1127,6 @@ void Catalog::removeFormFromAcroForm(const Ref formRef)
     catalogLocker();
 
     Object catDict = xref->getCatalog();
-    Ref acroFormRef;
-    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
-
     if (acroForm.isDict()) {
         // remove from field array
         Ref fieldRef;
@@ -1106,7 +1140,7 @@ void Catalog::removeFormFromAcroForm(const Ref formRef)
             }
         }
 
-        xref->setModifiedObject(&acroForm, acroFormRef);
+        setAcroFormModified();
     }
 }
 
@@ -1194,8 +1228,9 @@ std::unique_ptr<LinkAction> Catalog::getAdditionalAction(DocumentAdditionalActio
                                                                        : nullptr);
 
         Object actionObject = additionalActionsObject.dictLookup(key);
-        if (actionObject.isDict())
+        if (actionObject.isDict()) {
             return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+        }
     }
     return nullptr;
 }

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -28,6 +28,7 @@
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2023 Shivodit Gill <shivodit.gill@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -79,6 +80,32 @@ enum SysFontType
 
 //------------------------------------------------------------------------
 
+struct FamilyStyleFontSearchResult
+{
+    FamilyStyleFontSearchResult() = default;
+
+    FamilyStyleFontSearchResult(const std::string &filepathA, int faceIndexA) : filepath(filepathA), faceIndex(faceIndexA) { }
+
+    std::string filepath;
+    int faceIndex = 0;
+};
+
+//------------------------------------------------------------------------
+
+struct UCharFontSearchResult
+{
+    UCharFontSearchResult() = default;
+
+    UCharFontSearchResult(const std::string &filepathA, int faceIndexA, const std::string &familyA, const std::string &styleA) : filepath(filepathA), faceIndex(faceIndexA), family(familyA), style(styleA) { }
+
+    const std::string filepath;
+    const int faceIndex = 0;
+    const std::string family;
+    const std::string style;
+};
+
+//------------------------------------------------------------------------
+
 class POPPLER_PRIVATE_EXPORT GlobalParams
 {
 public:
@@ -108,36 +135,34 @@ public:
     FILE *getUnicodeMapFile(const std::string &encodingName);
     FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
     FILE *findToUnicodeFile(const GooString *name);
-    GooString *findFontFile(const GooString *fontName);
-    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+    GooString *findFontFile(const std::string &fontName);
+    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font, GooString *substituteFontName = nullptr);
     GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
-    bool getPSExpandSmaller();
-    bool getPSShrinkLarger();
+    FamilyStyleFontSearchResult findSystemFontFileForFamilyAndStyle(const std::string &fontFamily, const std::string &fontStyle, const std::vector<std::string> &filesToIgnore = {});
+    UCharFontSearchResult findSystemFontFileForUChar(Unicode uChar, const GfxFont &fontToEmulate);
     std::string getTextEncodingName() const;
-    bool getOverprintPreview() { return overprintPreview; }
     bool getPrintCommands();
     bool getProfileCommands();
     bool getErrQuiet();
 
     CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
     const UnicodeMap *getUnicodeMap(const std::string &encodingName);
-    CMap *getCMap(const GooString *collection, const GooString *cMapName);
+    std::shared_ptr<CMap> getCMap(const GooString *collection, const GooString *cMapName);
     const UnicodeMap *getTextEncoding();
 
     const UnicodeMap *getUtf8Map();
 
-    std::vector<GooString *> *getEncodingNames();
+    std::vector<std::string> getEncodingNames();
 
     //----- functions to set parameters
-    void addFontFile(const GooString *fontName, const GooString *path);
-    void setPSExpandSmaller(bool expand);
-    void setPSShrinkLarger(bool shrink);
+    void addFontFile(const std::string &fontName, const std::string &path);
     void setTextEncoding(const char *encodingName);
-    void setOverprintPreview(bool overprintPreviewA);
     void setPrintCommands(bool printCommandsA);
     void setProfileCommands(bool profileCommandsA);
     void setErrQuiet(bool errQuietA);
-
+#ifdef ANDROID
+    static void setFontDir(const std::string &fontDir);
+#endif
     static bool parseYesNo2(const char *token, bool *flag);
 
 private:
@@ -170,7 +195,7 @@ private:
     std::unordered_map<std::string, std::string> unicodeMaps;
     // list of CMap dirs, indexed by collection
     std::unordered_multimap<std::string, std::string> cMapDirs;
-    std::vector<GooString *> *toUnicodeDirs; // list of ToUnicode CMap dirs
+    std::vector<GooString *> toUnicodeDirs; // list of ToUnicode CMap dirs
     bool baseFontsInitialized;
 #ifdef _WIN32
     // windows font substitutes (for CID fonts)
@@ -179,11 +204,8 @@ private:
     // font files: font name mapped to path
     std::unordered_map<std::string, std::string> fontFiles;
     SysFontList *sysFonts; // system fonts
-    bool psExpandSmaller; // expand smaller pages to fill paper
-    bool psShrinkLarger; // shrink larger pages to fit paper
     GooString *textEncoding; // encoding (unicodeMap) to use for text
                              //   output
-    bool overprintPreview; // enable overprint preview
     bool printCommands; // print the drawing commands
     bool profileCommands; // profile the drawing commands
     bool errQuiet; // suppress error messages?

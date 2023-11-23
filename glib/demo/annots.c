@@ -22,6 +22,8 @@
 #include "annots.h"
 #include "utils.h"
 
+#define STAMP_CUSTOM_IMAGE "Custom image"
+
 enum
 {
     ANNOTS_TYPE_COLUMN,
@@ -47,9 +49,25 @@ typedef struct
 } Annotations;
 
 static const Annotations supported_annots[] = {
-    { POPPLER_ANNOT_TEXT, "Text" },           { POPPLER_ANNOT_LINE, "Line" },           { POPPLER_ANNOT_SQUARE, "Square" },     { POPPLER_ANNOT_CIRCLE, "Circle" },
-    { POPPLER_ANNOT_HIGHLIGHT, "Highlight" }, { POPPLER_ANNOT_UNDERLINE, "Underline" }, { POPPLER_ANNOT_SQUIGGLY, "Squiggly" }, { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" },
+    { POPPLER_ANNOT_TEXT, "Text" },           { POPPLER_ANNOT_LINE, "Line" },         { POPPLER_ANNOT_SQUARE, "Square" },         { POPPLER_ANNOT_CIRCLE, "Circle" }, { POPPLER_ANNOT_HIGHLIGHT, "Highlight" },
+    { POPPLER_ANNOT_UNDERLINE, "Underline" }, { POPPLER_ANNOT_SQUIGGLY, "Squiggly" }, { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" }, { POPPLER_ANNOT_STAMP, "Stamp" },
 };
+
+static const char *stamp_types[] = { [POPPLER_ANNOT_STAMP_ICON_UNKNOWN] = "Unknown",
+                                     [POPPLER_ANNOT_STAMP_ICON_APPROVED] = "APPROVED",
+                                     [POPPLER_ANNOT_STAMP_ICON_AS_IS] = "AS_IS",
+                                     [POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL] = "CONFIDENTIAL",
+                                     [POPPLER_ANNOT_STAMP_ICON_FINAL] = "FINAL",
+                                     [POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL] = "EXPERIMENTAL",
+                                     [POPPLER_ANNOT_STAMP_ICON_EXPIRED] = "EXPIRED",
+                                     [POPPLER_ANNOT_STAMP_ICON_NOT_APPROVED] = "NOT_APPROVED",
+                                     [POPPLER_ANNOT_STAMP_ICON_NOT_FOR_PUBLIC_RELEASE] = "NOT_FOR_PUBLIC_RELEASE",
+                                     [POPPLER_ANNOT_STAMP_ICON_SOLD] = "SOLD",
+                                     [POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL] = "DEPARTMENTAL",
+                                     [POPPLER_ANNOT_STAMP_ICON_FOR_COMMENT] = "FOR_COMMENT",
+                                     [POPPLER_ANNOT_STAMP_ICON_FOR_PUBLIC_RELEASE] = "FOR_PUBLIC_RELEASE",
+                                     [POPPLER_ANNOT_STAMP_ICON_TOP_SECRET] = "TOP_SECRET",
+                                     [POPPLER_ANNOT_STAMP_ICON_NONE] = "None" };
 
 typedef enum
 {
@@ -72,10 +90,12 @@ typedef struct
     GtkWidget *timer_label;
     GtkWidget *remove_button;
     GtkWidget *type_selector;
+    GtkWidget *stamp_selector;
     GtkWidget *main_box;
 
     gint num_page;
     gint annot_type;
+    char *custom_image_filename;
     ModeType mode;
 
     cairo_surface_t *surface;
@@ -91,8 +111,9 @@ static void pgd_annots_viewer_queue_redraw(PgdAnnotsDemo *demo);
 
 static void pgd_annots_free(PgdAnnotsDemo *demo)
 {
-    if (!demo)
+    if (!demo) {
         return;
+    }
 
     if (demo->annotations_idle > 0) {
         g_source_remove(demo->annotations_idle);
@@ -217,8 +238,9 @@ gchar *get_markup_date(PopplerAnnotMarkup *poppler_annot)
     time_t timet;
 
     date = poppler_annot_markup_get_date(poppler_annot);
-    if (!date)
+    if (!date) {
         return NULL;
+    }
 
     g_date_to_struct_tm(date, &t);
     g_date_free(date);
@@ -302,8 +324,9 @@ gchar *get_free_text_callout_line(PopplerAnnotFreeText *poppler_annot)
 
     if ((callout = poppler_annot_free_text_get_callout_line(poppler_annot))) {
         text = g_strdup_printf("%f,%f,%f,%f", callout->x1, callout->y1, callout->x2, callout->y2);
-        if (callout->multiline)
+        if (callout->multiline) {
             text = g_strdup_printf("%s,%f,%f", text, callout->x3, callout->y3);
+        }
 
         return text;
     }
@@ -315,8 +338,9 @@ static void pgd_annots_update_cursor(PgdAnnotsDemo *demo, GdkCursorType cursor_t
 {
     GdkCursor *cursor = NULL;
 
-    if (cursor_type == demo->cursor)
+    if (cursor_type == demo->cursor) {
         return;
+    }
 
     if (cursor_type != GDK_LAST_CURSOR) {
         cursor = gdk_cursor_new_for_display(gtk_widget_get_display(demo->main_box), cursor_type);
@@ -326,8 +350,9 @@ static void pgd_annots_update_cursor(PgdAnnotsDemo *demo, GdkCursorType cursor_t
 
     gdk_window_set_cursor(gtk_widget_get_window(demo->main_box), cursor);
     gdk_display_flush(gtk_widget_get_display(demo->main_box));
-    if (cursor)
+    if (cursor) {
         g_object_unref(cursor);
+    }
 }
 
 static void pgd_annots_start_add_annot(GtkWidget *button, PgdAnnotsDemo *demo)
@@ -455,6 +480,14 @@ static void pgd_annot_view_set_annot_free_text(GtkWidget *table, PopplerAnnotFre
     g_free(text);
 }
 
+static void pgd_annot_view_set_annot_stamp(GtkWidget *table, PopplerAnnotStamp *annot, gint *row)
+{
+    PopplerAnnotStampIcon icon;
+
+    icon = poppler_annot_stamp_get_icon(annot);
+    pgd_table_add_property(GTK_GRID(table), "<b>Icon Name:</b>", stamp_types[icon], row);
+}
+
 static void pgd_annots_file_attachment_save_dialog_response(GtkFileChooser *file_chooser, gint response, PopplerAttachment *attachment)
 {
     gchar *filename;
@@ -482,8 +515,9 @@ static void pgd_annot_save_file_attachment_button_clicked(GtkButton *button, Pop
     PopplerAttachment *attachment;
 
     attachment = poppler_annot_file_attachment_get_attachment(annot);
-    if (!attachment)
+    if (!attachment) {
         return;
+    }
 
     file_chooser = gtk_file_chooser_dialog_new("Save attachment", GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(button))), GTK_FILE_CHOOSER_ACTION_SAVE, "_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
     gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(file_chooser), poppler_attachment_get_name(attachment));
@@ -544,8 +578,9 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
         gtk_container_remove(GTK_CONTAINER(demo->annot_view), table);
     }
 
-    if (!annot)
+    if (!annot) {
         return;
+    }
 
     table = gtk_grid_new();
     gtk_widget_set_margin_top(table, 5);
@@ -581,8 +616,9 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
     pgd_table_add_property(GTK_GRID(table), "<b>Coords:</b>", text, &row);
     g_free(text);
 
-    if (POPPLER_IS_ANNOT_MARKUP(annot))
+    if (POPPLER_IS_ANNOT_MARKUP(annot)) {
         pgd_annot_view_set_annot_markup(table, POPPLER_ANNOT_MARKUP(annot), &row);
+    }
 
     switch (poppler_annot_get_annot_type(annot)) {
     case POPPLER_ANNOT_TEXT:
@@ -605,6 +641,9 @@ static void pgd_annot_view_set_annot(PgdAnnotsDemo *demo, PopplerAnnot *annot)
         break;
     case POPPLER_ANNOT_SCREEN:
         pgd_annot_view_set_annot_screen(table, POPPLER_ANNOT_SCREEN(annot), &row);
+        break;
+    case POPPLER_ANNOT_STAMP:
+        pgd_annot_view_set_annot_stamp(table, POPPLER_ANNOT_STAMP(annot), &row);
         break;
     default:
         break;
@@ -635,8 +674,9 @@ static void pgd_annots_add_annot_to_model(PgdAnnotsDemo *demo, PopplerAnnot *ann
         gtk_tree_path_free(path);
     }
 
-    if (pixbuf)
+    if (pixbuf) {
         g_object_unref(pixbuf);
+    }
 }
 
 static void pgd_annots_get_annots(PgdAnnotsDemo *demo)
@@ -654,8 +694,9 @@ static void pgd_annots_get_annots(PgdAnnotsDemo *demo)
     }
 
     demo->page = poppler_document_get_page(demo->doc, demo->num_page);
-    if (!demo->page)
+    if (!demo->page) {
         return;
+    }
 
     timer = g_timer_new();
     mapping = poppler_page_get_annot_mapping(demo->page);
@@ -725,10 +766,11 @@ static void pgd_annots_flags_toggled(GtkCellRendererToggle *renderer, gchar *pat
     fixed ^= 1;
     flags = poppler_annot_get_flags(annot);
 
-    if (fixed)
+    if (fixed) {
         flags |= flag_bit;
-    else
+    } else {
         flags &= ~flag_bit;
+    }
 
     poppler_annot_set_flags(annot, flags);
     gtk_list_store_set(GTK_LIST_STORE(model), &iter, column, fixed, -1);
@@ -778,6 +820,19 @@ static GArray *pgd_annots_create_quads_array_for_rectangle(PopplerRectangle *rec
     pgd_annots_set_poppler_quad_from_rectangle(quad, rect);
 
     return quads_array;
+}
+
+static PopplerAnnotStampIcon get_icon_from_stamp_text(gchar *icon_text)
+{
+    int i;
+
+    for (i = 1; i < G_N_ELEMENTS(stamp_types) - 1; i++) {
+        if (strcmp(stamp_types[i], icon_text) == 0) {
+            return (PopplerAnnotStampIcon)i;
+        }
+    }
+
+    return POPPLER_ANNOT_STAMP_ICON_UNKNOWN;
 }
 
 static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
@@ -849,13 +904,35 @@ static void pgd_annots_add_annot(PgdAnnotsDemo *demo)
         annot = poppler_annot_text_markup_new_strikeout(demo->doc, &rect, quads_array);
         g_array_free(quads_array, TRUE);
     } break;
+    case POPPLER_ANNOT_STAMP: {
+        annot = poppler_annot_stamp_new(demo->doc, &rect);
+        gchar *stamp_type = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(demo->stamp_selector));
+        GError *error = NULL;
+
+        if (strcmp(stamp_type, STAMP_CUSTOM_IMAGE) == 0 && demo->custom_image_filename) {
+            cairo_surface_t *img = cairo_image_surface_create_from_png(demo->custom_image_filename);
+            if (cairo_surface_status(img) == CAIRO_STATUS_SUCCESS) {
+                poppler_annot_stamp_set_custom_image(POPPLER_ANNOT_STAMP(annot), img, &error);
+                if (error) {
+                    g_warning("%s", error->message);
+                    g_error_free(error);
+                }
+            }
+            cairo_surface_destroy(img);
+        } else {
+            poppler_annot_stamp_set_icon(POPPLER_ANNOT_STAMP(annot), get_icon_from_stamp_text(stamp_type));
+        }
+        g_free(stamp_type);
+    } break;
     default:
         g_assert_not_reached();
     }
 
     demo->active_annot = annot;
 
-    poppler_annot_set_color(annot, &color);
+    if (demo->annot_type != POPPLER_ANNOT_STAMP) {
+        poppler_annot_set_color(annot, &color);
+    }
     poppler_page_add_annot(demo->page, annot);
     pgd_annots_add_annot_to_model(demo, annot, rect, TRUE);
     g_object_unref(annot);
@@ -889,8 +966,9 @@ static void pgd_annots_update_selected_text(PgdAnnotsDemo *demo)
     doc_area.x2 = demo->stop.x;
     doc_area.y2 = demo->stop.y;
 
-    if (!poppler_page_get_text_layout_for_area(demo->page, &doc_area, &rects, &n_rects))
+    if (!poppler_page_get_text_layout_for_area(demo->page, &doc_area, &rects, &n_rects)) {
         return;
+    }
 
     r = g_slice_new(PopplerRectangle);
     r->x1 = G_MAXDOUBLE;
@@ -904,8 +982,9 @@ static void pgd_annots_update_selected_text(PgdAnnotsDemo *demo)
            On the same line, make an union of rectangles at
            the same line */
         if (ABS(r->y2 - rects[i].y2) > 0.0001) {
-            if (i > 0)
+            if (i > 0) {
                 l_rects = g_list_append(l_rects, r);
+            }
             r = g_slice_new(PopplerRectangle);
             r->x1 = rects[i].x1;
             r->y1 = rects[i].y1;
@@ -957,8 +1036,9 @@ static cairo_surface_t *pgd_annots_render_page(PgdAnnotsDemo *demo)
     cairo_surface_t *surface = NULL;
 
     page = poppler_document_get_page(demo->doc, demo->num_page);
-    if (!page)
+    if (!page) {
         return NULL;
+    }
 
     poppler_page_get_size(page, &width, &height);
     gtk_widget_set_size_request(demo->darea, width, height);
@@ -984,13 +1064,15 @@ static cairo_surface_t *pgd_annots_render_page(PgdAnnotsDemo *demo)
 
 static gboolean pgd_annots_view_drawing_area_draw(GtkWidget *area, cairo_t *cr, PgdAnnotsDemo *demo)
 {
-    if (demo->num_page == -1)
+    if (demo->num_page == -1) {
         return FALSE;
+    }
 
     if (!demo->surface) {
         demo->surface = pgd_annots_render_page(demo);
-        if (!demo->surface)
+        if (!demo->surface) {
             return FALSE;
+        }
     }
 
     cairo_set_source_surface(cr, demo->surface, 0, 0);
@@ -1013,8 +1095,9 @@ static gboolean pgd_annots_viewer_redraw(PgdAnnotsDemo *demo)
 
 static void pgd_annots_viewer_queue_redraw(PgdAnnotsDemo *demo)
 {
-    if (demo->annotations_idle == 0)
+    if (demo->annotations_idle == 0) {
         demo->annotations_idle = g_idle_add((GSourceFunc)pgd_annots_viewer_redraw, demo);
+    }
 }
 
 static void pgd_annots_drawing_area_realize(GtkWidget *area, PgdAnnotsDemo *demo)
@@ -1024,8 +1107,9 @@ static void pgd_annots_drawing_area_realize(GtkWidget *area, PgdAnnotsDemo *demo
 
 static gboolean pgd_annots_drawing_area_button_press(GtkWidget *area, GdkEventButton *event, PgdAnnotsDemo *demo)
 {
-    if (!demo->page || demo->mode != MODE_ADD || event->button != 1)
+    if (!demo->page || demo->mode != MODE_ADD || event->button != 1) {
         return FALSE;
+    }
 
     demo->start.x = event->x;
     demo->start.y = event->y;
@@ -1038,14 +1122,92 @@ static gboolean pgd_annots_drawing_area_button_press(GtkWidget *area, GdkEventBu
     return TRUE;
 }
 
+static void choose_custom_image(PgdAnnotsDemo *demo)
+{
+    GtkFileChooser *chooser_dialog;
+    gint response;
+    const gchar *chooser_dir = "/usr/share/pixmaps";
+    const gchar *pics_dir;
+    GtkFileFilter *filter;
+
+    chooser_dialog = GTK_FILE_CHOOSER(gtk_file_chooser_dialog_new("Select PNG Image", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "gtk-cancel", GTK_RESPONSE_CANCEL, "gtk-open", GTK_RESPONSE_ACCEPT, NULL));
+    gtk_window_set_modal(GTK_WINDOW(chooser_dialog), TRUE);
+    gtk_dialog_set_default_response(GTK_DIALOG(chooser_dialog), GTK_RESPONSE_ACCEPT);
+
+    gtk_file_chooser_add_shortcut_folder(chooser_dialog, chooser_dir, NULL);
+    pics_dir = g_get_user_special_dir(G_USER_DIRECTORY_PICTURES);
+    if (pics_dir != NULL) {
+        gtk_file_chooser_add_shortcut_folder(chooser_dialog, pics_dir, NULL);
+    }
+
+    if (!g_file_test(chooser_dir, G_FILE_TEST_IS_DIR)) {
+        chooser_dir = g_get_home_dir();
+    }
+
+    gtk_file_chooser_set_current_folder(chooser_dialog, chooser_dir);
+
+    filter = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter, "PNG images");
+    gtk_file_filter_add_mime_type(filter, "image/png");
+    gtk_file_chooser_add_filter(chooser_dialog, filter);
+    filter = gtk_file_filter_new();
+    gtk_file_filter_set_name(filter, "All Files");
+    gtk_file_filter_add_pattern(filter, "*");
+    gtk_file_chooser_add_filter(chooser_dialog, filter);
+
+    response = gtk_dialog_run(GTK_DIALOG(chooser_dialog));
+
+    if (response == GTK_RESPONSE_ACCEPT) {
+        if (demo->custom_image_filename) {
+            g_free(demo->custom_image_filename);
+        }
+
+        demo->custom_image_filename = gtk_file_chooser_get_filename(chooser_dialog);
+    } else {
+        if (demo->custom_image_filename) {
+            g_free(demo->custom_image_filename);
+            demo->custom_image_filename = NULL;
+        }
+    }
+
+    gtk_widget_destroy(GTK_WIDGET(chooser_dialog));
+}
+
+static void stamp_selector_changed(GtkComboBox *combo_box, PgdAnnotsDemo *demo)
+{
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    gchar *active;
+
+    model = gtk_combo_box_get_model(combo_box);
+    gtk_combo_box_get_active_iter(combo_box, &iter);
+    gtk_tree_model_get(model, &iter, 0, &active, -1);
+    if (strcmp(active, STAMP_CUSTOM_IMAGE) == 0) {
+        choose_custom_image(demo);
+    }
+}
+
+static void type_selector_changed(GtkComboBox *combo_box, PgdAnnotsDemo *demo)
+{
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    int active;
+
+    model = gtk_combo_box_get_model(combo_box);
+    gtk_combo_box_get_active_iter(combo_box, &iter);
+    gtk_tree_model_get(model, &iter, SELECTED_TYPE_COLUMN, &active, -1);
+    gtk_widget_set_sensitive(demo->stamp_selector, active == POPPLER_ANNOT_STAMP);
+}
+
 static gboolean pgd_annots_drawing_area_motion_notify(GtkWidget *area, GdkEventMotion *event, PgdAnnotsDemo *demo)
 {
     PopplerRectangle rect;
     PopplerPoint start, end;
     gdouble width, height;
 
-    if (!demo->page || demo->mode != MODE_DRAWING || demo->start.x == -1)
+    if (!demo->page || demo->mode != MODE_DRAWING || demo->start.x == -1) {
         return FALSE;
+    }
 
     demo->stop.x = event->x;
     demo->stop.y = event->y;
@@ -1063,11 +1225,13 @@ static gboolean pgd_annots_drawing_area_motion_notify(GtkWidget *area, GdkEventM
 
     poppler_annot_set_rectangle(demo->active_annot, &rect);
 
-    if (demo->annot_type == POPPLER_ANNOT_LINE)
+    if (demo->annot_type == POPPLER_ANNOT_LINE) {
         poppler_annot_line_set_vertices(POPPLER_ANNOT_LINE(demo->active_annot), &start, &end);
+    }
 
-    if (POPPLER_IS_ANNOT_TEXT_MARKUP(demo->active_annot))
+    if (POPPLER_IS_ANNOT_TEXT_MARKUP(demo->active_annot)) {
         pgd_annots_update_selected_text(demo);
+    }
 
     pgd_annot_view_set_annot(demo, demo->active_annot);
     pgd_annots_viewer_queue_redraw(demo);
@@ -1077,8 +1241,9 @@ static gboolean pgd_annots_drawing_area_motion_notify(GtkWidget *area, GdkEventM
 
 static gboolean pgd_annots_drawing_area_button_release(GtkWidget *area, GdkEventButton *event, PgdAnnotsDemo *demo)
 {
-    if (!demo->page || demo->mode != MODE_DRAWING || event->button != 1)
+    if (!demo->page || demo->mode != MODE_DRAWING || event->button != 1) {
         return FALSE;
+    }
 
     pgd_annots_finish_add_annot(demo);
 
@@ -1092,7 +1257,7 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     GtkWidget *label;
     GtkWidget *vbox, *vbox2;
     GtkWidget *button;
-    GtkWidget *hbox, *page_selector;
+    GtkWidget *hbox, *hbox2, *page_selector;
     GtkWidget *hpaned;
     GtkWidget *swindow, *treeview;
     GtkTreeSelection *selection;
@@ -1116,6 +1281,7 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
 
     label = gtk_label_new("Page:");
     gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
@@ -1139,6 +1305,7 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     gtk_widget_show(demo->remove_button);
 
     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, TRUE, 0);
 
     button = gtk_button_new_with_mnemonic("_Add");
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(pgd_annots_start_add_annot), (gpointer)demo);
@@ -1153,7 +1320,24 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     }
 
     demo->type_selector = gtk_combo_box_new_with_model(GTK_TREE_MODEL(model));
+    g_signal_connect(demo->type_selector, "changed", G_CALLBACK(type_selector_changed), (gpointer)demo);
     g_object_unref(model);
+
+    demo->stamp_selector = gtk_combo_box_text_new();
+    for (i = 1; i < G_N_ELEMENTS(stamp_types) - 1; i++) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(demo->stamp_selector), stamp_types[i]);
+    }
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(demo->stamp_selector), STAMP_CUSTOM_IMAGE);
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(demo->stamp_selector), 0);
+    g_signal_connect(demo->stamp_selector, "changed", G_CALLBACK(stamp_selector_changed), (gpointer)demo);
+    gtk_widget_set_sensitive(demo->stamp_selector, FALSE);
+    label = gtk_label_new("Stamp type: ");
+    gtk_widget_set_sensitive(label, FALSE);
+    g_object_bind_property(demo->stamp_selector, "sensitive", label, "sensitive", 0);
+    gtk_box_pack_end(GTK_BOX(hbox2), demo->stamp_selector, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(hbox2), label, FALSE, TRUE, 0);
+    gtk_widget_show_all(hbox2);
 
     renderer = gtk_cell_renderer_text_new();
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(demo->type_selector), renderer, TRUE);
@@ -1171,6 +1355,7 @@ GtkWidget *pgd_annots_create_widget(PopplerDocument *document)
     gtk_widget_show(button);
 
     gtk_widget_show(hbox);
+    gtk_widget_show(hbox2);
 
     demo->timer_label = gtk_label_new(NULL);
     gtk_label_set_markup(GTK_LABEL(demo->timer_label), "<i>No annotations found</i>");

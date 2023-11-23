@@ -15,12 +15,12 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009-2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2016, 2020, 2022, 2023 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2014-2016, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020-2022 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,6 +53,7 @@
 
 #include <cstring>
 #include <cmath>
+#include <vector>
 #include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
@@ -118,8 +119,9 @@ static inline void convertGfxColor(SplashColorPtr dest, const SplashColorMode co
         break;
     case splashModeDeviceN8:
         colorSpace->getDeviceN(src, &deviceN);
-        for (int i = 0; i < SPOT_NCOMPS + 4; i++)
+        for (int i = 0; i < SPOT_NCOMPS + 4; i++) {
             color[i] = colToByte(deviceN.c[i]);
+        }
         break;
     }
     splashColorCopy(dest, color);
@@ -163,8 +165,9 @@ static inline void convertGfxShortColor(SplashColorPtr dest, const SplashColorMo
     case splashModeDeviceN8: {
         GfxColor deviceN;
         colorSpace->getDeviceN(src, &deviceN);
-        for (int i = 0; i < SPOT_NCOMPS + 4; i++)
+        for (int i = 0; i < SPOT_NCOMPS + 4; i++) {
             dest[i] = colToByte(deviceN.c[i]);
+        }
     } break;
     }
 }
@@ -200,8 +203,9 @@ void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColor
 
     if (bDirectColorTranslation) {
         const int colorComps = splashColorModeNComps[mode];
-        for (int m = 0; m < colorComps; ++m)
+        for (int m = 0; m < colorComps; ++m) {
             dest[m] = colToByte(src.c[m]);
+        }
     } else {
         GfxColorSpace *srcColorSpace = shading->getColorSpace();
         convertGfxShortColor(dest, mode, srcColorSpace, &src);
@@ -252,8 +256,9 @@ bool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c)
     double xc, yc;
 
     ictm.transform(x, y, &xc, &yc);
-    if (xc < xMin || xc > xMax || yc < yMin || yc > yMax)
+    if (xc < xMin || xc > xMax || yc < yMin || yc > yMax) {
         return false;
+    }
     shading->getColor(xc, yc, &gfxColor);
     convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
     return true;
@@ -293,13 +298,15 @@ bool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c)
     double xc, yc, t;
 
     ictm.transform(x, y, &xc, &yc);
-    if (!getParameter(xc, yc, &t))
+    if (!getParameter(xc, yc, &t)) {
         return false;
+    }
 
     const int filled = shading->getColor(t, &gfxColor);
     if (unlikely(filled < shading->getColorSpace()->getNComps())) {
-        for (int i = filled; i < shading->getColorSpace()->getNComps(); ++i)
+        for (int i = filled; i < shading->getColorSpace()->getNComps(); ++i) {
             gfxColor.c[i] = 0;
+        }
     }
     convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
     return true;
@@ -310,8 +317,9 @@ bool SplashUnivariatePattern::testPosition(int x, int y)
     double xc, yc, t;
 
     ictm.transform(x, y, &xc, &yc);
-    if (!getParameter(xc, yc, &t))
+    if (!getParameter(xc, yc, &t)) {
         return false;
+    }
     return (t0 < t1) ? (t > t0 && t < t1) : (t > t1 && t < t0);
 }
 
@@ -330,8 +338,9 @@ SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *s
     dy -= y0;
     dr -= r0;
     a = dx * dx + dy * dy - dr * dr;
-    if (fabs(a) > RADIAL_EPSILON)
+    if (fabs(a) > RADIAL_EPSILON) {
         inva = 1.0 / a;
+    }
     shadingA->getColorSpace()->getDefaultColor(&srcColor);
     convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
 }
@@ -370,16 +379,18 @@ bool SplashRadialPattern::getParameter(double xs, double ys, double *t)
         //   -2*B*s + C = 0
         // If B is 0, we can either have no solution or an indeterminate
         // equation, thus we behave as if we had an invalid solution
-        if (fabs(b) <= RADIAL_EPSILON)
+        if (fabs(b) <= RADIAL_EPSILON) {
             return false;
+        }
 
         s0 = s1 = 0.5 * c / b;
     } else {
         double d;
 
         d = b * b - a * c;
-        if (d < 0)
+        if (d < 0) {
             return false;
+        }
 
         d = sqrt(d);
         s0 = b + d;
@@ -745,8 +756,9 @@ static void splashOutBlendDifference(SplashColorPtr src, SplashColorPtr dest, Sp
     }
     if (cm == splashModeDeviceN8) {
         for (i = 4; i < splashColorModeNComps[cm]; ++i) {
-            if (dest[i] == 0 && src[i] == 0)
+            if (dest[i] == 0 && src[i] == 0) {
                 blend[i] = 0;
+            }
         }
     }
 }
@@ -775,59 +787,43 @@ static void splashOutBlendExclusion(SplashColorPtr src, SplashColorPtr dest, Spl
     }
     if (cm == splashModeDeviceN8) {
         for (i = 4; i < splashColorModeNComps[cm]; ++i) {
-            if (dest[i] == 0 && src[i] == 0)
+            if (dest[i] == 0 && src[i] == 0) {
                 blend[i] = 0;
+            }
         }
     }
 }
 
 static int getLum(int r, int g, int b)
 {
-    return (int)(0.3 * r + 0.59 * g + 0.11 * b);
+    // (int)(0.3 * r + 0.59 * g + 0.11 * b) =
+    // (int)(256 / 256 * 0.3 * r + 256 / 256 * 0.59 * g + 256 / 256 * 0.11 * b)
+    // (int)((77 * r + 151 * g + 28 * b) / 256)  = // round!
+    return (int)((r * 77 + g * 151 + b * 28 + 0x80) >> 8);
 }
 
 static int getSat(int r, int g, int b)
 {
-    int rgbMin, rgbMax;
+    int rgbMin = std::min({ r, g, b });
+    int rgbMax = std::max({ r, g, b });
 
-    rgbMin = rgbMax = r;
-    if (g < rgbMin) {
-        rgbMin = g;
-    } else if (g > rgbMax) {
-        rgbMax = g;
-    }
-    if (b < rgbMin) {
-        rgbMin = b;
-    } else if (b > rgbMax) {
-        rgbMax = b;
-    }
     return rgbMax - rgbMin;
 }
 
 static void clipColor(int rIn, int gIn, int bIn, unsigned char *rOut, unsigned char *gOut, unsigned char *bOut)
 {
-    int lum, rgbMin, rgbMax;
+    int lum = getLum(rIn, gIn, bIn);
+    int rgbMin = std::min({ rIn, bIn, gIn });
+    int rgbMax = std::max({ rIn, bIn, gIn });
 
-    lum = getLum(rIn, gIn, bIn);
-    rgbMin = rgbMax = rIn;
-    if (gIn < rgbMin) {
-        rgbMin = gIn;
-    } else if (gIn > rgbMax) {
-        rgbMax = gIn;
-    }
-    if (bIn < rgbMin) {
-        rgbMin = bIn;
-    } else if (bIn > rgbMax) {
-        rgbMax = bIn;
-    }
     if (rgbMin < 0) {
-        *rOut = (unsigned char)(lum + ((rIn - lum) * lum) / (lum - rgbMin));
-        *gOut = (unsigned char)(lum + ((gIn - lum) * lum) / (lum - rgbMin));
-        *bOut = (unsigned char)(lum + ((bIn - lum) * lum) / (lum - rgbMin));
+        *rOut = (unsigned char)std::clamp(lum + ((rIn - lum) * lum) / (lum - rgbMin), 0, 255);
+        *gOut = (unsigned char)std::clamp(lum + ((gIn - lum) * lum) / (lum - rgbMin), 0, 255);
+        *bOut = (unsigned char)std::clamp(lum + ((bIn - lum) * lum) / (lum - rgbMin), 0, 255);
     } else if (rgbMax > 255) {
-        *rOut = (unsigned char)(lum + ((rIn - lum) * (255 - lum)) / (rgbMax - lum));
-        *gOut = (unsigned char)(lum + ((gIn - lum) * (255 - lum)) / (rgbMax - lum));
-        *bOut = (unsigned char)(lum + ((bIn - lum) * (255 - lum)) / (rgbMax - lum));
+        *rOut = (unsigned char)std::clamp(lum + ((rIn - lum) * (255 - lum)) / (rgbMax - lum), 0, 255);
+        *gOut = (unsigned char)std::clamp(lum + ((gIn - lum) * (255 - lum)) / (rgbMax - lum), 0, 255);
+        *bOut = (unsigned char)std::clamp(lum + ((bIn - lum) * (255 - lum)) / (rgbMax - lum), 0, 255);
     } else {
         *rOut = rIn;
         *gOut = gIn;
@@ -876,8 +872,8 @@ static void setSat(unsigned char rIn, unsigned char gIn, unsigned char bIn, int 
         minOut = bOut;
     }
     if (rgbMax > rgbMin) {
-        *midOut = (unsigned char)((rgbMid - rgbMin) * sat) / (rgbMax - rgbMin);
-        *maxOut = (unsigned char)sat;
+        *midOut = (unsigned char)std::clamp(((rgbMid - rgbMin) * sat) / (rgbMax - rgbMin), 0, 255);
+        *maxOut = (unsigned char)std::clamp(sat, 0, 255);
     } else {
         *midOut = *maxOut = 0;
     }
@@ -1136,8 +1132,9 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A, double m2
         glyphSize = ((glyphW + 7) >> 3) * glyphH;
     }
     cacheAssoc = type3FontCacheAssoc;
-    for (cacheSets = type3FontCacheMaxSets; cacheSets > 1 && cacheSets * cacheAssoc * glyphSize > type3FontCacheSize; cacheSets >>= 1)
+    for (cacheSets = type3FontCacheMaxSets; cacheSets > 1 && cacheSets * cacheAssoc * glyphSize > type3FontCacheSize; cacheSets >>= 1) {
         ;
+    }
     if (glyphSize < 10485760 / cacheAssoc / cacheSets) {
         cacheData = (unsigned char *)gmallocn_checkoverflow(cacheSets * cacheAssoc, glyphSize);
     } else {
@@ -1390,7 +1387,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA)
     splash->setFillPattern(new SplashSolidColor(color));
     splash->setLineCap(splashLineCapButt);
     splash->setLineJoin(splashLineJoinMiter);
-    splash->setLineDash(nullptr, 0, 0);
+    splash->setLineDash({}, 0);
     splash->setMiterLimit(10);
     splash->setFlatness(1);
     // the SA parameter supposedly defaults to false, but Acrobat
@@ -1457,23 +1454,18 @@ void SplashOutputDev::updateCTM(GfxState *state, double m11, double m12, double 
 
 void SplashOutputDev::updateLineDash(GfxState *state)
 {
-    double *dashPattern;
-    int dashLength;
     double dashStart;
-    SplashCoord dash[20];
-    int i;
 
-    state->getLineDash(&dashPattern, &dashLength, &dashStart);
-    if (dashLength > 20) {
-        dashLength = 20;
-    }
-    for (i = 0; i < dashLength; ++i) {
+    const std::vector<double> &dashPattern = state->getLineDash(&dashStart);
+
+    std::vector<SplashCoord> dash(dashPattern.size());
+    for (std::vector<double>::size_type i = 0; i < dashPattern.size(); ++i) {
         dash[i] = (SplashCoord)dashPattern[i];
         if (dash[i] < 0) {
             dash[i] = 0;
         }
     }
-    splash->setLineDash(dash, dashLength, (SplashCoord)dashStart);
+    splash->setLineDash(std::move(dash), (SplashCoord)dashStart);
 }
 
 void SplashOutputDev::updateFlatness(GfxState *state)
@@ -1514,14 +1506,16 @@ void SplashOutputDev::updateStrokeAdjust(GfxState * /*state*/)
 
 void SplashOutputDev::updateFillColorSpace(GfxState *state)
 {
-    if (colorMode == splashModeDeviceN8)
+    if (colorMode == splashModeDeviceN8) {
         state->getFillColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
+    }
 }
 
 void SplashOutputDev::updateStrokeColorSpace(GfxState *state)
 {
-    if (colorMode == splashModeDeviceN8)
+    if (colorMode == splashModeDeviceN8) {
         state->getStrokeColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
+    }
 }
 
 void SplashOutputDev::updateFillColor(GfxState *state)
@@ -1612,8 +1606,9 @@ SplashPattern *SplashOutputDev::getColor(GfxRGB *rgb)
     color[0] = colToByte(r);
     color[1] = colToByte(g);
     color[2] = colToByte(b);
-    if (colorMode == splashModeXBGR8)
+    if (colorMode == splashModeXBGR8) {
         color[3] = 255;
+    }
     return new SplashSolidColor(color);
 }
 
@@ -1632,8 +1627,9 @@ SplashPattern *SplashOutputDev::getColor(GfxColor *deviceN)
 {
     SplashColor color;
 
-    for (int i = 0; i < 4 + SPOT_NCOMPS; i++)
+    for (int i = 0; i < 4 + SPOT_NCOMPS; i++) {
         color[i] = colToByte(deviceN->c[i]);
+    }
     return new SplashSolidColor(color);
 }
 
@@ -1673,8 +1669,9 @@ void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap 
         break;
     case splashModeDeviceN8:
         colorMap->getColorSpace()->getDeviceN(matteColorIn, &deviceN);
-        for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+        for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
             matteColor[cp] = colToByte(deviceN.c[cp]);
+        }
         break;
     }
 }
@@ -1707,7 +1704,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace, bool overprint
                 mask &= ~8;
             }
         }
-        if (grayIndexed) {
+        if (grayIndexed && colorSpace->getMode() != csDeviceN) {
             mask &= ~7;
         } else if (colorSpace->getMode() == csSeparation) {
             GfxSeparationColorSpace *deviceSep = (GfxSeparationColorSpace *)colorSpace;
@@ -1823,16 +1820,10 @@ void SplashOutputDev::updateFont(GfxState * /*state*/)
 
 void SplashOutputDev::doUpdateFont(GfxState *state)
 {
-    GfxFont *gfxFont;
-    GfxFontLoc *fontLoc;
     GfxFontType fontType;
     SplashOutFontFileID *id = nullptr;
     SplashFontFile *fontFile;
     SplashFontSrc *fontsrc = nullptr;
-    FoFiTrueType *ff;
-    GooString *fileName;
-    char *tmpBuf;
-    int tmpBufLen;
     const double *textMat;
     double m11, m12, m21, m22, fontSize;
     int faceIndex = 0;
@@ -1842,11 +1833,9 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
 
     needFontUpdate = false;
     font = nullptr;
-    fileName = nullptr;
-    tmpBuf = nullptr;
-    fontLoc = nullptr;
 
-    if (!(gfxFont = state->getFont())) {
+    GfxFont *const gfxFont = state->getFont().get();
+    if (!gfxFont) {
         goto err1;
     }
     fontType = gfxFont->getType();
@@ -1863,8 +1852,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state)
     // check the font file cache
 reload:
     delete id;
-    delete fontLoc;
-    fontLoc = nullptr;
     if (fontsrc && !fontsrc->isFile) {
         fontsrc->unref();
         fontsrc = nullptr;
@@ -1876,17 +1863,22 @@ reload:
 
     } else {
 
-        if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr))) {
+        std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr);
+        if (!fontLoc) {
             error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
             goto err2;
         }
 
         // embedded font
+        std::string fileName;
+        std::optional<std::vector<unsigned char>> tmpBuf;
+
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
-            tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef(), &tmpBufLen);
-            if (!tmpBuf)
+            tmpBuf = gfxFont->readEmbFontFile((xref) ? xref : doc->getXRef());
+            if (!tmpBuf) {
                 goto err2;
+            }
 
             // external font
         } else { // gfxFontLocExternal
@@ -1896,48 +1888,53 @@ reload:
         }
 
         fontsrc = new SplashFontSrc;
-        if (fileName)
-            fontsrc->setFile(fileName, false);
-        else
-            fontsrc->setBuf(tmpBuf, tmpBufLen, true);
+        if (!fileName.empty()) {
+            fontsrc->setFile(fileName);
+        } else {
+            fontsrc->setBuf(std::move(tmpBuf.value()));
+        }
 
         // load the font file
         switch (fontType) {
         case fontType1:
             if (!(fontFile = fontEngine->loadType1Font(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
         case fontType1C:
             if (!(fontFile = fontEngine->loadType1CFont(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
         case fontType1COT:
             if (!(fontFile = fontEngine->loadOpenTypeT1CFont(id, fontsrc, (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
         case fontTrueType:
         case fontTrueTypeOT: {
-            if (fileName)
-                ff = FoFiTrueType::load(fileName->c_str());
-            else
-                ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
+            std::unique_ptr<FoFiTrueType> ff;
+            if (!fileName.empty()) {
+                ff = FoFiTrueType::load(fileName.c_str());
+            } else {
+                ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size());
+            }
             int *codeToGID;
             const int n = ff ? 256 : 0;
             if (ff) {
-                codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff);
-                delete ff;
+                codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get());
                 // if we're substituting for a non-TrueType font, we need to mark
                 // all notdef codes as "do not draw" (rather than drawing TrueType
                 // notdef glyphs)
@@ -1953,8 +1950,9 @@ reload:
             }
             if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
@@ -1963,8 +1961,9 @@ reload:
         case fontCIDType0C:
             if (!(fontFile = fontEngine->loadCIDFont(id, fontsrc))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
@@ -1982,8 +1981,9 @@ reload:
             if (!(fontFile = fontEngine->loadOpenTypeCFFFont(id, fontsrc, codeToGID, n))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                 gfree(codeToGID);
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
@@ -1999,21 +1999,23 @@ reload:
                     memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), n * sizeof(int));
                 }
             } else {
-                if (fileName)
-                    ff = FoFiTrueType::load(fileName->c_str());
-                else
-                    ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
+                std::unique_ptr<FoFiTrueType> ff;
+                if (!fileName.empty()) {
+                    ff = FoFiTrueType::load(fileName.c_str());
+                } else {
+                    ff = FoFiTrueType::make(fontsrc->buf.data(), fontsrc->buf.size());
+                }
                 if (!ff) {
                     error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     goto err2;
                 }
-                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff, &n);
-                delete ff;
+                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &n);
             }
             if (!(fontFile = fontEngine->loadTrueTypeFont(id, fontsrc, codeToGID, n, faceIndex))) {
                 error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
-                if (gfxFont->invalidateEmbeddedFont())
+                if (gfxFont->invalidateEmbeddedFont()) {
                     goto reload;
+                }
                 goto err2;
             }
             break;
@@ -2076,17 +2078,17 @@ reload:
         font = fontEngine->getFont(fontFile, mat, splash->getMatrix());
     }
 
-    delete fontLoc;
-    if (fontsrc && !fontsrc->isFile)
+    if (fontsrc && !fontsrc->isFile) {
         fontsrc->unref();
+    }
     return;
 
 err2:
     delete id;
-    delete fontLoc;
 err1:
-    if (fontsrc && !fontsrc->isFile)
+    if (fontsrc && !fontsrc->isFile) {
         fontsrc->unref();
+    }
     return;
 }
 
@@ -2209,8 +2211,9 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
 
     path = nullptr;
     SplashCoord lineWidth = splash->getLineWidth();
-    if (doStroke && lineWidth == 0.0)
+    if (doStroke && lineWidth == 0.0) {
         splash->setLineWidth(1 / state->getVDPI());
+    }
     if (doStroke || doClip) {
         if ((path = font->getGlyphPath(code))) {
             path->offset((SplashCoord)x, (SplashCoord)y);
@@ -2272,7 +2275,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y, double dx, d
 
 bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen)
 {
-    GfxFont *gfxFont;
+    std::shared_ptr<const GfxFont> gfxFont;
     const Ref *fontID;
     const double *ctm, *bbox;
     T3FontCache *t3Font;
@@ -2524,8 +2527,9 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy, double llx,
         return;
     }
 
-    if (t3Font->cacheTags == nullptr)
+    if (t3Font->cacheTags == nullptr) {
         return;
+    }
 
     // allocate a cache entry
     i = (t3GlyphStack->code & (t3Font->cacheSets - 1)) * t3Font->cacheAssoc;
@@ -2635,8 +2639,9 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str, i
 
     const double *ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
-        if (!std::isfinite(ctm[i]))
+        if (!std::isfinite(ctm[i])) {
             return;
+        }
     }
     mat[0] = ctm[0];
     mat[1] = ctm[1];
@@ -2679,8 +2684,9 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Str
 
     ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
-        if (!std::isfinite(ctm[i]))
+        if (!std::isfinite(ctm[i])) {
             return;
+        }
     }
 
     beginTransparencyGroup(state, bbox, nullptr, false, false, false);
@@ -2762,22 +2768,26 @@ bool SplashOutputDev::useIccImageSrc(void *data)
         switch (imgData->colorMode) {
         case splashModeMono1:
         case splashModeMono8:
-            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceGray)
+            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceGray) {
                 return true;
+            }
             break;
         case splashModeXBGR8:
         case splashModeRGB8:
         case splashModeBGR8:
-            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceRGB)
+            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceRGB) {
                 return true;
+            }
             break;
         case splashModeCMYK8:
-            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceCMYK)
+            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceCMYK) {
                 return true;
+            }
             break;
         case splashModeDeviceN8:
-            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceN)
+            if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceN) {
                 return true;
+            }
             break;
         }
     }
@@ -2808,14 +2818,15 @@ bool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine, unsigned ch
     }
     if (!(p = imgData->imgStr->getLine())) {
         int destComps = 1;
-        if (imgData->colorMode == splashModeRGB8 || imgData->colorMode == splashModeBGR8)
+        if (imgData->colorMode == splashModeRGB8 || imgData->colorMode == splashModeBGR8) {
             destComps = 3;
-        else if (imgData->colorMode == splashModeXBGR8)
+        } else if (imgData->colorMode == splashModeXBGR8) {
             destComps = 4;
-        else if (imgData->colorMode == splashModeCMYK8)
+        } else if (imgData->colorMode == splashModeCMYK8) {
             destComps = 4;
-        else if (imgData->colorMode == splashModeDeviceN8)
+        } else if (imgData->colorMode == splashModeDeviceN8) {
             destComps = SPOT_NCOMPS + 4;
+        }
         memset(colorLine, 0, imgData->width * destComps);
         return false;
     }
@@ -2860,8 +2871,9 @@ bool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine, unsigned ch
         case splashModeDeviceN8:
             for (x = 0, q = colorLine; x < imgData->width; ++x, ++p) {
                 col = &imgData->lookup[(SPOT_NCOMPS + 4) * *p];
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     *q++ = col[cp];
+                }
             }
             break;
         }
@@ -2919,8 +2931,9 @@ bool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine, unsigned ch
             } else {
                 for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
                     imgData->colorMap->getDeviceN(p, &deviceN);
-                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                         *q++ = colToByte(deviceN.c[cp]);
+                    }
                 }
             }
             break;
@@ -2953,14 +2966,15 @@ bool SplashOutputDev::iccImageSrc(void *data, SplashColorPtr colorLine, unsigned
     }
     if (!(p = imgData->imgStr->getLine())) {
         int destComps = 1;
-        if (imgData->colorMode == splashModeRGB8 || imgData->colorMode == splashModeBGR8)
+        if (imgData->colorMode == splashModeRGB8 || imgData->colorMode == splashModeBGR8) {
             destComps = 3;
-        else if (imgData->colorMode == splashModeXBGR8)
+        } else if (imgData->colorMode == splashModeXBGR8) {
             destComps = 4;
-        else if (imgData->colorMode == splashModeCMYK8)
+        } else if (imgData->colorMode == splashModeCMYK8) {
             destComps = 4;
-        else if (imgData->colorMode == splashModeDeviceN8)
+        } else if (imgData->colorMode == splashModeDeviceN8) {
             destComps = SPOT_NCOMPS + 4;
+        }
         memset(colorLine, 0, imgData->width * destComps);
         return false;
     }
@@ -3031,8 +3045,9 @@ void SplashOutputDev::iccTransform(void *data, SplashBitmap *bitmap)
         }
     }
     gfree(colorLine);
-    if (rgbxLine != nullptr)
+    if (rgbxLine != nullptr) {
         gfree(rgbxLine);
+    }
 }
 #endif
 
@@ -3094,8 +3109,9 @@ bool SplashOutputDev::alphaImageSrc(void *data, SplashColorPtr colorLine, unsign
                 break;
             case splashModeDeviceN8:
                 col = &imgData->lookup[(SPOT_NCOMPS + 4) * *p];
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     *q++ = col[cp];
+                }
                 break;
             }
             *aq++ = alpha;
@@ -3113,8 +3129,9 @@ bool SplashOutputDev::alphaImageSrc(void *data, SplashColorPtr colorLine, unsign
                 *q++ = colToByte(rgb.r);
                 *q++ = colToByte(rgb.g);
                 *q++ = colToByte(rgb.b);
-                if (imgData->colorMode == splashModeXBGR8)
+                if (imgData->colorMode == splashModeXBGR8) {
                     *q++ = 255;
+                }
                 break;
             case splashModeCMYK8:
                 imgData->colorMap->getCMYK(p, &cmyk);
@@ -3125,8 +3142,9 @@ bool SplashOutputDev::alphaImageSrc(void *data, SplashColorPtr colorLine, unsign
                 break;
             case splashModeDeviceN8:
                 imgData->colorMap->getDeviceN(p, &deviceN);
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     *q++ = colToByte(deviceN.c[cp]);
+                }
                 break;
             }
             *aq++ = alpha;
@@ -3154,8 +3172,9 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
 
     if (imgData->y == imgData->bitmap->getHeight()) {
         imgData->repeatY--;
-        if (imgData->repeatY == 0)
+        if (imgData->repeatY == 0) {
             return false;
+        }
         imgData->y = 0;
     }
 
@@ -3203,10 +3222,11 @@ bool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine, unsi
                 imgData->bitmap->getPixel(x, imgData->y, col);
                 imgData->pattern->getColor(x, imgData->y, pat);
                 for (int i = 0; i < splashColorModeNComps[imgData->colorMode]; ++i) {
-                    if (imgData->colorMode == splashModeCMYK8 || imgData->colorMode == splashModeDeviceN8)
+                    if (imgData->colorMode == splashModeCMYK8 || imgData->colorMode == splashModeDeviceN8) {
                         dest[i] = div255(pat[i] * (255 - col[0]));
-                    else
+                    } else {
                         dest[i] = 255 - div255((255 - pat[i]) * (255 - col[0]));
+                    }
                 }
                 dest += splashColorModeNComps[imgData->colorMode];
             }
@@ -3245,8 +3265,9 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
 
     const double *ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
-        if (!std::isfinite(ctm[i]))
+        if (!std::isfinite(ctm[i])) {
             return;
+        }
     }
     mat[0] = ctm[0];
     mat[1] = ctm[1];
@@ -3338,8 +3359,9 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str, int w
                         grayIndexed = false;
                     }
                     colorMap->getDeviceN(&pix, &deviceN);
-                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                         imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
+                    }
                 }
             }
             break;
@@ -3443,8 +3465,9 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
                 break;
             case splashModeDeviceN8:
                 col = &imgData->lookup[(SPOT_NCOMPS + 4) * *p];
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     *q++ = col[cp];
+                }
                 break;
             }
             *aq++ = alpha;
@@ -3462,8 +3485,9 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
                 *q++ = colToByte(rgb.r);
                 *q++ = colToByte(rgb.g);
                 *q++ = colToByte(rgb.b);
-                if (imgData->colorMode == splashModeXBGR8)
+                if (imgData->colorMode == splashModeXBGR8) {
                     *q++ = 255;
+                }
                 break;
             case splashModeCMYK8:
                 imgData->colorMap->getCMYK(p, &cmyk);
@@ -3474,8 +3498,9 @@ bool SplashOutputDev::maskedImageSrc(void *data, SplashColorPtr colorLine, unsig
                 break;
             case splashModeDeviceN8:
                 imgData->colorMap->getDeviceN(p, &deviceN);
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     *q++ = colToByte(deviceN.c[cp]);
+                }
                 break;
             }
             *aq++ = alpha;
@@ -3625,8 +3650,9 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
                 for (i = 0; i < n; ++i) {
                     pix = (unsigned char)i;
                     colorMap->getDeviceN(&pix, &deviceN);
-                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                         imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
+                    }
                 }
                 break;
             }
@@ -3666,8 +3692,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
 
     const double *ctm = state->getCTM();
     for (int i = 0; i < 6; ++i) {
-        if (!std::isfinite(ctm[i]))
+        if (!std::isfinite(ctm[i])) {
             return;
+        }
     }
     mat[0] = ctm[0];
     mat[1] = ctm[1];
@@ -3801,8 +3828,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
                 for (unsigned i = 0; i < n; ++i) {
                     pix = (unsigned char)i;
                     colorMap->getDeviceN(&pix, &deviceN);
-                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                    for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                         imgData.lookup[(SPOT_NCOMPS + 4) * i + cp] = colToByte(deviceN.c[cp]);
+                    }
                 }
             }
             break;
@@ -3828,8 +3856,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */, S
 
 bool SplashOutputDev::checkTransparencyGroup(GfxState *state, bool knockout)
 {
-    if (state->getFillOpacity() != 1 || state->getStrokeOpacity() != 1 || state->getAlphaIsShape() || state->getBlendMode() != gfxBlendNormal || splash->getSoftMask() != nullptr || knockout)
+    if (state->getFillOpacity() != 1 || state->getStrokeOpacity() != 1 || state->getAlphaIsShape() || state->getBlendMode() != gfxBlendNormal || splash->getSoftMask() != nullptr || knockout) {
         return true;
+    }
     return transpGroupStack != nullptr && transpGroupStack->shape != nullptr;
 }
 
@@ -3958,8 +3987,9 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox
     splash->setStrokePattern(transpGroup->origSplash->getStrokePattern()->copy());
     if (isolated) {
         splashClearColor(color);
-        if (colorMode == splashModeXBGR8)
+        if (colorMode == splashModeXBGR8) {
             color[3] = 255;
+        }
         splash->clear(color, 0);
     } else {
         SplashBitmap *shape = (knockout) ? transpGroup->shape : (transpGroup->next != nullptr && transpGroup->next->shape != nullptr) ? transpGroup->next->shape : transpGroup->origBitmap;
@@ -4074,8 +4104,9 @@ void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alph
                 break;
             case splashModeDeviceN8:
                 transpGroupStack->blendingColorSpace->getDeviceN(backdropColor, &deviceN);
-                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+                for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++) {
                     color[cp] = colToByte(deviceN.c[cp]);
+                }
                 tSplash->compositeBackground(color);
                 break;
             }
@@ -4093,10 +4124,12 @@ void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alph
     p = softMask->getDataPtr() + ty * softMask->getRowSize() + tx;
     int xMax = tBitmap->getWidth();
     int yMax = tBitmap->getHeight();
-    if (xMax > bitmap->getWidth() - tx)
+    if (xMax > bitmap->getWidth() - tx) {
         xMax = bitmap->getWidth() - tx;
-    if (yMax > bitmap->getHeight() - ty)
+    }
+    if (yMax > bitmap->getHeight() - ty) {
         yMax = bitmap->getHeight() - ty;
+    }
     for (y = 0; y < yMax; ++y) {
         for (x = 0; x < xMax; ++x) {
             if (alpha) {
@@ -4104,8 +4137,9 @@ void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox, bool alph
                     lum = tBitmap->getAlpha(x, y) / 255.0;
                     transferFunc->transform(&lum, &lum2);
                     p[x] = (int)(lum2 * 255.0 + 0.5);
-                } else
+                } else {
                     p[x] = tBitmap->getAlpha(x, y);
+                }
             } else {
                 tBitmap->getPixel(x, y, color);
                 // convert to luminosity
@@ -4218,8 +4252,9 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     width = bbox[2] - bbox[0];
     height = bbox[3] - bbox[1];
 
-    if (xStep != width || yStep != height)
+    if (xStep != width || yStep != height) {
         return false;
+    }
 
     // calculate offsets
     ctm = state->getCTM();
@@ -4274,6 +4309,15 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         surface_height = (int)ceil(fabs(ky));
         repeatX = x1 - x0;
         repeatY = y1 - y0;
+        while ((unsigned long)repeatX * repeatY > 0x800000L) {
+            // try to avoid bogus memory allocation size
+            if (repeatX > 1) {
+                repeatX /= 2;
+            }
+            if (repeatY > 1) {
+                repeatY /= 2;
+            }
+        }
     } else {
         if ((unsigned long)surface_width * surface_height > 0x800000L) {
             state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
@@ -4294,14 +4338,18 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         }
         repeatX = result_width / surface_width;
         repeatY = result_height / surface_height;
-        if (surface_width * repeatX < result_width)
+        if (surface_width * repeatX < result_width) {
             repeatX++;
-        if (surface_height * repeatY < result_height)
+        }
+        if (surface_height * repeatY < result_height) {
             repeatY++;
-        if (x1 - x0 > repeatX)
+        }
+        if (x1 - x0 > repeatX) {
             repeatX = x1 - x0;
-        if (y1 - y0 > repeatY)
+        }
+        if (y1 - y0 > repeatY) {
             repeatY = y1 - y0;
+        }
     }
     // restore CTM and calculate rotate and scale with rounded matrix
     state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
@@ -4401,6 +4449,9 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
         retValue = splash->drawImage(&tilingBitmapSrc, nullptr, &imgData, colorMode, true, result_width, result_height, matc, false, true) == splashOk;
     }
     delete tBitmap;
+    if (!retValue) {
+        state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
+    }
     return retValue;
 }
 

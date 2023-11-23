@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015-2020, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     SplashOutputDev *splashOut = nullptr;
     bool doOutline;
     bool ok;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     Object info;
     int exit_status = EXIT_FAILURE;
 
@@ -206,14 +206,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0]) {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0]) {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     fileName = new GooString(argv[1]);
@@ -225,12 +221,6 @@ int main(int argc, char *argv[])
 
     doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         goto error;
     }
@@ -271,17 +261,20 @@ int main(int argc, char *argv[])
         goto error;
     } else {
         const char *p = fileName->c_str() + fileName->getLength() - 4;
-        if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF"))
+        if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
             htmlFileName = new GooString(fileName->c_str(), fileName->getLength() - 4);
-        else
+        } else {
             htmlFileName = fileName->copy();
+        }
         //   htmlFileName->append(".html");
     }
 
-    if (scale > 3.0)
+    if (scale > 3.0) {
         scale = 3.0;
-    if (scale < 0.5)
+    }
+    if (scale < 0.5) {
         scale = 0.5;
+    }
 
     if (complexMode) {
         // noframes=false;
@@ -301,10 +294,12 @@ int main(int argc, char *argv[])
     }
 
     // get page range
-    if (firstPage < 1)
+    if (firstPage < 1) {
         firstPage = 1;
-    if (lastPage < 1 || lastPage > doc->getNumPages())
+    }
+    if (lastPage < 1 || lastPage > doc->getNumPages()) {
         lastPage = doc->getNumPages();
+    }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
         goto error;
@@ -317,16 +312,19 @@ int main(int argc, char *argv[])
         keywords = getInfoString(info.getDict(), "Keywords");
         subject = getInfoString(info.getDict(), "Subject");
         date = getInfoDate(info.getDict(), "ModDate");
-        if (!date)
+        if (!date) {
             date = getInfoDate(info.getDict(), "CreationDate");
+        }
     }
-    if (!docTitle)
+    if (!docTitle) {
         docTitle = new GooString(htmlFileName);
+    }
 
-    if (!singleHtml)
+    if (!singleHtml) {
         rawOrder = complexMode; // todo: figure out what exactly rawOrder do :)
-    else
+    } else {
         rawOrder = singleHtml;
+    }
 
     doOutline = doc->getOutline()->getItems() != nullptr;
     // write text file
@@ -347,7 +345,6 @@ int main(int argc, char *argv[])
     }
 
     if ((complexMode || singleHtml) && !xml && !ignore) {
-        GooString *imgFileName = nullptr;
         // White paper color
         SplashColor color;
         color[0] = color[1] = color[2] = 255;
@@ -362,11 +359,10 @@ int main(int argc, char *argv[])
             doc->displayPage(splashOut, pg, 72 * scale, 72 * scale, 0, true, false, false);
             SplashBitmap *bitmap = splashOut->getBitmap();
 
-            imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", htmlFileName->c_str(), pg, extension);
+            const std::unique_ptr<GooString> imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", htmlFileName->c_str(), pg, extension);
             auto f1 = dataUrls ? imf.open("wb") : fopen(imgFileName->c_str(), "wb");
             if (!f1) {
                 fprintf(stderr, "Could not open %s\n", imgFileName->c_str());
-                delete imgFileName;
                 continue;
             }
             bitmap->writeImgFile(format, f1, 72 * scale, 72 * scale);
@@ -376,7 +372,6 @@ int main(int argc, char *argv[])
             } else {
                 htmlOut->addBackgroundImage(gbasename(imgFileName->c_str()));
             }
-            delete imgFileName;
         }
 
         delete splashOut;
@@ -395,8 +390,9 @@ int main(int argc, char *argv[])
 error:
     delete fileName;
 
-    if (htmlFileName)
+    if (htmlFileName) {
         delete htmlFileName;
+    }
 
     return exit_status;
 }

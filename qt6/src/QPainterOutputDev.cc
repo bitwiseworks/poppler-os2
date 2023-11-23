@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2009, 2011, 2012, 2014, 2015, 2018, 2019, 2021, 2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
@@ -23,8 +23,8 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
-// Copyright (C) 2017, 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
-// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2017, 2018, 2020-2022 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2022 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -40,6 +40,7 @@
 
 #include <array>
 
+#include "goo/ft_utils.h"
 #include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
@@ -64,13 +65,13 @@
 class QPainterOutputDevType3Font
 {
 public:
-    QPainterOutputDevType3Font(PDFDoc *doc, Gfx8BitFont *font);
+    QPainterOutputDevType3Font(PDFDoc *doc, const std::shared_ptr<Gfx8BitFont> &font);
 
     const QPicture &getGlyph(int gid) const;
 
 private:
     PDFDoc *m_doc;
-    Gfx8BitFont *m_font;
+    std::shared_ptr<Gfx8BitFont> m_font;
 
     mutable std::vector<std::unique_ptr<QPicture>> glyphs;
 
@@ -78,7 +79,7 @@ public:
     std::vector<int> codeToGID;
 };
 
-QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, Gfx8BitFont *font) : m_doc(doc), m_font(font)
+QPainterOutputDevType3Font::QPainterOutputDevType3Font(PDFDoc *doc, const std::shared_ptr<Gfx8BitFont> &font) : m_doc(doc), m_font(font)
 {
     char *name;
     const Dict *charProcs = font->getCharProcs();
@@ -239,22 +240,20 @@ void QPainterOutputDev::updateCTM(GfxState *state, double m11, double m12, doubl
 
 void QPainterOutputDev::updateLineDash(GfxState *state)
 {
-    double *dashPattern;
-    int dashLength;
     double dashStart;
-    state->getLineDash(&dashPattern, &dashLength, &dashStart);
+    const std::vector<double> &dashPattern = state->getLineDash(&dashStart);
 
     // Special handling for zero-length patterns, i.e., solid lines.
     // Simply calling QPen::setDashPattern with an empty pattern does *not*
     // result in a solid line.  Rather, the current pattern is unchanged.
     // See the implementation of the setDashPattern method in the file qpen.cpp.
-    if (dashLength == 0) {
+    if (dashPattern.empty()) {
         m_currentPen.setStyle(Qt::SolidLine);
         m_painter.top()->setPen(m_currentPen);
         return;
     }
 
-    QVector<qreal> pattern(dashLength);
+    QVector<qreal> pattern(dashPattern.size());
     double scaling = state->getLineWidth();
 
     //  Negative line widths are not allowed, width 0 counts as 'one pixel width'.
@@ -262,7 +261,7 @@ void QPainterOutputDev::updateLineDash(GfxState *state)
         scaling = 1.0;
     }
 
-    for (int i = 0; i < dashLength; ++i) {
+    for (std::vector<double>::size_type i = 0; i < dashPattern.size(); ++i) {
         // pdf measures the dash pattern in dots, but Qt uses the
         // line width as the unit.
         pattern[i] = dashPattern[i] / scaling;
@@ -394,6 +393,7 @@ void QPainterOutputDev::updateBlendMode(GfxState *state)
         break;
     default:
         qDebug() << "Unsupported blend mode, falling back to CompositionMode_SourceOver";
+        [[fallthrough]];
     case gfxBlendNormal:
         m_painter.top()->setCompositionMode(QPainter::CompositionMode_SourceOver);
         break;
@@ -417,7 +417,7 @@ void QPainterOutputDev::updateStrokeOpacity(GfxState *state)
 
 void QPainterOutputDev::updateFont(GfxState *state)
 {
-    GfxFont *gfxFont = state->getFont();
+    const std::shared_ptr<GfxFont> &gfxFont = state->getFont();
     if (!gfxFont) {
         return;
     }
@@ -436,7 +436,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
         } else {
 
-            m_currentType3Font = new QPainterOutputDevType3Font(m_doc, (Gfx8BitFont *)gfxFont);
+            m_currentType3Font = new QPainterOutputDevType3Font(m_doc, std::static_pointer_cast<Gfx8BitFont>(gfxFont));
             m_type3FontCache.insert(std::make_pair(fontID, std::unique_ptr<QPainterOutputDevType3Font>(m_currentType3Font)));
         }
 
@@ -456,30 +456,28 @@ void QPainterOutputDev::updateFont(GfxState *state)
         // New font: load it into the cache
         float fontSize = state->getFontSize();
 
-        std::unique_ptr<GfxFontLoc> fontLoc(gfxFont->locateFont(xref, nullptr));
+        std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont(xref, nullptr);
 
         if (fontLoc) {
             // load the font from respective location
             switch (fontLoc->locType) {
             case gfxFontLocEmbedded: { // if there is an embedded font, read it to memory
-                int fontDataLen;
-                const char *fontData = gfxFont->readEmbFontFile(xref, &fontDataLen);
+                const std::optional<std::vector<unsigned char>> fontData = gfxFont->readEmbFontFile(xref);
 
-                m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize, m_hintingPreference);
+                // fontData gets copied in the QByteArray constructor
+                m_rawFont = new QRawFont(QByteArray(fontData ? (const char *)fontData->data() : nullptr, fontData ? fontData->size() : 0), fontSize, m_hintingPreference);
                 m_rawFontCache.insert(std::make_pair(fontID, std::unique_ptr<QRawFont>(m_rawFont)));
 
-                // Free the font data, it was copied in the QByteArray constructor
-                free((char *)fontData);
                 break;
             }
             case gfxFontLocExternal: { // font is in an external font file
-                QString fontFile(fontLoc->path->c_str());
+                QString fontFile(fontLoc->path.c_str());
                 m_rawFont = new QRawFont(fontFile, fontSize, m_hintingPreference);
                 m_rawFontCache.insert(std::make_pair(fontID, std::unique_ptr<QRawFont>(m_rawFont)));
                 break;
             }
             case gfxFontLocResident: { // font resides in a PS printer
-                qDebug() << "Font Resident Encoding:" << fontLoc->encoding->c_str() << ", not implemented yet!";
+                qDebug() << "Resident Font Resident not implemented yet!";
 
                 break;
             }
@@ -521,10 +519,9 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
     } else {
 
-        std::unique_ptr<char[], void (*)(char *)> tmpBuf(nullptr, [](char *b) { free(b); });
-        int tmpBufLen = 0;
+        std::optional<std::vector<unsigned char>> fontBuffer;
 
-        std::unique_ptr<GfxFontLoc> fontLoc(gfxFont->locateFont(xref, nullptr));
+        std::optional<GfxFontLoc> fontLoc = gfxFont->locateFont(xref, nullptr);
         if (!fontLoc) {
             error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
             return;
@@ -533,8 +530,8 @@ void QPainterOutputDev::updateFont(GfxState *state)
         // embedded font
         if (fontLoc->locType == gfxFontLocEmbedded) {
             // if there is an embedded font, read it to memory
-            tmpBuf.reset(gfxFont->readEmbFontFile(xref, &tmpBufLen));
-            if (!tmpBuf) {
+            fontBuffer = gfxFont->readEmbFontFile(xref);
+            if (!fontBuffer) {
                 return;
             }
 
@@ -554,12 +551,12 @@ void QPainterOutputDev::updateFont(GfxState *state)
             FT_Face freeTypeFace;
 
             if (fontLoc->locType != gfxFontLocEmbedded) {
-                if (FT_New_Face(m_ftLibrary, fontLoc->path->c_str(), faceIndex, &freeTypeFace)) {
+                if (ft_new_face_from_file(m_ftLibrary, fontLoc->path.c_str(), faceIndex, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
             } else {
-                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)tmpBuf.get(), tmpBufLen, faceIndex, &freeTypeFace)) {
+                if (FT_New_Memory_Face(m_ftLibrary, (const FT_Byte *)fontBuffer->data(), fontBuffer->size(), faceIndex, &freeTypeFace)) {
                     error(errSyntaxError, -1, "Couldn't create a FreeType face for '{0:s}'", gfxFont->getName() ? gfxFont->getName()->c_str() : "(unnamed)");
                     return;
                 }
@@ -570,7 +567,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
             int *codeToGID = (int *)gmallocn(256, sizeof(int));
             for (int i = 0; i < 256; ++i) {
                 codeToGID[i] = 0;
-                if ((name = ((const char **)((Gfx8BitFont *)gfxFont)->getEncoding())[i])) {
+                if ((name = ((const char **)((Gfx8BitFont *)gfxFont.get())->getEncoding())[i])) {
                     codeToGID[i] = (int)FT_Get_Name_Index(freeTypeFace, (char *)name);
                     if (codeToGID[i] == 0) {
                         name = GfxFont::getAlternateName(name);
@@ -589,9 +586,9 @@ void QPainterOutputDev::updateFont(GfxState *state)
         }
         case fontTrueType:
         case fontTrueTypeOT: {
-            auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiTrueType>(FoFiTrueType::load(fontLoc->path->c_str())) : std::unique_ptr<FoFiTrueType>(FoFiTrueType::make(tmpBuf.get(), tmpBufLen));
+            auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size());
 
-            m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff.get()) : nullptr;
+            m_codeToGIDCache[id] = (ff) ? ((Gfx8BitFont *)gfxFont.get())->getCodeToGIDMap(ff.get()) : nullptr;
 
             break;
         }
@@ -602,7 +599,7 @@ void QPainterOutputDev::updateFont(GfxState *state)
 
             // check for a CFF font
             if (!m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiType1C>(FoFiType1C::load(fontLoc->path->c_str())) : std::unique_ptr<FoFiType1C>(FoFiType1C::make(tmpBuf.get(), tmpBufLen));
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiType1C>(FoFiType1C::load(fontLoc->path.c_str())) : std::unique_ptr<FoFiType1C>(FoFiType1C::make(fontBuffer->data(), fontBuffer->size()));
 
                 cidToGIDMap = (ff) ? ff->getCIDToGIDMap(&nCIDs) : nullptr;
             }
@@ -614,17 +611,17 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontCIDType0COT: {
             int *codeToGID = nullptr;
 
-            if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
-                int codeToGIDLen = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
+            if (((GfxCIDFont *)gfxFont.get())->getCIDToGID()) {
+                int codeToGIDLen = ((GfxCIDFont *)gfxFont.get())->getCIDToGIDLen();
                 codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
-                memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), codeToGIDLen * sizeof(int));
+                memcpy(codeToGID, ((GfxCIDFont *)gfxFont.get())->getCIDToGID(), codeToGIDLen * sizeof(int));
             }
 
             int *cidToGIDMap = nullptr;
             int nCIDs = 0;
 
             if (!codeToGID && !m_useCIDs) {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiTrueType>(FoFiTrueType::load(fontLoc->path->c_str())) : std::unique_ptr<FoFiTrueType>(FoFiTrueType::make(tmpBuf.get(), tmpBufLen));
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size());
 
                 if (ff && ff->isOpenTypeCFF()) {
                     cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
@@ -639,18 +636,18 @@ void QPainterOutputDev::updateFont(GfxState *state)
         case fontCIDType2OT: {
             int *codeToGID = nullptr;
             int codeToGIDLen = 0;
-            if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
-                codeToGIDLen = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
+            if (((GfxCIDFont *)gfxFont.get())->getCIDToGID()) {
+                codeToGIDLen = ((GfxCIDFont *)gfxFont.get())->getCIDToGIDLen();
                 if (codeToGIDLen) {
                     codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
-                    memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(), codeToGIDLen * sizeof(int));
+                    memcpy(codeToGID, ((GfxCIDFont *)gfxFont.get())->getCIDToGID(), codeToGIDLen * sizeof(int));
                 }
             } else {
-                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? std::unique_ptr<FoFiTrueType>(FoFiTrueType::load(fontLoc->path->c_str())) : std::unique_ptr<FoFiTrueType>(FoFiTrueType::make(tmpBuf.get(), tmpBufLen));
+                auto ff = (fontLoc->locType != gfxFontLocEmbedded) ? FoFiTrueType::load(fontLoc->path.c_str()) : FoFiTrueType::make(fontBuffer->data(), fontBuffer->size());
                 if (!ff) {
                     return;
                 }
-                codeToGID = ((GfxCIDFont *)gfxFont)->getCodeToGIDMap(ff.get(), &codeToGIDLen);
+                codeToGID = ((GfxCIDFont *)gfxFont.get())->getCodeToGIDMap(ff.get(), &codeToGIDLen);
             }
 
             m_codeToGIDCache[id] = codeToGID;
@@ -794,12 +791,14 @@ bool QPainterOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shadin
             shading->getColor(midPoint, &colorAtMidPoint);
 
             GfxColor linearlyInterpolatedColor;
-            for (int ii = 0; ii < nComps; ii++)
+            for (int ii = 0; ii < nComps; ii++) {
                 linearlyInterpolatedColor.c[ii] = 0.5 * (color0.c[ii] + color1.c[ii]);
+            }
 
             // If the two colors are equal, ta[j] is a good place for the next color stop; take it!
-            if (isSameGfxColor(colorAtMidPoint, linearlyInterpolatedColor))
+            if (isSameGfxColor(colorAtMidPoint, linearlyInterpolatedColor)) {
                 break;
+            }
 
             // Otherwise: bisect further
             int k = (i + j) / 2;
@@ -867,7 +866,7 @@ void QPainterOutputDev::drawChar(GfxState *state, double x, double y, double dx,
 {
 
     // First handle type3 fonts
-    GfxFont *gfxFont = state->getFont();
+    const std::shared_ptr<GfxFont> &gfxFont = state->getFont();
 
     GfxFontType fontType = gfxFont->getType();
     if (fontType == fontType3) {
