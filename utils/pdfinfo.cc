@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018, 2021 Adrian Johnson <ajohnson@redneon.com>
@@ -87,6 +87,7 @@ static bool printEnc = false;
 static bool printStructure = false;
 static bool printStructureText = false;
 static bool printDests = false;
+static bool printUrls = false;
 
 static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to convert" },
                                    { "-l", argInt, &lastPage, 0, "last page to convert" },
@@ -99,6 +100,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-isodates", argFlag, &isoDates, 0, "print the dates in ISO-8601 format" },
                                    { "-rawdates", argFlag, &rawDates, 0, "print the undecoded date strings directly from the PDF file" },
                                    { "-dests", argFlag, &printDests, 0, "print all named destinations in the PDF" },
+                                   { "-url", argFlag, &printUrls, 0, "print all URLs inside PDF objects (does not scan text content)" },
                                    { "-enc", argString, textEncName, sizeof(textEncName), "output text encoding name" },
                                    { "-listenc", argFlag, &printEnc, 0, "list available encodings" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
@@ -114,7 +116,7 @@ static void printTextString(const GooString *s, const UnicodeMap *uMap)
 {
     Unicode *u;
     char buf[8];
-    int len = TextStringToUCS4(s, &u);
+    int len = TextStringToUCS4(s->toStr(), &u);
     for (int i = 0; i < len; i++) {
         int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
         fwrite(buf, 1, n, stdout);
@@ -171,8 +173,9 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text, con
             time = timegm(&tmStruct);
             if (time != (time_t)-1) {
                 int offset = (tz_hour * 60 + tz_minute) * 60;
-                if (tz == '-')
+                if (tz == '-') {
                     offset *= -1;
+                }
                 time -= offset;
                 localtime_r(&time, &tmStruct);
                 strftime(buf, sizeof(buf), "%c %Z", &tmStruct);
@@ -202,8 +205,9 @@ static void printISODate(Dict *infoDict, const char *key, const char *text, cons
                 fprintf(stdout, "Z");
             } else {
                 fprintf(stdout, "%c%02d", tz, tz_hour);
-                if (tz_minute)
+                if (tz_minute) {
                     fprintf(stdout, ":%02d", tz_minute);
+                }
             }
         } else {
             printTextString(obj.getString(), uMap);
@@ -230,9 +234,8 @@ static void printAttribute(const Attribute *attribute, unsigned indent)
     printIndent(indent);
     printf(" /%s ", attribute->getTypeName());
     if (attribute->getType() == Attribute::UserProperty) {
-        GooString *name = attribute->getName();
+        std::unique_ptr<GooString> name = attribute->getName();
         printf("(%s) ", name->c_str());
-        delete name;
     }
     attribute->getValue()->print(stdout);
     if (attribute->getFormattedValue()) {
@@ -406,6 +409,25 @@ static void printDestinations(PDFDoc *doc, const UnicodeMap *uMap)
                     printTextString(it.first, uMap);
                     printf("\"\n");
                     delete it.first;
+                }
+            }
+        }
+    }
+}
+
+static void printUrlList(PDFDoc *doc)
+{
+    printf("Page  Type          URL\n");
+    for (int pg = firstPage; pg <= lastPage; pg++) {
+        Page *page = doc->getPage(pg);
+        if (page) {
+            std::unique_ptr<Links> links = page->getLinks();
+            for (AnnotLink *annot : links->getLinks()) {
+                LinkAction *action = annot->getAction();
+                if (action->getKind() == actionURI) {
+                    LinkURI *linkUri = dynamic_cast<LinkURI *>(action);
+                    std::string uri = linkUri->getURI();
+                    printf("%4d  Annotation    %s\n", pg, uri.c_str());
                 }
             }
         }
@@ -636,13 +658,15 @@ static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap)
 
         printf("    Title:         %s\n", typeExp->c_str());
         printf("    Abbreviation:  %s\n", abbr->c_str());
-        if (part.get())
+        if (part.get()) {
             printf("    Subtitle:      Part %d: %s\n", subpart, part->c_str());
-        else
+        } else {
             printf("    Subtitle:      Part %d\n", subpart);
+        }
         printf("    Standard:      %s-%d\n", typeExp->toStr().substr(0, 9).c_str(), subpart);
-        if (confExp.get())
+        if (confExp.get()) {
             printf("    Conformance:   %s\n", confExp->c_str());
+        }
     }
 }
 
@@ -896,7 +920,7 @@ int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     const UnicodeMap *uMap;
     FILE *f;
     bool ok;
@@ -915,13 +939,15 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdfinfo", "<PDF-file>", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             exitCode = 0;
+        }
         goto err0;
     }
 
-    if (printStructureText)
+    if (printStructureText) {
         printStructure = true;
+    }
 
     // read config file
     globalParams = std::make_unique<GlobalParams>();
@@ -947,14 +973,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
 
     if (fileName->cmp("-") == 0) {
@@ -964,12 +986,6 @@ int main(int argc, char *argv[])
 
     doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         exitCode = 1;
         goto err2;
@@ -1015,6 +1031,8 @@ int main(int argc, char *argv[])
         }
     } else if (printDests) {
         printDestinations(doc.get(), uMap);
+    } else if (printUrls) {
+        printUrlList(doc.get());
     } else {
         // print info
         long long filesize = 0;
@@ -1026,8 +1044,9 @@ int main(int argc, char *argv[])
             fclose(f);
         }
 
-        if (multiPage == false)
+        if (multiPage == false) {
             lastPage = 1;
+        }
 
         printInfo(doc.get(), uMap, filesize, multiPage);
     }

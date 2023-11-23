@@ -16,6 +16,7 @@ add_executable(pdftoppm ${pdftoppm_SOURCES})
 target_link_libraries(pdftoppm ${common_libs})
 if(LCMS2_FOUND)
   target_link_libraries(pdftoppm ${LCMS2_LIBRARIES})
+  target_include_directories(pdftoppm SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
 endif()
 if (OS2)
   set_target_properties(pdftoppm PROPERTIES
@@ -38,17 +39,14 @@ if (HAVE_CAIRO)
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    SYSTEM
-    ${CAIRO_INCLUDE_DIRS}
   )
   add_definitions(${CAIRO_CFLAGS})
   add_executable(pdftocairo ${pdftocairo_SOURCES})
-  target_link_libraries(pdftocairo ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES} ${common_libs})
-  if(CMAKE_USE_PTHREADS_INIT)
-    target_link_libraries(pdftocairo Threads::Threads)
-  endif()
+  target_link_libraries(pdftocairo ${CAIRO_LIBRARIES} Freetype::Freetype ${common_libs})
+  target_include_directories(pdftocairo SYSTEM PRIVATE ${CAIRO_INCLUDE_DIRS})
   if(LCMS2_FOUND)
     target_link_libraries(pdftocairo ${LCMS2_LIBRARIES})
+    target_include_directories(pdftocairo SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
   endif()
   if (OS2)
     set_target_properties(pdftocairo PROPERTIES
@@ -137,19 +135,23 @@ endif()
 install(TARGETS pdfinfo DESTINATION bin)
 install(FILES pdfinfo.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
-if (ENABLE_NSS3)
+if (ENABLE_SIGNATURES)
   # pdfsig
   set(pdfsig_SOURCES ${common_srcs}
     pdfsig.cc
   )
   add_executable(pdfsig ${pdfsig_SOURCES})
-  target_include_directories(pdfsig SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
   target_link_libraries(pdfsig ${common_libs})
+
   if (OS2)
     set_target_properties(pdfsig PROPERTIES
       OS2_DEF_VENDOR "$ENV{VENDOR}"
       OS2_DEF_PATCH "${POPPLER_MICRO_VERSION}"
       OS2_DEF_VERSION "${POPPLER_VERSION}")
+  endif()
+
+  if (ENABLE_NSS3)
+    target_include_directories(pdfsig SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
   endif()
   install(TARGETS pdfsig DESTINATION bin)
   install(FILES pdfsig.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
@@ -164,6 +166,7 @@ add_executable(pdftops ${pdftops_SOURCES})
 target_link_libraries(pdftops ${common_libs})
 if(LCMS2_FOUND)
   target_link_libraries(pdftops ${LCMS2_LIBRARIES})
+  target_include_directories(pdftops SYSTEM PRIVATE ${LCMS2_INCLUDE_DIR})
 endif()
 if (OS2)
 set_target_properties(pdftops PROPERTIES

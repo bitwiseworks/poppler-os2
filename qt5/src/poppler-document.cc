@@ -1,7 +1,7 @@
 /* poppler-document.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2010, 2012, 2013, 2015, 2017-2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2010, 2012, 2013, 2015, 2017-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
@@ -67,20 +67,20 @@ namespace Poppler {
 
 Document *Document::load(const QString &filePath, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(filePath, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+    DocumentData *doc = new DocumentData(filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 Document *Document::load(QIODevice *device, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
-    DocumentData *doc = new DocumentData(device, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+    DocumentData *doc = new DocumentData(device, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
 Document *Document::loadFromData(const QByteArray &fileContents, const QByteArray &ownerPassword, const QByteArray &userPassword)
 {
     // create stream
-    DocumentData *doc = new DocumentData(fileContents, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+    DocumentData *doc = new DocumentData(fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
     return DocumentData::checkDocument(doc);
 }
 
@@ -89,9 +89,9 @@ Document *DocumentData::checkDocument(DocumentData *doc)
     Document *pdoc;
     if (doc->doc->isOk() || doc->doc->getErrorCode() == errEncrypted) {
         pdoc = new Document(doc);
-        if (doc->doc->getErrorCode() == errEncrypted)
+        if (doc->doc->getErrorCode() == errEncrypted) {
             pdoc->m_doc->locked = true;
-        else {
+        } else {
             pdoc->m_doc->locked = false;
             pdoc->m_doc->fillMembers();
         }
@@ -134,11 +134,11 @@ bool Document::unlock(const QByteArray &ownerPassword, const QByteArray &userPas
         /* racier then it needs to be */
         DocumentData *doc2;
         if (!m_doc->fileContents.isEmpty()) {
-            doc2 = new DocumentData(m_doc->fileContents, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+            doc2 = new DocumentData(m_doc->fileContents, GooString(ownerPassword.data()), GooString(userPassword.data()));
         } else if (m_doc->m_device) {
-            doc2 = new DocumentData(m_doc->m_device, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+            doc2 = new DocumentData(m_doc->m_device, GooString(ownerPassword.data()), GooString(userPassword.data()));
         } else {
-            doc2 = new DocumentData(m_doc->m_filePath, new GooString(ownerPassword.data()), new GooString(userPassword.data()));
+            doc2 = new DocumentData(m_doc->m_filePath, GooString(ownerPassword.data()), GooString(userPassword.data()));
         }
         if (!doc2->doc->isOk()) {
             delete doc2;
@@ -196,8 +196,9 @@ Document::PageLayout Document::pageLayout() const
 
 Qt::LayoutDirection Document::textDirection() const
 {
-    if (!m_doc->doc->getCatalog()->getViewerPreferences())
+    if (!m_doc->doc->getCatalog()->getViewerPreferences()) {
         return Qt::LayoutDirectionAuto;
+    }
 
     switch (m_doc->doc->getCatalog()->getViewerPreferences()->getDirection()) {
     case ViewerPreferences::directionL2R:
@@ -261,8 +262,8 @@ QString Document::info(const QString &type) const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setInfo(const QString &key, const QString &val)
@@ -282,8 +283,8 @@ QString Document::title() const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoTitle());
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoTitle());
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setTitle(const QString &val)
@@ -302,8 +303,8 @@ QString Document::author() const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoAuthor());
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoAuthor());
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setAuthor(const QString &val)
@@ -322,8 +323,8 @@ QString Document::subject() const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoSubject());
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoSubject());
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setSubject(const QString &val)
@@ -342,8 +343,8 @@ QString Document::keywords() const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoKeywords());
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoKeywords());
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setKeywords(const QString &val)
@@ -362,8 +363,8 @@ QString Document::creator() const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoCreator());
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoCreator());
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setCreator(const QString &val)
@@ -382,8 +383,8 @@ QString Document::producer() const
         return QString();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoProducer());
-    return UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoProducer());
+    return UnicodeParsedString(goo.get());
 }
 
 bool Document::setProducer(const QString &val)
@@ -410,15 +411,18 @@ QStringList Document::infoKeys() const
 {
     QStringList keys;
 
-    if (m_doc->locked)
+    if (m_doc->locked) {
         return QStringList();
+    }
 
     QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
-    if (!xref)
+    if (!xref) {
         return QStringList();
+    }
     Object info = xref->getDocInfo();
-    if (!info.isDict())
+    if (!info.isDict()) {
         return QStringList();
+    }
 
     Dict *infoDict = info.getDict();
     // somehow iterate over keys in infoDict
@@ -436,8 +440,8 @@ QDateTime Document::date(const QString &type) const
         return QDateTime();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
-    QString str = UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
+    QString str = UnicodeParsedString(goo.get());
     return Poppler::convertDate(str.toLatin1().constData());
 }
 
@@ -457,8 +461,8 @@ QDateTime Document::creationDate() const
         return QDateTime();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoCreatDate());
-    QString str = UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoCreatDate());
+    QString str = UnicodeParsedString(goo.get());
     return Poppler::convertDate(str.toLatin1().constData());
 }
 
@@ -478,8 +482,8 @@ QDateTime Document::modificationDate() const
         return QDateTime();
     }
 
-    QScopedPointer<GooString> goo(m_doc->doc->getDocInfoModDate());
-    QString str = UnicodeParsedString(goo.data());
+    std::unique_ptr<GooString> goo(m_doc->doc->getDocInfoModDate());
+    QString str = UnicodeParsedString(goo.get());
     return Poppler::convertDate(str.toLatin1().constData());
 }
 
@@ -550,10 +554,12 @@ bool Document::okToAssemble() const
 
 void Document::getPdfVersion(int *major, int *minor) const
 {
-    if (major)
+    if (major) {
         *major = m_doc->doc->getPDFMajorVersion();
-    if (minor)
+    }
+    if (minor) {
         *minor = m_doc->doc->getPDFMinorVersion();
+    }
 }
 
 Document::PdfVersion Document::getPdfVersion() const
@@ -584,16 +590,19 @@ bool Document::hasEmbeddedFiles() const
 QDomDocument *Document::toc() const
 {
     Outline *outline = m_doc->doc->getOutline();
-    if (!outline)
+    if (!outline) {
         return nullptr;
+    }
 
     const std::vector<::OutlineItem *> *items = outline->getItems();
-    if (!items || items->size() < 1)
+    if (!items || items->size() < 1) {
         return nullptr;
+    }
 
     QDomDocument *toc = new QDomDocument();
-    if (items->size() > 0)
+    if (items->size() > 0) {
         m_doc->addTocChildren(toc, toc, items);
+    }
 
     return toc;
 }
@@ -709,13 +718,15 @@ void Document::setRenderHint(Document::RenderHint hint, bool on)
     const bool touchesOverprinting = hint & Document::OverprintPreview;
 
     int hintForOperation = hint;
-    if (touchesOverprinting && !isOverprintPreviewAvailable())
+    if (touchesOverprinting && !isOverprintPreviewAvailable()) {
         hintForOperation = hintForOperation & ~(int)Document::OverprintPreview;
+    }
 
-    if (on)
+    if (on) {
         m_doc->m_hints |= hintForOperation;
-    else
+    } else {
         m_doc->m_hints &= ~hintForOperation;
+    }
 }
 
 Document::RenderHints Document::renderHints() const
@@ -739,8 +750,9 @@ QString Document::metadata() const
     Catalog *catalog = m_doc->doc->getCatalog();
     if (catalog && catalog->isOk()) {
         std::unique_ptr<GooString> s = catalog->readMetadata();
-        if (s)
+        if (s) {
             result = UnicodeParsedString(s.get());
+        }
     }
     return result;
 }
@@ -778,13 +790,16 @@ bool Document::getPdfId(QByteArray *permanentId, QByteArray *updateId) const
     GooString gooPermanentId;
     GooString gooUpdateId;
 
-    if (!m_doc->doc->getID(permanentId ? &gooPermanentId : nullptr, updateId ? &gooUpdateId : nullptr))
+    if (!m_doc->doc->getID(permanentId ? &gooPermanentId : nullptr, updateId ? &gooUpdateId : nullptr)) {
         return false;
+    }
 
-    if (permanentId)
+    if (permanentId) {
         *permanentId = gooPermanentId.c_str();
-    if (updateId)
+    }
+    if (updateId) {
         *updateId = gooUpdateId.c_str();
+    }
 
     return true;
 }

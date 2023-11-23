@@ -55,10 +55,11 @@ public:
 
     const std::vector<OutlineItem *> *getItems() const
     {
-        if (!items || items->empty())
+        if (!items || items->empty()) {
             return nullptr;
-        else
+        } else {
             return items;
+        }
     }
 
     struct OutlineTreeNode

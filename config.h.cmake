@@ -18,14 +18,20 @@
 /* Do not hardcode the library location */
 #cmakedefine ENABLE_RELOCATABLE 1
 
-/* Build against zlib. */
-#cmakedefine ENABLE_ZLIB 1
-
 /* Use zlib instead of builtin zlib decoder to uncompress flate streams. */
 #cmakedefine ENABLE_ZLIB_UNCOMPRESS 1
 
 /* Build against libnss3 for digital signature validation */
 #cmakedefine ENABLE_NSS3 1
+
+/* Build against libgpgme for digital signature validation */
+#cmakedefine ENABLE_GPGME 1
+
+/* Signatures enabled */
+#cmakedefine ENABLE_SIGNATURES 1
+
+/* Default signature backend */
+#cmakedefine DEFAULT_SIGNATURE_BACKEND "${DEFAULT_SIGNATURE_BACKEND}"
 
 /* Use cairo for rendering. */
 #cmakedefine HAVE_CAIRO 1
@@ -69,9 +75,6 @@
 
 /* Defines if timegm is available on your system */
 #cmakedefine HAVE_TIMEGM 1
-
-/* Define if you have the iconv() function and it works. */
-#cmakedefine HAVE_ICONV 1
 
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ 1
@@ -161,6 +164,9 @@
 
 /* Use win32 font configuration backend */
 #cmakedefine WITH_FONTCONFIGURATION_WIN32 1
+
+/* Use android font configuration backend */
+#cmakedefine WITH_FONTCONFIGURATION_ANDROID 1
 
 /* OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag */
 #cmakedefine WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG 1

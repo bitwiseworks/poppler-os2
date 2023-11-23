@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2015, 2017, 2018, 2020-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
 // Copyright (C) 2009, 2011, 2012, 2014-2016, 2020 William Bader <williambader@hotmail.com>
@@ -25,7 +25,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2021, 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
 //
@@ -194,10 +194,10 @@ int main(int argc, char *argv[])
 {
     std::unique_ptr<PDFDoc> doc;
     GooString *fileName;
-    GooString *psFileName;
+    std::string psFileName;
     PSLevel level;
     PSOutMode mode;
-    GooString *ownerPW, *userPW;
+    std::optional<GooString> ownerPW, userPW;
     PSOutputDev *psOut;
     bool ok;
     int exitCode;
@@ -219,10 +219,11 @@ int main(int argc, char *argv[])
         if (!printVersion) {
             printUsage("pdftops", "<PDF-file> [<PS-file>]", argDesc);
         }
-        if (printVersion || printHelp)
+        if (printVersion || printHelp) {
             exit(0);
-        else
+        } else {
             exit(1);
+        }
     }
     if ((level1 ? 1 : 0) + (level1Sep ? 1 : 0) + (level2 ? 1 : 0) + (level2Sep ? 1 : 0) + (level3 ? 1 : 0) + (level3Sep ? 1 : 0) > 1) {
         fprintf(stderr, "Error: use only one of the 'level' options.\n");
@@ -267,15 +268,6 @@ int main(int argc, char *argv[])
             delete fileName;
             goto err0;
         }
-    }
-    if (overprint) {
-        globalParams->setOverprintPreview(true);
-    }
-    if (expand) {
-        globalParams->setPSExpandSmaller(true);
-    }
-    if (noShrink) {
-        globalParams->setPSShrinkLarger(false);
     }
     if (quiet) {
         globalParams->setErrQuiet(quiet);
@@ -371,14 +363,10 @@ int main(int argc, char *argv[])
 
     // open PDF file
     if (ownerPassword[0] != '\001') {
-        ownerPW = new GooString(ownerPassword);
-    } else {
-        ownerPW = nullptr;
+        ownerPW = GooString(ownerPassword);
     }
     if (userPassword[0] != '\001') {
-        userPW = new GooString(userPassword);
-    } else {
-        userPW = nullptr;
+        userPW = GooString(userPassword);
     }
     if (fileName->cmp("-") == 0) {
         delete fileName;
@@ -387,12 +375,6 @@ int main(int argc, char *argv[])
 
     doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
 
-    if (userPW) {
-        delete userPW;
-    }
-    if (ownerPW) {
-        delete ownerPW;
-    }
     if (!doc->isOk()) {
         exitCode = 1;
         goto err1;
@@ -409,18 +391,19 @@ int main(int argc, char *argv[])
 
     // construct PostScript file name
     if (argc == 3) {
-        psFileName = new GooString(argv[2]);
+        psFileName = std::string(argv[2]);
     } else if (fileName->cmp("fd://0") == 0) {
         error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
         goto err1;
     } else {
         const char *p = fileName->c_str() + fileName->getLength() - 4;
         if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-            psFileName = new GooString(fileName->c_str(), fileName->getLength() - 4);
+            psFileName = std::string(fileName->c_str(), fileName->getLength() - 4);
+
         } else {
-            psFileName = fileName->copy();
+            psFileName = fileName->toStr();
         }
-        psFileName->append(doEPS ? ".eps" : ".ps");
+        psFileName += (doEPS ? ".eps" : ".ps");
     }
 
     // get page range
@@ -432,13 +415,13 @@ int main(int argc, char *argv[])
     }
     if (lastPage < firstPage) {
         error(errCommandLine, -1, "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).", firstPage, lastPage);
-        goto err2;
+        goto err1;
     }
 
     // check for multi-page EPS or form
     if ((doEPS || doForm) && firstPage != lastPage) {
         error(errCommandLine, -1, "EPS and form files can only contain one page.");
-        goto err2;
+        goto err1;
     }
 
     for (int i = firstPage; i <= lastPage; ++i) {
@@ -446,10 +429,19 @@ int main(int argc, char *argv[])
     }
 
     // write PostScript file
-    psOut = new PSOutputDev(psFileName->c_str(), doc.get(), nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
+    psOut = new PSOutputDev(psFileName.c_str(), doc.get(), nullptr, pages, mode, paperWidth, paperHeight, noCrop, duplex, /*imgLLXA*/ 0, /*imgLLYA*/ 0,
                             /*imgURXA*/ 0, /*imgURYA*/ 0, psRasterizeWhenNeeded, /*manualCtrlA*/ false, /*customCodeCbkA*/ nullptr, /*customCodeCbkDataA*/ nullptr, level);
     if (noCenter) {
         psOut->setPSCenter(false);
+    }
+    if (expand) {
+        psOut->setPSExpandSmaller(true);
+    }
+    if (noShrink) {
+        psOut->setPSShrinkLarger(false);
+    }
+    if (overprint) {
+        psOut->setOverprintPreview(true);
     }
 
     if (rasterAntialiasStr[0]) {
@@ -475,8 +467,9 @@ int main(int argc, char *argv[])
     if (splashResolution > 0) {
         psOut->setRasterResolution(splashResolution);
     }
-    if (processcolorformatspecified)
+    if (processcolorformatspecified) {
         psOut->setProcessColorFormat(processcolorformat);
+    }
 #ifdef USE_CMS
     psOut->setDisplayProfile(processcolorprofile);
     psOut->setDefaultGrayProfile(defaultgrayprofile);
@@ -504,15 +497,13 @@ int main(int argc, char *argv[])
     } else {
         delete psOut;
         exitCode = 2;
-        goto err2;
+        goto err1;
     }
     delete psOut;
 
     exitCode = 0;
 
     // clean up
-err2:
-    delete psFileName;
 err1:
     delete fileName;
 err0:

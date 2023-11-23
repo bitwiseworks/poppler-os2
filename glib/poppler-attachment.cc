@@ -69,16 +69,19 @@ static void poppler_attachment_finalize(GObject *obj)
     attachment = (PopplerAttachment *)obj;
     priv = GET_PRIVATE(attachment);
 
-    if (attachment->name)
+    if (attachment->name) {
         g_free(attachment->name);
+    }
     attachment->name = nullptr;
 
-    if (attachment->description)
+    if (attachment->description) {
         g_free(attachment->description);
+    }
     attachment->description = nullptr;
 
-    if (attachment->checksum)
+    if (attachment->checksum) {
         g_string_free(attachment->checksum, TRUE);
+    }
     attachment->checksum = nullptr;
 
     g_clear_pointer(&priv->mtime, g_date_time_unref);
@@ -102,10 +105,12 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
     attachment = (PopplerAttachment *)g_object_new(POPPLER_TYPE_ATTACHMENT, nullptr);
     priv = GET_PRIVATE(attachment);
 
-    if (emb_file->getFileName())
+    if (emb_file->getFileName()) {
         attachment->name = _poppler_goo_string_to_utf8(emb_file->getFileName());
-    if (emb_file->getDescription())
+    }
+    if (emb_file->getDescription()) {
         attachment->description = _poppler_goo_string_to_utf8(emb_file->getDescription());
+    }
 
     embFile = emb_file->getEmbeddedFile();
     if (embFile != nullptr && embFile->streamObject()->isStream()) {
@@ -128,8 +133,9 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
             G_GNUC_END_IGNORE_DEPRECATIONS
         }
 
-        if (embFile->checksum() && embFile->checksum()->getLength() > 0)
+        if (embFile->checksum() && embFile->checksum()->getLength() > 0) {
             attachment->checksum = g_string_new_len(embFile->checksum()->c_str(), embFile->checksum()->getLength());
+        }
         priv->obj_stream = embFile->streamObject()->copy();
     } else {
         g_warning("Missing stream object for embedded file");
@@ -227,7 +233,8 @@ static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError
 
     n = fwrite(buf, 1, count, f);
     if (n != count) {
-        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errno), _("Error writing to image file: %s"), g_strerror(errno));
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Error writing to image file: %s"), g_strerror(errsv));
         return FALSE;
     }
 
@@ -274,6 +281,54 @@ gboolean poppler_attachment_save(PopplerAttachment *attachment, const char *file
     return result;
 }
 
+#ifndef G_OS_WIN32
+
+/**
+ * poppler_attachment_save_to_fd:
+ * @attachment: A #PopplerAttachment.
+ * @fd: a valid file descriptor open for writing
+ * @error: (allow-none): return location for error, or %NULL.
+ *
+ * Saves @attachment to a file referred to by @fd.  If @error is set, %FALSE
+ * will be returned. Possible errors include those in the #G_FILE_ERROR domain
+ * and whatever the save function generates.
+ * Note that this function takes ownership of @fd; you must not operate on it
+ * again, nor close it.
+ *
+ * Return value: %TRUE, if the file successfully saved
+ *
+ * Since: 21.12.0
+ **/
+gboolean poppler_attachment_save_to_fd(PopplerAttachment *attachment, int fd, GError **error)
+{
+    gboolean result;
+    FILE *f;
+
+    g_return_val_if_fail(POPPLER_IS_ATTACHMENT(attachment), FALSE);
+    g_return_val_if_fail(fd != -1, FALSE);
+    g_return_val_if_fail(error == nullptr || *error == nullptr, FALSE);
+
+    f = fdopen(fd, "wb");
+    if (f == nullptr) {
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Failed to open FD %d for writing: %s"), fd, g_strerror(errsv));
+        close(fd);
+        return FALSE;
+    }
+
+    result = poppler_attachment_save_to_callback(attachment, save_helper, f, error);
+
+    if (fclose(f) < 0) {
+        int errsv = errno;
+        g_set_error(error, G_FILE_ERROR, g_file_error_from_errno(errsv), _("Failed to close FD %d, all data may not have been saved: %s"), fd, g_strerror(errsv));
+        return FALSE;
+    }
+
+    return result;
+}
+
+#endif /* !G_OS_WIN32 */
+
 #define BUF_SIZE 1024
 
 /**
@@ -318,8 +373,9 @@ gboolean poppler_attachment_save_to_callback(PopplerAttachment *attachment, Popp
         }
 
         if (i > 0) {
-            if (!(save_func)(buf, i, user_data, error))
+            if (!(save_func)(buf, i, user_data, error)) {
                 return FALSE;
+            }
         }
     } while (!eof_reached);
 

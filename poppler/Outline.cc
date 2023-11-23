@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2008, 2016-2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016-2019, 2021, 2023 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -105,7 +105,7 @@ static void insertChildHelper(const std::string &itemTitle, int destPageNum, uns
     Object prevItemObject;
     Object nextItemObject;
 
-    Ref outlineItemRef = xref->addIndirectObject(&outlineItem);
+    Ref outlineItemRef = xref->addIndirectObject(outlineItem);
 
     // the next two statements fix up the parent object
     // for clarity we separate this out
@@ -294,7 +294,7 @@ int Outline::addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList
         a->add(Object(objName, "Fit"));
 
         Object outlineItem = Object(new Dict(doc->getXRef()));
-        Ref outlineItemRef = doc->getXRef()->addIndirectObject(&outlineItem);
+        Ref outlineItemRef = doc->getXRef()->addIndirectObject(outlineItem);
 
         if (firstRef == Ref::INVALID()) {
             firstRef = outlineItemRef;
@@ -413,7 +413,7 @@ OutlineItem::OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef 
     obj1 = dict->lookup("Title");
     if (obj1.isString()) {
         const GooString *s = obj1.getString();
-        titleLen = TextStringToUCS4(s, &title);
+        titleLen = TextStringToUCS4(s->toStr(), &title);
     } else {
         titleLen = 0;
     }
@@ -483,8 +483,12 @@ void OutlineItem::open()
 {
     if (!kids) {
         Object itemDict = xref->fetch(ref);
-        const Object &firstRef = itemDict.dictLookupNF("First");
-        kids = readItemList(this, &firstRef, xref, doc);
+        if (itemDict.isDict()) {
+            const Object &firstRef = itemDict.dictLookupNF("First");
+            kids = readItemList(this, &firstRef, xref, doc);
+        } else {
+            kids = new std::vector<OutlineItem *>();
+        }
     }
 }
 
@@ -494,7 +498,7 @@ void OutlineItem::setTitle(const std::string &titleA)
 
     Object dict = xref->fetch(ref);
     GooString *g = new GooString(titleA);
-    titleLen = TextStringToUCS4(g, &title);
+    titleLen = TextStringToUCS4(g->toStr(), &title);
     dict.dictSet("Title", Object(g));
     xref->setModifiedObject(&dict, ref);
 }
@@ -569,8 +573,9 @@ const std::vector<OutlineItem *> *OutlineItem::getKids()
 {
     open();
 
-    if (!kids || kids->empty())
+    if (!kids || kids->empty()) {
         return nullptr;
-    else
+    } else {
         return kids;
+    }
 }

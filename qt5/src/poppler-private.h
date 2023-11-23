@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012, 2017-2021 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017-2022 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -53,6 +53,7 @@
 #include <poppler-config.h>
 #include <GfxState.h>
 #include <GlobalParams.h>
+#include <FileSpec.h>
 #include <Form.h>
 #include <PDFDoc.h>
 #include <FontInfo.h>
@@ -103,7 +104,7 @@ public:
 class DocumentData : private GlobalParamsIniter
 {
 public:
-    DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword) : GlobalParamsIniter(qt5ErrorFunction)
+    DocumentData(const QString &filePath, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         init();
         m_device = nullptr;
@@ -112,33 +113,25 @@ public:
 #ifdef _WIN32
         doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #else
-        GooString *fileName = new GooString(QFile::encodeName(filePath).constData());
-        doc = new PDFDoc(fileName, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
+        doc = new PDFDoc(std::make_unique<GooString>(QFile::encodeName(filePath).constData()), ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
 #endif
-
-        delete ownerPassword;
-        delete userPassword;
     }
 
-    DocumentData(QIODevice *device, GooString *ownerPassword, GooString *userPassword) : GlobalParamsIniter(qt5ErrorFunction)
+    DocumentData(QIODevice *device, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         m_device = device;
         QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object(objNull));
         init();
         doc = new PDFDoc(str, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
-        delete ownerPassword;
-        delete userPassword;
     }
 
-    DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword) : GlobalParamsIniter(qt5ErrorFunction)
+    DocumentData(const QByteArray &data, const std::optional<GooString> &ownerPassword, const std::optional<GooString> &userPassword) : GlobalParamsIniter(qt5ErrorFunction)
     {
         m_device = nullptr;
         fileContents = data;
         MemStream *str = new MemStream((char *)fileContents.data(), 0, fileContents.length(), Object(objNull));
         init();
         doc = new PDFDoc(str, ownerPassword, userPassword, nullptr, std::bind(&DocumentData::noitfyXRefReconstructed, this));
-        delete ownerPassword;
-        delete userPassword;
     }
 
     void init();
@@ -158,8 +151,8 @@ public:
         if (!(0 == numEmb)) {
             // we have some embedded documents, build the list
             for (int yalv = 0; yalv < numEmb; ++yalv) {
-                FileSpec *fs = doc->getCatalog()->embeddedFile(yalv);
-                m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(fs)));
+                std::unique_ptr<FileSpec> fs = doc->getCatalog()->embeddedFile(yalv);
+                m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(std::move(fs))));
             }
         }
     }
@@ -204,12 +197,15 @@ public:
 
     explicit FontInfoData(::FontInfo *fi)
     {
-        if (fi->getName())
+        if (fi->getName()) {
             fontName = fi->getName()->c_str();
-        if (fi->getFile())
+        }
+        if (fi->getFile()) {
             fontFile = fi->getFile()->c_str();
-        if (fi->getSubstituteName())
+        }
+        if (fi->getSubstituteName()) {
             fontSubstituteName = fi->getSubstituteName()->c_str();
+        }
         isEmbedded = fi->getEmbedded();
         isSubset = fi->getSubset();
         type = (Poppler::FontInfo::Type)fi->getType();

@@ -26,6 +26,7 @@
 #define ZERO_CROPBOX(c) (!(c && (c->x1 > 0.01 || c->y1 > 0.01)))
 
 const PDFRectangle *_poppler_annot_get_cropbox_and_page(PopplerAnnot *poppler_annot, Page **page_out);
+AnnotStampImageHelper *_poppler_convert_cairo_image_to_stamp_image_helper(cairo_surface_t *image, PDFDoc *doc, GError **error);
 
 /**
  * SECTION:poppler-annot
@@ -44,6 +45,7 @@ typedef struct _PopplerAnnotScreenClass PopplerAnnotScreenClass;
 typedef struct _PopplerAnnotLineClass PopplerAnnotLineClass;
 typedef struct _PopplerAnnotCircleClass PopplerAnnotCircleClass;
 typedef struct _PopplerAnnotSquareClass PopplerAnnotSquareClass;
+typedef struct _PopplerAnnotStampClass PopplerAnnotStampClass;
 
 struct _PopplerAnnotClass
 {
@@ -153,6 +155,14 @@ struct _PopplerAnnotSquareClass
 {
     PopplerAnnotMarkupClass parent_class;
 };
+struct _PopplerAnnotStamp
+{
+    PopplerAnnot parent_instance;
+};
+struct _PopplerAnnotStampClass
+{
+    PopplerAnnotClass parent_class;
+};
 
 G_DEFINE_TYPE(PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE(PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
@@ -165,6 +175,7 @@ G_DEFINE_TYPE(PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE(PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE(PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE(PopplerAnnotStamp, poppler_annot_stamp, POPPLER_TYPE_ANNOT)
 
 static PopplerAnnot *_poppler_create_annot(GType annot_type, Annot *annot)
 {
@@ -490,8 +501,9 @@ PopplerAnnot *_poppler_annot_screen_new(PopplerDocument *doc, Annot *annot)
     poppler_annot = _poppler_create_annot(POPPLER_TYPE_ANNOT_SCREEN, annot);
     annot_screen = static_cast<AnnotScreen *>(poppler_annot->annot);
     action = annot_screen->getAction();
-    if (action)
+    if (action) {
         POPPLER_ANNOT_SCREEN(poppler_annot)->action = _poppler_action_new(doc, action, nullptr);
+    }
 
     return poppler_annot;
 }
@@ -597,6 +609,141 @@ PopplerAnnot *poppler_annot_square_new(PopplerDocument *doc, PopplerRectangle *r
     return _poppler_annot_square_new(annot);
 }
 
+static void poppler_annot_stamp_finalize(GObject *object)
+{
+    G_OBJECT_CLASS(poppler_annot_stamp_parent_class)->finalize(object);
+}
+
+static void poppler_annot_stamp_init(PopplerAnnotStamp *poppler_annot) { }
+
+static void poppler_annot_stamp_class_init(PopplerAnnotStampClass *klass)
+{
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    gobject_class->finalize = poppler_annot_stamp_finalize;
+}
+
+PopplerAnnot *_poppler_annot_stamp_new(Annot *annot)
+{
+    PopplerAnnot *poppler_annot;
+
+    poppler_annot = _poppler_create_annot(POPPLER_TYPE_ANNOT_STAMP, annot);
+
+    return poppler_annot;
+}
+
+/**
+ * poppler_annot_stamp_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new Stamp annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotStamp annotation
+ *
+ * Since: 22.07.0
+ **/
+PopplerAnnot *poppler_annot_stamp_new(PopplerDocument *doc, PopplerRectangle *rect)
+{
+    Annot *annot;
+    PDFRectangle pdf_rect(rect->x1, rect->y1, rect->x2, rect->y2);
+
+    annot = new AnnotStamp(doc->doc, &pdf_rect);
+
+    return _poppler_annot_stamp_new(annot);
+}
+
+static gboolean get_raw_data_from_cairo_image(cairo_surface_t *image, cairo_format_t format, const int width, const int height, const size_t rowstride_c, GByteArray *data, GByteArray *soft_mask_data)
+{
+    gboolean has_alpha = format == CAIRO_FORMAT_ARGB32;
+
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+    static const size_t CAIRO_B = 0;
+    static const size_t CAIRO_G = 1;
+    static const size_t CAIRO_R = 2;
+    static const size_t CAIRO_A = 3;
+#elif G_BYTE_ORDER == G_BIG_ENDIAN
+    static const size_t CAIRO_A = 0;
+    static const size_t CAIRO_R = 1;
+    static const size_t CAIRO_G = 2;
+    static const size_t CAIRO_B = 3;
+#else
+#    error "Unsupported endian type"
+#endif
+
+    cairo_surface_flush(image);
+    unsigned char *pixels_c = cairo_image_surface_get_data(image);
+
+    if (format == CAIRO_FORMAT_ARGB32 || format == CAIRO_FORMAT_RGB24) {
+        unsigned char pixel[3];
+
+        for (int h = 0; h < height; h++) {
+            unsigned char *iter_c = pixels_c + h * rowstride_c;
+            for (int w = 0; w < width; w++) {
+                pixel[0] = iter_c[CAIRO_R];
+                pixel[1] = iter_c[CAIRO_G];
+                pixel[2] = iter_c[CAIRO_B];
+                iter_c += 4;
+
+                g_byte_array_append(data, (guint8 *)pixel, 3);
+                if (has_alpha) {
+                    g_byte_array_append(soft_mask_data, (guint8 *)&iter_c[CAIRO_A], 1);
+                }
+            }
+        }
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+AnnotStampImageHelper *_poppler_convert_cairo_image_to_stamp_image_helper(cairo_surface_t *image, PDFDoc *doc, GError **error)
+{
+    AnnotStampImageHelper *annotImg;
+    GByteArray *data;
+    GByteArray *sMaskData;
+
+    int bitsPerComponent;
+    const int width = cairo_image_surface_get_width(image);
+    const int height = cairo_image_surface_get_height(image);
+    const size_t rowstride_c = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+    cairo_format_t format = cairo_image_surface_get_format(image);
+
+    ColorSpace colorSpace;
+
+    if (format == CAIRO_FORMAT_ARGB32 || format == CAIRO_FORMAT_RGB24) {
+        colorSpace = ColorSpace::DeviceRGB;
+        bitsPerComponent = 8;
+    } else {
+        g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Invalid or unsupported cairo image type %u", (unsigned int)format);
+        return nullptr;
+    }
+
+    data = g_byte_array_sized_new((guint)((width * 4) + rowstride_c) * height);
+    sMaskData = g_byte_array_sized_new((guint)((width * 4) + rowstride_c) * height);
+
+    if (!get_raw_data_from_cairo_image(image, format, width, height, rowstride_c, data, sMaskData)) {
+        g_set_error(error, POPPLER_ERROR, POPPLER_ERROR_INVALID, "Failed to get raw data from cairo image");
+        g_byte_array_unref(data);
+        g_byte_array_unref(sMaskData);
+        return nullptr;
+    }
+
+    if (sMaskData->len > 0) {
+        AnnotStampImageHelper sMask(doc, width, height, ColorSpace::DeviceGray, 8, (char *)sMaskData->data, (int)sMaskData->len);
+        annotImg = new AnnotStampImageHelper(doc, width, height, colorSpace, bitsPerComponent, (char *)data->data, (int)data->len, sMask.getRef());
+    } else {
+        annotImg = new AnnotStampImageHelper(doc, width, height, colorSpace, bitsPerComponent, (char *)data->data, (int)data->len);
+    }
+
+    g_byte_array_unref(data);
+    g_byte_array_unref(sMaskData);
+
+    return annotImg;
+}
+
 /* Public methods */
 /**
  * poppler_annot_get_annot_type:
@@ -700,17 +847,14 @@ gchar *poppler_annot_get_contents(PopplerAnnot *poppler_annot)
  **/
 void poppler_annot_set_contents(PopplerAnnot *poppler_annot, const gchar *contents)
 {
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
     g_return_if_fail(POPPLER_IS_ANNOT(poppler_annot));
 
     tmp = contents ? g_convert(contents, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    poppler_annot->annot->setContents(std::make_unique<GooString>(tmp, length));
     g_free(tmp);
-    poppler_annot->annot->setContents(goo_tmp);
-    delete (goo_tmp);
 }
 
 /**
@@ -785,8 +929,9 @@ void poppler_annot_set_flags(PopplerAnnot *poppler_annot, PopplerAnnotFlag flags
 {
     g_return_if_fail(POPPLER_IS_ANNOT(poppler_annot));
 
-    if (poppler_annot_get_flags(poppler_annot) == flags)
+    if (poppler_annot_get_flags(poppler_annot) == flags) {
         return;
+    }
 
     poppler_annot->annot->setFlags((guint)flags);
 }
@@ -827,8 +972,9 @@ static PopplerColor *create_poppler_color_from_annot_color(AnnotColor *color)
 
 static std::unique_ptr<AnnotColor> create_annot_color_from_poppler_color(PopplerColor *poppler_color)
 {
-    if (!poppler_color)
+    if (!poppler_color) {
         return nullptr;
+    }
 
     return std::make_unique<AnnotColor>((double)poppler_color->red / 65535, (double)poppler_color->green / 65535, (double)poppler_color->blue / 65535);
 }
@@ -898,8 +1044,9 @@ const PDFRectangle *_poppler_annot_get_cropbox_and_page(PopplerAnnot *poppler_an
 
         page = poppler_annot->annot->getDoc()->getPage(page_index);
         if (page) {
-            if (page_out)
+            if (page_out) {
                 *page_out = page;
+            }
 
             return page->getCropBox();
         }
@@ -927,7 +1074,6 @@ const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot)
  */
 void poppler_annot_get_rectangle(PopplerAnnot *poppler_annot, PopplerRectangle *poppler_rect)
 {
-    PDFRectangle *annot_rect;
     const PDFRectangle *crop_box;
     PDFRectangle zerobox;
     Page *page = nullptr;
@@ -941,11 +1087,11 @@ void poppler_annot_get_rectangle(PopplerAnnot *poppler_annot, PopplerRectangle *
         crop_box = &zerobox;
     }
 
-    annot_rect = poppler_annot->annot->getRect();
-    poppler_rect->x1 = annot_rect->x1 - crop_box->x1;
-    poppler_rect->x2 = annot_rect->x2 - crop_box->x1;
-    poppler_rect->y1 = annot_rect->y1 - crop_box->y1;
-    poppler_rect->y2 = annot_rect->y2 - crop_box->y1;
+    const PDFRectangle &annot_rect = poppler_annot->annot->getRect();
+    poppler_rect->x1 = annot_rect.x1 - crop_box->x1;
+    poppler_rect->x2 = annot_rect.x2 - crop_box->x1;
+    poppler_rect->y1 = annot_rect.y1 - crop_box->y1;
+    poppler_rect->y2 = annot_rect.y2 - crop_box->y1;
 }
 
 /**
@@ -1023,7 +1169,6 @@ gchar *poppler_annot_markup_get_label(PopplerAnnotMarkup *poppler_annot)
 void poppler_annot_markup_set_label(PopplerAnnotMarkup *poppler_annot, const gchar *label)
 {
     AnnotMarkup *annot;
-    GooString *goo_tmp;
     gchar *tmp;
     gsize length = 0;
 
@@ -1032,10 +1177,8 @@ void poppler_annot_markup_set_label(PopplerAnnotMarkup *poppler_annot, const gch
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     tmp = label ? g_convert(label, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
-    goo_tmp = new GooString(tmp, length);
+    annot->setLabel(std::make_unique<GooString>(tmp, length));
     g_free(tmp);
-    annot->setLabel(goo_tmp);
-    delete goo_tmp;
 }
 
 /**
@@ -1098,8 +1241,9 @@ gboolean poppler_annot_markup_get_popup_is_open(PopplerAnnotMarkup *poppler_anno
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
-    if ((annot_popup = annot->getPopup()))
+    if ((annot_popup = annot->getPopup())) {
         return annot_popup->getOpen();
+    }
 
     return FALSE;
 }
@@ -1123,11 +1267,13 @@ void poppler_annot_markup_set_popup_is_open(PopplerAnnotMarkup *poppler_annot, g
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     annot_popup = annot->getPopup();
-    if (!annot_popup)
+    if (!annot_popup) {
         return;
+    }
 
-    if (annot_popup->getOpen() != is_open)
+    if (annot_popup->getOpen() != is_open) {
         annot_popup->setOpen(is_open);
+    }
 }
 
 /**
@@ -1145,21 +1291,21 @@ gboolean poppler_annot_markup_get_popup_rectangle(PopplerAnnotMarkup *poppler_an
 {
     AnnotMarkup *annot;
     Annot *annot_popup;
-    PDFRectangle *annot_rect;
 
     g_return_val_if_fail(POPPLER_IS_ANNOT_MARKUP(poppler_annot), FALSE);
     g_return_val_if_fail(poppler_rect != nullptr, FALSE);
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
     annot_popup = annot->getPopup();
-    if (!annot_popup)
+    if (!annot_popup) {
         return FALSE;
+    }
 
-    annot_rect = annot_popup->getRect();
-    poppler_rect->x1 = annot_rect->x1;
-    poppler_rect->x2 = annot_rect->x2;
-    poppler_rect->y1 = annot_rect->y1;
-    poppler_rect->y2 = annot_rect->y2;
+    const PDFRectangle &annot_rect = annot_popup->getRect();
+    poppler_rect->x1 = annot_rect.x1;
+    poppler_rect->x2 = annot_rect.x2;
+    poppler_rect->y1 = annot_rect.y1;
+    poppler_rect->y2 = annot_rect.y2;
 
     return TRUE;
 }
@@ -1186,8 +1332,9 @@ void poppler_annot_markup_set_popup_rectangle(PopplerAnnotMarkup *poppler_annot,
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
     annot_popup = annot->getPopup();
-    if (!annot_popup)
+    if (!annot_popup) {
         return;
+    }
 
     annot_popup->setRect(poppler_rect->x1, poppler_rect->y1, poppler_rect->x2, poppler_rect->y2);
 }
@@ -1252,8 +1399,9 @@ GDate *poppler_annot_markup_get_date(PopplerAnnotMarkup *poppler_annot)
 
     annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT(poppler_annot)->annot);
     annot_date = annot->getDate();
-    if (!annot_date)
+    if (!annot_date) {
         return nullptr;
+    }
 
     if (_poppler_convert_pdf_date_to_gtime(annot_date, &timet)) {
         GDate *date;
@@ -1585,11 +1733,11 @@ PopplerAnnotFreeTextQuadding poppler_annot_free_text_get_quadding(PopplerAnnotFr
     annot = static_cast<AnnotFreeText *>(POPPLER_ANNOT(poppler_annot)->annot);
 
     switch (annot->getQuadding()) {
-    case AnnotFreeText::quaddingLeftJustified:
+    case VariableTextQuadding::leftJustified:
         return POPPLER_ANNOT_FREE_TEXT_QUADDING_LEFT_JUSTIFIED;
-    case AnnotFreeText::quaddingCentered:
+    case VariableTextQuadding::centered:
         return POPPLER_ANNOT_FREE_TEXT_QUADDING_CENTERED;
-    case AnnotFreeText::quaddingRightJustified:
+    case VariableTextQuadding::rightJustified:
         return POPPLER_ANNOT_FREE_TEXT_QUADDING_RIGHT_JUSTIFIED;
     default:
         g_warning("Unsupported Annot Free Text Quadding");
@@ -1908,4 +2056,146 @@ void poppler_annot_square_set_interior_color(PopplerAnnotSquare *poppler_annot, 
     g_return_if_fail(POPPLER_IS_ANNOT_SQUARE(poppler_annot));
 
     poppler_annot_geometry_set_interior_color(POPPLER_ANNOT(poppler_annot), poppler_color);
+}
+
+/**
+ * poppler_annot_stamp_get_icon:
+ * @poppler_annot: a #PopplerAnnotStamp
+ *
+ * Return value: the corresponding #PopplerAnnotStampIcon of the icon
+ *
+ * Since: 22.07.0
+ */
+PopplerAnnotStampIcon poppler_annot_stamp_get_icon(PopplerAnnotStamp *poppler_annot)
+{
+    AnnotStamp *annot;
+    const GooString *text;
+
+    g_return_val_if_fail(POPPLER_IS_ANNOT_STAMP(poppler_annot), POPPLER_ANNOT_STAMP_ICON_UNKNOWN);
+
+    annot = static_cast<AnnotStamp *>(POPPLER_ANNOT(poppler_annot)->annot);
+
+    text = annot->getIcon();
+
+    if (!text) {
+        return POPPLER_ANNOT_STAMP_ICON_NONE;
+    }
+
+    if (!text->cmp("Approved")) {
+        return POPPLER_ANNOT_STAMP_ICON_APPROVED;
+    } else if (!text->cmp("AsIs")) {
+        return POPPLER_ANNOT_STAMP_ICON_AS_IS;
+    } else if (!text->cmp("Confidential")) {
+        return POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL;
+    } else if (!text->cmp("Final")) {
+        return POPPLER_ANNOT_STAMP_ICON_FINAL;
+    } else if (!text->cmp("Experimental")) {
+        return POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL;
+    } else if (!text->cmp("Expired")) {
+        return POPPLER_ANNOT_STAMP_ICON_EXPIRED;
+    } else if (!text->cmp("NotApproved")) {
+        return POPPLER_ANNOT_STAMP_ICON_NOT_APPROVED;
+    } else if (!text->cmp("NotForPublicRelease")) {
+        return POPPLER_ANNOT_STAMP_ICON_NOT_FOR_PUBLIC_RELEASE;
+    } else if (!text->cmp("Sold")) {
+        return POPPLER_ANNOT_STAMP_ICON_SOLD;
+    } else if (!text->cmp("Departmental")) {
+        return POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL;
+    } else if (!text->cmp("ForComment")) {
+        return POPPLER_ANNOT_STAMP_ICON_FOR_COMMENT;
+    } else if (!text->cmp("ForPublicRelease")) {
+        return POPPLER_ANNOT_STAMP_ICON_FOR_PUBLIC_RELEASE;
+    } else if (!text->cmp("TopSecret")) {
+        return POPPLER_ANNOT_STAMP_ICON_TOP_SECRET;
+    }
+
+    return POPPLER_ANNOT_STAMP_ICON_UNKNOWN;
+}
+
+/**
+ * poppler_annot_stamp_set_icon:
+ * @poppler_annot: a #PopplerAnnotStamp
+ * @icon: the #PopplerAnnotStampIcon type of the icon
+ *
+ * Sets the icon of @poppler_annot to be one of the predefined values in #PopplerAnnotStampIcon
+ *
+ * Since: 22.07.0
+ */
+void poppler_annot_stamp_set_icon(PopplerAnnotStamp *poppler_annot, PopplerAnnotStampIcon icon)
+{
+    AnnotStamp *annot;
+    GooString *goo_str;
+    const gchar *text;
+
+    g_return_if_fail(POPPLER_IS_ANNOT_STAMP(poppler_annot));
+
+    annot = static_cast<AnnotStamp *>(POPPLER_ANNOT(poppler_annot)->annot);
+
+    if (icon == POPPLER_ANNOT_STAMP_ICON_NONE) {
+        annot->setIcon(nullptr);
+        return;
+    }
+
+    if (icon == POPPLER_ANNOT_STAMP_ICON_APPROVED) {
+        text = "Approved";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_AS_IS) {
+        text = "AsIs";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_CONFIDENTIAL) {
+        text = "Confidential";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_FINAL) {
+        text = "Final";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_EXPERIMENTAL) {
+        text = "Experimental";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_EXPIRED) {
+        text = "Expired";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_NOT_APPROVED) {
+        text = "NotApproved";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_NOT_FOR_PUBLIC_RELEASE) {
+        text = "NotForPublicRelease";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_SOLD) {
+        text = "Sold";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_DEPARTMENTAL) {
+        text = "Departmental";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_FOR_COMMENT) {
+        text = "ForComment";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_FOR_PUBLIC_RELEASE) {
+        text = "ForPublicRelease";
+    } else if (icon == POPPLER_ANNOT_STAMP_ICON_TOP_SECRET) {
+        text = "TopSecret";
+    } else {
+        return; /* POPPLER_ANNOT_STAMP_ICON_UNKNOWN */
+    }
+
+    goo_str = new GooString(text);
+    annot->setIcon(goo_str);
+    delete goo_str;
+}
+
+/**
+ * poppler_annot_stamp_set_custom_image:
+ * @poppler_annot: a #PopplerAnnotStamp
+ * @image: an image cairo surface
+ * @error: (nullable): return location for error, or %NULL.
+ *
+ * Sets the custom image of @poppler_annot to be @image
+ *
+ * Return value: %TRUE on success, %FALSE otherwise.
+ *
+ * Since: 22.07.0
+ */
+gboolean poppler_annot_stamp_set_custom_image(PopplerAnnotStamp *poppler_annot, cairo_surface_t *image, GError **error)
+{
+    AnnotStamp *annot;
+    AnnotStampImageHelper *annot_image_helper;
+
+    g_return_val_if_fail(POPPLER_IS_ANNOT_STAMP(poppler_annot), FALSE);
+
+    annot = static_cast<AnnotStamp *>(POPPLER_ANNOT(poppler_annot)->annot);
+    annot_image_helper = _poppler_convert_cairo_image_to_stamp_image_helper(image, annot->getDoc(), error);
+    if (!annot_image_helper) {
+        return FALSE;
+    }
+    annot->setCustomImage(annot_image_helper);
+
+    return TRUE;
 }

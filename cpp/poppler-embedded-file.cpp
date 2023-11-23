@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, 2022 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,16 +34,11 @@
 
 using namespace poppler;
 
-embedded_file_private::embedded_file_private(FileSpec *fs) : file_spec(fs) { }
+embedded_file_private::embedded_file_private(std::unique_ptr<FileSpec> &&fs) : file_spec(std::move(fs)) { }
 
-embedded_file_private::~embedded_file_private()
+embedded_file *embedded_file_private::create(std::unique_ptr<FileSpec> &&fs)
 {
-    delete file_spec;
-}
-
-embedded_file *embedded_file_private::create(FileSpec *fs)
-{
-    return new embedded_file(*new embedded_file_private(fs));
+    return new embedded_file(*new embedded_file_private(std::move(fs)));
 }
 
 /**
@@ -101,25 +96,47 @@ int embedded_file::size() const
 }
 
 /**
- \returns the time_t representing the modification date of the embedded file,
+ \returns the time_type representing the modification date of the embedded file,
           if available
  */
 time_type embedded_file::modification_date() const
 {
     const EmbFile *ef = d->file_spec->getEmbeddedFile();
     const GooString *goo = ef ? ef->modDate() : nullptr;
-    return goo ? dateStringToTime(goo) : time_type(-1);
+    return goo ? static_cast<time_type>(dateStringToTime(goo)) : time_type(-1);
 }
 
 /**
- \returns the time_t representing the creation date of the embedded file,
+ \returns the time_type representing the creation date of the embedded file,
           if available
  */
 time_type embedded_file::creation_date() const
 {
     const EmbFile *ef = d->file_spec->getEmbeddedFile();
     const GooString *goo = ef ? ef->createDate() : nullptr;
-    return goo ? dateStringToTime(goo) : time_type(-1);
+    return goo ? static_cast<time_type>(dateStringToTime(goo)) : time_type(-1);
+}
+
+/**
+ \returns the time_t representing the modification date of the embedded file,
+          if available
+ */
+time_t embedded_file::modification_date_t() const
+{
+    const EmbFile *ef = d->file_spec->getEmbeddedFile();
+    const GooString *goo = ef ? ef->modDate() : nullptr;
+    return goo ? dateStringToTime(goo) : time_t(-1);
+}
+
+/**
+ \returns the time_t representing the creation date of the embedded file,
+          if available
+ */
+time_t embedded_file::creation_date_t() const
+{
+    const EmbFile *ef = d->file_spec->getEmbeddedFile();
+    const GooString *goo = ef ? ef->createDate() : nullptr;
+    return goo ? dateStringToTime(goo) : time_t(-1);
 }
 
 /**

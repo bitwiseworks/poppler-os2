@@ -2,8 +2,9 @@
  * Copyright (C) 2004, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018, 2019, 2021, 2022 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2021 André Guerreiro <aguerreiro1985@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,6 +291,7 @@ typedef enum
 
 POPPLER_PUBLIC
 GType poppler_document_get_type(void) G_GNUC_CONST;
+
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error);
 POPPLER_PUBLIC
@@ -300,10 +302,18 @@ POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_stream(GInputStream *stream, goffset length, const char *password, GCancellable *cancellable, GError **error);
 POPPLER_PUBLIC
 PopplerDocument *poppler_document_new_from_gfile(GFile *file, const char *password, GCancellable *cancellable, GError **error);
+#ifndef G_OS_WIN32
+POPPLER_PUBLIC
+PopplerDocument *poppler_document_new_from_fd(int fd, const char *password, GError **error);
+#endif
 POPPLER_PUBLIC
 gboolean poppler_document_save(PopplerDocument *document, const char *uri, GError **error);
 POPPLER_PUBLIC
 gboolean poppler_document_save_a_copy(PopplerDocument *document, const char *uri, GError **error);
+#ifndef G_OS_WIN32
+POPPLER_PUBLIC
+gboolean poppler_document_save_to_fd(PopplerDocument *document, int fd, gboolean include_changes, GError **error);
+#endif
 POPPLER_PUBLIC
 gboolean poppler_document_get_id(PopplerDocument *document, gchar **permanent_id, gchar **update_id);
 POPPLER_PUBLIC
@@ -407,6 +417,12 @@ void poppler_document_reset_form(PopplerDocument *document, GList *fields, gbool
 POPPLER_PUBLIC
 gboolean poppler_document_has_javascript(PopplerDocument *document);
 
+/* Signatures */
+POPPLER_PUBLIC
+GList *poppler_document_get_signature_fields(PopplerDocument *document);
+POPPLER_PUBLIC
+gint poppler_document_get_n_signatures(const PopplerDocument *document);
+
 /* Interface for getting the Index of a poppler_document */
 #define POPPLER_TYPE_INDEX_ITER (poppler_index_iter_get_type())
 POPPLER_PUBLIC
@@ -494,12 +510,21 @@ POPPLER_PUBLIC
 GType poppler_ps_file_get_type(void) G_GNUC_CONST;
 POPPLER_PUBLIC
 PopplerPSFile *poppler_ps_file_new(PopplerDocument *document, const char *filename, int first_page, int n_pages);
+#ifndef G_OS_WIN32
+POPPLER_PUBLIC
+PopplerPSFile *poppler_ps_file_new_fd(PopplerDocument *document, int fd, int first_page, int n_pages);
+#endif
 POPPLER_PUBLIC
 void poppler_ps_file_set_paper_size(PopplerPSFile *ps_file, double width, double height);
 POPPLER_PUBLIC
 void poppler_ps_file_set_duplex(PopplerPSFile *ps_file, gboolean duplex);
 POPPLER_PUBLIC
 void poppler_ps_file_free(PopplerPSFile *ps_file);
+
+POPPLER_PUBLIC
+void poppler_document_sign(PopplerDocument *document, const PopplerSigningData *signing_data, GCancellable *cancellable, GAsyncReadyCallback callback, gpointer user_data);
+POPPLER_PUBLIC
+gboolean poppler_document_sign_finish(PopplerDocument *document, GAsyncResult *result, GError **error);
 
 /**
  * PopplerPageRange:

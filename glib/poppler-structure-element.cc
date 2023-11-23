@@ -283,7 +283,7 @@ ENUM_VALUES(PopplerStructureTableScope, Scope) { { "Row", POPPLER_STRUCTURE_TABL
 #undef ENUM_VALUES
 
 template<typename EnumType>
-static EnumType name_to_enum(Object *name_value)
+static EnumType name_to_enum(const Object *name_value)
 {
     /*
      * Non-NULL names must always be valid because Poppler
@@ -291,9 +291,11 @@ static EnumType name_to_enum(Object *name_value)
      */
     g_assert(name_value != nullptr);
 
-    for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values; item->name; item++)
-        if (name_value->isName(item->name))
+    for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values; item->name; item++) {
+        if (name_value->isName(item->name)) {
             return item->value;
+        }
+    }
 
     g_assert_not_reached();
     return static_cast<EnumType>(-1);
@@ -306,7 +308,7 @@ static EnumType attr_to_enum(PopplerStructureElement *poppler_structure_element)
     return name_to_enum<EnumType>((attr != nullptr) ? attr->getValue() : Attribute::getDefaultValue(EnumNameValue<EnumType>::attribute_type));
 }
 
-static inline Object *attr_value_or_default(PopplerStructureElement *poppler_structure_element, Attribute::Type attribute_type)
+static inline const Object *attr_value_or_default(PopplerStructureElement *poppler_structure_element, Attribute::Type attribute_type)
 {
     const Attribute *attr = poppler_structure_element->elem->findAttribute(attribute_type, true);
     return attr ? attr->getValue() : Attribute::getDefaultValue(attribute_type);
@@ -466,8 +468,9 @@ gchar *poppler_structure_element_get_abbreviation(PopplerStructureElement *poppl
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-    if (poppler_structure_element->elem->getType() != StructElement::Span)
+    if (poppler_structure_element->elem->getType() != StructElement::Span) {
         return nullptr;
+    }
 
     const GooString *string = poppler_structure_element->elem->getExpandedAbbr();
     return string ? _poppler_goo_string_to_utf8(string) : nullptr;
@@ -616,8 +619,9 @@ PopplerStructureElementIter *poppler_structure_element_iter_copy(PopplerStructur
  */
 void poppler_structure_element_iter_free(PopplerStructureElementIter *iter)
 {
-    if (G_UNLIKELY(iter == nullptr))
+    if (G_UNLIKELY(iter == nullptr)) {
         return;
+    }
 
     g_object_unref(iter->document);
     g_slice_free(PopplerStructureElementIter, iter);
@@ -630,7 +634,7 @@ void poppler_structure_element_iter_free(PopplerStructureElementIter *iter)
  * Returns the root #PopplerStructureElementIter for @document, or %NULL. The
  * returned value must be freed with poppler_structure_element_iter_free().
  *
- * Documents may have an associated structure tree &mdashmostly, Tagged-PDF
+ * Documents may have an associated structure tree &mdash;mostly, Tagged-PDF
  * compliant documents&mdash; which can be used to obtain information about
  * the document structure and its contents. Each node in the tree contains
  * a #PopplerStructureElement.
@@ -669,11 +673,13 @@ PopplerStructureElementIter *poppler_structure_element_iter_new(PopplerDocument 
     g_return_val_if_fail(POPPLER_IS_DOCUMENT(poppler_document), NULL);
 
     const StructTreeRoot *root = poppler_document->doc->getStructTreeRoot();
-    if (root == nullptr)
+    if (root == nullptr) {
         return nullptr;
+    }
 
-    if (root->getNumChildren() == 0)
+    if (root->getNumChildren() == 0) {
         return nullptr;
+    }
 
     iter = g_slice_new0(PopplerStructureElementIter);
     iter->document = (PopplerDocument *)g_object_ref(poppler_document);
@@ -776,8 +782,9 @@ enum
 static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
 {
     PopplerTextSpan *new_span = g_slice_new0(PopplerTextSpan);
-    if (GooString *text = span.getText())
+    if (GooString *text = span.getText()) {
         new_span->text = _poppler_goo_string_to_utf8(text);
+    }
 
     new_span->color.red = colToDbl(span.getColor().r) * 65535;
     new_span->color.green = colToDbl(span.getColor().g) * 65535;
@@ -787,18 +794,27 @@ static PopplerTextSpan *text_span_poppler_text_span(const TextSpan &span)
         // GfxFont sometimes does not have a family name but there
         // is always a font name that can be used as fallback.
         const GooString *font_name = span.getFont()->getFamily();
-        if (font_name == nullptr)
-            font_name = span.getFont()->getName();
+        if (font_name) {
+            new_span->font_name = _poppler_goo_string_to_utf8(font_name);
+        } else if (span.getFont()->getName()) {
+            const GooString aux(*span.getFont()->getName());
+            new_span->font_name = _poppler_goo_string_to_utf8(&aux);
+        } else {
+            new_span->font_name = nullptr;
+        }
 
-        new_span->font_name = _poppler_goo_string_to_utf8(font_name);
-        if (span.getFont()->isFixedWidth())
+        if (span.getFont()->isFixedWidth()) {
             new_span->flags |= POPPLER_TEXT_SPAN_FIXED_WIDTH;
-        if (span.getFont()->isSerif())
+        }
+        if (span.getFont()->isSerif()) {
             new_span->flags |= POPPLER_TEXT_SPAN_SERIF;
-        if (span.getFont()->isItalic())
+        }
+        if (span.getFont()->isItalic()) {
             new_span->flags |= POPPLER_TEXT_SPAN_ITALIC;
-        if (span.getFont()->isBold())
+        }
+        if (span.getFont()->isBold()) {
             new_span->flags |= POPPLER_TEXT_SPAN_BOLD;
+        }
 
         /* isBold() can return false for some fonts whose weight is heavy */
         switch (span.getFont()->getWeight()) {
@@ -834,8 +850,9 @@ PopplerTextSpan *poppler_text_span_copy(PopplerTextSpan *poppler_text_span)
 
     new_span = g_slice_dup(PopplerTextSpan, poppler_text_span);
     new_span->text = g_strdup(poppler_text_span->text);
-    if (poppler_text_span->font_name)
+    if (poppler_text_span->font_name) {
         new_span->font_name = g_strdup(poppler_text_span->font_name);
+    }
     return new_span;
 }
 
@@ -849,8 +866,9 @@ PopplerTextSpan *poppler_text_span_copy(PopplerTextSpan *poppler_text_span)
  */
 void poppler_text_span_free(PopplerTextSpan *poppler_text_span)
 {
-    if (G_UNLIKELY(poppler_text_span == nullptr))
+    if (G_UNLIKELY(poppler_text_span == nullptr)) {
         return;
+    }
 
     g_free(poppler_text_span->text);
     g_free(poppler_text_span->font_name);
@@ -992,15 +1010,17 @@ PopplerTextSpan **poppler_structure_element_get_text_spans(PopplerStructureEleme
     g_return_val_if_fail(n_text_spans != nullptr, NULL);
     g_return_val_if_fail(poppler_structure_element->elem != nullptr, NULL);
 
-    if (!poppler_structure_element->elem->isContent())
+    if (!poppler_structure_element->elem->isContent()) {
         return nullptr;
+    }
 
     const TextSpanArray spans(poppler_structure_element->elem->getTextSpans());
     PopplerTextSpan **text_spans = g_new0(PopplerTextSpan *, spans.size());
 
     size_t i = 0;
-    for (const TextSpan &s : spans)
+    for (const TextSpan &s : spans) {
         text_spans[i++] = text_span_poppler_text_span(s);
+    }
 
     *n_text_spans = spans.size();
 
@@ -1042,7 +1062,7 @@ PopplerStructureWritingMode poppler_structure_element_get_writing_mode(PopplerSt
     return attr_to_enum<PopplerStructureWritingMode>(poppler_structure_element);
 }
 
-static void convert_border_style(Object *object, PopplerStructureBorderStyle *values)
+static void convert_border_style(const Object *object, PopplerStructureBorderStyle *values)
 {
     g_assert(object != nullptr);
     g_assert(values != nullptr);
@@ -1078,7 +1098,7 @@ void poppler_structure_element_get_border_style(PopplerStructureElement *poppler
     convert_border_style(attr_value_or_default(poppler_structure_element, Attribute::BorderStyle), border_styles);
 }
 
-static inline void convert_doubles_array(Object *object, gdouble **values, guint *n_values)
+static inline void convert_doubles_array(const Object *object, gdouble **values, guint *n_values)
 {
     g_assert(object->isArray());
     g_assert(n_values != nullptr);
@@ -1094,7 +1114,7 @@ static inline void convert_doubles_array(Object *object, gdouble **values, guint
     values = &doubles;
 }
 
-static inline void convert_color(Object *object, PopplerColor *color)
+static inline void convert_color(const Object *object, PopplerColor *color)
 {
     g_assert(color != nullptr);
     g_assert(object->isArray() && object->arrayGetLength() != 3);
@@ -1123,9 +1143,10 @@ gboolean poppler_structure_element_get_color(PopplerStructureElement *poppler_st
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
     g_return_val_if_fail(color != nullptr, FALSE);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Color);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Color);
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_color(value, color);
     return TRUE;
@@ -1149,9 +1170,10 @@ gboolean poppler_structure_element_get_background_color(PopplerStructureElement 
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
     g_return_val_if_fail(color != nullptr, FALSE);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BackgroundColor);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BackgroundColor);
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_color(value, color);
     return TRUE;
@@ -1180,9 +1202,10 @@ gboolean poppler_structure_element_get_border_color(PopplerStructureElement *pop
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
     g_return_val_if_fail(colors != nullptr, FALSE);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderColor);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderColor);
+    if (value == nullptr) {
         return FALSE;
+    }
 
     g_assert(value->isArray());
     if (value->arrayGetLength() == 4) {
@@ -1201,7 +1224,7 @@ gboolean poppler_structure_element_get_border_color(PopplerStructureElement *pop
     return TRUE;
 }
 
-static inline void convert_double_or_4_doubles(Object *object, gdouble *value)
+static inline void convert_double_or_4_doubles(const Object *object, gdouble *value)
 {
     g_assert(object != nullptr);
 
@@ -1237,9 +1260,10 @@ gboolean poppler_structure_element_get_border_thickness(PopplerStructureElement 
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), FALSE);
     g_return_val_if_fail(border_thicknesses != nullptr, FALSE);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderThickness);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BorderThickness);
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_double_or_4_doubles(value, border_thicknesses);
     return TRUE;
@@ -1381,9 +1405,10 @@ gboolean poppler_structure_element_get_bounding_box(PopplerStructureElement *pop
     g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), FALSE);
     g_return_val_if_fail(bounding_box != nullptr, FALSE);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::BBox);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::BBox);
+    if (value == nullptr) {
         return FALSE;
+    }
 
     gdouble dimensions[4];
     convert_double_or_4_doubles(value, dimensions);
@@ -1411,7 +1436,7 @@ gboolean poppler_structure_element_get_bounding_box(PopplerStructureElement *pop
 gdouble poppler_structure_element_get_width(PopplerStructureElement *poppler_structure_element)
 {
     g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Width);
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Width);
     return value->isName("Auto") ? -1.0 : value->getNum();
 }
 
@@ -1430,7 +1455,7 @@ gdouble poppler_structure_element_get_width(PopplerStructureElement *poppler_str
 gdouble poppler_structure_element_get_height(PopplerStructureElement *poppler_structure_element)
 {
     g_return_val_if_fail(poppler_structure_element_is_block(poppler_structure_element), NAN);
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Height);
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Height);
     return value->isName("Auto") ? -1.0 : value->getNum();
 }
 
@@ -1542,7 +1567,7 @@ gdouble poppler_structure_element_get_baseline_shift(PopplerStructureElement *po
 gdouble poppler_structure_element_get_line_height(PopplerStructureElement *poppler_structure_element)
 {
     g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), NAN);
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::LineHeight);
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::LineHeight);
     return (value->isName("Normal") || value->isName("Auto")) ? -1.0 : value->getNum();
 }
 
@@ -1566,9 +1591,10 @@ gboolean poppler_structure_element_get_text_decoration_color(PopplerStructureEle
     g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), FALSE);
     g_return_val_if_fail(color != nullptr, FALSE);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationColor);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationColor);
+    if (value == nullptr) {
         return FALSE;
+    }
 
     convert_color(value, color);
     return FALSE;
@@ -1591,7 +1617,7 @@ gdouble poppler_structure_element_get_text_decoration_thickness(PopplerStructure
 {
     g_return_val_if_fail(poppler_structure_element_is_inline(poppler_structure_element), NAN);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationThickness);
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::TextDecorationThickness);
     return (value == nullptr) ? NAN : value->getNum();
 }
 
@@ -1711,7 +1737,7 @@ gdouble *poppler_structure_element_get_column_gaps(PopplerStructureElement *popp
     g_return_val_if_fail(poppler_structure_element_is_grouping(poppler_structure_element), NULL);
     g_return_val_if_fail(n_values != nullptr, NULL);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnGap);
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnGap);
     if (value == nullptr) {
         *n_values = static_cast<guint>(-1);
         return nullptr;
@@ -1743,9 +1769,10 @@ gdouble *poppler_structure_element_get_column_widths(PopplerStructureElement *po
     g_return_val_if_fail(poppler_structure_element_is_grouping(poppler_structure_element), NULL);
     g_return_val_if_fail(n_values != nullptr, NULL);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnWidths);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::ColumnWidths);
+    if (value == nullptr) {
         return nullptr;
+    }
 
     gdouble *result = nullptr;
     convert_doubles_array(value, &result, n_values);
@@ -1791,9 +1818,10 @@ PopplerStructureFormRole poppler_structure_element_get_form_role(PopplerStructur
     /*
      * The Role attribute can actually be undefined.
      */
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Role);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Role);
+    if (value == nullptr) {
         return POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED;
+    }
 
     return name_to_enum<PopplerStructureFormRole>(value);
 }
@@ -1837,13 +1865,16 @@ gchar *poppler_structure_element_get_form_description(PopplerStructureElement *p
 {
     g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, NULL);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Desc);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Desc);
+    if (value == nullptr) {
         return nullptr;
-    if (value->isString())
+    }
+    if (value->isString()) {
         return _poppler_goo_string_to_utf8(value->getString());
-    if (value->isName())
+    }
+    if (value->isName()) {
         return g_strdup(value->getName());
+    }
 
     g_assert_not_reached();
     return nullptr;
@@ -1904,9 +1935,10 @@ gchar **poppler_structure_element_get_table_headers(PopplerStructureElement *pop
 {
     g_return_val_if_fail(poppler_structure_element_get_kind(poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, NULL);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Headers);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Headers);
+    if (value == nullptr) {
         return nullptr;
+    }
 
     g_assert(value->isArray());
 
@@ -1916,12 +1948,13 @@ gchar **poppler_structure_element_get_table_headers(PopplerStructureElement *pop
     for (guint i = 0; i < n_values; i++) {
         Object item = value->arrayGet(i);
 
-        if (item.isString())
+        if (item.isString()) {
             result[i] = _poppler_goo_string_to_utf8(item.getString());
-        else if (item.isName())
+        } else if (item.isName()) {
             result[i] = g_strdup(item.getName());
-        else
+        } else {
             g_assert_not_reached();
+        }
     }
 
     return result;
@@ -1966,13 +1999,16 @@ gchar *poppler_structure_element_get_table_summary(PopplerStructureElement *popp
 {
     g_return_val_if_fail(POPPLER_IS_STRUCTURE_ELEMENT(poppler_structure_element), NULL);
 
-    Object *value = attr_value_or_default(poppler_structure_element, Attribute::Summary);
-    if (value == nullptr)
+    const Object *value = attr_value_or_default(poppler_structure_element, Attribute::Summary);
+    if (value == nullptr) {
         return nullptr;
-    if (value->isString())
+    }
+    if (value->isString()) {
         return _poppler_goo_string_to_utf8(value->getString());
-    if (value->isName())
+    }
+    if (value->isName()) {
         return g_strdup(value->getName());
+    }
 
     g_assert_not_reached();
     return nullptr;

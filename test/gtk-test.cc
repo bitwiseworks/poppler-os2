@@ -15,15 +15,22 @@
 #include <poppler.h>
 #include <poppler-private.h>
 #include <gtk/gtk.h>
+#include <cerrno>
 #include <cmath>
 
 static int requested_page = 0;
 static gboolean cairo_output = FALSE;
 static gboolean splash_output = FALSE;
+#ifndef G_OS_WIN32
+static gboolean args_are_fds = FALSE;
+#endif
 static const char **file_arguments = nullptr;
 static const GOptionEntry options[] = { { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr },
                                         { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr },
                                         { "page", 'p', 0, G_OPTION_ARG_INT, &requested_page, "Page number", "PAGE" },
+#ifndef G_OS_WIN32
+                                        { "fd", 'f', 0, G_OPTION_ARG_NONE, &args_are_fds, "File descriptors", nullptr },
+#endif
                                         { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
                                         {} };
 
@@ -153,11 +160,13 @@ static gboolean drawing_area_draw(GtkWidget *drawing_area, cairo_t *cr, View *vi
         document.height = view->out->getBitmapHeight();
     }
 
-    if (!gdk_cairo_get_clip_rectangle(cr, &clip))
+    if (!gdk_cairo_get_clip_rectangle(cr, &clip)) {
         return FALSE;
+    }
 
-    if (!gdk_rectangle_intersect(&document, &clip, &draw))
+    if (!gdk_rectangle_intersect(&document, &clip, &draw)) {
         return FALSE;
+    }
 
     if (cairo_output) {
         cairo_set_source_surface(cr, view->surface, 0, 0);
@@ -183,8 +192,9 @@ static void view_set_page(View *view, int page)
         w = (int)ceil(width);
         h = (int)ceil(height);
 
-        if (view->surface)
+        if (view->surface) {
             cairo_surface_destroy(view->surface);
+        }
         view->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
 
         cr = cairo_create(view->surface);
@@ -216,8 +226,9 @@ static void redraw_callback(void *data)
 
 static void view_free(View *view)
 {
-    if (G_UNLIKELY(!view))
+    if (G_UNLIKELY(!view)) {
         return;
+    }
 
     g_object_unref(view->doc);
     delete view->out;
@@ -230,8 +241,9 @@ static void destroy_window_callback(GtkWindow *window, View *view)
     view_list = g_list_remove(view_list, view);
     view_free(view);
 
-    if (!view_list)
+    if (!view_list) {
         gtk_main_quit();
+    }
 }
 
 static void page_changed_callback(GtkSpinButton *button, View *view)
@@ -336,30 +348,52 @@ int main(int argc, char *argv[])
     for (int i = 0; file_arguments[i]; i++) {
         View *view;
         GFile *file;
-        PopplerDocument *doc;
+        PopplerDocument *doc = nullptr;
         GError *error = nullptr;
+        const char *arg;
 
-        file = g_file_new_for_commandline_arg(file_arguments[i]);
-        doc = poppler_document_new_from_gfile(file, nullptr, nullptr, &error);
-        if (!doc) {
-            gchar *uri;
+        arg = file_arguments[i];
+#ifndef G_OS_WIN32
+        if (args_are_fds) {
+            char *end;
+            gint64 v;
 
-            uri = g_file_get_uri(file);
-            g_printerr("Error opening document %s: %s\n", uri, error->message);
-            g_error_free(error);
-            g_free(uri);
+            errno = 0;
+            end = nullptr;
+            v = g_ascii_strtoll(arg, &end, 10);
+            if (errno || end == arg || v == -1 || v < G_MININT || v > G_MAXINT) {
+                g_set_error(&error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE, "Failed to parse \"%s\" as file descriptor number", arg);
+            } else {
+                doc = poppler_document_new_from_fd(int(v), nullptr, &error);
+            }
+        } else
+#endif /* !G_OS_WIN32 */
+        {
+            file = g_file_new_for_commandline_arg(arg);
+            doc = poppler_document_new_from_gfile(file, nullptr, nullptr, &error);
+            if (!doc) {
+                gchar *uri;
+
+                uri = g_file_get_uri(file);
+                g_prefix_error(&error, "%s: ", uri);
+                g_free(uri);
+            }
             g_object_unref(file);
-
-            continue;
         }
-        g_object_unref(file);
 
-        view = view_new(doc);
-        view_list = g_list_prepend(view_list, view);
-        view_set_page(view, CLAMP(requested_page, 0, poppler_document_get_n_pages(doc) - 1));
+        if (doc) {
+            view = view_new(doc);
+            view_list = g_list_prepend(view_list, view);
+            view_set_page(view, CLAMP(requested_page, 0, poppler_document_get_n_pages(doc) - 1));
+        } else {
+            g_printerr("Error opening document: %s\n", error->message);
+            g_error_free(error);
+        }
     }
 
-    gtk_main();
+    if (view_list != nullptr) {
+        gtk_main();
+    }
 
     return 0;
 }

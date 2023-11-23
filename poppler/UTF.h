@@ -4,12 +4,15 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2012, 2017, 2021 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017, 2021, 2023 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
+// Copyright (C) 2023 Even Rouault <even.rouault@spatialys.com>
+// Copyright (C) 2023 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -18,11 +21,13 @@
 
 #include <cstdint>
 #include <climits>
+#include <string>
 
-#include "poppler-config.h"
-#include "goo/GooString.h"
 #include "CharTypes.h"
 #include "poppler_private_export.h"
+
+// Magic bytes that mark the byte order in a UTF-16 unicode string
+constexpr std::string_view unicodeByteOrderMark = "\xFE\xFF";
 
 // Convert a UTF-16 string to a UCS-4
 //   utf16      - utf16 bytes
@@ -36,7 +41,7 @@ POPPLER_PRIVATE_EXPORT int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unico
 //   ucs4       - if the number of UCS-4 characters is > 0, allocates and
 //                returns UCS-4 string. Free with gfree.
 //   returns number of UCS-4 characters
-int POPPLER_PRIVATE_EXPORT TextStringToUCS4(const GooString *textStr, Unicode **ucs4);
+int POPPLER_PRIVATE_EXPORT TextStringToUCS4(const std::string &textStr, Unicode **ucs4);
 
 // check if UCS-4 character is valid
 bool UnicodeIsValid(Unicode ucs4);
@@ -68,16 +73,27 @@ int POPPLER_PRIVATE_EXPORT utf8CountUtf16CodeUnits(const char *utf8);
 //  maxUtf8 - maximum number of UTF-8 bytes to convert. Conversion stops when
 //            either this count is reached or a null is encountered.
 // Returns number of UTF-16 code units written (excluding NULL).
-int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16 = INT_MAX, int maxUtf8 = INT_MAX);
+int POPPLER_PRIVATE_EXPORT utf8ToUtf16(const char *utf8, uint16_t *utf16, int maxUtf16, int maxUtf8);
 
 // Allocate utf16 string and convert utf8 into it.
 uint16_t POPPLER_PRIVATE_EXPORT *utf8ToUtf16(const char *utf8, int *len = nullptr);
+
+inline bool isUtf8WithBom(std::string_view str)
+{
+    if (str.size() < 4) {
+        return false;
+    }
+    if (str[0] == '\xef' && str[1] == '\xbb' && str[2] == '\xbf') {
+        return true;
+    }
+    return false;
+}
 
 // Converts a UTF-8 string to a big endian UTF-16 string with BOM.
 // The caller owns the returned pointer.
 //  utf8 - UTF-8 string to convert. An empty string is acceptable.
 // Returns a big endian UTF-16 string with BOM or an empty string without BOM.
-GooString POPPLER_PRIVATE_EXPORT *utf8ToUtf16WithBom(const GooString &utf8);
+std::string POPPLER_PRIVATE_EXPORT utf8ToUtf16WithBom(const std::string &utf8);
 
 // Count number of UTF-8 bytes required to convert a UTF-16 string to
 // UTF-8 (excluding terminating NULL).
@@ -108,5 +124,10 @@ char POPPLER_PRIVATE_EXPORT *utf16ToUtf8(const uint16_t *utf16, int *len = nullp
 //              of the corresponding character in the text of the line (thanks to this info
 //              being passed in @in_idx parameter).
 void POPPLER_PRIVATE_EXPORT unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices);
+
+// Convert a PDF Text String to UTF-8
+//   textStr    - PDF text string
+//   returns UTF-8 string.
+std::string POPPLER_PRIVATE_EXPORT TextStringToUtf8(const std::string &textStr);
 
 #endif

@@ -1,8 +1,9 @@
 /* poppler-document.cc: qt interface to poppler
- * Copyright (C) 2005, 2008, 2009, 2012, 2013, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005, 2008, 2009, 2012, 2013, 2018, 2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2008, 2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2023 g10 Code GmbH, Author: Sune Stolborg Vuorela <sune@vuorela.dk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +28,13 @@
 #include "Object.h"
 #include "Stream.h"
 #include "Catalog.h"
-#include "FileSpec.h"
 
 #include "poppler-private.h"
 #include "poppler-embeddedfile-private.h"
 
 namespace Poppler {
 
-EmbeddedFileData::EmbeddedFileData(FileSpec *fs) : filespec(fs) { }
-
-EmbeddedFileData::~EmbeddedFileData()
-{
-    delete filespec;
-}
+EmbeddedFileData::EmbeddedFileData(std::unique_ptr<FileSpec> &&fs) : filespec(std::move(fs)) { }
 
 EmbFile *EmbeddedFileData::embFile() const
 {
@@ -101,24 +96,17 @@ QString EmbeddedFile::mimeType() const
 
 QByteArray EmbeddedFile::data()
 {
-    if (!isValid())
+    if (!isValid()) {
         return QByteArray();
+    }
     Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : nullptr;
-    if (!stream)
+    if (!stream) {
         return QByteArray();
+    }
 
     stream->reset();
-    int dataLen = 0;
-    QByteArray fileArray;
-    int i;
-    while ((i = stream->getChar()) != EOF) {
-        if (dataLen >= fileArray.size())
-            fileArray.resize(dataLen + 32768);
-        fileArray[dataLen] = (char)i;
-        ++dataLen;
-    }
-    fileArray.resize(dataLen);
-    return fileArray;
+    auto data = stream->toUnsignedChars();
+    return QByteArray(reinterpret_cast<const char *>(data.data()), data.size());
 }
 
 bool EmbeddedFile::isValid() const

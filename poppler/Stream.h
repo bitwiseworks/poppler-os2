@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -28,9 +28,11 @@
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
-// Copyright (C) 2020, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020-2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2021 Hubert Figuiere <hub@figuiere.net>
+// Copyright (C) 2021 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -42,6 +44,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <vector>
 
 #include "poppler-config.h"
 #include "poppler_private_export.h"
@@ -95,7 +98,7 @@ enum CryptAlgorithm
 
 typedef struct _ByteRange
 {
-    unsigned int offset;
+    size_t offset;
     unsigned int length;
 } ByteRange;
 
@@ -131,10 +134,11 @@ public:
         } else {
             for (int i = 0; i < nChars; ++i) {
                 const int c = getChar();
-                if (likely(c != EOF))
+                if (likely(c != EOF)) {
                     buffer[i] = c;
-                else
+                } else {
                     return i;
+                }
             }
             return nChars;
         }
@@ -152,22 +156,23 @@ public:
 
     inline void fillGooString(GooString *s) { fillString(s->toNonConstStr()); }
 
-    inline unsigned char *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
+    inline std::vector<unsigned char> toUnsignedChars(int initialSize = 4096, int sizeIncrement = 4096)
     {
+        std::vector<unsigned char> buf(initialSize);
+
         int readChars;
-        unsigned char *buf = (unsigned char *)gmalloc(initialSize);
         int size = initialSize;
-        *length = 0;
+        int length = 0;
         int charsToRead = initialSize;
         bool continueReading = true;
         reset();
-        while (continueReading && (readChars = doGetChars(charsToRead, &buf[*length])) != 0) {
-            *length += readChars;
+        while (continueReading && (readChars = doGetChars(charsToRead, buf.data() + length)) != 0) {
+            length += readChars;
             if (readChars == charsToRead) {
                 if (lookChar() != EOF) {
                     size += sizeIncrement;
                     charsToRead = sizeIncrement;
-                    buf = (unsigned char *)grealloc(buf, size);
+                    buf.resize(size);
                 } else {
                     continueReading = false;
                 }
@@ -175,6 +180,8 @@ public:
                 continueReading = false;
             }
         }
+
+        buf.resize(length);
         return buf;
     }
 
@@ -516,7 +523,7 @@ private:
 
 #define fileStreamBufSize 256
 
-class FileStream : public BaseStream
+class POPPLER_PRIVATE_EXPORT FileStream : public BaseStream
 {
 public:
     FileStream(GooFile *fileA, Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
@@ -665,7 +672,7 @@ public:
 
     void setPos(Goffset pos, int dir = 0) override
     {
-        unsigned int i;
+        Goffset i;
 
         if (dir >= 0) {
             i = pos;
@@ -733,9 +740,17 @@ public:
 
 class AutoFreeMemStream : public BaseMemStream<char>
 {
+    bool filterRemovalForbidden = false;
+
 public:
+    // AutoFreeMemStream takes ownership over the buffer.
+    // The buffer should be created using gmalloc().
     AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseMemStream(bufA, startA, lengthA, std::move(dictA)) { }
     ~AutoFreeMemStream() override;
+
+    // A hack to deal with the strange behaviour of PDFDoc::writeObject().
+    bool isFilterRemovalForbidden() const;
+    void setFilterRemovalForbidden(bool forbidden);
 };
 
 //------------------------------------------------------------------------
@@ -991,8 +1006,9 @@ private:
     short lookBits(int n);
     void eatBits(int n)
     {
-        if ((inputBits -= n) < 0)
+        if ((inputBits -= n) < 0) {
             inputBits = 0;
+        }
     }
 };
 
@@ -1156,8 +1172,9 @@ private:
         int c;
 
         while (remain == 0) {
-            if (endOfBlock && eof)
+            if (endOfBlock && eof) {
                 return EOF;
+            }
             readSome();
         }
         c = buf[index];

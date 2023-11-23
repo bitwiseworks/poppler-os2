@@ -4,9 +4,10 @@
  * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, 2020, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020-2022, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2022, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,8 +52,9 @@ struct MiniIconv
     MiniIconv(const char *to_code, const char *from_code) : i_(iconv_open(to_code, from_code)) { }
     ~MiniIconv()
     {
-        if (is_valid())
+        if (is_valid()) {
             iconv_close(i_);
+        }
     }
     MiniIconv(const MiniIconv &) = delete;
     MiniIconv &operator=(const MiniIconv &) = delete;
@@ -205,6 +207,8 @@ noncopyable::noncopyable() { }
 
 noncopyable::~noncopyable() { }
 
+noncopyable &noncopyable::operator=(noncopyable &&other) noexcept = default;
+
 ustring::ustring() { }
 
 ustring::ustring(size_type len, value_type ch) : std::basic_string<value_type>(len, ch) { }
@@ -316,9 +320,18 @@ ustring ustring::from_latin1(const std::string &str)
 }
 
 /**
- Converts a string representing a PDF date to a value compatible with time_t.
+ Converts a string representing a PDF date to a value compatible with time_type.
  */
 time_type poppler::convert_date(const std::string &date)
+{
+    GooString gooDateStr(date.c_str());
+    return static_cast<time_type>(dateStringToTime(&gooDateStr));
+}
+
+/**
+ Converts a string representing a PDF date to a value compatible with time_t.
+ */
+time_t poppler::convert_date_t(const std::string &date)
 {
     GooString gooDateStr(date.c_str());
     return dateStringToTime(&gooDateStr);

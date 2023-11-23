@@ -17,13 +17,13 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
-// Copyright (C) 2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2015, 2017, 2020, 2022 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2017, 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020, 2021 Philipp Knechtges <philipp-dev@knechtges.com>
 //
@@ -44,6 +44,7 @@
 #include <cassert>
 #include <map>
 #include <memory>
+#include <vector>
 
 class Array;
 class Gfx;
@@ -122,7 +123,7 @@ static inline double colToDbl(GfxColorComp x)
 
 static inline unsigned char dblToByte(double x)
 {
-    return (x * 255.0);
+    return static_cast<unsigned char>(x * 255.0);
 }
 
 static inline double byteToDbl(unsigned char x)
@@ -179,6 +180,8 @@ typedef GfxColorComp GfxGray;
 struct GfxRGB
 {
     GfxColorComp r, g, b;
+
+    bool operator==(GfxRGB other) const { return r == other.r && g == other.g && b == other.b; }
 };
 
 //------------------------------------------------------------------------
@@ -851,7 +854,7 @@ private:
 // GfxShading
 //------------------------------------------------------------------------
 
-class GfxShading
+class POPPLER_PRIVATE_EXPORT GfxShading
 {
 public:
     explicit GfxShading(int typeA);
@@ -1491,11 +1494,10 @@ public:
     int getOverprintMode() const { return overprintMode; }
     Function **getTransfer() { return transfer; }
     double getLineWidth() const { return lineWidth; }
-    void getLineDash(double **dash, int *length, double *start)
+    const std::vector<double> &getLineDash(double *start)
     {
-        *dash = lineDash;
-        *length = lineDashLength;
         *start = lineDashStart;
+        return lineDash;
     }
     int getFlatness() const { return flatness; }
     int getLineJoin() const { return lineJoin; }
@@ -1504,7 +1506,7 @@ public:
     bool getStrokeAdjust() const { return strokeAdjust; }
     bool getAlphaIsShape() const { return alphaIsShape; }
     bool getTextKnockout() const { return textKnockout; }
-    GfxFont *getFont() const { return font; }
+    const std::shared_ptr<GfxFont> &getFont() const { return font; }
     double getFontSize() const { return fontSize; }
     const double *getTextMat() const { return textMat; }
     double getCharSpace() const { return charSpace; }
@@ -1577,7 +1579,7 @@ public:
     void setOverprintMode(int op) { overprintMode = op; }
     void setTransfer(Function **funcs);
     void setLineWidth(double width) { lineWidth = width; }
-    void setLineDash(double *dash, int length, double start);
+    void setLineDash(std::vector<double> &&dash, double start);
     void setFlatness(int flatness1) { flatness = flatness1; }
     void setLineJoin(int lineJoin1) { lineJoin = lineJoin1; }
     void setLineCap(int lineCap1) { lineCap = lineCap1; }
@@ -1585,7 +1587,7 @@ public:
     void setStrokeAdjust(bool sa) { strokeAdjust = sa; }
     void setAlphaIsShape(bool ais) { alphaIsShape = ais; }
     void setTextKnockout(bool tk) { textKnockout = tk; }
-    void setFont(GfxFont *fontA, double fontSizeA);
+    void setFont(std::shared_ptr<GfxFont> fontA, double fontSizeA);
     void setTextMat(double a, double b, double c, double d, double e, double f)
     {
         textMat[0] = a;
@@ -1709,8 +1711,7 @@ private:
                            //   R,G,B,gray functions)
 
     double lineWidth; // line width
-    double *lineDash; // line dash
-    int lineDashLength;
+    std::vector<double> lineDash; // line dash
     double lineDashStart;
     int flatness; // curve flatness
     int lineJoin; // line join style
@@ -1720,7 +1721,7 @@ private:
     bool alphaIsShape; // alpha is shape
     bool textKnockout; // text knockout
 
-    GfxFont *font; // font
+    std::shared_ptr<GfxFont> font; // font
     double fontSize; // font size
     double textMat[6]; // text matrix
     double charSpace; // character spacing

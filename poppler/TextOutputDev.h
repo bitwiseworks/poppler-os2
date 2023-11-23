@@ -24,7 +24,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018, 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2022 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 // Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
@@ -119,7 +119,7 @@ public:
 #endif
 
 private:
-    GfxFont *gfxFont;
+    std::shared_ptr<GfxFont> gfxFont;
 #ifdef TEXTOUT_WORD_LIST
     GooString *fontName;
     int flags;
@@ -525,7 +525,7 @@ public:
     TextWord *get(int idx);
 
 private:
-    std::vector<TextWord *> *words;
+    std::vector<TextWord *> words;
 };
 
 #endif // TEXTOUT_WORD_LIST
@@ -596,6 +596,7 @@ public:
 
     // Coalesce strings that look like parts of the same line.
     void coalesce(bool physLayout, double fixedPitch, bool doHTML);
+    void coalesce(bool physLayout, double fixedPitch, bool doHTML, double minColSpacing1);
 
     // Find a string.  If <startAtTop> is true, starts looking at the
     // top of the page; else if <startAtLast> is true, starts looking
@@ -660,7 +661,7 @@ public:
     // this->rawOrder is true), physical layout order (if <physLayout>
     // is true and this->rawOrder is false), or reading order (if both
     // flags are false).
-    TextWordList *makeWordList(bool physLayout);
+    std::unique_ptr<TextWordList> makeWordList(bool physLayout);
 #endif
 
 private:
@@ -689,7 +690,7 @@ private:
                           //   previous char
     bool diagonal; // whether the current text is diagonal
 
-    TextPool *pools[4]; // a "pool" of TextWords for each rotation
+    std::unique_ptr<TextPool> pools[4]; // a "pool" of TextWords for each rotation
     TextFlow *flows; // linked list of flows
     TextBlock **blocks; // array of blocks, in yx order
     int nBlocks; // number of blocks
@@ -700,14 +701,14 @@ private:
                         //   rawOrder is set)
     TextWord *rawLastWord; // last word on rawWords list
 
-    std::vector<TextFontInfo *> *fonts; // all font info objects used on this page
+    std::vector<std::unique_ptr<TextFontInfo>> fonts; // all font info objects used on this page
 
     double lastFindXMin, // coordinates of the last "find" result
             lastFindYMin;
     bool haveLastFind;
 
-    std::vector<TextUnderline *> *underlines;
-    std::vector<TextLink *> *links;
+    std::vector<std::unique_ptr<TextUnderline>> underlines;
+    std::vector<std::unique_ptr<TextLink>> links;
 
     int refCnt;
 
@@ -756,6 +757,8 @@ private:
 class POPPLER_PRIVATE_EXPORT TextOutputDev : public OutputDev
 {
 public:
+    static double minColSpacing1_default;
+
     // Open a text output file.  If <fileName> is NULL, no file is
     // written (this is useful, e.g., for searching text).  If
     // <physLayoutA> is true, the original physical layout of the text
@@ -861,7 +864,7 @@ public:
     // this->rawOrder is true), physical layout order (if
     // this->physLayout is true and this->rawOrder is false), or reading
     // order (if both flags are false).
-    TextWordList *makeWordList();
+    std::unique_ptr<TextWordList> makeWordList();
 #endif
 
     // Returns the TextPage object for the last rasterized page,
@@ -885,6 +888,8 @@ public:
     }
     void setTextEOL(EndOfLineKind textEOLA) { textEOL = textEOLA; }
     void setTextPageBreaks(bool textPageBreaksA) { textPageBreaks = textPageBreaksA; }
+    double getMinColSpacing1() const { return minColSpacing1; }
+    void setMinColSpacing1(double val) { minColSpacing1 = val; }
 
 private:
     TextOutputFunc outputFunc; // output function
@@ -897,6 +902,7 @@ private:
     double fixedPitch; // if physLayout is true and this is non-zero,
                        //   assume fixed-pitch characters with this
                        //   width
+    double minColSpacing1; // see default value defined with same name at TextOutputDev.cc
     bool rawOrder; // keep text in content stream order
     bool discardDiag; // Diagonal text, i.e., text that is not close to one of the
                       // 0, 90, 180, or 270 degree axes, is discarded. This is useful

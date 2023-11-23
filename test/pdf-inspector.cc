@@ -4,7 +4,7 @@
 //
 // Copyright 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019, 2022 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -121,8 +121,9 @@ void PdfInspector::on_file_activated(GtkWidget *widget, PdfInspector *inspector)
     gchar *file_name;
 
     file_name = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget));
-    if (file_name)
+    if (file_name) {
         inspector->load(file_name);
+    }
 
     g_free(file_name);
 }
@@ -142,8 +143,9 @@ void PdfInspector::on_selection_changed(GtkTreeSelection *selection, PdfInspecto
         gtk_tree_model_get(model, &iter, OP_STRING, &op, -1);
     }
 
-    if (op == nullptr)
+    if (op == nullptr) {
         return;
+    }
 
     for (i = 0; i < G_N_ELEMENTS(op_mapping); i++) {
 
@@ -222,10 +224,7 @@ void PdfInspector::load(const char *file_name)
 
     // load the new file
     if (file_name) {
-        GooString *filename_g;
-
-        filename_g = new GooString(file_name);
-        doc = new PDFDoc(filename_g, nullptr, nullptr);
+        doc = new PDFDoc(std::make_unique<GooString>(file_name));
     }
 
     if (doc && !doc->isOk()) {
@@ -279,17 +278,18 @@ int main(int argc, char *argv[])
     globalParams->setProfileCommands(true);
     globalParams->setPrintCommands(true);
 
-    if (argc == 2)
+    if (argc == 2) {
         file_name = argv[1];
-    else if (argc > 2) {
+    } else if (argc > 2) {
         fprintf(stderr, "usage: %s [PDF-FILE]\n", argv[0]);
         return -1;
     }
 
     inspector = new PdfInspector();
 
-    if (file_name)
+    if (file_name) {
         inspector->set_file_name(file_name);
+    }
 
     inspector->run();
 

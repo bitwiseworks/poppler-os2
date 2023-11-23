@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -303,8 +303,9 @@ bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
     // - all other entries with prefixLen = 0
     // (on entry, table[len] has prefixLen = 0, rangeLen = EOT)
     for (i = 0; i < len; ++i) {
-        for (j = i; j < len && table[j].prefixLen == 0; ++j)
+        for (j = i; j < len && table[j].prefixLen == 0; ++j) {
             ;
+        }
         if (j == len) {
             break;
         }
@@ -687,6 +688,9 @@ JBIG2Bitmap *JBIG2Bitmap::getSlice(unsigned int x, unsigned int y, unsigned int 
 
 void JBIG2Bitmap::expand(int newH, unsigned int pixel)
 {
+    if (unlikely(!data)) {
+        return;
+    }
     if (newH <= h || line <= 0 || newH >= (INT_MAX - 1) / line) {
         error(errSyntaxError, -1, "invalid width/height");
         gfree(data);
@@ -808,8 +812,9 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp
     oneByte = x0 == ((x1 - 1) & ~7);
 
     for (yy = y0; yy < y1; ++yy) {
-        if (unlikely((y + yy >= h) || (y + yy < 0)))
+        if (unlikely((y + yy >= h) || (y + yy < 0))) {
             continue;
+        }
 
         // one byte per line -- need to mask both left and right side
         if (oneByte) {
@@ -1030,8 +1035,9 @@ public:
     unsigned int getSize() { return size; }
     void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap)
     {
-        if (likely(idx < size))
+        if (likely(idx < size)) {
             bitmaps[idx] = bitmap;
+        }
     }
     JBIG2Bitmap *getBitmap(unsigned int idx) { return (idx < size) ? bitmaps[idx] : nullptr; }
 
@@ -1117,8 +1123,9 @@ JBIG2Stream::JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsS
 
     if (globalsStreamA.isStream()) {
         globalsStream = std::move(globalsStreamA);
-        if (globalsStreamRefA->isRef())
+        if (globalsStreamRefA->isRef()) {
             globalsStreamRef = globalsStreamRefA->getRef();
+        }
     }
 
     curStr = nullptr;
@@ -1420,8 +1427,8 @@ void JBIG2Stream::readSegments()
             byteCounter += huffDecoder->getByteCounter();
             byteCounter += mmrDecoder->getByteCounter();
 
-            Goffset segExtraBytes = segLength - byteCounter;
-            if (segExtraBytes > 0) {
+            if (segLength > byteCounter) {
+                const unsigned int segExtraBytes = segLength - byteCounter;
 
                 // If we didn't read all of the bytes in the segment data,
                 // indicate an error, and throw away the rest of the data.
@@ -1431,9 +1438,9 @@ void JBIG2Stream::readSegments()
                 // arithmetic-coded symbol dictionary segments when numNewSyms
                 // == 0.  Segments like this often occur for blank pages.
 
-                error(errSyntaxError, curStr->getPos(), "{0:lld} extraneous byte{1:s} after segment", segExtraBytes, (segExtraBytes > 1) ? "s" : "");
-
-            } else if (segExtraBytes < 0 || segLength - byteCounter > 65536) {
+                error(errSyntaxError, curStr->getPos(), "{0:ud} extraneous byte{1:s} after segment", segExtraBytes, (segExtraBytes > 1) ? "s" : "");
+                byteCounter += curStr->discardChars(segExtraBytes);
+            } else if (segLength < byteCounter) {
 
                 // If we read more bytes than we should have, according to the
                 // segment length field, note an error.
@@ -1441,7 +1448,6 @@ void JBIG2Stream::readSegments()
                 error(errSyntaxError, curStr->getPos(), "Previous segment handler read too many bytes");
                 goto syntaxError;
             }
-            byteCounter += curStr->discardChars(segExtraBytes);
         }
 
         gfree(refSegs);
@@ -1833,8 +1839,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
         }
         if (i + run > numInputSyms + numNewSyms || (ex && j + run > numExSyms)) {
             error(errSyntaxError, curStr->getPos(), "Too many exported symbols in JBIG2 symbol dictionary");
-            for (; j < numExSyms; ++j)
+            for (; j < numExSyms; ++j) {
                 symbolDict->setBitmap(j, nullptr);
+            }
             goto syntaxError;
         }
         if (ex) {
@@ -1848,8 +1855,9 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length, un
     }
     if (j != numExSyms) {
         error(errSyntaxError, curStr->getPos(), "Too few symbols in JBIG2 symbol dictionary");
-        for (; j < numExSyms; ++j)
+        for (; j < numExSyms; ++j) {
             symbolDict->setBitmap(j, nullptr);
+        }
         goto syntaxError;
     }
 
@@ -1968,7 +1976,11 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
     for (i = 0; i < nRefSegs; ++i) {
         if ((seg = findSegment(refSegs[i]))) {
             if (seg->getType() == jbig2SegSymbolDict) {
-                numSyms += ((JBIG2SymbolDict *)seg)->getSize();
+                const unsigned int segSize = ((JBIG2SymbolDict *)seg)->getSize();
+                if (unlikely(checkedAdd(numSyms, segSize, &numSyms))) {
+                    error(errSyntaxError, getPos(), "Too many symbols in JBIG2 text region");
+                    return;
+                }
             } else if (seg->getType() == jbig2SegCodeTable) {
                 codeTables.push_back(seg);
             }
@@ -2185,7 +2197,9 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm, bool lossless
             if (pageH == 0xffffffff && y + h > curPageH) {
                 pageBitmap->expand(y + h, pageDefPixel);
             }
-            pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+            if (pageBitmap->isOk()) {
+                pageBitmap->combine(bitmap.get(), x, y, extCombOp);
+            }
 
             // store the region bitmap
         } else {
@@ -2492,10 +2506,23 @@ void JBIG2Stream::readPatternDictSeg(unsigned int segNum, unsigned int length)
     aty[2] = -2;
     atx[3] = -2;
     aty[3] = -2;
-    bitmap = readGenericBitmap(mmr, (grayMax + 1) * patternW, patternH, templ, false, false, nullptr, atx, aty, length - 7);
 
-    if (!bitmap)
+    unsigned int grayMaxPlusOne;
+    if (unlikely(checkedAdd(grayMax, 1u, &grayMaxPlusOne))) {
         return;
+    }
+    unsigned int bitmapW;
+    if (unlikely(checkedMultiply(grayMaxPlusOne, patternW, &bitmapW))) {
+        return;
+    }
+    if (bitmapW >= INT_MAX) {
+        return;
+    }
+    bitmap = readGenericBitmap(mmr, static_cast<int>(bitmapW), patternH, templ, false, false, nullptr, atx, aty, length - 7);
+
+    if (!bitmap) {
+        return;
+    }
 
     // create the pattern dict object
     patternDict = std::make_unique<JBIG2PatternDict>(segNum, grayMax + 1);
@@ -2521,7 +2548,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     std::unique_ptr<JBIG2Bitmap> bitmap;
     JBIG2Segment *seg;
     JBIG2PatternDict *patternDict;
-    JBIG2Bitmap *skipBitmap;
+    std::unique_ptr<JBIG2Bitmap> skipBitmap;
     unsigned int *grayImg;
     JBIG2Bitmap *patternBitmap;
     unsigned int w, h, x, y, segInfoFlags, extCombOp;
@@ -2604,9 +2631,8 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     // compute the skip bitmap
-    skipBitmap = nullptr;
     if (enableSkip) {
-        skipBitmap = new JBIG2Bitmap(0, gridW, gridH);
+        skipBitmap = std::make_unique<JBIG2Bitmap>(0, gridW, gridH);
         skipBitmap->clearToZero();
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
@@ -2634,7 +2660,7 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     atx[3] = -2;
     aty[3] = -2;
     for (j = bpp - 1; j >= 0; --j) {
-        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap, atx, aty, -1);
+        std::unique_ptr<JBIG2Bitmap> grayBitmap = readGenericBitmap(mmr, gridW, gridH, templ, false, enableSkip, skipBitmap.get(), atx, aty, -1);
         i = 0;
         for (m = 0; m < gridH; ++m) {
             for (n = 0; n < gridW; ++n) {
@@ -2654,7 +2680,6 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
             if (!(enableSkip && skipBitmap->getPixel(n, m))) {
                 patternBitmap = patternDict->getBitmap(grayImg[i]);
                 if (unlikely(patternBitmap == nullptr)) {
-                    delete skipBitmap;
                     gfree(grayImg);
                     error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
                     return;
@@ -2668,9 +2693,6 @@ void JBIG2Stream::readHalftoneRegionSeg(unsigned int segNum, bool imm, bool loss
     }
 
     gfree(grayImg);
-    if (skipBitmap) {
-        delete skipBitmap;
-    }
 
     // combine the region bitmap into the page bitmap
     if (imm) {
@@ -2732,13 +2754,18 @@ void JBIG2Stream::readGenericRegionSeg(unsigned int segNum, bool imm, bool lossl
 
     // read the bitmap
     bitmap = readGenericBitmap(mmr, w, h, templ, tpgdOn, false, nullptr, atx, aty, mmr ? length - 18 : 0);
-    if (!bitmap)
+    if (!bitmap) {
         return;
+    }
 
     // combine the region bitmap into the page bitmap
     if (imm) {
         if (pageH == 0xffffffff && y + h > curPageH) {
             pageBitmap->expand(y + h, pageDefPixel);
+            if (!pageBitmap->isOk()) {
+                error(errSyntaxError, curStr->getPos(), "JBIG2Stream::readGenericRegionSeg: expand failed");
+                return;
+            }
         }
         pageBitmap->combine(bitmap.get(), x, y, extCombOp);
 
@@ -2836,8 +2863,9 @@ std::unique_ptr<JBIG2Bitmap> JBIG2Stream::readGenericBitmap(bool mmr, int w, int
         }
 
         memset(refLine, 0, (w + 2) * sizeof(int));
-        for (i = 0; i < w + 1; ++i)
+        for (i = 0; i < w + 1; ++i) {
             codingLine[i] = w;
+        }
 
         for (y = 0; y < h; ++y) {
 

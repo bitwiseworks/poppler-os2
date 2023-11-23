@@ -18,7 +18,7 @@ add_definitions(
 
 configure_file(poppler-features.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h @ONLY)
 
-if (GTK_FOUND AND BUILD_GTK_TESTS)
+if (GTK_FOUND AND BUILD_GTK_TESTS AND NOT MSVC)
   add_subdirectory(demo)
   add_subdirectory(tests)
 endif ()
@@ -39,11 +39,13 @@ set(poppler_glib_public_headers
 )
 
 find_program(GLIB2_MKENUMS glib-mkenums)
+find_program(GLIB2_MKENUMS_PYTHON NAMES python3 python)
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
-  COMMAND ${GLIB2_MKENUMS}
+  COMMAND ${GLIB2_MKENUMS_PYTHON}
   ARGS
+    ${GLIB2_MKENUMS}
     --template poppler-enums.h.template
     ${poppler_glib_public_headers} > ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -53,8 +55,9 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
-  COMMAND ${GLIB2_MKENUMS}
+  COMMAND ${GLIB2_MKENUMS_PYTHON}
   ARGS
+    ${GLIB2_MKENUMS}
     --template poppler-enums.c.template
     ${poppler_glib_public_headers} > ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -87,16 +90,18 @@ set(poppler_glib_generated_SRCS
 )
 add_library(poppler-glib ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
 generate_export_header(poppler-glib EXPORT_MACRO_NAME POPPLER_PUBLIC EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler-macros.h")
-set_target_properties(poppler-glib PROPERTIES VERSION 8.21.0 SOVERSION 8)
+set_target_properties(poppler-glib PROPERTIES VERSION 8.26.0 SOVERSION 8)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_GLIB_SOVERSION poppler-glib SOVERSION)
     set_target_properties(poppler-glib PROPERTIES SUFFIX "-${POPPLER_GLIB_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
-target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
-if(CMAKE_USE_PTHREADS_INIT)
-   target_link_libraries(poppler-glib Threads::Threads)
-endif()
+target_link_libraries(poppler-glib poppler PkgConfig::GLIB2 ${CAIRO_LIBRARIES} Freetype::Freetype)
+target_include_directories(poppler-glib SYSTEM PRIVATE ${CAIRO_INCLUDE_DIRS})
 install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+if (ENABLE_NSS3)
+    target_include_directories(poppler-glib SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
+endif()
 
 install(FILES
   ${poppler_glib_public_headers}
@@ -116,7 +121,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   # General gir: Reset object-list for introspection & load tool args
   set(INTROSPECTION_GIRS)
   set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR}" "--warn-all")
-  set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
+  set(INTROSPECTION_COMPILER_ARGS ${INTROSPECTION_COMPILER_ARGS} "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
   # Poppler: Assign package to gir & export keys
   set(Poppler_0_18_gir "poppler-glib")
@@ -149,3 +154,5 @@ endif ()
 if(ENABLE_GTK_DOC)
   add_subdirectory(reference)
 endif()
+
+check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
