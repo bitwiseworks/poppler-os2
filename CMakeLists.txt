@@ -168,7 +168,7 @@ macro(find_soft_mandatory_package _enable_option _package_name _package_version)
   endif()
 endmacro()
 
-find_soft_mandatory_package(ENABLE_NSS3 NSS3 3.68)
+find_soft_mandatory_package(ENABLE_NSS3 NSS3 3.47)
 find_soft_mandatory_package(ENABLE_GPGME Gpgmepp 1.19)
 find_soft_mandatory_package(ENABLE_LIBTIFF TIFF 4.1)
 
